@@ -1,0 +1,13 @@
+bulan,kecamatan,kelurahan,rata_rata_ketinggian_air,lama_genangan,rw_terdampak,kk_terdampak,jiwa_terdampak,korban_meninggal,korban_hilang,korban_luka_berat,korban_luka_ringan,jumlah_jiwa_pengungsi_tertinggi,jumlah_tempat_pengungsian,jumlah_nilai_kerugian
+01,4,5,10-70,2,7,n.a,n.a,0,0,0,0,0,0,n.a
+02,31,67,10-250,5,216,6967,19325,6,0,0,0,5858,45,n.a
+03,20,40,0-160,3,95,3232,10166,0,0,0,0,1870,27,n.a
+04,19,33,10-200,1,78,621,2131,0,0,0,0,753,40,n.a
+05,15,25,5-120,2,48,1056,3420,0,0,0,0,20,0,n.a
+06,4,5,10-110,1,17,1409,4547,0,0,0,0,0,0,n.a
+07,6,8,10-80,1,22,251,705,0,0,0,0,0,6,n.a
+08,5,6,10-80,1,13,n.a,n.a,0,0,0,0,0,4,n.a
+09,1,1,10-80,1,2,n.a,n.a,0,0,0,0,0,9,n.a
+10,8,11,10-105,3,25,15,n.a,0,0,0,0,0,0,n.a
+11,17,37,10-150,2,86,1935,6505,0,0,0,0,564,3,n.a
+12,19,26,10-70,2,51,131,404,0,0,0,0,35,0,n.a
