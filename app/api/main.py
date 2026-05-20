@@ -1,6 +1,11 @@
 from __future__ import annotations
+from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(override=True)
+# Load the project-root .env explicitly. dotenv's default search walks up from
+# this file's directory and would otherwise pick up app/.env first, which lacks
+# FLOOD_API_KEYS. override=False lets process/shell env (e.g. test fixtures and
+# deployment env vars) take precedence over the file.
+load_dotenv(Path(__file__).resolve().parents[2] / ".env", override=False)
 import asyncio
 import hashlib
 import json

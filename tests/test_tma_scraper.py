@@ -15,6 +15,7 @@ def test_fetch_tma_data_stops_retrying_when_deadline_expires(monkeypatch):
     sleep_mock = Mock()
     now_values = iter([started_at, started_at + timedelta(seconds=3)])
 
+    monkeypatch.setenv("TMA_PROXY_URL", "https://example.test/tma")
     monkeypatch.setenv("TMA_MAX_RETRIES", "3")
     monkeypatch.setenv("TMA_RETRY_DELAY_SECONDS", "2")
     monkeypatch.setenv("TMA_TIMEOUT_SECONDS", "5")

@@ -1,4 +1,4 @@
-$BASE = "http://127.0.0.1:8001"
+$BASE = "http://127.0.0.1:8000"
 $HEADERS = @{
     "x-api-key"    = "demo123"
     "Content-Type" = "application/json"

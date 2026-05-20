@@ -56,10 +56,11 @@ _log = get_logger("flood.tma_scraper")
 
 # ─── Configuration ────────────────────────────────────────────────────────────
 
-_DEFAULT_PROXY_URL = (
-    "https://web.animemusic.us/api-track-aksesibilitas/index.php"
-    "?web=bpbd.jakarta.go.id&menu-disabilitas=no_data"
-)
+# No default proxy: the previous default pointed at an abandoned third-party
+# domain that returned 502. Configure a verified endpoint via TMA_PROXY_URL.
+# When unset, fetch_tma_data short-circuits to a STALE/empty response, which
+# downstream consumers already treat as "unknown, not invalid".
+_DEFAULT_PROXY_URL = ""
 
 
 def _env_float(key: str, default: float) -> float:
@@ -390,6 +391,12 @@ def fetch_tma_data(
     """
     ref_now = now if now is not None else _utcnow()
     proxy_url = _proxy_url()
+    if not proxy_url:
+        return _stale_response(
+            "no TMA proxy configured — set TMA_PROXY_URL to a verified water-level endpoint",
+            cache_state=cache_state,
+            now=ref_now,
+        )
     max_retries = _max_retries()
     timeout = _timeout_seconds()
     retry_delay = _retry_delay_seconds()

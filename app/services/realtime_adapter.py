@@ -4,13 +4,22 @@ from datetime import datetime, timezone
 
 import pandas as pd
 
+from app.services.awlr_threshold_fetcher import load_cached_thresholds, siaga1_cm_for
 from app.services.bmkg_filter import filter_jakarta_bmkg_alerts
 from app.services.constants import (
     BMKG_CERTAINTY_WEIGHTS,
     BMKG_SEVERITY_WEIGHTS,
     BMKG_URGENCY_WEIGHTS,
 )
+from app.services.pintu_air_fetcher import (
+    load_cached_pintu_air,
+    observation_age_minutes,
+)
 from app.utils.paths import CONFIG_DIR, DEFAULT_REALTIME_SNAPSHOT
+
+# Live TMA (Tinggi Muka Air) readings older than this are treated as stale and
+# excluded from active signalling — the AWLR thresholds still apply as context.
+_TMA_STALE_THRESHOLD_MIN = 120.0
 
 SEVERITY_WEIGHTS = BMKG_SEVERITY_WEIGHTS
 CERTAINTY_WEIGHTS = BMKG_CERTAINTY_WEIGHTS
@@ -206,6 +215,54 @@ def _score_data_quality(weather, poskobanjir_records, alerts, feature_sources):
     }
 
 
+def _build_tma_context(now=None):
+    """
+    Load the latest live water-gate (TMA) reading from the cached FeatureServer
+    pull and combine it with the AWLR SIAGA-1 threshold to compute a ratio.
+
+    Read-only and never raises: returns a dict that is always safe to merge into
+    diagnostics. When data is missing or older than ``_TMA_STALE_THRESHOLD_MIN``,
+    ``tma_stale`` is True and the live level is not used as an active signal — the
+    AWLR threshold remains available as context.
+    """
+    payload = load_cached_pintu_air()
+    if not payload:
+        return {
+            "tma_available": False,
+            "tma_stale": True,
+            "tma_water_level_cm": None,
+            "tma_status": None,
+            "tma_observation_age_minutes": None,
+            "tma_water_gate_ratio": None,
+            "tma_source": "unavailable",
+        }
+
+    age_minutes = observation_age_minutes(payload, now=now)
+    is_stale = age_minutes is None or age_minutes > _TMA_STALE_THRESHOLD_MIN
+
+    max_cm = payload.get("max_water_level_cm")
+    max_status = payload.get("max_status")
+    worst_gate = payload.get("max_status_gate") or ""
+
+    siaga1_cm = siaga1_cm_for(worst_gate) if worst_gate else None
+    ratio = None
+    if max_cm is not None and siaga1_cm and siaga1_cm > 0:
+        ratio = round(min(max_cm / siaga1_cm, 1.5), 4)
+
+    return {
+        "tma_available": True,
+        "tma_stale": bool(is_stale),
+        "tma_water_level_cm": max_cm,
+        "tma_status": max_status,
+        "tma_status_gate": worst_gate or None,
+        "tma_observation_age_minutes": round(age_minutes, 1) if age_minutes is not None else None,
+        "tma_gate_count": payload.get("gate_count"),
+        "tma_siaga1_threshold_cm": siaga1_cm,
+        "tma_water_gate_ratio": ratio,
+        "tma_source": payload.get("source", "jakartasatu_bpbd_data_pintu_air"),
+    }
+
+
 def adapt_snapshot_to_features(snapshot):
     baselines = _load_baselines()
     region_name, region_profile, region_source = _select_region(snapshot, baselines)
@@ -271,8 +328,11 @@ def adapt_snapshot_to_features(snapshot):
     }
     data_quality = _score_data_quality(weather, poskobanjir_records, alerts, feature_sources)
 
+    tma_context = _build_tma_context(now=timestamp)
+
     diagnostics = {
         "selected_region": region_name,
+        **tma_context,
         "baseline_profile": region_profile,
         "bmkg_alert_count": len(alerts),
         "bmkg_alerts_total": len(raw_alerts),
