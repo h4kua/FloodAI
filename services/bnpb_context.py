@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -434,6 +435,34 @@ class VulnerabilityContext:
         return base
 
 
+# ─── Query normalisation ──────────────────────────────────────────────────────
+# Leading administrative-unit prefixes that should be stripped before alias
+# lookup. A separator (dot or whitespace) is REQUIRED after the token so real
+# names beginning with these letters are never truncated (e.g. "Kelapa Gading",
+# "Kembangan", "Kecamatan"-less "Kemayoran" stay intact). Only sub-kota units
+# are stripped here — "kota"/"kab." prefixes are deliberately left alone because
+# they appear verbatim in _EXACT_ALIASES (e.g. "kota jakarta pusat").
+_ADMIN_PREFIX_RE = re.compile(
+    r"^(?:kelurahan|kecamatan|kel|kec|desa)[.\s]+",
+    re.IGNORECASE,
+)
+
+
+def _normalise_location(location_str: str) -> str:
+    """
+    Lowercase, strip a leading kelurahan/kecamatan prefix, and collapse
+    internal whitespace. Returns "" for falsy input. Idempotent and never
+    raises — used as the front door of ``map_to_jakarta_district`` so prefixed
+    forms ("Kec. Penjaringan", "kecamatan  cengkareng") resolve to the same
+    exact alias as the bare kecamatan name.
+    """
+    n = location_str.lower().strip()
+    if not n:
+        return ""
+    n = _ADMIN_PREFIX_RE.sub("", n).strip()
+    return re.sub(r"\s+", " ", n)
+
+
 # ─── Public mapping function ─────────────────────────────────────────────────
 
 def map_to_jakarta_district(location_str: str) -> tuple[str | None, float]:
@@ -455,7 +484,7 @@ def map_to_jakarta_district(location_str: str) -> tuple[str | None, float]:
     if not location_str:
         return None, 0.0
 
-    n = location_str.lower().strip()
+    n = _normalise_location(location_str)
     if not n:
         return None, 0.0
 
