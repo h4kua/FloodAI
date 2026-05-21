@@ -7,10 +7,10 @@ from dotenv import load_dotenv
 # deployment env vars) take precedence over the file.
 load_dotenv(Path(__file__).resolve().parents[2] / ".env", override=False)
 import asyncio
+import os
 import hashlib
 import json
 import logging
-import os
 import uuid
 from contextlib import asynccontextmanager
 from typing import Optional
@@ -428,7 +428,7 @@ async def _bounded_threadpool(fn, *args, **kwargs):
 async def lifespan(app: FastAPI):
     configure_logging()
     load_runtime_bundle()
-    app.state.pipeline = FloodDecisionPipeline()
+    app.state.pipeline = FloodDecisionPipeline(persist=os.getenv("DB_PERSISTENCE_ENABLED", "true").lower() == "true")
     try:
         yield
     finally:

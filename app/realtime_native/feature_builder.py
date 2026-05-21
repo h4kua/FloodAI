@@ -144,6 +144,10 @@ def _load_history(path=REALTIME_NATIVE_HISTORY_PATH):
         if not Path(path).exists():
             return pd.DataFrame()
         return pd.read_csv(path)
+    # Allow operators to disable the history DB read entirely (e.g. when the
+    # database is unreachable) so it never consumes the reasoning-stage budget.
+    if os.getenv("FEATURE_HISTORY_DB_ENABLED", "true").lower() == "false":
+        return pd.DataFrame()
     try:
         with pooled_connection() as conn:
             with conn.cursor() as cur:
@@ -215,6 +219,10 @@ def _append_history(row, path=REALTIME_NATIVE_HISTORY_PATH):
             logger.warning(
                 "feature_builder._append_history: lock timeout after 10s - write skipped"
             )
+        return
+    # Skip the history DB write when disabled (e.g. DB unreachable) so a write
+    # timeout never blocks the pipeline.
+    if os.getenv("FEATURE_HISTORY_DB_ENABLED", "true").lower() == "false":
         return
     try:
         observed_at = _parse_timestamp(row.get("timestamp"))
