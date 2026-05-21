@@ -218,6 +218,53 @@ class PerceptionAgent:
                 "source": "DEMNAS_BIG_8m",
             }
 
+        # Flood-prone zone enrichment (additive; never affects risk_level or
+        # probability). Spatial proximity to a recorded flood-prone point.
+        if _lat is not None and _lon is not None:
+            try:
+                from app.services.flood_prone_locator import (
+                    in_flood_prone_zone,
+                    nearest_prone_point,
+                )
+
+                in_zone = in_flood_prone_zone(_lat, _lon)
+                signal_presence["in_flood_prone_zone"] = in_zone
+                nearest = nearest_prone_point(_lat, _lon)
+                if nearest:
+                    mapping_info["flood_prone"] = {"in_zone": in_zone, **nearest}
+            except Exception:  # noqa: BLE001 — enrichment is best-effort
+                pass
+
+            # Drainage-infrastructure context: nearby pump houses. Higher pump
+            # density is a mitigating drainage factor (advisory only).
+            try:
+                from app.services.pump_locator import (
+                    get_nearest_pump_houses,
+                    pump_drainage_capacity,
+                )
+
+                drainage = pump_drainage_capacity(_lat, _lon)
+                signal_presence["pump_drainage_score"] = drainage.get("drainage_score", 0.0)
+                mapping_info["pump_drainage_capacity"] = drainage
+                pumps = get_nearest_pump_houses(_lat, _lon, limit=3)
+                if pumps:
+                    mapping_info["nearest_pump_houses"] = pumps
+            except Exception:  # noqa: BLE001 — enrichment is best-effort
+                pass
+
+        # River-overflow flood zone (name-based; works without coordinates).
+        try:
+            from app.services.flood_prone_locator import river_overflow_zone
+
+            kec_name = kecamatan_record.get("name") if kecamatan_record else None
+            if kec_name:
+                ro = river_overflow_zone(kecamatan=kec_name)
+                signal_presence["in_river_overflow_zone"] = ro["in_river_overflow_zone"]
+                if ro["in_river_overflow_zone"]:
+                    mapping_info["river_overflow"] = ro
+        except Exception:  # noqa: BLE001 — enrichment is best-effort
+            pass
+
         return PerceptionResult(
             snapshot=snapshot,
             openweather=openweather,

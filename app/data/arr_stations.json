@@ -1,0 +1,459 @@
+{
+  "_meta": {
+    "schema_version": "1",
+    "generated_at": "2026-05-21T00:22:47.235569+00:00",
+    "source": "jakartasatu ARR (Automatic Rainfall Recorder) FeatureServer",
+    "station_count": 56,
+    "note": "Registry of rainfall-gauge locations. This feed does NOT expose live rainfall_mm_per_hour values."
+  },
+  "stations": [
+    {
+      "station_name": "PS. Pesanggrahan",
+      "lat": -6.397153,
+      "lon": 106.771835,
+      "das": "Kali Pesanggrahan",
+      "wadmkk": "KOTA DEPOK",
+      "alamat": "Jl. Raya Muchtar, Kel. Sawangan Baru, Kec. Sawangan, Kota Depok, Jawa Barat"
+    },
+    {
+      "station_name": "PS. Angke Hulu",
+      "lat": -6.218298,
+      "lon": 106.694428,
+      "das": "Kali Angke",
+      "wadmkk": "KOTA TANGERANG",
+      "alamat": "Jl. Bayu, Kel. Pedurenan, Kec. Karang Tengah, Kota Tangerang, Banten"
+    },
+    {
+      "station_name": "Pompa Kali Duri",
+      "lat": -6.142372,
+      "lon": 106.791074,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Utara",
+      "alamat": "Jl. Kepanduan II, Kel. Pejagalan, Kec. Penjaringan, Kota Jkt Utara, Daerah Khusus Ibukota Jakarta"
+    },
+    {
+      "station_name": "PS. Sunter Hulu",
+      "lat": -6.317916,
+      "lon": 106.920893,
+      "das": "Cipinang",
+      "wadmkk": "Kota Adm. Jakarta Timur",
+      "alamat": "Jl. Kp. Keramat, Kel. Setu, Kec. Cipayung Kota Jakarta Timur"
+    },
+    {
+      "station_name": "Rumah Pompa Cideng",
+      "lat": -6.171573,
+      "lon": 106.803291,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Pusat",
+      "alamat": "Jl. Cideng Barat, Kel. Cideng, Kecamatan Gambir, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta"
+    },
+    {
+      "station_name": "SCH. Katulampa",
+      "lat": -6.633251,
+      "lon": 106.836995,
+      "das": "DAS Ciliwung",
+      "wadmkk": "KOTA BOGOR",
+      "alamat": "Jl. Babadak, Kel. Katulampa, Kec. Bogor Timur, Kota Bogor, Jawa Barat"
+    },
+    {
+      "station_name": "Depok",
+      "lat": -6.400514,
+      "lon": 106.832143,
+      "das": "DAS Ciliwung",
+      "wadmkk": "KOTA DEPOK",
+      "alamat": "Jemb. Panus, Depok, Kec. Pancoran Mas, Kota Depok, Jawa Barat"
+    },
+    {
+      "station_name": "Cideng",
+      "lat": -6.171573,
+      "lon": 106.803291,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Pusat",
+      "alamat": "Jl. Cideng Barat, Kel. Cideng, Kecamatan Gambir, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta"
+    },
+    {
+      "station_name": "Karet",
+      "lat": -6.197898,
+      "lon": 106.81007,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Selatan",
+      "alamat": "Jl. Tenaga Listrik, Kel. Kb. Melati, Kecamatan Tanah Abang , Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta"
+    },
+    {
+      "station_name": "Manggarai",
+      "lat": -6.207903,
+      "lon": 106.848439,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Selatan",
+      "alamat": "Jl. Tambak, Kel. Pegangsaan, Kec. Menteng, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta"
+    },
+    {
+      "station_name": "P.A. Yos Sudarso 1",
+      "lat": -6.15488,
+      "lon": 106.886,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Utara",
+      "alamat": "Jl. Yos Sudarso, Kel. Klp. Gading Bar., Kec. Tj. Priok, Kota Jakarta Utara, Daerah Khusus Ibukota Jakarta"
+    },
+    {
+      "station_name": "P.A. Pluit",
+      "lat": -6.10964,
+      "lon": 106.796952,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Utara",
+      "alamat": "Jl. Inspeksi Waduk Pluit Utara, Penjaringan, Kec. Penjaringan, Kota Jkt Utara, Daerah Khusus Ibukota Jakarta"
+    },
+    {
+      "station_name": "P.A. Marina Ancol",
+      "lat": -6.125582,
+      "lon": 106.830153,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Utara",
+      "alamat": "Jl. Pelabuhan Ratu, Ancol, Kec. Pademangan, Kota Jakarta Utara"
+    },
+    {
+      "station_name": "Pasar Ikan",
+      "lat": -6.125497,
+      "lon": 106.810247,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Utara",
+      "alamat": "Jl. Krapu , Ancol, Kec. Pademangan, Kota Jakarta Utara, Daerah Khusus Ibukota Jakarta"
+    },
+    {
+      "station_name": "Desa Bojong Murni",
+      "lat": -6.6994,
+      "lon": 106.8951,
+      "das": "DAS Ciliwung",
+      "wadmkk": "KABUPATEN BOGOR",
+      "alamat": "Kantor Desa Bojong Murni, Kec. Ciawi Bogor"
+    },
+    {
+      "station_name": "Kel. Kedung Jaya",
+      "lat": -6.6994,
+      "lon": 106.8951,
+      "das": "DAS Ciliwung",
+      "wadmkk": "KOTA BOGOR",
+      "alamat": "Kantor Kelurahan Kedung Jaya, Kec. Tanah Sareal Bogor"
+    },
+    {
+      "station_name": "Kel. Pengasinan",
+      "lat": -6.4221,
+      "lon": 106.7524,
+      "das": "DAS Angke dan \nDAS Pesanggrahan",
+      "wadmkk": "KOTA DEPOK",
+      "alamat": "Kantor Kelurahan Pengasinan, Kec. Sawangan, Kota Depok"
+    },
+    {
+      "station_name": "Kel. Cilangkap",
+      "lat": -6.4449,
+      "lon": 106.8566,
+      "das": "DAS Sunter dan \nDAS Cipinang",
+      "wadmkk": "KOTA DEPOK",
+      "alamat": "Kantor Kelurahan Cilangkap, Kec. Tapos, Kota Depok"
+    },
+    {
+      "station_name": "Cimanggis",
+      "lat": -6.3664,
+      "lon": 106.8855,
+      "das": "DAS Cipinang dan DAS Sunter",
+      "wadmkk": "Kota Adm. Jakarta Timur",
+      "alamat": "IPA Waduk Cimanggis, Kec. Ciracas, Jakarta Timur"
+    },
+    {
+      "station_name": "PDAM Cibinong",
+      "lat": -6.4827,
+      "lon": 106.8156,
+      "das": "DAS Ciliwung",
+      "wadmkk": "KABUPATEN BOGOR",
+      "alamat": "Kantor PDAM Cibinong Bogor"
+    },
+    {
+      "station_name": "Kec. Jatisampurna",
+      "lat": -6.3633,
+      "lon": 106.9209,
+      "das": "DAS Cakung dan \nDAS Sunter",
+      "wadmkk": "KOTA BEKASI",
+      "alamat": "Kantor Kecamatan Jatisampurna, Kota Bekasi"
+    },
+    {
+      "station_name": "Kel. Lubang Buaya",
+      "lat": -6.2893,
+      "lon": 106.9043,
+      "das": "DAS Sunter",
+      "wadmkk": "Kota Adm. Jakarta Timur",
+      "alamat": "Kantor Kelurahan Lubang Buaya, Kec. Cipayung Jakarta Timur"
+    },
+    {
+      "station_name": "Waduk Pekayon",
+      "lat": -6.3448,
+      "lon": 106.8647,
+      "das": "DAS Ciliwung Dan DAS Cipinang",
+      "wadmkk": "Kota Adm. Jakarta Timur",
+      "alamat": "Waduk Pekayon, Kec. Pasar Rebo Jakarta Timur"
+    },
+    {
+      "station_name": "Kel. Kamal Muara",
+      "lat": -6.1066,
+      "lon": 106.7258,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Utara",
+      "alamat": "Kantor Kelurahan Kamal Muara, Kec. Penjaringan, Jakarta Utara"
+    },
+    {
+      "station_name": "Kel. Pondok Jagung Timur",
+      "lat": -6.2476,
+      "lon": 106.6667,
+      "das": "DAS Angke",
+      "wadmkk": "KOTA TANGERANG SELATAN",
+      "alamat": "Kantor Kelurahan Pondok Jagung Timur, Kec. Serpong Utara, Kota Tangerang Selatan"
+    },
+    {
+      "station_name": "Kel. Batu Ceper",
+      "lat": -6.1631,
+      "lon": 106.6672,
+      "das": "DAS Angke",
+      "wadmkk": "KOTA TANGERANG",
+      "alamat": "Kantor Kelurahan Batuceper, Kec. Batuceper, Kota Tangerang"
+    },
+    {
+      "station_name": "Kec. Ciputat Timur",
+      "lat": -6.2885,
+      "lon": 106.7456,
+      "das": "DAS Pesanggrahan",
+      "wadmkk": "KOTA TANGERANG SELATAN",
+      "alamat": "Kantor Kecamatan Ciputat Timur Tanggerang Selatan"
+    },
+    {
+      "station_name": "Kel. Pela Mampang",
+      "lat": -6.2457,
+      "lon": 106.8223,
+      "das": "DAS Krukut",
+      "wadmkk": "Kota Adm. Jakarta Selatan",
+      "alamat": "Kantor Kelurahan Pela Mampang, Kec. Mampang Prapatan, Jakarta Selatan"
+    },
+    {
+      "station_name": "Kel. Bukit Duri",
+      "lat": -6.2174,
+      "lon": 106.8581,
+      "das": "DAS Ciliwung",
+      "wadmkk": "Kota Adm. Jakarta Selatan",
+      "alamat": "Kantor Kelurahan Bukit Duri, Kec. Tebet, Jakarta Selatan"
+    },
+    {
+      "station_name": "Kel. Cengkareng Barat",
+      "lat": -6.1352,
+      "lon": 106.7245,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Barat",
+      "alamat": "Kantor Kelurahan Cengkareng Barat Kec. Cengkareng, Kota Jakarta Barat"
+    },
+    {
+      "station_name": "Kec. Pasar Minggu",
+      "lat": -6.2856,
+      "lon": 106.8353,
+      "das": "DAS Krukut",
+      "wadmkk": "Kota Adm. Jakarta Selatan",
+      "alamat": "Kantor Kecamatan Pasar Minggu, Kelurahan Jati Padang Jakarta Selatan"
+    },
+    {
+      "station_name": "P.A. Jembatan Merah",
+      "lat": -6.1491,
+      "lon": 106.8342,
+      "das": "DAS Ciliwung",
+      "wadmkk": "Kota Adm. Jakarta Pusat",
+      "alamat": "Pintu Air Jembatan Merah, Kec. Sawah Besar Jakarta Pusat"
+    },
+    {
+      "station_name": "Kel. Sunter Jaya",
+      "lat": -6.1498,
+      "lon": 106.861,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Utara",
+      "alamat": "Kantor Kelurahan Sunter Jaya, Kec. Tj. Priok, Jakarta Utara"
+    },
+    {
+      "station_name": "Kel. Balekambang",
+      "lat": -6.2817,
+      "lon": 106.8503,
+      "das": "DAS Ciliwung",
+      "wadmkk": "Kota Adm. Jakarta Timur",
+      "alamat": "Kantor Kelurahan Balekambang, Kec. Kramat Jati Jakarta Timur"
+    },
+    {
+      "station_name": "Kec. Megamendung",
+      "lat": -6.6994,
+      "lon": 106.8951,
+      "das": "DAS Ciliwung",
+      "wadmkk": "KABUPATEN BOGOR",
+      "alamat": "Kantor Kecamatan Megamendung Bogor"
+    },
+    {
+      "station_name": "Sodetan Kali Grogol",
+      "lat": -6.2633,
+      "lon": 106.785,
+      "das": "DAS Grogol",
+      "wadmkk": "Kota Adm. Jakarta Selatan",
+      "alamat": "Pintu Air Sodetan Kali Grogol - Kali Pesanggrahan, Kec. Kebayoran Baru Jakarta Selatan"
+    },
+    {
+      "station_name": "Kel. Joglo",
+      "lat": -6.2189,
+      "lon": 106.7378,
+      "das": "DAS Pesanggrahan",
+      "wadmkk": "Kota Adm. Jakarta Barat",
+      "alamat": "Kantor Kelurahan Joglo, Kec. Kembangan Jakarta Barat"
+    },
+    {
+      "station_name": "Kel. Kedaung Kali Angke",
+      "lat": -6.1417,
+      "lon": 106.7511,
+      "das": "DAS Pesanggrahan",
+      "wadmkk": "Kota Adm. Jakarta Barat",
+      "alamat": "Kantor Kelurahan Kedaung Kali Angke Kec. Cengkareng, Jakarta Barat"
+    },
+    {
+      "station_name": "Kel. Duri Kosambi",
+      "lat": -6.17,
+      "lon": 106.7219,
+      "das": "DAS Pesanggrahan Dan DAS Angke",
+      "wadmkk": "Kota Adm. Jakarta Barat",
+      "alamat": "Kantor Kelurahan Duri Kosambi, Cengkareng Jakarta Barat"
+    },
+    {
+      "station_name": "Kec. Mampang Prapatan",
+      "lat": -6.2602,
+      "lon": 106.8246,
+      "das": "DAS Krukut dan \nDAS Cideng",
+      "wadmkk": "Kota Adm. Jakarta Selatan",
+      "alamat": "Kantor Kecamatan Mampang Prapatan, Jakarta Selatan"
+    },
+    {
+      "station_name": "Lebak Bulus",
+      "lat": -6.3008,
+      "lon": 106.7889,
+      "das": "DAS Grogol",
+      "wadmkk": "Kota Adm. Jakarta Selatan",
+      "alamat": "Waduk Lebak Bulus, Kec. Cilandak Jakarta Selatan"
+    },
+    {
+      "station_name": "Kel. Gunung",
+      "lat": -6.2344,
+      "lon": 106.7881,
+      "das": "DAS Grogol",
+      "wadmkk": "Kota Adm. Jakarta Selatan",
+      "alamat": "Kelurahan Gunung, Kec. Kebayoran Baru Jakarta Selatan"
+    },
+    {
+      "station_name": "Kel. Penggilingan",
+      "lat": -6.1934,
+      "lon": 106.9389,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Timur",
+      "alamat": "Kantor Kelurahan Penggilingan, Kec. Cakung, Jakarta Timur"
+    },
+    {
+      "station_name": "Kel. Rorotan",
+      "lat": -6.1521,
+      "lon": 106.9563,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Utara",
+      "alamat": "Kantor Kelurahan Rorotan, Kec. Cilincing Jakarta Utara"
+    },
+    {
+      "station_name": "Kel. Kelapa Gading Timur",
+      "lat": -6.1665,
+      "lon": 106.9135,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Utara",
+      "alamat": "Kantor Kelurahan Kelapa Gading Timur, Kec. Kelapa Gading, Jakarta Utara"
+    },
+    {
+      "station_name": "Kel. Pondok Kelapa",
+      "lat": -6.2395,
+      "lon": 106.9348,
+      "das": "DAS Jati Kramat",
+      "wadmkk": "Kota Adm. Jakarta Timur",
+      "alamat": "Kantor Kelurahan Pondok Kelapa, Kec. Duren Sawit Jakarta Timur"
+    },
+    {
+      "station_name": "Kel. Pondok Labu",
+      "lat": -6.3061,
+      "lon": 106.7956,
+      "das": "DAS Krukut dan DAS Grogol",
+      "wadmkk": "Kota Adm. Jakarta Selatan",
+      "alamat": "Kantor Kelurahan Pondok Labu, Kec. Cilandak Jakarta Selatan"
+    },
+    {
+      "station_name": "Kel. Pancoran Mas",
+      "lat": -6.3964,
+      "lon": 106.8013,
+      "das": "DAS Krukut dan \nDAS Grogol",
+      "wadmkk": "KOTA DEPOK",
+      "alamat": "Kantor Kelurahan Pancoran Mas, Kec. Pancoran Mas, Kota Depok"
+    },
+    {
+      "station_name": "Kel. Koja",
+      "lat": -6.1074,
+      "lon": 106.8965,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Utara",
+      "alamat": "Kantor Kelurahan Koja, Kec. Koja, Jakarta Utara"
+    },
+    {
+      "station_name": "Ciganjur",
+      "lat": -6.282789,
+      "lon": 106.822356,
+      "das": "DAS Krukut",
+      "wadmkk": "Kota Adm. Jakarta Selatan",
+      "alamat": "RW.1, Cipedak, Kec. Jagakarsa, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12630"
+    },
+    {
+      "station_name": "PS. Cibalok",
+      "lat": -6.653317,
+      "lon": 106.869641,
+      "das": "Ciliwung",
+      "wadmkk": "KOTA BOGOR",
+      "alamat": "Jl. Raya Puncak - Cianjur No.53, Gadog, Kec. Megamendung, Bogor, Jawa Barat 16770"
+    },
+    {
+      "station_name": "Waduk Kampung Rambutan",
+      "lat": -6.308363,
+      "lon": 106.880832,
+      "das": "Cipinang",
+      "wadmkk": "Kota Adm. Jakarta Timur",
+      "alamat": "Jl. Manunggal 2, RT.4/RW.4, Rambutan, Kec. Ciracas, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13830"
+    },
+    {
+      "station_name": "P.A.Flusing Ancol",
+      "lat": -6.130007,
+      "lon": 106.831268,
+      "das": "DAS Lainnya",
+      "wadmkk": "Kota Adm. Jakarta Utara",
+      "alamat": "Jl. Lodan Raya, Kel.Ancol, Kec. Pademangan, Kota Jkt Utara, Daerah Khusus Ibukota Jakarta"
+    },
+    {
+      "station_name": "P.A. Hek",
+      "lat": -6.287583,
+      "lon": 106.87063,
+      "das": "Kali Baru Timur",
+      "wadmkk": "Kota Adm. Jakarta Timur",
+      "alamat": "Jl. Jaabah, Kel. Kp. Tengah, Kec. Kramat jati, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta"
+    },
+    {
+      "station_name": "P.A. Istiqlal",
+      "lat": -6.168147,
+      "lon": 106.831445,
+      "das": "Ciliwung",
+      "wadmkk": "Kota Adm. Jakarta Pusat",
+      "alamat": "Jl. Ir. H. Juanda, Kel. Ps. Baru, Kec. Sawah Besar, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta"
+    },
+    {
+      "station_name": "PA. Pulo Gadung",
+      "lat": -6.190609,
+      "lon": 106.904119,
+      "das": "Kali Sunter",
+      "wadmkk": "Kota Adm. Jakarta Timur",
+      "alamat": "Jl. Jati Bend, Kel. Jati, Kec. Pulo Gadung, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta"
+    }
+  ]
+}

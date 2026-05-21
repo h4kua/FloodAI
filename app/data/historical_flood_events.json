@@ -1,0 +1,212 @@
+{
+  "_meta": {
+    "schema_version": "1",
+    "generated_at": "2026-05-20T15:20:53.613775+00:00",
+    "source": "data/raw/combined.csv (DKI flood events 2013-2020)",
+    "rows_skipped_unmapped": 55,
+    "frequency_basis": "event_count normalised to the busiest district (=1.0)",
+    "severity_basis": "0.8*min(avg_depth/300cm,1) + 0.2*min(fatalities/50,1)"
+  },
+  "districts": {
+    "Jakarta Timur": {
+      "event_count": 847,
+      "years_covered": [
+        "2013",
+        "2014",
+        "2015",
+        "2016",
+        "2017",
+        "2018",
+        "2019",
+        "2020"
+      ],
+      "events_per_year": 105.88,
+      "by_month": {
+        "1": 113,
+        "2": 175,
+        "3": 68,
+        "4": 75,
+        "5": 39,
+        "6": 21,
+        "7": 23,
+        "8": 15,
+        "9": 15,
+        "10": 189,
+        "11": 58,
+        "12": 56
+      },
+      "avg_ketinggian_cm": 74.8,
+      "max_ketinggian_cm": 400.0,
+      "total_meninggal": 8,
+      "total_luka": 46655,
+      "historical_flood_frequency": 1.0,
+      "avg_severity_historical": 0.2315
+    },
+    "Jakarta Selatan": {
+      "event_count": 819,
+      "years_covered": [
+        "2013",
+        "2014",
+        "2015",
+        "2016",
+        "2017",
+        "2018",
+        "2019",
+        "2020"
+      ],
+      "events_per_year": 102.38,
+      "by_month": {
+        "1": 115,
+        "2": 157,
+        "3": 69,
+        "4": 86,
+        "5": 48,
+        "6": 11,
+        "7": 21,
+        "8": 32,
+        "9": 22,
+        "10": 133,
+        "11": 86,
+        "12": 39
+      },
+      "avg_ketinggian_cm": 71.0,
+      "max_ketinggian_cm": 300.0,
+      "total_meninggal": 4,
+      "total_luka": 36411,
+      "historical_flood_frequency": 0.9669,
+      "avg_severity_historical": 0.2053
+    },
+    "Jakarta Pusat": {
+      "event_count": 85,
+      "years_covered": [
+        "2013",
+        "2014",
+        "2015",
+        "2016",
+        "2017",
+        "2018",
+        "2020"
+      ],
+      "events_per_year": 12.14,
+      "by_month": {
+        "1": 25,
+        "2": 42,
+        "3": 3,
+        "4": 2,
+        "5": 1,
+        "6": 1,
+        "7": 1,
+        "8": 3,
+        "10": 1,
+        "11": 2,
+        "12": 4
+      },
+      "avg_ketinggian_cm": 48.7,
+      "max_ketinggian_cm": 250.0,
+      "total_meninggal": 2,
+      "total_luka": 5241,
+      "historical_flood_frequency": 0.1004,
+      "avg_severity_historical": 0.1379
+    },
+    "Jakarta Barat": {
+      "event_count": 473,
+      "years_covered": [
+        "2013",
+        "2014",
+        "2015",
+        "2016",
+        "2017",
+        "2018",
+        "2019",
+        "2020"
+      ],
+      "events_per_year": 59.12,
+      "by_month": {
+        "1": 128,
+        "2": 121,
+        "3": 40,
+        "4": 18,
+        "5": 13,
+        "6": 5,
+        "7": 5,
+        "8": 8,
+        "9": 18,
+        "10": 71,
+        "11": 23,
+        "12": 23
+      },
+      "avg_ketinggian_cm": 54.0,
+      "max_ketinggian_cm": 200.0,
+      "total_meninggal": 23,
+      "total_luka": 21933,
+      "historical_flood_frequency": 0.5584,
+      "avg_severity_historical": 0.236
+    },
+    "Jakarta Utara": {
+      "event_count": 282,
+      "years_covered": [
+        "2013",
+        "2014",
+        "2015",
+        "2016",
+        "2017",
+        "2018",
+        "2019",
+        "2020"
+      ],
+      "events_per_year": 35.25,
+      "by_month": {
+        "1": 104,
+        "2": 81,
+        "3": 23,
+        "4": 2,
+        "5": 1,
+        "6": 12,
+        "7": 5,
+        "8": 2,
+        "9": 2,
+        "10": 9,
+        "11": 26,
+        "12": 15
+      },
+      "avg_ketinggian_cm": 47.1,
+      "max_ketinggian_cm": 250.0,
+      "total_meninggal": 8,
+      "total_luka": 8201,
+      "historical_flood_frequency": 0.3329,
+      "avg_severity_historical": 0.1576
+    },
+    "Kepulauan Seribu": {
+      "event_count": 14,
+      "years_covered": [
+        "2017",
+        "2020"
+      ],
+      "events_per_year": 7.0,
+      "by_month": {
+        "6": 6,
+        "12": 8
+      },
+      "avg_ketinggian_cm": 26.8,
+      "max_ketinggian_cm": 50.0,
+      "total_meninggal": 0,
+      "total_luka": 0,
+      "historical_flood_frequency": 0.0165,
+      "avg_severity_historical": 0.0715
+    }
+  },
+  "citywide_by_month": {
+    "1": 485,
+    "2": 576,
+    "3": 203,
+    "4": 183,
+    "5": 102,
+    "6": 56,
+    "7": 55,
+    "8": 60,
+    "9": 57,
+    "10": 403,
+    "11": 195,
+    "12": 145
+  }
+}

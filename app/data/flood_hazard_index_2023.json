@@ -1,0 +1,762 @@
+{
+  "_meta": {
+    "schema_version": "1",
+    "generated_at": "2026-05-21T01:39:01.774273+00:00",
+    "source": "data/raw/indeks-bahaya-banjir-tahun-2023-komponen-data.xls",
+    "kelurahan_count": 116,
+    "note": "Only flood-hazard-rated kelurahan are listed. Index scale per source (~1-3)."
+  },
+  "kota": {
+    "Jakarta Barat": {
+      "avg_index": 1.5733,
+      "max_index": 2.2,
+      "kelurahan_count": 30,
+      "by_category": {
+        "SEDANG": 12,
+        "TINGGI": 3,
+        "RENDAH": 15
+      },
+      "dominant_category": "RENDAH"
+    },
+    "Jakarta Pusat": {
+      "avg_index": 1.4,
+      "max_index": 1.4,
+      "kelurahan_count": 6,
+      "by_category": {
+        "RENDAH": 6
+      },
+      "dominant_category": "RENDAH"
+    },
+    "Jakarta Selatan": {
+      "avg_index": 1.4474,
+      "max_index": 2.0,
+      "kelurahan_count": 38,
+      "by_category": {
+        "RENDAH": 34,
+        "SEDANG": 3,
+        "TINGGI": 1
+      },
+      "dominant_category": "RENDAH"
+    },
+    "Jakarta Timur": {
+      "avg_index": 1.4952,
+      "max_index": 2.4,
+      "kelurahan_count": 21,
+      "by_category": {
+        "RENDAH": 18,
+        "TINGGI": 2,
+        "SEDANG": 1
+      },
+      "dominant_category": "RENDAH"
+    },
+    "Jakarta Utara": {
+      "avg_index": 1.5429,
+      "max_index": 2.2,
+      "kelurahan_count": 21,
+      "by_category": {
+        "RENDAH": 13,
+        "SEDANG": 7,
+        "TINGGI": 1
+      },
+      "dominant_category": "RENDAH"
+    }
+  },
+  "kelurahan": {
+    "CENGKARENG BARAT": {
+      "index": 1.8,
+      "category": "SEDANG",
+      "kota": "Jakarta Barat",
+      "kecamatan": "CENGKARENG"
+    },
+    "CENGKARENG TIMUR": {
+      "index": 1.6,
+      "category": "SEDANG",
+      "kota": "Jakarta Barat",
+      "kecamatan": "CENGKARENG"
+    },
+    "DURI KOSAMBI": {
+      "index": 1.8,
+      "category": "SEDANG",
+      "kota": "Jakarta Barat",
+      "kecamatan": "CENGKARENG"
+    },
+    "KAPUK": {
+      "index": 1.6,
+      "category": "SEDANG",
+      "kota": "Jakarta Barat",
+      "kecamatan": "CENGKARENG"
+    },
+    "KEDAUNG KALI ANGKE": {
+      "index": 1.6,
+      "category": "SEDANG",
+      "kota": "Jakarta Barat",
+      "kecamatan": "CENGKARENG"
+    },
+    "RAWA BUAYA": {
+      "index": 2.2,
+      "category": "TINGGI",
+      "kota": "Jakarta Barat",
+      "kecamatan": "CENGKARENG"
+    },
+    "GROGOL": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "GROGOL PETAMBURAN"
+    },
+    "JELAMBAR": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "GROGOL PETAMBURAN"
+    },
+    "JELAMBAR BARU": {
+      "index": 1.6,
+      "category": "SEDANG",
+      "kota": "Jakarta Barat",
+      "kecamatan": "GROGOL PETAMBURAN"
+    },
+    "TANJUNG DUREN SELATAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "GROGOL PETAMBURAN"
+    },
+    "TANJUNG DUREN UTARA": {
+      "index": 1.6,
+      "category": "SEDANG",
+      "kota": "Jakarta Barat",
+      "kecamatan": "GROGOL PETAMBURAN"
+    },
+    "TOMANG": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "GROGOL PETAMBURAN"
+    },
+    "KAMAL": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "KALIDERES"
+    },
+    "SEMANAN": {
+      "index": 1.6,
+      "category": "SEDANG",
+      "kota": "Jakarta Barat",
+      "kecamatan": "KALIDERES"
+    },
+    "TEGAL ALUR": {
+      "index": 1.8,
+      "category": "SEDANG",
+      "kota": "Jakarta Barat",
+      "kecamatan": "KALIDERES"
+    },
+    "DURI KEPA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "KEBON JERUK"
+    },
+    "KEBON JERUK": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "KEBON JERUK"
+    },
+    "KEDOYA SELATAN": {
+      "index": 1.6,
+      "category": "SEDANG",
+      "kota": "Jakarta Barat",
+      "kecamatan": "KEBON JERUK"
+    },
+    "KEDOYA UTARA": {
+      "index": 1.8,
+      "category": "SEDANG",
+      "kota": "Jakarta Barat",
+      "kecamatan": "KEBON JERUK"
+    },
+    "SUKABUMI UTARA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "KEBON JERUK"
+    },
+    "JOGLO": {
+      "index": 1.6,
+      "category": "SEDANG",
+      "kota": "Jakarta Barat",
+      "kecamatan": "KEMBANGAN"
+    },
+    "KEMBANGAN SELATAN": {
+      "index": 2.0,
+      "category": "TINGGI",
+      "kota": "Jakarta Barat",
+      "kecamatan": "KEMBANGAN"
+    },
+    "KEMBANGAN UTARA": {
+      "index": 2.0,
+      "category": "TINGGI",
+      "kota": "Jakarta Barat",
+      "kecamatan": "KEMBANGAN"
+    },
+    "MERUYA SELATAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "KEMBANGAN"
+    },
+    "MERUYA UTARA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "KEMBANGAN"
+    },
+    "JATI PULO": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "PALMERAH"
+    },
+    "KOTA BAMBU UTARA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "PALMERAH"
+    },
+    "MANGGA BESAR": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "TAMAN SARI"
+    },
+    "ANGKE": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "TAMBORA"
+    },
+    "KERENDANG": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Barat",
+      "kecamatan": "TAMBORA"
+    },
+    "CEMPAKA BARU": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Pusat",
+      "kecamatan": "KEMAYORAN"
+    },
+    "GUNUNG SAHARI SELATAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Pusat",
+      "kecamatan": "KEMAYORAN"
+    },
+    "KEBON SIRIH": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Pusat",
+      "kecamatan": "MENTENG"
+    },
+    "MANGGA DUA SELATAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Pusat",
+      "kecamatan": "SAWAH BESAR"
+    },
+    "SENEN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Pusat",
+      "kecamatan": "SENEN"
+    },
+    "PETAMBURAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Pusat",
+      "kecamatan": "TANAH ABANG"
+    },
+    "CILANDAK BARAT": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "CILANDAK"
+    },
+    "CIPETE SELATAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "CILANDAK"
+    },
+    "GANDARIA SELATAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "CILANDAK"
+    },
+    "CIGANJUR": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "JAGAKARSA"
+    },
+    "CIPEDAK": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "JAGAKARSA"
+    },
+    "LENTENG AGUNG": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "JAGAKARSA"
+    },
+    "TANJUNG BARAT": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "JAGAKARSA"
+    },
+    "CIPETE UTARA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "KEBAYORAN BARU"
+    },
+    "GANDARIA UTARA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "KEBAYORAN BARU"
+    },
+    "MELAWAI": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "KEBAYORAN BARU"
+    },
+    "PETOGOGAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "KEBAYORAN BARU"
+    },
+    "PULO": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "KEBAYORAN BARU"
+    },
+    "CIPULIR": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "KEBAYORAN LAMA"
+    },
+    "GROGOL SELATAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "KEBAYORAN LAMA"
+    },
+    "GROGOL UTARA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "KEBAYORAN LAMA"
+    },
+    "KEBAYORAN LAMA UTARA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "KEBAYORAN LAMA"
+    },
+    "BANGKA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "MAMPANG PRAPATAN"
+    },
+    "KUNINGAN BARAT": {
+      "index": 1.8,
+      "category": "SEDANG",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "MAMPANG PRAPATAN"
+    },
+    "MAMPANG PRAPATAN": {
+      "index": 1.8,
+      "category": "SEDANG",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "MAMPANG PRAPATAN"
+    },
+    "PELA MAMPANG": {
+      "index": 1.8,
+      "category": "SEDANG",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "MAMPANG PRAPATAN"
+    },
+    "DUREN TIGA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "PANCORAN"
+    },
+    "KALIBATA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "PANCORAN"
+    },
+    "PANCORAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "PANCORAN"
+    },
+    "RAWA JATI": {
+      "index": 2.0,
+      "category": "TINGGI",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "PANCORAN"
+    },
+    "CILANDAK TIMUR": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "PASAR MINGGU"
+    },
+    "JATI PADANG": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "PASAR MINGGU"
+    },
+    "PEJATEN TIMUR": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "PASAR MINGGU"
+    },
+    "BINTARO": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "PESANGGRAHAN"
+    },
+    "PETUKANGAN SELATAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "PESANGGRAHAN"
+    },
+    "PETUKANGAN UTARA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "PESANGGRAHAN"
+    },
+    "ULUJAMI": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "PESANGGRAHAN"
+    },
+    "KARET KUNINGAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "SETIA BUDI"
+    },
+    "KARET SEMANGGI": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "SETIA BUDI"
+    },
+    "KUNINGAN TIMUR": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "SETIA BUDI"
+    },
+    "SETIA BUDI": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "SETIA BUDI"
+    },
+    "KEBON BARU": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "TEBET"
+    },
+    "TEBET BARAT": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "TEBET"
+    },
+    "TEBET TIMUR": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Selatan",
+      "kecamatan": "TEBET"
+    },
+    "CAKUNG BARAT": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "CAKUNG"
+    },
+    "CAKUNG TIMUR": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "CAKUNG"
+    },
+    "JATINEGARA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "CAKUNG"
+    },
+    "PULO GEBANG": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "CAKUNG"
+    },
+    "BAMBU APUS": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "CIPAYUNG"
+    },
+    "CIBUBUR": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "CIRACAS"
+    },
+    "CIRACAS": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "CIRACAS"
+    },
+    "RAMBUTAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "CIRACAS"
+    },
+    "DUREN SAWIT": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "DUREN SAWIT"
+    },
+    "PONDOK BAMBU": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "DUREN SAWIT"
+    },
+    "BIDARA CINA": {
+      "index": 2.4,
+      "category": "TINGGI",
+      "kota": "Jakarta Timur",
+      "kecamatan": "JATINEGARA"
+    },
+    "KAMPUNG MELAYU": {
+      "index": 2.2,
+      "category": "TINGGI",
+      "kota": "Jakarta Timur",
+      "kecamatan": "JATINEGARA"
+    },
+    "BALE KAMBANG": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "KRAMAT JATI"
+    },
+    "CAWANG": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "KRAMAT JATI"
+    },
+    "DUKUH": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "KRAMAT JATI"
+    },
+    "KRAMAT JATI": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "KRAMAT JATI"
+    },
+    "CIPINANG MELAYU": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "MAKASAR"
+    },
+    "PINANG RANTI": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "MAKASAR"
+    },
+    "CIJANTUNG": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "PASAR REBO"
+    },
+    "JATINEGARA KAUM": {
+      "index": 1.6,
+      "category": "SEDANG",
+      "kota": "Jakarta Timur",
+      "kecamatan": "PULO GADUNG"
+    },
+    "PISANGAN TIMUR": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Timur",
+      "kecamatan": "PULO GADUNG"
+    },
+    "CILINCING": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Utara",
+      "kecamatan": "CILINCING"
+    },
+    "KALIBARU": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Utara",
+      "kecamatan": "CILINCING"
+    },
+    "MARUNDA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Utara",
+      "kecamatan": "CILINCING"
+    },
+    "SEMPER BARAT": {
+      "index": 1.8,
+      "category": "SEDANG",
+      "kota": "Jakarta Utara",
+      "kecamatan": "CILINCING"
+    },
+    "SEMPER TIMUR": {
+      "index": 1.8,
+      "category": "SEDANG",
+      "kota": "Jakarta Utara",
+      "kecamatan": "CILINCING"
+    },
+    "SUKAPURA": {
+      "index": 1.8,
+      "category": "SEDANG",
+      "kota": "Jakarta Utara",
+      "kecamatan": "CILINCING"
+    },
+    "KELAPA GADING BARAT": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Utara",
+      "kecamatan": "KELAPA GADING"
+    },
+    "KELAPA GADING TIMUR": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Utara",
+      "kecamatan": "KELAPA GADING"
+    },
+    "PEGANGSAAN DUA": {
+      "index": 1.6,
+      "category": "SEDANG",
+      "kota": "Jakarta Utara",
+      "kecamatan": "KELAPA GADING"
+    },
+    "LAGOA": {
+      "index": 1.6,
+      "category": "SEDANG",
+      "kota": "Jakarta Utara",
+      "kecamatan": "KOJA"
+    },
+    "RAWA BADAK SELATAN": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Utara",
+      "kecamatan": "KOJA"
+    },
+    "TUGU UTARA": {
+      "index": 1.6,
+      "category": "SEDANG",
+      "kota": "Jakarta Utara",
+      "kecamatan": "KOJA"
+    },
+    "ANCOL": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Utara",
+      "kecamatan": "PADEMANGAN"
+    },
+    "PADEMANGAN BARAT": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Utara",
+      "kecamatan": "PADEMANGAN"
+    },
+    "PADEMANGAN TIMUR": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Utara",
+      "kecamatan": "PADEMANGAN"
+    },
+    "KAMAL MUARA": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Utara",
+      "kecamatan": "PENJARINGAN"
+    },
+    "PEJAGALAN": {
+      "index": 2.2,
+      "category": "TINGGI",
+      "kota": "Jakarta Utara",
+      "kecamatan": "PENJARINGAN"
+    },
+    "PENJARINGAN": {
+      "index": 1.8,
+      "category": "SEDANG",
+      "kota": "Jakarta Utara",
+      "kecamatan": "PENJARINGAN"
+    },
+    "KEBON BAWANG": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Utara",
+      "kecamatan": "TANJUNG PRIOK"
+    },
+    "SUNGAI BAMBU": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Utara",
+      "kecamatan": "TANJUNG PRIOK"
+    },
+    "TANJUNG PRIOK": {
+      "index": 1.4,
+      "category": "RENDAH",
+      "kota": "Jakarta Utara",
+      "kecamatan": "TANJUNG PRIOK"
+    }
+  }
+}

@@ -1,0 +1,508 @@
+{
+  "_meta": {
+    "schema_version": "1",
+    "generated_at": "2026-05-21T00:22:44.876492+00:00",
+    "source": "jakartasatu AWLR FeatureServer (via awlr_threshold_fetcher)",
+    "station_count": 28
+  },
+  "stations": [
+    {
+      "station_name": "PS. Angke Hulu",
+      "lat": -6.220047,
+      "lon": 106.694137,
+      "kali": "Kali Angke",
+      "wadmkk": "Kota Tangerang, Banten",
+      "siaga1_cm": 350.0,
+      "siaga_1": 350.0,
+      "siaga_2": {
+        "min": 250.0,
+        "max": 350.0
+      },
+      "siaga_3": {
+        "min": 150.0,
+        "max": 250.0
+      },
+      "siaga_4": 150.0
+    },
+    {
+      "station_name": "PS. Pesanggrahan",
+      "lat": -6.39717033,
+      "lon": 106.77182922,
+      "kali": "Kali Pesanggrahan",
+      "wadmkk": "Depok, Sawangan, Jawa Barat",
+      "siaga1_cm": 45.0,
+      "siaga_1": 45.0,
+      "siaga_2": {
+        "min": 0.0,
+        "max": 45.0
+      },
+      "siaga_3": {
+        "min": 0.0,
+        "max": 50.0
+      },
+      "siaga_4": 50.0
+    },
+    {
+      "station_name": "PS. Krukut Hulu",
+      "lat": -6.3439,
+      "lon": 106.798874,
+      "kali": "Kali Krukut",
+      "wadmkk": "Jakarta Selatan",
+      "siaga1_cm": 950.0,
+      "siaga_1": 950.0,
+      "siaga_2": {
+        "min": 850.0,
+        "max": 950.0
+      },
+      "siaga_3": {
+        "min": 750.0,
+        "max": 850.0
+      },
+      "siaga_4": 750.0
+    },
+    {
+      "station_name": "PS. Bendung Katulampa",
+      "lat": -6.633167,
+      "lon": 106.836806,
+      "kali": "Kali Ciliwung",
+      "wadmkk": "Bogor, Jawa Barat",
+      "siaga1_cm": 300.0,
+      "siaga_1": 300.0,
+      "siaga_2": {
+        "min": 250.0,
+        "max": 300.0
+      },
+      "siaga_3": {
+        "min": 200.0,
+        "max": 250.0
+      },
+      "siaga_4": 200.0
+    },
+    {
+      "station_name": "Pompa Pasar Ikan",
+      "lat": -6.126132,
+      "lon": 106.809783,
+      "kali": "Kali Besar & Laut",
+      "wadmkk": "Jakarta Utara",
+      "siaga1_cm": 250.0,
+      "siaga_1": 250.0,
+      "siaga_2": {
+        "min": 200.0,
+        "max": 250.0
+      },
+      "siaga_3": {
+        "min": 170.0,
+        "max": 200.0
+      },
+      "siaga_4": 170.0
+    },
+    {
+      "station_name": "PS. Depok",
+      "lat": -6.400514,
+      "lon": 106.832143,
+      "kali": "Kali Ciliwung",
+      "wadmkk": "Depok",
+      "siaga1_cm": 200.0,
+      "siaga_1": 200.0,
+      "siaga_2": {
+        "min": 150.0,
+        "max": 200.0
+      },
+      "siaga_3": {
+        "min": 80.0,
+        "max": 150.0
+      },
+      "siaga_4": 80.0
+    },
+    {
+      "station_name": "P.A. Manggarai",
+      "lat": -6.207825,
+      "lon": 106.848458,
+      "kali": "Kali Ciliwung & Kali Banjir Kanal Barat",
+      "wadmkk": "Jakarta Selatan",
+      "siaga1_cm": 250.0,
+      "siaga_1": 250.0,
+      "siaga_2": {
+        "min": 200.0,
+        "max": 250.0
+      },
+      "siaga_3": {
+        "min": 170.0,
+        "max": 200.0
+      },
+      "siaga_4": 170.0
+    },
+    {
+      "station_name": "P.A. Pulo Gadung",
+      "lat": -6.1909266,
+      "lon": 106.9041032,
+      "kali": "Kali Sunter",
+      "wadmkk": "Jakarta Timur",
+      "siaga1_cm": 250.0,
+      "siaga_1": 250.0,
+      "siaga_2": {
+        "min": 200.0,
+        "max": 250.0
+      },
+      "siaga_3": {
+        "min": 140.0,
+        "max": 200.0
+      },
+      "siaga_4": 140.0
+    },
+    {
+      "station_name": "PS. Sunter Hulu",
+      "lat": -6.31792,
+      "lon": 106.920901,
+      "kali": "Kali Sunter",
+      "wadmkk": "Jakarta Timur",
+      "siaga1_cm": 300.0,
+      "siaga_1": 300.0,
+      "siaga_2": {
+        "min": 250.0,
+        "max": 300.0
+      },
+      "siaga_3": {
+        "min": 150.0,
+        "max": 250.0
+      },
+      "siaga_4": 150.0
+    },
+    {
+      "station_name": "P.A. Marina Ancol",
+      "lat": -6.125585,
+      "lon": 106.830154,
+      "kali": "Kali Muara Gunung Sahari & Laut",
+      "wadmkk": "Jakarta Utara",
+      "siaga1_cm": 250.0,
+      "siaga_1": 250.0,
+      "siaga_2": {
+        "min": 200.0,
+        "max": 250.0
+      },
+      "siaga_3": {
+        "min": 150.0,
+        "max": 200.0
+      },
+      "siaga_4": 150.0
+    },
+    {
+      "station_name": "Pompa Pluit",
+      "lat": -6.109642,
+      "lon": 106.796954,
+      "kali": "Waduk Pluit & Laut",
+      "wadmkk": "Jakarta Utara",
+      "siaga1_cm": 350.0,
+      "siaga_1": 350.0,
+      "siaga_2": {
+        "min": 270.0,
+        "max": 350.0
+      },
+      "siaga_3": {
+        "min": 200.0,
+        "max": 270.0
+      },
+      "siaga_4": 200.0
+    },
+    {
+      "station_name": "P.A. Karet",
+      "lat": -6.197901,
+      "lon": 106.810075,
+      "kali": "Kali Banjir Kanal Barat",
+      "wadmkk": "Jakarta Pusat",
+      "siaga1_cm": 600.0,
+      "siaga_1": 600.0,
+      "siaga_2": {
+        "min": 550.0,
+        "max": 600.0
+      },
+      "siaga_3": {
+        "min": 450.0,
+        "max": 550.0
+      },
+      "siaga_4": 450.0
+    },
+    {
+      "station_name": "Pompa Kali Duri (Kalijodo)",
+      "lat": -6.14232,
+      "lon": 106.79039,
+      "kali": "Kali Duri Ledeng",
+      "wadmkk": "Penjaringan, Jakarta Utara",
+      "siaga1_cm": 250.0,
+      "siaga_1": 250.0,
+      "siaga_2": {
+        "min": 200.0,
+        "max": 250.0
+      },
+      "siaga_3": {
+        "min": 140.0,
+        "max": 200.0
+      },
+      "siaga_4": 140.0
+    },
+    {
+      "station_name": "P.A. Flusing Ancol",
+      "lat": -6.129859,
+      "lon": 106.831254,
+      "kali": "Kali Ciliwung Gunung Sahari & Kali Ancol",
+      "wadmkk": "Pademangan, Jakarta Utara",
+      "siaga1_cm": 220.0,
+      "siaga_1": 220.0,
+      "siaga_2": {
+        "min": 190.0,
+        "max": 220.0
+      },
+      "siaga_3": {
+        "min": 180.0,
+        "max": 190.0
+      },
+      "siaga_4": 180.0
+    },
+    {
+      "station_name": "P.A. Jembatan Merah",
+      "lat": -6.149068,
+      "lon": 106.834214,
+      "kali": "Kali Ciliwung Gunung Sahari & Anak Kali Ciliwung",
+      "wadmkk": "Sawah Besar, Jakarta Pusat",
+      "siaga1_cm": 300.0,
+      "siaga_1": 300.0,
+      "siaga_2": {
+        "min": 250.0,
+        "max": 300.0
+      },
+      "siaga_3": {
+        "min": 150.0,
+        "max": 250.0
+      },
+      "siaga_4": 150.0
+    },
+    {
+      "station_name": "P.A. Istiqlal",
+      "lat": -6.1681779,
+      "lon": 106.8314652,
+      "kali": "Kali Ciliwung Gunung Sahari",
+      "wadmkk": "Jakarta Pusat",
+      "siaga1_cm": 350.0,
+      "siaga_1": 350.0,
+      "siaga_2": {
+        "min": 300.0,
+        "max": 350.0
+      },
+      "siaga_3": {
+        "min": 250.0,
+        "max": 300.0
+      },
+      "siaga_4": 250.0
+    },
+    {
+      "station_name": "P.A. Hek",
+      "lat": -6.287305,
+      "lon": 106.87063,
+      "kali": "Kali Baru Timur",
+      "wadmkk": "Kramat Jati, Jakarta Timur",
+      "siaga1_cm": 320.0,
+      "siaga_1": 320.0,
+      "siaga_2": {
+        "min": 270.0,
+        "max": 320.0
+      },
+      "siaga_3": {
+        "min": 220.0,
+        "max": 270.0
+      },
+      "siaga_4": 220.0
+    },
+    {
+      "station_name": "PS. Cipinang Hulu",
+      "lat": -6.374284,
+      "lon": 106.883873,
+      "kali": "Kali Cipinang",
+      "wadmkk": "Cimanggis, Kota Depok",
+      "siaga1_cm": 250.0,
+      "siaga_1": 250.0,
+      "siaga_2": {
+        "min": 200.0,
+        "max": 250.0
+      },
+      "siaga_3": {
+        "min": 150.0,
+        "max": 200.0
+      },
+      "siaga_4": 150.0
+    },
+    {
+      "station_name": "P.A. Cengkareng Drain",
+      "lat": -6.15367755,
+      "lon": 106.74803185,
+      "kali": "Kali Cengkareng Drain & Kali Angke",
+      "wadmkk": "Kembangan, Jakarta Barat",
+      "siaga1_cm": 310.0,
+      "siaga_1": 310.0,
+      "siaga_2": {
+        "min": 270.0,
+        "max": 310.0
+      },
+      "siaga_3": {
+        "min": 190.0,
+        "max": 270.0
+      },
+      "siaga_4": 190.0
+    },
+    {
+      "station_name": "PS. Cibalok - Gadog",
+      "lat": -6.653317,
+      "lon": 106.869641,
+      "kali": "Kali Ciliwung",
+      "wadmkk": "Bogor Jawa Barat",
+      "siaga1_cm": 200.0,
+      "siaga_1": 200.0,
+      "siaga_2": {
+        "min": 150.0,
+        "max": 200.0
+      },
+      "siaga_3": {
+        "min": 140.0,
+        "max": 150.0
+      },
+      "siaga_4": 140.0
+    },
+    {
+      "station_name": "Pompa Cideng",
+      "lat": -6.17352446,
+      "lon": 106.8063501,
+      "kali": "Kali Cideng Siantar & Kali Banjir Kanal Barat",
+      "wadmkk": "Jakarta Pusat",
+      "siaga1_cm": 300.0,
+      "siaga_1": 300.0,
+      "siaga_2": {
+        "min": 250.0,
+        "max": 300.0
+      },
+      "siaga_3": {
+        "min": 150.0,
+        "max": 250.0
+      },
+      "siaga_4": 150.0
+    },
+    {
+      "station_name": "Pompa Yos Sudarso 1",
+      "lat": -6.15488497,
+      "lon": 106.886295,
+      "kali": "Kali Sunter",
+      "wadmkk": "Jakarta Utara",
+      "siaga1_cm": 770.0,
+      "siaga_1": 770.0,
+      "siaga_2": {
+        "min": 700.0,
+        "max": 770.0
+      },
+      "siaga_3": {
+        "min": 550.0,
+        "max": 700.0
+      },
+      "siaga_4": 550.0
+    },
+    {
+      "station_name": "P.A. Marina Ancol (Baru)",
+      "lat": -6.12645691,
+      "lon": 106.83002249,
+      "kali": "Kali Muara Gunung Sahari & Laut",
+      "wadmkk": "Kota Jakarta Utara",
+      "siaga1_cm": 300.0,
+      "siaga_1": 300.0,
+      "siaga_2": {
+        "min": 250.0,
+        "max": 300.0
+      },
+      "siaga_3": {
+        "min": 200.0,
+        "max": 250.0
+      },
+      "siaga_4": 190.0
+    },
+    {
+      "station_name": "Kampung Rambutan (Baru)",
+      "lat": -6.3084289,
+      "lon": 106.88084053,
+      "kali": "Kali Cipinang",
+      "wadmkk": "Kota Jakarta Timur",
+      "siaga1_cm": null,
+      "siaga_1": null,
+      "siaga_2": null,
+      "siaga_3": null,
+      "siaga_4": null
+    },
+    {
+      "station_name": "Pompa Polder Kamal (Bubble)",
+      "lat": -6.096239,
+      "lon": 106.718931,
+      "kali": "Kali Kamal",
+      "wadmkk": "Kota Jakarta Utara",
+      "siaga1_cm": 300.0,
+      "siaga_1": 300.0,
+      "siaga_2": {
+        "min": 250.0,
+        "max": 300.0
+      },
+      "siaga_3": {
+        "min": 200.0,
+        "max": 250.0
+      },
+      "siaga_4": 190.0
+    },
+    {
+      "station_name": "Pompa Kali Asin (Bubble)",
+      "lat": -6.110667,
+      "lon": 106.774083,
+      "kali": "Kali Angke",
+      "wadmkk": "Kota Jakarta Utara",
+      "siaga1_cm": 300.0,
+      "siaga_1": 300.0,
+      "siaga_2": {
+        "min": 250.0,
+        "max": 300.0
+      },
+      "siaga_3": {
+        "min": 200.0,
+        "max": 250.0
+      },
+      "siaga_4": 190.0
+    },
+    {
+      "station_name": "Pompa Lagoa (Bubble)",
+      "lat": -6.110317,
+      "lon": 106.906947,
+      "kali": "Kali Sunter",
+      "wadmkk": "Kota Jakarta Utara",
+      "siaga1_cm": 300.0,
+      "siaga_1": 300.0,
+      "siaga_2": {
+        "min": 250.0,
+        "max": 300.0
+      },
+      "siaga_3": {
+        "min": 200.0,
+        "max": 250.0
+      },
+      "siaga_4": 190.0
+    },
+    {
+      "station_name": "Pompa Cilincing (Bubble)",
+      "lat": -6.100906,
+      "lon": 106.940361,
+      "kali": "Kali Rawa Malang",
+      "wadmkk": "Kota Jakarta Utara",
+      "siaga1_cm": 300.0,
+      "siaga_1": 300.0,
+      "siaga_2": {
+        "min": 250.0,
+        "max": 300.0
+      },
+      "siaga_3": {
+        "min": 200.0,
+        "max": 250.0
+      },
+      "siaga_4": 190.0
+    }
+  ]
+}

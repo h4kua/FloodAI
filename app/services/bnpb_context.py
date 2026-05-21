@@ -19,6 +19,7 @@ import os
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
@@ -281,6 +282,77 @@ DATA_SOURCE_DEFAULT = "default"
 
 _cache: dict = {}
 
+# Historical flood statistics per kota, built by
+# scripts/build_historical_flood_events.py from data/raw/combined.csv.
+_HISTORICAL_EVENTS_PATH = Path(__file__).resolve().parents[1] / "data" / "historical_flood_events.json"
+
+
+@lru_cache(maxsize=1)
+def _load_historical_events() -> dict:
+    """Per-district historical flood stats. Returns {} on any failure (fail-open)."""
+    try:
+        if not _HISTORICAL_EVENTS_PATH.exists():
+            return {}
+        payload = json.loads(_HISTORICAL_EVENTS_PATH.read_text(encoding="utf-8"))
+        return payload.get("districts", {}) or {}
+    except (OSError, ValueError) as exc:
+        logger.warning("historical_events_load_failed: %s", exc)
+        return {}
+
+
+_HAZARD_2023_PATH = Path(__file__).resolve().parents[1] / "data" / "flood_hazard_index_2023.json"
+
+
+@lru_cache(maxsize=1)
+def _load_hazard_2023() -> dict:
+    """Per-kota 2023 flood hazard index. Returns {} on any failure (fail-open)."""
+    try:
+        if not _HAZARD_2023_PATH.exists():
+            return {}
+        payload = json.loads(_HAZARD_2023_PATH.read_text(encoding="utf-8"))
+        return payload.get("kota", {}) or {}
+    except (OSError, ValueError) as exc:
+        logger.warning("hazard_2023_load_failed: %s", exc)
+        return {}
+
+
+def _hazard_2023_for(district: str) -> dict:
+    """
+    2023 flood hazard index for a kota (more recent than IRBI). Additive; empty
+    when no record. Surfaced as context only — does NOT replace the
+    IRBI-driven effective_irbi_score that downstream agents key off.
+    """
+    rec = _load_hazard_2023().get((district or "").strip())
+    if not rec:
+        return {}
+    out: dict = {}
+    if isinstance(rec.get("avg_index"), (int, float)):
+        out["hazard_index_2023"] = rec["avg_index"]
+    if isinstance(rec.get("max_index"), (int, float)):
+        out["hazard_index_2023_max"] = rec["max_index"]
+    if rec.get("dominant_category"):
+        out["hazard_category_2023"] = rec["dominant_category"]
+    return out
+
+
+def _historical_for(district: str) -> dict:
+    """
+    Historical flood frequency/severity for a kota, suitable for merging into
+    VulnerabilityContext.to_dict(). Returns an empty dict when no record exists
+    so the field set degrades gracefully (additive, never breaks existing output).
+    """
+    rec = _load_historical_events().get((district or "").strip())
+    if not rec:
+        return {}
+    out: dict = {}
+    if isinstance(rec.get("historical_flood_frequency"), (int, float)):
+        out["historical_flood_frequency"] = rec["historical_flood_frequency"]
+    if isinstance(rec.get("avg_severity_historical"), (int, float)):
+        out["avg_severity_historical"] = rec["avg_severity_historical"]
+    if isinstance(rec.get("event_count"), int):
+        out["historical_event_count"] = rec["event_count"]
+    return out
+
 
 # ─── Public dataclass ─────────────────────────────────────────────────────────
 
@@ -311,7 +383,7 @@ class VulnerabilityContext:
     data_source: str = field(default=DATA_SOURCE_API)
 
     def to_dict(self) -> dict:
-        return {
+        base = {
             "irbi_score": round(self.irbi_flood_score, 4),
             "effective_irbi_score": round(self.effective_irbi_score, 4),
             "exposure_class": self.exposure_class,
@@ -320,6 +392,9 @@ class VulnerabilityContext:
             "data_vintage_days": self.data_vintage_days,
             "data_source": self.data_source,
         }
+        base.update(_historical_for(self.district))
+        base.update(_hazard_2023_for(self.district))
+        return base
 
 
 # ─── Public mapping function ─────────────────────────────────────────────────

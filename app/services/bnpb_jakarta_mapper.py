@@ -513,6 +513,18 @@ def _record_with_name(
     """Return the record under ``key`` annotated with its canonical name."""
     record = dict(index[key])
     record["name"] = key
+    # Additive enrichment: nearest named waterway for this kecamatan, from the
+    # precomputed table. Defensive — never blocks a mapping if data is absent.
+    try:
+        from app.services.river_locator import nearest_river_for_kecamatan
+
+        near = nearest_river_for_kecamatan(key)
+        if near:
+            record["nearest_river"] = near.get("nearest_river")
+            record["waterway_type"] = near.get("waterway_type")
+            record["distance_to_river_m"] = near.get("distance_to_river_m")
+    except Exception:  # noqa: BLE001 — enrichment is best-effort
+        pass
     return record
 
 

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
+from functools import lru_cache
 
 _log = logging.getLogger(__name__)
 
@@ -45,8 +46,56 @@ def _safe_float(v, default: float = 0.0) -> float:
         return default
 
 
+@lru_cache(maxsize=1)
+def _awlr_payload() -> tuple:
+    """Cached AWLR threshold gates (read-only, from data/raw cache). () on absence."""
+    try:
+        from app.services.awlr_threshold_fetcher import load_cached_thresholds
+
+        payload = load_cached_thresholds()
+        return tuple(payload.get("gates", [])) if payload else ()
+    except Exception:  # noqa: BLE001 — threshold enrichment must never break analysis
+        return ()
+
+
+def _awlr_thresholds_for(station_id: str) -> dict[str, float]:
+    """
+    Derive per-station siaga thresholds (cm) from the public AWLR dataset, used
+    as a fallback for stations not in _STATION_THRESHOLDS and without per-record
+    siaga values.
+
+    Only siaga1/siaga2/siaga3 LOWER bounds are derived — they are unambiguous in
+    the AWLR bands (e.g. "> 350", "250 - 350", "150 - 250"). siaga4 ("< 150") has
+    no defined lower bound, so it is intentionally omitted (sub-siaga3 readings
+    stay "normal") rather than fabricating a boundary in a safety-critical path.
+    """
+    needle = (station_id or "").strip().lower()
+    if not needle:
+        return {}
+    for gate in _awlr_payload():
+        name = (gate.get("name") or "").lower()
+        kali = (gate.get("kali") or "").lower()
+        if not (needle in name or (name and name in needle) or needle in kali):
+            continue
+        out: dict[str, float] = {}
+        s1 = gate.get("siaga1_cm")
+        if isinstance(s1, (int, float)) and s1 > 0:
+            out["siaga1"] = float(s1)
+        for level, key in (("siaga2", "siaga_2"), ("siaga3", "siaga_3")):
+            band = gate.get(key)
+            if isinstance(band, dict) and isinstance(band.get("min"), (int, float)) and band["min"] > 0:
+                out[level] = float(band["min"])
+        return out
+    return {}
+
+
 def _resolve_thresholds(record: dict, station_id: str) -> dict[str, float]:
+    # Reference stations (calibrated BPBD values) take precedence; for any other
+    # station, fall back to AWLR-derived thresholds so it can still be assessed
+    # against real per-gate values instead of going unscored.
     defaults = _STATION_THRESHOLDS.get(station_id.lower(), {})
+    if not defaults:
+        defaults = _awlr_thresholds_for(station_id)
     resolved = {
         k: _safe_float(record.get(k), defaults.get(k, 0.0))
         for k in ("siaga1", "siaga2", "siaga3", "siaga4")

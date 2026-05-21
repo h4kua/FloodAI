@@ -1,0 +1,1764 @@
+{
+  "_meta": {
+    "schema_version": "1",
+    "generated_at": "2026-05-21T01:40:51.793581+00:00",
+    "source": "data/raw/data-wilayah-potensi-banjir-akibat-luapan-sungai-komponen-data.xls",
+    "zone_count": 124,
+    "lookup_basis": "administrative name (kecamatan/kelurahan) — no coordinates in source"
+  },
+  "zones": [
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "CENGKARENG",
+      "kelurahan": "CENGKARENG TIMUR",
+      "sungai": "ANGKE"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "CENGKARENG",
+      "kelurahan": "CENGKARENG BARAT",
+      "sungai": "ANGKE"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "CENGKARENG",
+      "kelurahan": "DURI KOSAMBI",
+      "sungai": "ANGKE"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "CENGKARENG",
+      "kelurahan": "KAPUK",
+      "sungai": "ANGKE"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "CENGKARENG",
+      "kelurahan": "KEDAUNG KALI ANGKE",
+      "sungai": "ANGKE"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "KEMBANGAN",
+      "kelurahan": "KEMBANGAN UTARA",
+      "sungai": "ANGKE"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "CENGKARENG",
+      "kelurahan": "RAWA BUAYA",
+      "sungai": "ANGKE"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "KALIDERES",
+      "kelurahan": "SEMANAN",
+      "sungai": "ANGKE"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "KRAMAT JATI",
+      "kelurahan": "BALE KAMBANG",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "JATINEGARA",
+      "kelurahan": "BALI MESTER",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "PASAR REBO",
+      "kelurahan": "BARU",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "JATINEGARA",
+      "kelurahan": "BIDARA CINA",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "TEBET",
+      "kelurahan": "BUKIT DURI",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "KRAMAT JATI",
+      "kelurahan": "CAWANG",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PANCORAN",
+      "kelurahan": "CIKOKO",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "KRAMAT JATI",
+      "kelurahan": "CILILITAN",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PANCORAN",
+      "kelurahan": "DUREN TIGA",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "PASAR REBO",
+      "kelurahan": "GEDONG",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "JAGAKARSA",
+      "kelurahan": "JAGAKARSA",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PASAR MINGGU",
+      "kelurahan": "JATI PADANG",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PANCORAN",
+      "kelurahan": "KALIBATA",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "PASAR REBO",
+      "kelurahan": "KALISARI",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "JATINEGARA",
+      "kelurahan": "KAMPUNG MELAYU",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "KRAMAT JATI",
+      "kelurahan": "KAMPUNG TENGAH",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PASAR MINGGU",
+      "kelurahan": "KEBAGUSAN",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "TEBET",
+      "kelurahan": "KEBON BARU",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "MATRAMAN",
+      "kelurahan": "KEBON MANGGIS",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "JAGAKARSA",
+      "kelurahan": "LENTENG AGUNG",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "TEBET",
+      "kelurahan": "MANGGARAI",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "MATRAMAN",
+      "kelurahan": "PAL MERIEM",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PANCORAN",
+      "kelurahan": "PANCORAN",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PASAR MINGGU",
+      "kelurahan": "PEJATEN TIMUR",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PANCORAN",
+      "kelurahan": "PENGADEGAN",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PANCORAN",
+      "kelurahan": "RAWAJATI",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "JAGAKARSA",
+      "kelurahan": "SRENGSENG SAWAH",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "JAGAKARSA",
+      "kelurahan": "TANJUNG BARAT",
+      "sungai": "CILIWUNG"
+    },
+    {
+      "kota": "JAKARTA UTARA",
+      "kecamatan": "PADEMANGAN",
+      "kelurahan": "ANCOL",
+      "sungai": "CILIWUNG ARAH ISTANA NEGARA"
+    },
+    {
+      "kota": "JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "GUNUNG SAHARI SELATAN",
+      "sungai": "CILIWUNG ARAH ISTANA NEGARA"
+    },
+    {
+      "kota": "JAKARTA PUSAT",
+      "kecamatan": "SAWAH BESAR",
+      "kelurahan": "GUNUNG SAHARI UTARA",
+      "sungai": "CILIWUNG ARAH ISTANA NEGARA"
+    },
+    {
+      "kota": "JAKARTA PUSAT",
+      "kecamatan": "SAWAH BESAR",
+      "kelurahan": "KARANG ANYAR",
+      "sungai": "CILIWUNG ARAH ISTANA NEGARA"
+    },
+    {
+      "kota": "JAKARTA PUSAT",
+      "kecamatan": "SAWAH BESAR",
+      "kelurahan": "KARTINI",
+      "sungai": "CILIWUNG ARAH ISTANA NEGARA"
+    },
+    {
+      "kota": "JAKARTA PUSAT",
+      "kecamatan": "SAWAH BESAR",
+      "kelurahan": "MANGGA DUA SELATAN",
+      "sungai": "CILIWUNG ARAH ISTANA NEGARA"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "TAMAN SARI",
+      "kelurahan": "MAPHAR",
+      "sungai": "CILIWUNG ARAH ISTANA NEGARA"
+    },
+    {
+      "kota": "JAKARTA UTARA",
+      "kecamatan": "PADEMANGAN",
+      "kelurahan": "PADEMANGAN BARAT",
+      "sungai": "CILIWUNG ARAH ISTANA NEGARA"
+    },
+    {
+      "kota": "JAKARTA PUSAT",
+      "kecamatan": "SAWAH BESAR",
+      "kelurahan": "PASAR BARU",
+      "sungai": "CILIWUNG ARAH ISTANA NEGARA"
+    },
+    {
+      "kota": "JAKARTA PUSAT",
+      "kecamatan": "MENTENG",
+      "kelurahan": "GONDANGDIA",
+      "sungai": "CILIWUNG ARAH KANAL BANJIR BARAT"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "GROGOL PETAMBURAN",
+      "kelurahan": "GROGOL",
+      "sungai": "CILIWUNG ARAH KANAL BANJIR BARAT"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "PALMERAH",
+      "kelurahan": "JATI PULO",
+      "sungai": "CILIWUNG ARAH KANAL BANJIR BARAT"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "TAMBORA",
+      "kelurahan": "KALIANYAR",
+      "sungai": "CILIWUNG ARAH KANAL BANJIR BARAT"
+    },
+    {
+      "kota": "JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "KARET TENGSIN",
+      "sungai": "CILIWUNG ARAH KANAL BANJIR BARAT"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "PALMERAH",
+      "kelurahan": "KOTA BAMBU SELATAN",
+      "sungai": "CILIWUNG ARAH KANAL BANJIR BARAT"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "PALMERAH",
+      "kelurahan": "KOTA BAMBU UTARA",
+      "sungai": "CILIWUNG ARAH KANAL BANJIR BARAT"
+    },
+    {
+      "kota": "JAKARTA PUSAT",
+      "kecamatan": "MENTENG",
+      "kelurahan": "MENTENG",
+      "sungai": "CILIWUNG ARAH KANAL BANJIR BARAT"
+    },
+    {
+      "kota": "JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "PETAMBURAN",
+      "sungai": "CILIWUNG ARAH KANAL BANJIR BARAT"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "GROGOL PETAMBURAN",
+      "kelurahan": "TOMANG",
+      "sungai": "CILIWUNG ARAH KANAL BANJIR BARAT"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "CIRACAS",
+      "kelurahan": "CIBUBUR",
+      "sungai": "CIPINANG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "JATINEGARA",
+      "kelurahan": "CIPINANG CEMPEDAK",
+      "sungai": "CIPINANG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "JATINEGARA",
+      "kelurahan": "CIPINANG BESAR SELATAN",
+      "sungai": "CIPINANG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "JATINEGARA",
+      "kelurahan": "CIPINANG BESAR UTARA",
+      "sungai": "CIPINANG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "KRAMAT JATI",
+      "kelurahan": "DUKUH",
+      "sungai": "CIPINANG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "MAKASAR",
+      "kelurahan": "HALIM PERDANA KUSUMAH",
+      "sungai": "CIPINANG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "MAKASAR",
+      "kelurahan": "KEBON PALA",
+      "sungai": "CIPINANG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "KRAMAT JATI",
+      "kelurahan": "KRAMAT JATI",
+      "sungai": "CIPINANG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "MAKASAR",
+      "kelurahan": "MAKASAR",
+      "sungai": "CIPINANG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "PASAR REBO",
+      "kelurahan": "PEKAYON",
+      "sungai": "CIPINANG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "MAKASAR",
+      "kelurahan": "PINANG RANTI",
+      "sungai": "CIPINANG"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "CIRACAS",
+      "kelurahan": "RAMBUTAN",
+      "sungai": "CIPINANG"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "MAMPANG PRAPATAN",
+      "kelurahan": "BANGKA",
+      "sungai": "KRUKUT"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "KEBAYORAN BARU",
+      "kelurahan": "CIPETE UTARA",
+      "sungai": "KRUKUT"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "CILANDAK",
+      "kelurahan": "CILANDAK BARAT",
+      "sungai": "KRUKUT"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PASAR MINGGU",
+      "kelurahan": "CILANDAK TIMUR",
+      "sungai": "KRUKUT"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "SETIA BUDI",
+      "kelurahan": "KARET SEMANGGI",
+      "sungai": "KRUKUT"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "MAMPANG PRAPATAN",
+      "kelurahan": "KUNINGAN BARAT",
+      "sungai": "KRUKUT"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "MAMPANG PRAPATAN",
+      "kelurahan": "MAMPANG PRAPATAN",
+      "sungai": "KRUKUT"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "MAMPANG PRAPATAN",
+      "kelurahan": "PELA MAMPANG",
+      "sungai": "KRUKUT"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "KEBAYORAN BARU",
+      "kelurahan": "PETOGOGAN",
+      "sungai": "KRUKUT"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "CILANDAK",
+      "kelurahan": "PONDOK LABU",
+      "sungai": "KRUKUT"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "KEBAYORAN BARU",
+      "kelurahan": "RAWA BARAT",
+      "sungai": "KRUKUT"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "MAMPANG PRAPATAN",
+      "kelurahan": "TEGAL PARANG",
+      "sungai": "KRUKUT"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "GROGOL PETAMBURAN",
+      "kelurahan": "JELAMBAR",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PESANGGRAHAN",
+      "kelurahan": "BINTARO",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "GROGOL PETAMBURAN",
+      "kelurahan": "JELAMBAR BARU",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "KEBAYORAN LAMA",
+      "kelurahan": "CIPULIR",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "KEBON JERUK",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "DURI KEPA",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA UTARA",
+      "kecamatan": "PENJARINGAN",
+      "kelurahan": "KAPUK MUARA",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "KEBAYORAN LAMA",
+      "kelurahan": "KEBAYORAN LAMA UTARA",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "KEDOYA SELATAN",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "KELAPA DUA",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA UTARA",
+      "kecamatan": "PENJARINGAN",
+      "kelurahan": "PEJAGALAN",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "SUKABUMI SELATAN",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PESANGGRAHAN",
+      "kelurahan": "PESANGGRAHAN",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PESANGGRAHAN",
+      "kelurahan": "PETUKANGAN SELATAN",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PESANGGRAHAN",
+      "kelurahan": "PETUKANGAN UTARA",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "KEBAYORAN LAMA",
+      "kelurahan": "PONDOK PINANG",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "SUKABUMI UTARA",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "GROGOL PETAMBURAN",
+      "kelurahan": "TANJUNG DUREN UTARA",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA SELATAN",
+      "kecamatan": "PESANGGRAHAN",
+      "kelurahan": "ULUJAMI",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "GROGOL PETAMBURAN",
+      "kelurahan": "WIJAYA KESUMA",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "KEDOYA UTARA",
+      "sungai": "PESANGGRAHAN"
+    },
+    {
+      "kota": "JAKARTA BARAT",
+      "kecamatan": "KEMBANGAN",
+      "kelurahan": "KEMBANGAN SELATAN",
+      "sungai": "PESANGGRAHAN & ANGKE"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "CIPAYUNG",
+      "kelurahan": "BAMBU APUS",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "CIPAYUNG",
+      "kelurahan": "CILANGKAP",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "PULO GADUNG",
+      "kelurahan": "CIPINANG",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "MAKASAR",
+      "kelurahan": "CIPINANG MELAYU",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "JATINEGARA",
+      "kelurahan": "CIPINANG MUARA",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "DUREN SAWIT",
+      "kelurahan": "DUREN SAWIT",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "PULO GADUNG",
+      "kelurahan": "JATINEGARA KAUM",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "PULO GADUNG",
+      "kelurahan": "KAYU PUTIH",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA UTARA",
+      "kecamatan": "TANJUNG PRIOK",
+      "kelurahan": "KEBON BAWANG",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA UTARA",
+      "kecamatan": "KELAPA GADING",
+      "kelurahan": "KELAPA GADING BARAT",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA UTARA",
+      "kecamatan": "KELAPA GADING",
+      "kelurahan": "KELAPA GADING TIMUR",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA UTARA",
+      "kecamatan": "KOJA",
+      "kelurahan": "KOJA",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "CIPAYUNG",
+      "kelurahan": "LUBANG BUAYA",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "PULO GADUNG",
+      "kelurahan": "PULO GADUNG",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "DUREN SAWIT",
+      "kelurahan": "PONDOK BAMBU",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "DUREN SAWIT",
+      "kelurahan": "PONDOK KELAPA",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "CIPAYUNG",
+      "kelurahan": "PONDOK RANGGON",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA UTARA",
+      "kecamatan": "KOJA",
+      "kelurahan": "RAWABADAK SELATAN",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA UTARA",
+      "kecamatan": "KOJA",
+      "kelurahan": "RAWABADAK UTARA",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA TIMUR",
+      "kecamatan": "CIPAYUNG",
+      "kelurahan": "SETU",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "SUMUR BATU",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA UTARA",
+      "kecamatan": "TANJUNG PRIOK",
+      "kelurahan": "SUNGAI BAMBU",
+      "sungai": "SUNTER"
+    },
+    {
+      "kota": "JAKARTA UTARA",
+      "kecamatan": "TANJUNG PRIOK",
+      "kelurahan": "SUNTER JAYA",
+      "sungai": "SUNTER"
+    }
+  ],
+  "by_kecamatan": {
+    "CENGKARENG": {
+      "rivers": [
+        "ANGKE"
+      ],
+      "kelurahan": [
+        "CENGKARENG BARAT",
+        "CENGKARENG TIMUR",
+        "DURI KOSAMBI",
+        "KAPUK",
+        "KEDAUNG KALI ANGKE",
+        "RAWA BUAYA"
+      ]
+    },
+    "KEMBANGAN": {
+      "rivers": [
+        "ANGKE",
+        "PESANGGRAHAN & ANGKE"
+      ],
+      "kelurahan": [
+        "KEMBANGAN SELATAN",
+        "KEMBANGAN UTARA"
+      ]
+    },
+    "KALIDERES": {
+      "rivers": [
+        "ANGKE"
+      ],
+      "kelurahan": [
+        "SEMANAN"
+      ]
+    },
+    "KRAMAT JATI": {
+      "rivers": [
+        "CILIWUNG",
+        "CIPINANG"
+      ],
+      "kelurahan": [
+        "BALE KAMBANG",
+        "CAWANG",
+        "CILILITAN",
+        "DUKUH",
+        "KAMPUNG TENGAH",
+        "KRAMAT JATI"
+      ]
+    },
+    "JATINEGARA": {
+      "rivers": [
+        "CILIWUNG",
+        "CIPINANG",
+        "SUNTER"
+      ],
+      "kelurahan": [
+        "BALI MESTER",
+        "BIDARA CINA",
+        "CIPINANG BESAR SELATAN",
+        "CIPINANG BESAR UTARA",
+        "CIPINANG CEMPEDAK",
+        "CIPINANG MUARA",
+        "KAMPUNG MELAYU"
+      ]
+    },
+    "PASAR REBO": {
+      "rivers": [
+        "CILIWUNG",
+        "CIPINANG"
+      ],
+      "kelurahan": [
+        "BARU",
+        "GEDONG",
+        "KALISARI",
+        "PEKAYON"
+      ]
+    },
+    "TEBET": {
+      "rivers": [
+        "CILIWUNG"
+      ],
+      "kelurahan": [
+        "BUKIT DURI",
+        "KEBON BARU",
+        "MANGGARAI"
+      ]
+    },
+    "PANCORAN": {
+      "rivers": [
+        "CILIWUNG"
+      ],
+      "kelurahan": [
+        "CIKOKO",
+        "DUREN TIGA",
+        "KALIBATA",
+        "PANCORAN",
+        "PENGADEGAN",
+        "RAWAJATI"
+      ]
+    },
+    "JAGAKARSA": {
+      "rivers": [
+        "CILIWUNG"
+      ],
+      "kelurahan": [
+        "JAGAKARSA",
+        "LENTENG AGUNG",
+        "SRENGSENG SAWAH",
+        "TANJUNG BARAT"
+      ]
+    },
+    "PASAR MINGGU": {
+      "rivers": [
+        "CILIWUNG",
+        "KRUKUT"
+      ],
+      "kelurahan": [
+        "CILANDAK TIMUR",
+        "JATI PADANG",
+        "KEBAGUSAN",
+        "PEJATEN TIMUR"
+      ]
+    },
+    "MATRAMAN": {
+      "rivers": [
+        "CILIWUNG"
+      ],
+      "kelurahan": [
+        "KEBON MANGGIS",
+        "PAL MERIEM"
+      ]
+    },
+    "PADEMANGAN": {
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ],
+      "kelurahan": [
+        "ANCOL",
+        "PADEMANGAN BARAT"
+      ]
+    },
+    "KEMAYORAN": {
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA",
+        "SUNTER"
+      ],
+      "kelurahan": [
+        "GUNUNG SAHARI SELATAN",
+        "SUMUR BATU"
+      ]
+    },
+    "SAWAH BESAR": {
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ],
+      "kelurahan": [
+        "GUNUNG SAHARI UTARA",
+        "KARANG ANYAR",
+        "KARTINI",
+        "MANGGA DUA SELATAN",
+        "PASAR BARU"
+      ]
+    },
+    "TAMAN SARI": {
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ],
+      "kelurahan": [
+        "MAPHAR"
+      ]
+    },
+    "MENTENG": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ],
+      "kelurahan": [
+        "GONDANGDIA",
+        "MENTENG"
+      ]
+    },
+    "GROGOL PETAMBURAN": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT",
+        "PESANGGRAHAN"
+      ],
+      "kelurahan": [
+        "GROGOL",
+        "JELAMBAR",
+        "JELAMBAR BARU",
+        "TANJUNG DUREN UTARA",
+        "TOMANG",
+        "WIJAYA KESUMA"
+      ]
+    },
+    "PALMERAH": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ],
+      "kelurahan": [
+        "JATI PULO",
+        "KOTA BAMBU SELATAN",
+        "KOTA BAMBU UTARA"
+      ]
+    },
+    "TAMBORA": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ],
+      "kelurahan": [
+        "KALIANYAR"
+      ]
+    },
+    "TANAH ABANG": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ],
+      "kelurahan": [
+        "KARET TENGSIN",
+        "PETAMBURAN"
+      ]
+    },
+    "CIRACAS": {
+      "rivers": [
+        "CIPINANG"
+      ],
+      "kelurahan": [
+        "CIBUBUR",
+        "RAMBUTAN"
+      ]
+    },
+    "MAKASAR": {
+      "rivers": [
+        "CIPINANG",
+        "SUNTER"
+      ],
+      "kelurahan": [
+        "CIPINANG MELAYU",
+        "HALIM PERDANA KUSUMAH",
+        "KEBON PALA",
+        "MAKASAR",
+        "PINANG RANTI"
+      ]
+    },
+    "MAMPANG PRAPATAN": {
+      "rivers": [
+        "KRUKUT"
+      ],
+      "kelurahan": [
+        "BANGKA",
+        "KUNINGAN BARAT",
+        "MAMPANG PRAPATAN",
+        "PELA MAMPANG",
+        "TEGAL PARANG"
+      ]
+    },
+    "KEBAYORAN BARU": {
+      "rivers": [
+        "KRUKUT"
+      ],
+      "kelurahan": [
+        "CIPETE UTARA",
+        "PETOGOGAN",
+        "RAWA BARAT"
+      ]
+    },
+    "CILANDAK": {
+      "rivers": [
+        "KRUKUT"
+      ],
+      "kelurahan": [
+        "CILANDAK BARAT",
+        "PONDOK LABU"
+      ]
+    },
+    "SETIA BUDI": {
+      "rivers": [
+        "KRUKUT"
+      ],
+      "kelurahan": [
+        "KARET SEMANGGI"
+      ]
+    },
+    "PESANGGRAHAN": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ],
+      "kelurahan": [
+        "BINTARO",
+        "PESANGGRAHAN",
+        "PETUKANGAN SELATAN",
+        "PETUKANGAN UTARA",
+        "ULUJAMI"
+      ]
+    },
+    "KEBAYORAN LAMA": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ],
+      "kelurahan": [
+        "CIPULIR",
+        "KEBAYORAN LAMA UTARA",
+        "PONDOK PINANG"
+      ]
+    },
+    "KEBON JERUK": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ],
+      "kelurahan": [
+        "DURI KEPA",
+        "KEBON JERUK",
+        "KEDOYA SELATAN",
+        "KEDOYA UTARA",
+        "KELAPA DUA",
+        "SUKABUMI SELATAN",
+        "SUKABUMI UTARA"
+      ]
+    },
+    "PENJARINGAN": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ],
+      "kelurahan": [
+        "KAPUK MUARA",
+        "PEJAGALAN"
+      ]
+    },
+    "CIPAYUNG": {
+      "rivers": [
+        "SUNTER"
+      ],
+      "kelurahan": [
+        "BAMBU APUS",
+        "CILANGKAP",
+        "LUBANG BUAYA",
+        "PONDOK RANGGON",
+        "SETU"
+      ]
+    },
+    "PULO GADUNG": {
+      "rivers": [
+        "SUNTER"
+      ],
+      "kelurahan": [
+        "CIPINANG",
+        "JATINEGARA KAUM",
+        "KAYU PUTIH",
+        "PULO GADUNG"
+      ]
+    },
+    "DUREN SAWIT": {
+      "rivers": [
+        "SUNTER"
+      ],
+      "kelurahan": [
+        "DUREN SAWIT",
+        "PONDOK BAMBU",
+        "PONDOK KELAPA"
+      ]
+    },
+    "TANJUNG PRIOK": {
+      "rivers": [
+        "SUNTER"
+      ],
+      "kelurahan": [
+        "KEBON BAWANG",
+        "SUNGAI BAMBU",
+        "SUNTER JAYA"
+      ]
+    },
+    "KELAPA GADING": {
+      "rivers": [
+        "SUNTER"
+      ],
+      "kelurahan": [
+        "KELAPA GADING BARAT",
+        "KELAPA GADING TIMUR"
+      ]
+    },
+    "KOJA": {
+      "rivers": [
+        "SUNTER"
+      ],
+      "kelurahan": [
+        "KOJA",
+        "RAWABADAK SELATAN",
+        "RAWABADAK UTARA"
+      ]
+    }
+  },
+  "by_kelurahan": {
+    "CENGKARENG TIMUR": {
+      "rivers": [
+        "ANGKE"
+      ]
+    },
+    "CENGKARENG BARAT": {
+      "rivers": [
+        "ANGKE"
+      ]
+    },
+    "DURI KOSAMBI": {
+      "rivers": [
+        "ANGKE"
+      ]
+    },
+    "KAPUK": {
+      "rivers": [
+        "ANGKE"
+      ]
+    },
+    "KEDAUNG KALI ANGKE": {
+      "rivers": [
+        "ANGKE"
+      ]
+    },
+    "KEMBANGAN UTARA": {
+      "rivers": [
+        "ANGKE"
+      ]
+    },
+    "RAWA BUAYA": {
+      "rivers": [
+        "ANGKE"
+      ]
+    },
+    "SEMANAN": {
+      "rivers": [
+        "ANGKE"
+      ]
+    },
+    "BALE KAMBANG": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "BALI MESTER": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "BARU": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "BIDARA CINA": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "BUKIT DURI": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "CAWANG": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "CIKOKO": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "CILILITAN": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "DUREN TIGA": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "GEDONG": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "JAGAKARSA": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "JATI PADANG": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "KALIBATA": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "KALISARI": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "KAMPUNG MELAYU": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "KAMPUNG TENGAH": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "KEBAGUSAN": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "KEBON BARU": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "KEBON MANGGIS": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "LENTENG AGUNG": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "MANGGARAI": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "PAL MERIEM": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "PANCORAN": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "PEJATEN TIMUR": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "PENGADEGAN": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "RAWAJATI": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "SRENGSENG SAWAH": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "TANJUNG BARAT": {
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    "ANCOL": {
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    "GUNUNG SAHARI SELATAN": {
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    "GUNUNG SAHARI UTARA": {
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    "KARANG ANYAR": {
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    "KARTINI": {
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    "MANGGA DUA SELATAN": {
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    "MAPHAR": {
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    "PADEMANGAN BARAT": {
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    "PASAR BARU": {
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    "GONDANGDIA": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    "GROGOL": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    "JATI PULO": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    "KALIANYAR": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    "KARET TENGSIN": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    "KOTA BAMBU SELATAN": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    "KOTA BAMBU UTARA": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    "MENTENG": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    "PETAMBURAN": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    "TOMANG": {
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    "CIBUBUR": {
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    "CIPINANG CEMPEDAK": {
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    "CIPINANG BESAR SELATAN": {
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    "CIPINANG BESAR UTARA": {
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    "DUKUH": {
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    "HALIM PERDANA KUSUMAH": {
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    "KEBON PALA": {
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    "KRAMAT JATI": {
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    "MAKASAR": {
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    "PEKAYON": {
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    "PINANG RANTI": {
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    "RAMBUTAN": {
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    "BANGKA": {
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    "CIPETE UTARA": {
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    "CILANDAK BARAT": {
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    "CILANDAK TIMUR": {
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    "KARET SEMANGGI": {
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    "KUNINGAN BARAT": {
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    "MAMPANG PRAPATAN": {
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    "PELA MAMPANG": {
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    "PETOGOGAN": {
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    "PONDOK LABU": {
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    "RAWA BARAT": {
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    "TEGAL PARANG": {
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    "JELAMBAR": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "BINTARO": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "JELAMBAR BARU": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "CIPULIR": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "KEBON JERUK": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "DURI KEPA": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "KAPUK MUARA": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "KEBAYORAN LAMA UTARA": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "KEDOYA SELATAN": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "KELAPA DUA": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "PEJAGALAN": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "SUKABUMI SELATAN": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "PESANGGRAHAN": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "PETUKANGAN SELATAN": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "PETUKANGAN UTARA": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "PONDOK PINANG": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "SUKABUMI UTARA": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "TANJUNG DUREN UTARA": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "ULUJAMI": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "WIJAYA KESUMA": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "KEDOYA UTARA": {
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    "KEMBANGAN SELATAN": {
+      "rivers": [
+        "PESANGGRAHAN & ANGKE"
+      ]
+    },
+    "BAMBU APUS": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "CILANGKAP": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "CIPINANG": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "CIPINANG MELAYU": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "CIPINANG MUARA": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "DUREN SAWIT": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "JATINEGARA KAUM": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "KAYU PUTIH": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "KEBON BAWANG": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "KELAPA GADING BARAT": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "KELAPA GADING TIMUR": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "KOJA": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "LUBANG BUAYA": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "PULO GADUNG": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "PONDOK BAMBU": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "PONDOK KELAPA": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "PONDOK RANGGON": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "RAWABADAK SELATAN": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "RAWABADAK UTARA": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "SETU": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "SUMUR BATU": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "SUNGAI BAMBU": {
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    "SUNTER JAYA": {
+      "rivers": [
+        "SUNTER"
+      ]
+    }
+  }
+}

@@ -1,0 +1,731 @@
+{
+  "_meta": {
+    "schema_version": "1",
+    "generated_at": "2026-05-21T01:46:02.863107+00:00",
+    "source": "data/raw/data-pintu-air-komponen-data.xls",
+    "gate_count": 72,
+    "note": "Operational pintu-air registry. No SIAGA threshold columns present, so hydrology thresholds are unchanged."
+  },
+  "gates": [
+    {
+      "name": "PINTU AIR CENGKARENG DRAIN",
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI CENGKARENG DRAIN",
+      "outlet": "KALI CENGKARENG DRAIN",
+      "jumlah_unit": "3",
+      "lat": -6.154056,
+      "lon": 106.747768
+    },
+    {
+      "name": "PINTU AIR CITRALAND",
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI SEKERTARIS",
+      "outlet": "KALI GROGOL",
+      "jumlah_unit": "3",
+      "lat": -6.167454,
+      "lon": 106.788092
+    },
+    {
+      "name": "PINTU AIR FLUSHING ANGKE",
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI ANGKE",
+      "outlet": "CENGKARENG DRAIN",
+      "jumlah_unit": "2",
+      "lat": -6.166286,
+      "lon": 106.749605
+    },
+    {
+      "name": "PINTU AIR FLUSHING KONENG",
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI PESANGGRAHAN",
+      "outlet": "KALI PESANGGRAHAN",
+      "jumlah_unit": "1",
+      "lat": -6.177914,
+      "lon": 106.754497
+    },
+    {
+      "name": "PINTU AIR KAMPUNG GUSTI",
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI ANGKE",
+      "outlet": "KALI TUBAGUS ANGKE",
+      "jumlah_unit": "2",
+      "lat": -6.145026,
+      "lon": 106.775599
+    },
+    {
+      "name": "PINTU AIR KONENG",
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI PESANGGRAHAN",
+      "outlet": "KALI PESANGGRAHAN",
+      "jumlah_unit": "1",
+      "lat": -6.179773,
+      "lon": 106.754162
+    },
+    {
+      "name": "PINTU AIR MOOKERVART",
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI MOOKERVART",
+      "outlet": "CENGKARENG DRAIN",
+      "jumlah_unit": "2",
+      "lat": -6.155746,
+      "lon": 106.748264
+    },
+    {
+      "name": "PINTU AIR POLOR",
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI ANGKE",
+      "outlet": "KALI ANGKE",
+      "jumlah_unit": "1",
+      "lat": -6.189635,
+      "lon": 106.719577
+    },
+    {
+      "name": "PINTU AIR TANGKI",
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CILIWUNG GADJAH MADA",
+      "outlet": "KALI CILIWUNG GADJAH MADA",
+      "jumlah_unit": "2",
+      "lat": -6.147081,
+      "lon": 106.817312
+    },
+    {
+      "name": "PINTU AIR CIDENG",
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CIDENG",
+      "outlet": "KALI CIDENG",
+      "jumlah_unit": "9",
+      "lat": -6.173554,
+      "lon": 106.806328
+    },
+    {
+      "name": "PINTU AIR CILIWUNG LAMA",
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CILIWUNG",
+      "outlet": "KALI CILIWUNG LAMA",
+      "jumlah_unit": "1",
+      "lat": -6.20742,
+      "lon": 106.849107
+    },
+    {
+      "name": "PINTU AIR ISTIQLAL",
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CILIWUNG GUNUNG SAHARI",
+      "outlet": "KALI CILIWUNG GUNUNG SAHARI",
+      "jumlah_unit": "3",
+      "lat": -6.168147,
+      "lon": 106.831445
+    },
+    {
+      "name": "PINTU AIR JEMBATAN MERAH",
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CILIWUNG GUNUNG SAHARI",
+      "outlet": "KALI CILIWUNG GUNUNG SAHARI",
+      "jumlah_unit": "6",
+      "lat": -6.148889,
+      "lon": 106.834514
+    },
+    {
+      "name": "PINTU AIR KARET",
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI BANJIR KANAL BARAT",
+      "outlet": "KALI BANJIR KANAL BARAT",
+      "jumlah_unit": "5",
+      "lat": -6.19837,
+      "lon": 106.809817
+    },
+    {
+      "name": "PINTU AIR MANGGARAI",
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CILIWUNG",
+      "outlet": "KALI BANJIR KANAL BARAT",
+      "jumlah_unit": "3",
+      "lat": -6.207903,
+      "lon": 106.848439
+    },
+    {
+      "name": "PINTU AIR SOGO",
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CIDENG",
+      "outlet": "KALI CIDENG",
+      "jumlah_unit": "2",
+      "lat": -6.193901,
+      "lon": 106.820756
+    },
+    {
+      "name": "PINTU AIR BALI MATRAMAN",
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "SAL  PHB KALI BATA BAWAH",
+      "outlet": "SAL  PHB SODETAN KALI BATA",
+      "jumlah_unit": "2",
+      "lat": -6.218639,
+      "lon": 106.852722
+    },
+    {
+      "name": "PINTU AIR PONDOK PINANG",
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI GROGOL",
+      "outlet": "SODETAN GROGOL",
+      "jumlah_unit": "1",
+      "lat": -6.261379,
+      "lon": 106.785015
+    },
+    {
+      "name": "PINTU AIR SULTAN AGUNG",
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI BANJIR KANAL BARAT",
+      "outlet": "KALI BANJIR KANAL BARAT",
+      "jumlah_unit": "1",
+      "lat": -6.20936,
+      "lon": 106.845371
+    },
+    {
+      "name": "PINTU AIR CAKUNG DRAIN",
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI CAKUNG DRAIN",
+      "outlet": "KALI CAKUNG DRAIN",
+      "jumlah_unit": "4",
+      "lat": -6.183501,
+      "lon": 106.92895
+    },
+    {
+      "name": "PINTU AIR GG KELOR",
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI BARU TIMUR",
+      "outlet": "KALI BARU TIMUR",
+      "jumlah_unit": "4",
+      "lat": -6.21125,
+      "lon": 106.86174
+    },
+    {
+      "name": "PINTU AIR HEK",
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI BARU TIMUR",
+      "outlet": "KALI BARU TIMUR",
+      "jumlah_unit": "4",
+      "lat": -6.287583,
+      "lon": 106.87063
+    },
+    {
+      "name": "PINTU AIR KW 31",
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI BARU TIMUR",
+      "outlet": "KALI BARU TIMUR",
+      "jumlah_unit": "2",
+      "lat": -6.21125,
+      "lon": 106.86174
+    },
+    {
+      "name": "PINTU AIR PETUKANGAN   RAWA TERATE",
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI PETUKANGAN",
+      "outlet": "SODETAN BUARAN",
+      "jumlah_unit": "6",
+      "lat": -6.186382,
+      "lon": 106.922581
+    },
+    {
+      "name": "PINTU AIR PULO GADUNG",
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI SUNTER",
+      "outlet": "KALI SUNTER",
+      "jumlah_unit": "6",
+      "lat": -6.109,
+      "lon": 106.906417
+    },
+    {
+      "name": "PINTU AIR SUNTER HULU",
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI SUNTER",
+      "outlet": "KALI SUNTER",
+      "jumlah_unit": "6",
+      "lat": -6.317916,
+      "lon": 106.920893
+    },
+    {
+      "name": "PINTU AIR BULAK CABE",
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI CAKUNG LAMA",
+      "outlet": "KALI CAKUNG DRAIN",
+      "jumlah_unit": "1",
+      "lat": -6.106895,
+      "lon": 106.94039
+    },
+    {
+      "name": "PINTU AIR HONDA 1",
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI ITEM",
+      "outlet": "KALI ITEM",
+      "jumlah_unit": "3",
+      "lat": -6.162702,
+      "lon": 106.880362
+    },
+    {
+      "name": "PINTU AIR HONDA 2",
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI ITEM",
+      "outlet": "KALI SUNTER",
+      "jumlah_unit": "3",
+      "lat": -6.162816,
+      "lon": 106.88047
+    },
+    {
+      "name": "PINTU AIR KALI DURI LEDENG",
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI ANGKE",
+      "outlet": "KALI DURI LEDENG",
+      "jumlah_unit": "3",
+      "lat": -6.142372,
+      "lon": 106.791074
+    },
+    {
+      "name": "PINTU AIR KALI MATI",
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI MATI PADEMANGAN",
+      "outlet": "KALI CILIWUNG GUNUNG SAHARI",
+      "jumlah_unit": "2",
+      "lat": -6.138615,
+      "lon": 106.833153
+    },
+    {
+      "name": "PINTU AIR MARINA",
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI KALI SUNTER",
+      "outlet": "KALI SUNTER",
+      "jumlah_unit": "5",
+      "lat": -6.126688,
+      "lon": 106.829601
+    },
+    {
+      "name": "PINTU AIR PASAR IKAN",
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI KALI BESAR",
+      "outlet": "LAUT",
+      "jumlah_unit": "4",
+      "lat": -6.12669,
+      "lon": 106.809655
+    },
+    {
+      "name": "PINTU AIR RAWA MALANG",
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI TIRAM",
+      "outlet": "CAKUNG DRAIN",
+      "jumlah_unit": "2",
+      "lat": -6.135983,
+      "lon": 106.940645
+    },
+    {
+      "name": "PINTU AIR SUNTER C",
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI SUNTER",
+      "outlet": "KALI SENTIONG",
+      "jumlah_unit": "4",
+      "lat": -6.140253,
+      "lon": 106.856781
+    },
+    {
+      "name": "PINTU AIR SUNTER P8",
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI SUNTER",
+      "outlet": "KALI SUNTER",
+      "jumlah_unit": "5",
+      "lat": -6.163452,
+      "lon": 106.881474
+    },
+    {
+      "name": "PINTU AIR CILIWUNG LAMA",
+      "wilayah": "JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CILIWUNG",
+      "outlet": "KALI CILIWUNG LAMA",
+      "jumlah_unit": "1",
+      "lat": -6.20742,
+      "lon": 106.849107
+    },
+    {
+      "name": "PINTU AIR POLOR",
+      "wilayah": "JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI ANGKE",
+      "outlet": "KALI ANGKE",
+      "jumlah_unit": "1",
+      "lat": -6.189635,
+      "lon": 106.719577
+    },
+    {
+      "name": "PINTU AIR PONDOK PINANG",
+      "wilayah": "JAKARTA SELATAN",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI GROGOL",
+      "outlet": "SODETAN GROGOL",
+      "jumlah_unit": "1",
+      "lat": -6.261379,
+      "lon": 106.785015
+    },
+    {
+      "name": "PINTU AIR SOGO",
+      "wilayah": "JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CIDENG",
+      "outlet": "KALI CIDENG",
+      "jumlah_unit": "2",
+      "lat": -6.193901,
+      "lon": 106.820756
+    },
+    {
+      "name": "PINTU AIR SUNTER C",
+      "wilayah": "JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI SUNTER",
+      "outlet": "KALI SENTIONG",
+      "jumlah_unit": "4",
+      "lat": -6.140253,
+      "lon": 106.856781
+    },
+    {
+      "name": "PINTU AIR SUNTER P8",
+      "wilayah": "JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI SUNTER",
+      "outlet": "KALI SUNTER",
+      "jumlah_unit": "5",
+      "lat": -6.163452,
+      "lon": 106.881474
+    },
+    {
+      "name": "PINTU AIR TANGKI",
+      "wilayah": "JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CILIWUNG GADJAH MADA",
+      "outlet": "KALI CILIWUNG GADJAH MADA",
+      "jumlah_unit": "2",
+      "lat": -6.147081,
+      "lon": 106.817312
+    },
+    {
+      "name": "PINTU AIR GG KELOR",
+      "wilayah": "JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI BARU TIMUR",
+      "outlet": "KALI BARU TIMUR",
+      "jumlah_unit": "4",
+      "lat": -6.21125,
+      "lon": 106.86174
+    },
+    {
+      "name": "PINTU AIR CENGKARENG DRAIN",
+      "wilayah": "JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI CENGKARENG DRAIN",
+      "outlet": "KALI CENGKARENG DRAIN",
+      "jumlah_unit": "3",
+      "lat": -6.154056,
+      "lon": 106.747768
+    },
+    {
+      "name": "PINTU AIR BULAK CABE",
+      "wilayah": "JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI CAKUNG LAMA",
+      "outlet": "KALI CAKUNG DRAIN",
+      "jumlah_unit": "1",
+      "lat": -6.106895,
+      "lon": 106.94039
+    },
+    {
+      "name": "PINTU AIR SUNTER HULU",
+      "wilayah": "JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI SUNTER",
+      "outlet": "KALI SUNTER",
+      "jumlah_unit": "6",
+      "lat": -6.317916,
+      "lon": 106.920893
+    },
+    {
+      "name": "PINTU AIR JEMBATAN MERAH",
+      "wilayah": "JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CILIWUNG GUNUNG SAHARI",
+      "outlet": "KALI CILIWUNG GUNUNG SAHARI",
+      "jumlah_unit": "6",
+      "lat": -6.148889,
+      "lon": 106.834514
+    },
+    {
+      "name": "PINTU AIR KALI DURI LEDENG",
+      "wilayah": "JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI ANGKE",
+      "outlet": "KALI DURI LEDENG",
+      "jumlah_unit": "3",
+      "lat": -6.142372,
+      "lon": 106.791074
+    },
+    {
+      "name": "PINTU AIR KALI MATI",
+      "wilayah": "JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI MATI PADEMANGAN",
+      "outlet": "KALI CILIWUNG GUNUNG SAHARI",
+      "jumlah_unit": "2",
+      "lat": -6.138615,
+      "lon": 106.833153
+    },
+    {
+      "name": "PINTU AIR KAMPUNG GUSTI",
+      "wilayah": "JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI ANGKE",
+      "outlet": "KALI TUBAGUS ANGKE",
+      "jumlah_unit": "2",
+      "lat": -6.145026,
+      "lon": 106.775599
+    },
+    {
+      "name": "PINTU AIR KARET",
+      "wilayah": "JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI BANJIR KANAL BARAT",
+      "outlet": "KALI BANJIR KANAL BARAT",
+      "jumlah_unit": "5",
+      "lat": -6.19837,
+      "lon": 106.809817
+    },
+    {
+      "name": "PINTU AIR KONENG",
+      "wilayah": "JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI PESANGGRAHAN",
+      "outlet": "KALI PESANGGRAHAN",
+      "jumlah_unit": "1",
+      "lat": -6.179773,
+      "lon": 106.754162
+    },
+    {
+      "name": "PINTU AIR KW 31",
+      "wilayah": "JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI BARU TIMUR",
+      "outlet": "KALI BARU TIMUR",
+      "jumlah_unit": "2",
+      "lat": -6.21125,
+      "lon": 106.86174
+    },
+    {
+      "name": "PINTU AIR MANGGARAI",
+      "wilayah": "JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CILIWUNG",
+      "outlet": "KALI BANJIR KANAL BARAT",
+      "jumlah_unit": "3",
+      "lat": -6.207903,
+      "lon": 106.848439
+    },
+    {
+      "name": "PINTU AIR MOOKERVART",
+      "wilayah": "JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI MOOKERVART",
+      "outlet": "CENGKARENG DRAIN",
+      "jumlah_unit": "2",
+      "lat": -6.155746,
+      "lon": 106.748264
+    },
+    {
+      "name": "PINTU AIR PASAR IKAN",
+      "wilayah": "JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI KALI BESAR",
+      "outlet": "LAUT",
+      "jumlah_unit": "4",
+      "lat": -6.12669,
+      "lon": 106.809655
+    },
+    {
+      "name": "PINTU AIR MARINA",
+      "wilayah": "JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI KALI SUNTER",
+      "outlet": "KALI SUNTER",
+      "jumlah_unit": "5",
+      "lat": -6.126688,
+      "lon": 106.829601
+    },
+    {
+      "name": "PINTU AIR PULO GADUNG",
+      "wilayah": "JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI SUNTER",
+      "outlet": "KALI SUNTER",
+      "jumlah_unit": "6",
+      "lat": -6.109,
+      "lon": 106.906417
+    },
+    {
+      "name": "PINTU AIR PETUKANGAN ( RAWA TERATE )",
+      "wilayah": "JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI PETUKANGAN",
+      "outlet": "SODETAN BUARAN",
+      "jumlah_unit": "6",
+      "lat": -6.186382,
+      "lon": 106.922581
+    },
+    {
+      "name": "PINTU AIR RAWA MALANG",
+      "wilayah": "JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI TIRAM",
+      "outlet": "CAKUNG DRAIN",
+      "jumlah_unit": "2",
+      "lat": -6.135983,
+      "lon": 106.940645
+    },
+    {
+      "name": "PINTU AIR FLUSHING ANGKE",
+      "wilayah": "JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI ANGKE",
+      "outlet": "CENGKARENG DRAIN",
+      "jumlah_unit": "2",
+      "lat": -6.166286,
+      "lon": 106.749605
+    },
+    {
+      "name": "PINTU AIR FLUSHING KONENG",
+      "wilayah": "JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI PESANGGRAHAN",
+      "outlet": "KALI PESANGGRAHAN",
+      "jumlah_unit": "1",
+      "lat": -6.177914,
+      "lon": 106.754497
+    },
+    {
+      "name": "PINTU AIR HEK",
+      "wilayah": "JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI BARU TIMUR",
+      "outlet": "KALI BARU TIMUR",
+      "jumlah_unit": "4",
+      "lat": -6.287583,
+      "lon": 106.87063
+    },
+    {
+      "name": "PINTU AIR HONDA 1",
+      "wilayah": "JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI ITEM",
+      "outlet": "KALI ITEM",
+      "jumlah_unit": "3",
+      "lat": -6.162702,
+      "lon": 106.880362
+    },
+    {
+      "name": "PINTU AIR HONDA 2",
+      "wilayah": "JAKARTA UTARA",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI ITEM",
+      "outlet": "KALI SUNTER",
+      "jumlah_unit": "3",
+      "lat": -6.162816,
+      "lon": 106.88047
+    },
+    {
+      "name": "PINTU AIR ISTIQLAL",
+      "wilayah": "JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CILIWUNG GUNUNG SAHARI",
+      "outlet": "KALI CILIWUNG GUNUNG SAHARI",
+      "jumlah_unit": "3",
+      "lat": -6.168147,
+      "lon": 106.831445
+    },
+    {
+      "name": "PINTU AIR SULTAN AGUNG",
+      "wilayah": "JAKARTA SELATAN",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI BANJIR KANAL BARAT",
+      "outlet": "KALI BANJIR KANAL BARAT",
+      "jumlah_unit": "1",
+      "lat": -6.20936,
+      "lon": 106.845371
+    },
+    {
+      "name": "PINTU AIR BALI MATRAMAN",
+      "wilayah": "JAKARTA SELATAN",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "SAL. PHB KALI BATA BAWAH",
+      "outlet": "SAL. PHB SODETAN KALI BATA",
+      "jumlah_unit": "2",
+      "lat": -6.218639,
+      "lon": 106.852722
+    },
+    {
+      "name": "PINTU AIR CAKUNG DRAIN",
+      "wilayah": "JAKARTA TIMUR",
+      "sistem_aliran": "ALIRAN TIMUR",
+      "inlet": "KALI CAKUNG DRAIN",
+      "outlet": "KALI CAKUNG DRAIN",
+      "jumlah_unit": "4",
+      "lat": -6.183501,
+      "lon": 106.92895
+    },
+    {
+      "name": "PINTU AIR CIDENG",
+      "wilayah": "JAKARTA PUSAT",
+      "sistem_aliran": "ALIRAN TENGAH",
+      "inlet": "KALI CIDENG",
+      "outlet": "KALI CIDENG",
+      "jumlah_unit": "9",
+      "lat": -6.173554,
+      "lon": 106.806328
+    },
+    {
+      "name": "PINTU AIR CITRALAND",
+      "wilayah": "JAKARTA BARAT",
+      "sistem_aliran": "ALIRAN BARAT",
+      "inlet": "KALI SEKERTARIS",
+      "outlet": "KALI GROGOL",
+      "jumlah_unit": "3",
+      "lat": -6.167454,
+      "lon": 106.788092
+    }
+  ]
+}

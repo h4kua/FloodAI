@@ -1,0 +1,16 @@
+{
+  "_meta": {
+    "schema_version": "1",
+    "generated_at": "2026-05-21T00:57:50.253158+00:00",
+    "scope": "NATIONAL (Indonesia) — NOT per-district Jakarta",
+    "source": "BPS Proyeksi Penduduk Indonesia 2020-2050 (age structure)",
+    "caveat": "Use only as a generic age-vulnerability proxy. Authoritative per-kota population lives in bnpb_jakarta_fallback.json and must not be replaced by this national data."
+  },
+  "total_thousand": 287198.5,
+  "vulnerability_shares": {
+    "children_0_14": 0.2325,
+    "elderly_65_plus": 0.0791,
+    "working_15_64": 0.6884,
+    "high_vulnerability_share": 0.3116
+  }
+}

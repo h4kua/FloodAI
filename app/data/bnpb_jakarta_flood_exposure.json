@@ -1,0 +1,386 @@
+{
+  "_meta": {
+    "schema_version": "1",
+    "generated_at": "2026-05-21T00:25:42.015328+00:00",
+    "source": "inarisk.bnpb.go.id infografis_table_new (Banjir row, per kabupaten)",
+    "limitation": "Per-kecamatan IRBI flood scores are NOT exposed by InaRISK; only kota-level flood exposure is available. Kecamatan entries below are LOCATIONS ONLY."
+  },
+  "kota_flood_exposure": {
+    "Jakarta Selatan": {
+      "kabupaten_id": "3171",
+      "flood_hazard_area_ha": 6470.0,
+      "people_exposed": 1037505.0
+    },
+    "Jakarta Timur": {
+      "kabupaten_id": "3172",
+      "flood_hazard_area_ha": 10984.0,
+      "people_exposed": 1990531.0
+    },
+    "Jakarta Pusat": {
+      "kabupaten_id": "3173",
+      "flood_hazard_area_ha": 4608.0,
+      "people_exposed": 992482.0
+    },
+    "Jakarta Barat": {
+      "kabupaten_id": "3174",
+      "flood_hazard_area_ha": 11148.0,
+      "people_exposed": 2347521.0
+    },
+    "Jakarta Utara": {
+      "kabupaten_id": "3175",
+      "flood_hazard_area_ha": 11007.0,
+      "people_exposed": 1547594.0
+    },
+    "Kepulauan Seribu": {
+      "kabupaten_id": "3101",
+      "flood_hazard_area_ha": null,
+      "people_exposed": null
+    }
+  },
+  "kecamatan_locations": {
+    "PASAR REBO": {
+      "kabkot": "JAKARTA TIMUR",
+      "idkec": 3172010,
+      "idkab": 3172,
+      "lat": -6.3403083,
+      "lon": 106.8697141,
+      "remark": "Ibukota Kecamatan"
+    },
+    "JAGAKARSA": {
+      "kabkot": "JAKARTA SELATAN",
+      "idkec": 3171010,
+      "idkab": 3171,
+      "lat": -6.3347718,
+      "lon": 106.8223257,
+      "remark": "Ibukota Kecamatan"
+    },
+    "CIPAYUNG": {
+      "kabkot": "JAKARTA TIMUR",
+      "idkec": 3172030,
+      "idkab": 3172,
+      "lat": -6.3288314,
+      "lon": 106.8881319,
+      "remark": "Ibukota Kecamatan"
+    },
+    "CIRACAS": {
+      "kabkot": "JAKARTA TIMUR",
+      "idkec": 3172020,
+      "idkab": 3172,
+      "lat": -6.3235226,
+      "lon": 106.8835452,
+      "remark": "Ibukota Kecamatan"
+    },
+    "CILANDAK": {
+      "kabkot": "JAKARTA SELATAN",
+      "idkec": 3171030,
+      "idkab": 3171,
+      "lat": -6.2916346,
+      "lon": 106.7907151,
+      "remark": "Ibukota Kecamatan"
+    },
+    "KRAMAT JATI": {
+      "kabkot": "JAKARTA TIMUR",
+      "idkec": 3172050,
+      "idkab": 3172,
+      "lat": -6.2853206,
+      "lon": 106.8715302,
+      "remark": "Ibukota Kecamatan"
+    },
+    "PASAR MINGGU": {
+      "kabkot": "JAKARTA SELATAN",
+      "idkec": 3171020,
+      "idkab": 3171,
+      "lat": -6.2852684,
+      "lon": 106.8352456,
+      "remark": "Ibukota Kecamatan"
+    },
+    "MAKASAR": {
+      "kabkot": "JAKARTA TIMUR",
+      "idkec": 3172040,
+      "idkab": 3172,
+      "lat": -6.2796186,
+      "lon": 106.8782088,
+      "remark": "Ibukota Kecamatan"
+    },
+    "PESANGGRAHAN": {
+      "kabkot": "JAKARTA SELATAN",
+      "idkec": 3171040,
+      "idkab": 3171,
+      "lat": -6.2589011,
+      "lon": 106.7564664,
+      "remark": "Ibukota Kecamatan"
+    },
+    "PANCORAN": {
+      "kabkot": "JAKARTA SELATAN",
+      "idkec": 3171080,
+      "idkab": 3171,
+      "lat": -6.2487003,
+      "lon": 106.8594159,
+      "remark": "Ibukota Kecamatan"
+    },
+    "KEBAYORAN LAMA": {
+      "kabkot": "JAKARTA SELATAN",
+      "idkec": 3171050,
+      "idkab": 3171,
+      "lat": -6.2483109,
+      "lon": 106.7785536,
+      "remark": "Ibukota Kecamatan"
+    },
+    "MAMPANG PRAPATAN": {
+      "kabkot": "JAKARTA SELATAN",
+      "idkec": 3171070,
+      "idkab": 3171,
+      "lat": -6.2405148,
+      "lon": 106.826679,
+      "remark": "Ibukota Kecamatan"
+    },
+    "KEBAYORAN BARU": {
+      "kabkot": "JAKARTA SELATAN",
+      "idkec": 3171060,
+      "idkab": 3171,
+      "lat": -6.2401212,
+      "lon": 106.788568,
+      "remark": "Ibukota Kecamatan"
+    },
+    "DUREN SAWIT": {
+      "kabkot": "JAKARTA TIMUR",
+      "idkec": 3172070,
+      "idkab": 3172,
+      "lat": -6.2337384,
+      "lon": 106.9169523,
+      "remark": "Ibukota Kecamatan"
+    },
+    "JATINEGARA": {
+      "kabkot": "JAKARTA TIMUR",
+      "idkec": 3172060,
+      "idkab": 3172,
+      "lat": -6.2322413,
+      "lon": 106.8807506,
+      "remark": "Ibukota Kecamatan"
+    },
+    "TEBET": {
+      "kabkot": "JAKARTA SELATAN",
+      "idkec": 3171090,
+      "idkab": 3171,
+      "lat": -6.2314772,
+      "lon": 106.846257,
+      "remark": "Ibukota Kecamatan"
+    },
+    "SETIA BUDI": {
+      "kabkot": "JAKARTA SELATAN",
+      "idkec": 3171100,
+      "idkab": 3171,
+      "lat": -6.2088055,
+      "lon": 106.8240436,
+      "remark": "Ibukota Kecamatan"
+    },
+    "PALMERAH": {
+      "kabkot": "JAKARTA BARAT",
+      "idkec": 3174030,
+      "idkab": 3174,
+      "lat": -6.2009772,
+      "lon": 106.7863305,
+      "remark": "Ibukota Kecamatan"
+    },
+    "TANAH ABANG": {
+      "kabkot": "JAKARTA PUSAT",
+      "idkec": 3173010,
+      "idkab": 3173,
+      "lat": -6.199706,
+      "lon": 106.8145241,
+      "remark": "Ibukota Kecamatan"
+    },
+    "MENTENG": {
+      "kabkot": "JAKARTA PUSAT",
+      "idkec": 3173020,
+      "idkab": 3173,
+      "lat": -6.198621,
+      "lon": 106.8407318,
+      "remark": "Ibukota Kecamatan"
+    },
+    "KEBON JERUK": {
+      "kabkot": "JAKARTA BARAT",
+      "idkec": 3174020,
+      "idkab": 3174,
+      "lat": -6.198475,
+      "lon": 106.7640221,
+      "remark": "Ibukota Kecamatan"
+    },
+    "MATRAMAN": {
+      "kabkot": "JAKARTA TIMUR",
+      "idkec": 3172100,
+      "idkab": 3172,
+      "lat": -6.1976964,
+      "lon": 106.8698391,
+      "remark": "Ibukota Kecamatan"
+    },
+    "CAKUNG": {
+      "kabkot": "JAKARTA TIMUR",
+      "idkec": 3172080,
+      "idkab": 3172,
+      "lat": -6.1842848,
+      "lon": 106.9387802,
+      "remark": "Ibukota Kecamatan"
+    },
+    "CEMPAKA PUTIH": {
+      "kabkot": "JAKARTA PUSAT",
+      "idkec": 3173050,
+      "idkab": 3173,
+      "lat": -6.1842527,
+      "lon": 106.8669584,
+      "remark": "Ibukota Kecamatan"
+    },
+    "JOHAR BARU": {
+      "kabkot": "JAKARTA PUSAT",
+      "idkec": 3173040,
+      "idkab": 3173,
+      "lat": -6.1821196,
+      "lon": 106.856435,
+      "remark": "Ibukota Kecamatan"
+    },
+    "PULO GADUNG": {
+      "kabkot": "JAKARTA TIMUR",
+      "idkec": 3172090,
+      "idkab": 3172,
+      "lat": -6.1793893,
+      "lon": 106.8795226,
+      "remark": "Ibukota Kecamatan"
+    },
+    "SENEN": {
+      "kabkot": "JAKARTA PUSAT",
+      "idkec": 3173030,
+      "idkab": 3173,
+      "lat": -6.1732232,
+      "lon": 106.84327,
+      "remark": "Ibukota Kecamatan"
+    },
+    "GROGOL PETAMBURAN": {
+      "kabkot": "JAKARTA BARAT",
+      "idkec": 3174040,
+      "idkab": 3174,
+      "lat": -6.1731014,
+      "lon": 106.7888947,
+      "remark": "Ibukota Kecamatan"
+    },
+    "GAMBIR": {
+      "kabkot": "JAKARTA PUSAT",
+      "idkec": 3173080,
+      "idkab": 3173,
+      "lat": -6.1711091,
+      "lon": 106.819134,
+      "remark": "Ibukota Kecamatan"
+    },
+    "KEMBANGAN": {
+      "kabkot": "JAKARTA BARAT",
+      "idkec": 3174010,
+      "idkab": 3174,
+      "lat": -6.1671648,
+      "lon": 106.7468368,
+      "remark": "Ibukota Kecamatan"
+    },
+    "KELAPA GADING": {
+      "kabkot": "JAKARTA UTARA",
+      "idkec": 3175050,
+      "idkab": 3175,
+      "lat": -6.1623355,
+      "lon": 106.9079781,
+      "remark": "Ibukota Kecamatan"
+    },
+    "SAWAH BESAR": {
+      "kabkot": "JAKARTA PUSAT",
+      "idkec": 3173070,
+      "idkab": 3173,
+      "lat": -6.1612975,
+      "lon": 106.8300804,
+      "remark": "Ibukota Kecamatan"
+    },
+    "KEMAYORAN": {
+      "kabkot": "JAKARTA PUSAT",
+      "idkec": 3173060,
+      "idkab": 3173,
+      "lat": -6.1564077,
+      "lon": 106.8635393,
+      "remark": "Ibukota Kecamatan"
+    },
+    "CENGKARENG": {
+      "kabkot": "JAKARTA BARAT",
+      "idkec": 3174070,
+      "idkab": 3174,
+      "lat": -6.1510012,
+      "lon": 106.7262014,
+      "remark": "Ibukota Kecamatan"
+    },
+    "TAMBORA": {
+      "kabkot": "JAKARTA BARAT",
+      "idkec": 3174050,
+      "idkab": 3174,
+      "lat": -6.1438075,
+      "lon": 106.7910049,
+      "remark": "Ibukota Kecamatan"
+    },
+    "KALI DERES": {
+      "kabkot": "JAKARTA BARAT",
+      "idkec": 3174080,
+      "idkab": 3174,
+      "lat": -6.1425433,
+      "lon": 106.7018865,
+      "remark": "Ibukota Kecamatan"
+    },
+    "TAMAN SARI": {
+      "kabkot": "JAKARTA BARAT",
+      "idkec": 3174060,
+      "idkab": 3174,
+      "lat": -6.1356506,
+      "lon": 106.8154857,
+      "remark": "Ibukota Kecamatan"
+    },
+    "PADEMANGAN": {
+      "kabkot": "JAKARTA UTARA",
+      "idkec": 3175020,
+      "idkab": 3175,
+      "lat": -6.1330359,
+      "lon": 106.8371722,
+      "remark": "Ibukota Kecamatan"
+    },
+    "PENJARINGAN": {
+      "kabkot": "JAKARTA UTARA",
+      "idkec": 3175010,
+      "idkab": 3175,
+      "lat": -6.1263976,
+      "lon": 106.7922561,
+      "remark": "Ibukota Kecamatan"
+    },
+    "KOJA": {
+      "kabkot": "JAKARTA UTARA",
+      "idkec": 3175040,
+      "idkab": 3175,
+      "lat": -6.1176896,
+      "lon": 106.9104399,
+      "remark": "Ibukota Kecamatan"
+    },
+    "TANJUNG PRIOK": {
+      "kabkot": "JAKARTA UTARA",
+      "idkec": 3175030,
+      "idkab": 3175,
+      "lat": -6.1173825,
+      "lon": 106.8924745,
+      "remark": "Ibukota Kecamatan"
+    },
+    "CILINCING": {
+      "kabkot": "JAKARTA UTARA",
+      "idkec": 3175060,
+      "idkab": 3175,
+      "lat": -6.1023617,
+      "lon": 106.9390364,
+      "remark": "Ibukota Kecamatan"
+    },
+    "KEPULAUAN SERIBU UTARA": {
+      "kabkot": "KEPULAUAN SERIBU",
+      "idkec": 3101020,
+      "idkab": 3101,
+      "lat": -5.7460638,
+      "lon": 106.6136331,
+      "remark": "Ibukota Kecamatan"
+    }
+  }
+}

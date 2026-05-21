@@ -530,6 +530,70 @@ async def predict_realtime_native_endpoint() -> dict:
         _safe_error_response(exc)
 
 
+_EVACUATION_RISK_LEVELS = {"WARNING", "DANGER"}
+
+
+def _resolve_location_coords(snapshot_dict: dict, result: dict) -> "tuple[float, float] | None":
+    """
+    Best-effort (lat, lon) for the assessed location. Prefers the snapshot's
+    OpenWeather coordinate; falls back to the mapped kecamatan centroid. Returns
+    None when neither is available. Never raises.
+    """
+    coord = ((snapshot_dict.get("openweather") or {}).get("coord") or {})
+    lat, lon = coord.get("lat"), coord.get("lon")
+    if isinstance(lat, (int, float)) and isinstance(lon, (int, float)):
+        return float(lat), float(lon)
+    try:
+        from app.services.bnpb_jakarta_mapper import get_kecamatan
+
+        kec_name = ((result.get("mapping_info") or {}).get("kecamatan") or {}).get("name")
+        if kec_name:
+            rec = get_kecamatan(kec_name) or {}
+            klat, klon = rec.get("lat"), rec.get("lon")
+            if isinstance(klat, (int, float)) and isinstance(klon, (int, float)):
+                return float(klat), float(klon)
+    except Exception:  # noqa: BLE001 — enrichment must never break the response
+        return None
+    return None
+
+
+def _enrich_with_evacuation(result: dict, snapshot_dict: dict) -> dict:
+    """
+    Add nearest-shelter / evacuation_points to an agentic result when risk is
+    elevated and a location coordinate is resolvable. Additive and defensive:
+    on any failure the result is returned unchanged.
+    """
+    try:
+        if result.get("risk_level") not in _EVACUATION_RISK_LEVELS:
+            return result
+        coords = _resolve_location_coords(snapshot_dict, result)
+        if coords is None:
+            return result
+        from app.services.shelter_locator import nearest_shelters
+
+        shelters = nearest_shelters(coords[0], coords[1], limit=3, require_capacity=True)
+        if not shelters:
+            return result
+        result["evacuation_points"] = shelters
+        result["nearest_shelter"] = shelters[0]
+        vuln = result.get("vulnerability_context")
+        if isinstance(vuln, dict):
+            vuln["nearest_shelter"] = shelters[0]
+
+        # Vulnerable facilities (flood-prone schools = children) within 500 m.
+        try:
+            from app.services.school_locator import nearby_schools
+
+            schools = nearby_schools(coords[0], coords[1], radius_m=500.0, limit=5)
+            if schools:
+                result["vulnerable_facilities_nearby"] = schools
+        except Exception:  # noqa: BLE001 — best-effort enrichment
+            pass
+    except Exception:  # noqa: BLE001 — never let enrichment break the prediction
+        return result
+    return result
+
+
 @app.post("/predict/agentic", dependencies=[Depends(require_api_key)])
 async def predict_agentic_endpoint(
     request: Request,
@@ -551,6 +615,7 @@ async def predict_agentic_endpoint(
             origin=origin,
             destination=destination,
         )
+        result = _enrich_with_evacuation(result, snapshot_dict)
         await _bounded_threadpool(_store_idempotent_response, idempotency_key, result)
         return result
     except FileNotFoundError as exc:
