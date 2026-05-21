@@ -26,7 +26,7 @@ from utils.paths import PROJECT_ROOT
 _log = logging.getLogger(__name__)
 
 DEM_SOURCE_NAME = "DEMNAS_BIG_8m"
-_DEFAULT_DEM_DIR = PROJECT_ROOT / "demnas"
+_DEFAULT_DEM_DIR = PROJECT_ROOT / "data" / "elevation"
 _FLOAT32_BYTES = 4
 _METERS_PER_DEGREE = 111_320.0
 _FLOAT_TOLERANCE_M = 0.05

@@ -95,8 +95,8 @@ honoured for one hour.
 - **BMKG CAP / Nowcast** — severity, certainty, urgency alerts.
 - **OpenWeather** — temperature, humidity, rainfall, coordinates.
 - **BNPB InaRISK** — kelurahan vulnerability index (live + static fallback in
-  `app/data/bnpb_jakarta_fallback.json`).
-- **DEMNAS** — 8 m DEM tiles for elevation context. Place tiles in `demnas/`:
+  `data/bundled/bnpb_jakarta_fallback.json`).
+- **DEMNAS** — 8 m DEM tiles for elevation context. Place tiles in `data/elevation/`:
   `DEMNAS_1209-42_v1.0.tif`, `DEMNAS_1209-43_v1.0.tif`,
   `DEMNAS_1209-44_v1.0.tif`. Missing tiles fail open — elevation fields
   return `None` / `"unknown"` and the API keeps serving.
