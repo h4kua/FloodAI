@@ -84,3 +84,4 @@ tmp/
 
 data/raw/awlr_thresholds.json
 data/raw/pintu_air_latest.json
+.venv/
