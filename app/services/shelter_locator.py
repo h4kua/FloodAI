@@ -60,7 +60,9 @@ def load_shelters() -> tuple[dict, ...]:
 
 def _to_result(shelter: dict, distance_m: float) -> dict:
     return {
+        "id": shelter.get("id"),
         "name": shelter.get("name"),
+        "kelurahan": shelter.get("kelurahan"),
         "lat": shelter.get("lat"),
         "lon": shelter.get("lon"),
         "capacity": shelter.get("capacity_raw") or None,

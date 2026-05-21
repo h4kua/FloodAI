@@ -40,6 +40,19 @@ def _parse_capacity(raw: object) -> tuple[str, int | None]:
     return text, estimate
 
 
+_KEL_RE = re.compile(r"\bkel(?:urahan)?\.?\s+([A-Za-z][A-Za-z .'-]{2,40})", re.IGNORECASE)
+
+
+def _kelurahan_from_address(address: str) -> str | None:
+    """Best-effort kelurahan extraction from a freeform OSM address; None if absent."""
+    if not address:
+        return None
+    m = _KEL_RE.search(address)
+    if not m:
+        return None
+    return m.group(1).strip(" .,'-").title() or None
+
+
 def _coords(feature: dict) -> tuple[float, float] | None:
     geom = feature.get("geometry") or {}
     if geom.get("type") != "Point":
@@ -67,16 +80,23 @@ def build() -> dict:
             continue
         lat, lon = latlon
         cap_raw, cap_est = _parse_capacity(props.get("capacity:persons"))
+        address = (props.get("addr:full") or "").strip()
         shelters.append(
             {
+                # Stable ordinal id so downstream responses can reference a shelter.
+                "id": f"SH{len(shelters):05d}",
                 "name": name,
+                # kelurahan is not a first-class OSM field here; take addr:suburb
+                # when present, else a best-effort parse of the full address.
+                # Frequently null — never fabricated.
+                "kelurahan": (props.get("addr:suburb") or "").strip() or _kelurahan_from_address(address),
                 "lat": round(lat, 6),
                 "lon": round(lon, 6),
                 "capacity_raw": cap_raw,
                 "capacity_est": cap_est,
                 "amenity": (props.get("amenity") or "").strip(),
                 "building": (props.get("building") or "").strip(),
-                "address": (props.get("addr:full") or "").strip(),
+                "address": address,
             }
         )
 

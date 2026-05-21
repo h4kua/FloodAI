@@ -13,6 +13,7 @@ import json
 import logging
 import uuid
 from contextlib import asynccontextmanager
+from functools import lru_cache
 from typing import Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
@@ -533,11 +534,44 @@ async def predict_realtime_native_endpoint() -> dict:
 _EVACUATION_RISK_LEVELS = {"WARNING", "DANGER"}
 
 
+@lru_cache(maxsize=1)
+def _kota_centroids() -> dict:
+    """
+    Average kecamatan centroid per kota, derived from the offline BNPB index
+    (static fallback — no DB/network). Returns {} on any failure.
+    """
+    try:
+        from app.services.bnpb_jakarta_mapper import get_jakarta_index_sync
+
+        index = get_jakarta_index_sync() or {}
+    except Exception:  # noqa: BLE001
+        return {}
+    acc: dict[str, list[float]] = {}
+    for rec in index.values():
+        kab = str(rec.get("kabkot") or "").strip().upper()
+        lat, lon = rec.get("lat"), rec.get("lon")
+        if kab and isinstance(lat, (int, float)) and isinstance(lon, (int, float)):
+            a = acc.setdefault(kab, [0.0, 0.0, 0.0])
+            a[0] += float(lat)
+            a[1] += float(lon)
+            a[2] += 1
+    return {k: (v[0] / v[2], v[1] / v[2]) for k, v in acc.items() if v[2]}
+
+
+def _kota_centroid(kota: object) -> "tuple[float, float] | None":
+    if not kota:
+        return None
+    return _kota_centroids().get(str(kota).strip().upper())
+
+
 def _resolve_location_coords(snapshot_dict: dict, result: dict) -> "tuple[float, float] | None":
     """
-    Best-effort (lat, lon) for the assessed location. Prefers the snapshot's
-    OpenWeather coordinate; falls back to the mapped kecamatan centroid. Returns
-    None when neither is available. Never raises.
+    Best-effort (lat, lon) for the assessed location, in priority order:
+      1. snapshot openweather.coord
+      2. mapped kecamatan centroid
+      3. mapped kota (mapped_district) centroid — handles bare-kota requests
+         like "Jakarta Utara" that have no kecamatan match.
+    Returns None only when none resolve. Never raises.
     """
     coord = ((snapshot_dict.get("openweather") or {}).get("coord") or {})
     lat, lon = coord.get("lat"), coord.get("lon")
@@ -552,9 +586,18 @@ def _resolve_location_coords(snapshot_dict: dict, result: dict) -> "tuple[float,
             klat, klon = rec.get("lat"), rec.get("lon")
             if isinstance(klat, (int, float)) and isinstance(klon, (int, float)):
                 return float(klat), float(klon)
-    except Exception:  # noqa: BLE001 — enrichment must never break the response
-        return None
-    return None
+    except Exception:  # noqa: BLE001 — fall through to the kota-level fallback
+        pass
+    # Kota-level fallback uses the pipeline's mapped_district; if that is absent
+    # fall back to the raw snapshot location ONLY when it is a specific, valid
+    # place — never the synthetic default — so an absent location does not
+    # fabricate a centroid.
+    kota = (result.get("mapping_info") or {}).get("mapped_district")
+    if not kota:
+        raw_loc = snapshot_dict.get("location")
+        if _is_specific_location(raw_loc):
+            kota = _normalize_location(raw_loc)
+    return _kota_centroid(kota)
 
 
 def _enrich_with_evacuation(result: dict, snapshot_dict: dict) -> dict:
@@ -571,7 +614,11 @@ def _enrich_with_evacuation(result: dict, snapshot_dict: dict) -> dict:
             return result
         from app.services.shelter_locator import nearest_shelters
 
+        # Prefer shelters with a known capacity; fall back to nearest regardless
+        # of capacity so the field is never empty when coordinates resolve.
         shelters = nearest_shelters(coords[0], coords[1], limit=3, require_capacity=True)
+        if not shelters:
+            shelters = nearest_shelters(coords[0], coords[1], limit=3, require_capacity=False)
         if not shelters:
             return result
         result["evacuation_points"] = shelters
