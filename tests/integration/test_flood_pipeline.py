@@ -11,8 +11,8 @@ from datetime import datetime, timezone
 import pandas as pd
 import pytest
 
-from app.pipeline.flood_pipeline import FloodDecisionPipeline
-from app.utils.paths import DEFAULT_REALTIME_SNAPSHOT
+from pipeline.flood_pipeline import FloodDecisionPipeline
+from utils.paths import DEFAULT_REALTIME_SNAPSHOT
 
 _REQUIRED_KEYS = {
     "risk_level",
@@ -141,7 +141,7 @@ def test_pipeline_trend_analysis_comes_from_snapshot_history(monkeypatch):
             {"timestamp": "2026-04-18T09:00:00+00:00", "rainfall_mm": 9.0, "water_level_ratio": 0.35},
         ]
     )
-    monkeypatch.setattr("app.realtime_native.feature_builder._load_history", lambda path=None: history)
+    monkeypatch.setattr("realtime_native.feature_builder._load_history", lambda path=None: history)
 
     result = FloodDecisionPipeline(persist=False).run(_minimal_snapshot(), replay_mode=True)
 

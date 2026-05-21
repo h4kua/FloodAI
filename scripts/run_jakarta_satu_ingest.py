@@ -78,7 +78,7 @@ def main() -> int:
     )
 
     # ── Step 1: scrape ────────────────────────────────────────────────────────
-    from app.services.jakarta_satu_scraper import ScraperError, scrape_all
+    from services.jakarta_satu_scraper import ScraperError, scrape_all
 
     try:
         snapshot = scrape_all(wait_s=args.wait)

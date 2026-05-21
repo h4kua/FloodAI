@@ -22,7 +22,7 @@ from pathlib import Path
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _SRC = _PROJECT_ROOT / "data" / "raw" / "shelter.geojson"
-_DST = _PROJECT_ROOT / "app" / "data" / "jakarta_shelters.json"
+_DST = _PROJECT_ROOT / "data" / "bundled" / "jakarta_shelters.json"
 
 _NUM_RE = re.compile(r"(\d+(?:[.,]\d+)?)")
 

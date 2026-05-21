@@ -31,7 +31,7 @@ _SOURCES = [
     _PROJECT_ROOT / "data" / "raw" / "data-kejadian-bencana-banjir-komponen-data.xls",
     _PROJECT_ROOT / "data" / "raw" / "data-kejadian-bencana-banjir-tahun-2023-komponen-data.xls",
 ]
-_DST = _PROJECT_ROOT / "app" / "data" / "kelurahan_flood_history.json"
+_DST = _PROJECT_ROOT / "data" / "bundled" / "kelurahan_flood_history.json"
 
 _CANON = ["Jakarta Utara", "Jakarta Selatan", "Jakarta Pusat",
           "Jakarta Timur", "Jakarta Barat", "Kepulauan Seribu"]

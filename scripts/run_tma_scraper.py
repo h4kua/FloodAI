@@ -62,7 +62,7 @@ logger = logging.getLogger("tma_scraper_job")
 def _refresh_awlr() -> bool:
     """Refresh AWLR SIAGA thresholds. Returns True on success."""
     try:
-        from app.services.awlr_threshold_fetcher import get_awlr_thresholds
+        from services.awlr_threshold_fetcher import get_awlr_thresholds
 
         payload = get_awlr_thresholds(force_refresh=True)
         if payload and payload.get("gate_count"):
@@ -77,7 +77,7 @@ def _refresh_awlr() -> bool:
 def _refresh_pintu_air() -> bool:
     """Refresh live water-gate readings. Returns True on success."""
     try:
-        from app.services.pintu_air_fetcher import get_pintu_air
+        from services.pintu_air_fetcher import get_pintu_air
 
         payload = get_pintu_air(force_refresh=True)
         if payload and payload.get("gate_count"):

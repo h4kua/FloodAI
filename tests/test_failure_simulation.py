@@ -43,14 +43,14 @@ from datetime import datetime, timezone
 
 import pytest
 
-from app.core.enums import (
+from core.enums import (
     DATA_VALIDITY_VALUES as _VALID_DATA_VALIDITY,
     DECISION_REASONS as _VALID_DECISION_REASONS,
     ML_EXECUTION_MODES as _VALID_ML_EXEC_MODES,
     RISK_LEVELS as _VALID_RISK_LEVELS,
     SYSTEM_STATUSES as _VALID_SYSTEM_STATUSES,
 )
-from app.pipeline.flood_pipeline import FloodDecisionPipeline
+from pipeline.flood_pipeline import FloodDecisionPipeline
 
 
 # ─── Snapshot factory ─────────────────────────────────────────────────────────
@@ -603,7 +603,7 @@ class TestConflictingSignals:
         success/failure.
         """
         from unittest.mock import patch
-        from app.services import failure_handling as fh
+        from services import failure_handling as fh
 
         real_detect = fh.detect_failures
 
@@ -626,7 +626,7 @@ class TestConflictingSignals:
         snapshot["openweather"]["rain"] = {"1h": 0.3}
         snapshot["poskobanjir"][0]["tinggi_air"] = 100.0
 
-        with patch("app.agents.reasoning_agent.detect_failures", side_effect=_injected_detect):
+        with patch("agents.reasoning_agent.detect_failures", side_effect=_injected_detect):
             result = pipeline.run(snapshot)
 
         # CONFLICT / LOW_TRUST / DEGRADED are all valid downgrades.
@@ -1000,7 +1000,7 @@ class TestMissingCriticalData:
         regardless of which detector surfaces it.
         """
         from unittest.mock import patch
-        from app.services import failure_handling as fh
+        from services import failure_handling as fh
 
         real_detect = fh.detect_failures
 
@@ -1023,7 +1023,7 @@ class TestMissingCriticalData:
         snapshot = make_base_snapshot()
         snapshot["poskobanjir"] = []
 
-        with patch("app.agents.reasoning_agent.detect_failures", side_effect=_injected_detect):
+        with patch("agents.reasoning_agent.detect_failures", side_effect=_injected_detect):
             result = pipeline.run(snapshot)
 
         assert result["system_status"] != "OK", (
@@ -1243,7 +1243,7 @@ class TestOutputContractValidator:
         self, pipeline: FloodDecisionPipeline
     ) -> None:
         """A normal pipeline run must satisfy validate_output_schema."""
-        from app.core.output_contract import validate_output_schema
+        from core.output_contract import validate_output_schema
         result = pipeline.run(make_base_snapshot())
         # Should not raise.
         validate_output_schema(result)
@@ -1252,14 +1252,14 @@ class TestOutputContractValidator:
         self, pipeline: FloodDecisionPipeline
     ) -> None:
         """The L0 fallback path also produces contract-valid output."""
-        from app.core.output_contract import validate_output_schema
+        from core.output_contract import validate_output_schema
         snapshot = make_base_snapshot()
         snapshot["poskobanjir"][0]["tinggi_air"] = 9999.0
         result = pipeline.run(snapshot)
         validate_output_schema(result)
 
     def test_validator_rejects_unknown_decision_reason(self) -> None:
-        from app.core.output_contract import (
+        from core.output_contract import (
             OutputContractError,
             validate_decision_meta,
         )
@@ -1274,7 +1274,7 @@ class TestOutputContractValidator:
             )
 
     def test_validator_rejects_invalid_with_safe_for_automation(self) -> None:
-        from app.core.output_contract import (
+        from core.output_contract import (
             OutputContractError,
             validate_decision_meta,
         )
@@ -1289,7 +1289,7 @@ class TestOutputContractValidator:
             )
 
     def test_validator_rejects_invalid_with_risk_reason(self) -> None:
-        from app.core.output_contract import (
+        from core.output_contract import (
             OutputContractError,
             validate_decision_meta,
         )
@@ -1304,7 +1304,7 @@ class TestOutputContractValidator:
             )
 
     def test_validator_rejects_invalid_input_without_warning(self) -> None:
-        from app.core.output_contract import (
+        from core.output_contract import (
             OutputContractError,
             validate_decision_meta,
         )
@@ -1323,7 +1323,7 @@ class TestOutputContractValidator:
         The safe-fallback dict must itself satisfy validate_output_schema —
         otherwise the contract gate would have nothing safe to substitute.
         """
-        from app.core.output_contract import (
+        from core.output_contract import (
             safe_fallback_output,
             validate_output_schema,
         )
@@ -1336,7 +1336,7 @@ class TestOutputContractValidator:
 
     def test_emergency_output_is_contract_valid(self) -> None:
         """The PIPELINE_FAILURE emergency dict must also pass validation."""
-        from app.core.output_contract import validate_output_schema
+        from core.output_contract import validate_output_schema
         result = FloodDecisionPipeline._emergency_output("synthetic crash for test")
         validate_output_schema(result)
 
@@ -1368,7 +1368,7 @@ class TestOutputContractValidator:
 
     def test_safe_fallback_carries_contract_violation_block(self) -> None:
         """The safe-fallback dict carries the diagnostic observability block."""
-        from app.core.output_contract import safe_fallback_output
+        from core.output_contract import safe_fallback_output
         result = safe_fallback_output(
             "synthetic Inv-1 violation",
             error_type="OutputContractError",
@@ -1382,7 +1382,7 @@ class TestOutputContractValidator:
     def test_safe_fallback_includes_L5_trace_marker(self) -> None:
         """The L5-CONTRACT-FAILURE trace marker must be present so the
         failure surfaces in the same trace consumers already read."""
-        from app.core.output_contract import safe_fallback_output
+        from core.output_contract import safe_fallback_output
         result = safe_fallback_output("synthetic violation")
         trace = result.get("decision_trace", [])
         joined = " ".join(trace)
@@ -1394,7 +1394,7 @@ class TestOutputContractValidator:
     def test_safe_fallback_preserves_original_snapshot(self) -> None:
         """When original_result is provided, an audit-grade snapshot is
         preserved under contract_violation.original_snapshot."""
-        from app.core.output_contract import safe_fallback_output
+        from core.output_contract import safe_fallback_output
         offending = {
             "risk_level": "DANGER",
             "system_status": "OK",
@@ -1420,7 +1420,7 @@ class TestOutputContractValidator:
         (external/runtime crash) must be queryably distinct in stored records,
         even though both have system_status=PIPELINE_FAILURE.
         """
-        from app.core.output_contract import safe_fallback_output
+        from core.output_contract import safe_fallback_output
         contract = safe_fallback_output("synthetic")
         emergency = FloodDecisionPipeline._emergency_output("synthetic")
 
@@ -1439,7 +1439,7 @@ class TestOutputContractValidator:
     def test_strict_mode_raises_on_contract_violation(self) -> None:
         """strict_mode=True must re-raise OutputContractError instead of
         silently substituting the safe-fallback dict."""
-        from app.core.output_contract import OutputContractError
+        from core.output_contract import OutputContractError
 
         strict_pipe = FloodDecisionPipeline(strict_mode=True)
         original_run = strict_pipe._action.run

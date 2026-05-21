@@ -29,7 +29,7 @@ from pathlib import Path
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _SRC = _PROJECT_ROOT / "data" / "raw" / "combined.csv"
-_DST = _PROJECT_ROOT / "app" / "data" / "historical_flood_events.json"
+_DST = _PROJECT_ROOT / "data" / "bundled" / "historical_flood_events.json"
 
 # Canonical DKI kota + tolerant matching for source typos ("Jakara Barat", etc.).
 _CANONICAL = ["Jakarta Utara", "Jakarta Selatan", "Jakarta Pusat",

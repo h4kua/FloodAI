@@ -24,7 +24,7 @@ from bs4 import BeautifulSoup
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _SRC = _PROJECT_ROOT / "data" / "raw" / "data-wilayah-potensi-banjir-akibat-luapan-sungai-komponen-data.xls"
-_DST = _PROJECT_ROOT / "app" / "data" / "river_flood_zones.json"
+_DST = _PROJECT_ROOT / "data" / "bundled" / "river_flood_zones.json"
 
 
 def build() -> dict:

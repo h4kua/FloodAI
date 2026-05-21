@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from app.domain import AdaptiveThresholds
-from app.services.adaptive_threshold import AdaptiveThresholder
-from app.services.decision_engine import (
+from domain import AdaptiveThresholds
+from services.adaptive_threshold import AdaptiveThresholder
+from services.decision_engine import (
     _build_canonical_inputs,
     _canonical_default_thresholds,
 )

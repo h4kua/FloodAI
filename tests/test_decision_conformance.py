@@ -35,12 +35,12 @@ from __future__ import annotations
 
 import pytest
 
-from app.contracts import (
+from contracts import (
     DecisionAuthority,
     RiskLevel,
     SystemStatus,
 )
-from app.domain import (
+from domain import (
     AdaptiveThresholds,
     PerceptionInputs,
     PhysicalSignals,
@@ -48,7 +48,7 @@ from app.domain import (
     TrendSnapshot,
     decide,
 )
-from app.services.decision_engine import (
+from services.decision_engine import (
     DecisionResult,
     _AUTHORITY_TO_SOURCE,
     _build_canonical_inputs,
@@ -527,7 +527,7 @@ def test_run_decision_engine_calls_canonical_decide():
     """
     import inspect
 
-    from app.services import decision_engine as de
+    from services import decision_engine as de
 
     src = inspect.getsource(de.run_decision_engine)
     assert "canonical_decide" in src, "run_decision_engine no longer calls canonical_decide"

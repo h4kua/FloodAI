@@ -30,7 +30,7 @@ import requests
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _STATIC = _PROJECT_ROOT / "data" / "bnpb_jakarta_static.json"
-_DST = _PROJECT_ROOT / "app" / "data" / "bnpb_jakarta_flood_exposure.json"
+_DST = _PROJECT_ROOT / "data" / "bundled" / "bnpb_jakarta_flood_exposure.json"
 
 # DKI kabupaten/kota ids (InaRISK admin codes).
 _KABUPATEN = {

@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from app.services.decision_engine import (
+from services.decision_engine import (
     _SHADOW_DANGER_THRESHOLD,
     _SHADOW_WARNING_THRESHOLD,
     _PROD_DANGER_THRESHOLD,
@@ -203,7 +203,7 @@ def _base_result() -> dict:
 
 
 def _mock_eval(prob: float):
-    from app.agents.evaluation_agent import EvaluationResult
+    from agents.evaluation_agent import EvaluationResult
     m = MagicMock(spec=EvaluationResult)
     m.probability = prob
     m.risk_level = "SAFE"
@@ -214,7 +214,7 @@ def _mock_eval(prob: float):
 
 
 def _run_pipeline(prob: float) -> dict:
-    from app.pipeline.flood_pipeline import FloodDecisionPipeline
+    from pipeline.flood_pipeline import FloodDecisionPipeline
     pipeline = FloodDecisionPipeline(strict_mode=False, persist=False)
     result_base = _base_result()
     result_base["probability"] = prob

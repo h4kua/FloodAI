@@ -27,7 +27,7 @@ from bs4 import BeautifulSoup
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _SRC = _PROJECT_ROOT / "data" / "raw" / "data-sekolah-rawan-banjir-di-provinsi-dki-jakarta-komponen-data.xls"
-_DST = _PROJECT_ROOT / "app" / "data" / "flood_prone_schools.json"
+_DST = _PROJECT_ROOT / "data" / "bundled" / "flood_prone_schools.json"
 
 _LAT_RANGE = (5.5, 7.0)     # magnitude (Jakarta lat is negative)
 _LON_RANGE = (106.0, 107.5)

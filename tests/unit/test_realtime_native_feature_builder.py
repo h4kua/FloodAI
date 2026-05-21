@@ -1,6 +1,6 @@
 import pandas as pd
 
-from app.realtime_native.feature_builder import (
+from realtime_native.feature_builder import (
     REALTIME_NATIVE_FEATURES,
     build_realtime_native_features_from_snapshot,
 )
@@ -95,7 +95,7 @@ def test_snapshot_history_trend_state_uses_feature_history(monkeypatch):
             {"timestamp": "2026-04-18T09:00:00+00:00", "rainfall_mm": 11.0, "water_level_ratio": 0.55},
         ]
     )
-    monkeypatch.setattr("app.realtime_native.feature_builder._load_history", lambda path=None: history)
+    monkeypatch.setattr("realtime_native.feature_builder._load_history", lambda path=None: history)
 
     engineered = build_realtime_native_features_from_snapshot(snapshot, persist_history=False)
     trend_state = engineered.diagnostics["trend_state"]
@@ -121,7 +121,7 @@ def test_snapshot_history_trend_state_respects_as_of_cutoff(monkeypatch):
             {"timestamp": "2026-04-18T11:00:00+00:00", "rainfall_mm": 40.0, "water_level_ratio": 0.90},
         ]
     )
-    monkeypatch.setattr("app.realtime_native.feature_builder._load_history", lambda path=None: history)
+    monkeypatch.setattr("realtime_native.feature_builder._load_history", lambda path=None: history)
 
     engineered = build_realtime_native_features_from_snapshot(
         snapshot,

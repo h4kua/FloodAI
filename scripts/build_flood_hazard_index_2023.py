@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _SRC = _PROJECT_ROOT / "data" / "raw" / "indeks-bahaya-banjir-tahun-2023-komponen-data.xls"
-_DST = _PROJECT_ROOT / "app" / "data" / "flood_hazard_index_2023.json"
+_DST = _PROJECT_ROOT / "data" / "bundled" / "flood_hazard_index_2023.json"
 
 _CANON = ["Jakarta Utara", "Jakarta Selatan", "Jakarta Pusat",
           "Jakarta Timur", "Jakarta Barat", "Kepulauan Seribu"]

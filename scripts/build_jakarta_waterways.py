@@ -24,7 +24,7 @@ from pathlib import Path
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _SRC = _PROJECT_ROOT / "data" / "raw" / "jakarta_waterways.geojson"
 _STATIC = _PROJECT_ROOT / "data" / "bnpb_jakarta_static.json"
-_DST = _PROJECT_ROOT / "app" / "data" / "jakarta_waterways.json"
+_DST = _PROJECT_ROOT / "data" / "bundled" / "jakarta_waterways.json"
 
 _M_PER_DEG_LAT = 111_320.0
 _JKT_LAT = -6.2  # reference latitude for equirectangular metres

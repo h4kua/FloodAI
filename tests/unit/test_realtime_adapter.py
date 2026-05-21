@@ -1,4 +1,4 @@
-from app.services.realtime_adapter import adapt_snapshot_to_features
+from services.realtime_adapter import adapt_snapshot_to_features
 
 
 def test_adapt_snapshot_to_features_builds_expected_feature_columns():

@@ -22,7 +22,7 @@ from bs4 import BeautifulSoup
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _SRC = _PROJECT_ROOT / "data" / "raw" / "data-titik-rawan-bencana_banjir-komponen-data.xls"
-_DST = _PROJECT_ROOT / "app" / "data" / "flood_prone_points.json"
+_DST = _PROJECT_ROOT / "data" / "bundled" / "flood_prone_points.json"
 
 # Jakarta bounding box (sanity guard against malformed coordinates).
 _LAT_RANGE = (-7.0, -5.5)

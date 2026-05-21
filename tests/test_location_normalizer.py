@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import pytest
 
-from app.api.main import (
+from api.main import (
     _DEFAULT_LOCATION,
     _VALID_KOTA,
     _normalize_location,

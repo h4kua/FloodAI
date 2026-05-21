@@ -1,8 +1,8 @@
-from app.services.confidence_engine import (
+from services.confidence_engine import (
     classify_ood_state,
     compute_automation_confidence,
 )
-from app.services.decision_engine import _apply_elevation_adjustment, run_decision_engine
+from services.decision_engine import _apply_elevation_adjustment, run_decision_engine
 
 
 def _decision_kwargs(**overrides):

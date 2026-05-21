@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.api.main import (
+from api.main import (
     _enrich_with_evacuation,
     _enrich_with_infrastructure,
     _resolve_location_coords,

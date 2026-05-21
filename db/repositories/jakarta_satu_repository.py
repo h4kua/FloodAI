@@ -13,7 +13,7 @@ from datetime import datetime
 from psycopg2.extensions import connection as PgConnection
 from psycopg2.extras import Json
 
-from app.services.jakarta_satu_scraper import (
+from services.jakarta_satu_scraper import (
     AffectedRT,
     JakartaSatuSnapshot,
     WaterGateReading,

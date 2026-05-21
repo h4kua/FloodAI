@@ -27,7 +27,7 @@ from pathlib import Path
 import requests
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
-_DATA = _PROJECT_ROOT / "app" / "data"
+_DATA = _PROJECT_ROOT / "data" / "bundled"
 
 _SOURCES = {
     "bps_wilayah_provinsi.json": (

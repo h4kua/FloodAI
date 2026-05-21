@@ -48,6 +48,16 @@ ml = [
     "plotly>=5.14.0",
 ]
 
+[tool.setuptools.packages.find]
+# Flattened from the former single `app` package. Explicit include prevents
+# setuptools flat-layout auto-discovery from erroring on multiple top-level
+# packages alongside non-package dirs (data/, models/, scripts/, tests/).
+include = [
+    "api*", "agents*", "services*", "core*", "domain*", "pipeline*",
+    "realtime_native*", "evaluation*", "monitoring*", "config*",
+    "contracts*", "utils*",
+]
+
 [tool.black]
 line-length = 100
 target-version = ['py38', 'py39', 'py310', 'py311', 'py312']

@@ -1,5 +1,6 @@
 {
   "permissions": {
+    "defaultMode": "acceptEdits",
     "allow": [
       "Bash(grep \"\\\\.py$\")",
       "Bash(python -m pytest tests/test_failure_simulation.py --collect-only -q)",

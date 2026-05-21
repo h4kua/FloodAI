@@ -14,8 +14,8 @@ and emits ``DecisionAuthority.L1_7_BMKG_SAFETY_FLOOR`` with
 
 from __future__ import annotations
 
-from app.contracts import DecisionAuthority, DecisionReason, RiskLevel
-from app.domain import (
+from contracts import DecisionAuthority, DecisionReason, RiskLevel
+from domain import (
     PerceptionInputs,
     PhysicalSignals,
     ReasoningInputs,

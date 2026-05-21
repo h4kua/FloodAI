@@ -8,7 +8,7 @@ from unittest.mock import Mock
 import pytest
 import requests
 
-from app.services import awlr_threshold_fetcher as awlr
+from services import awlr_threshold_fetcher as awlr
 
 
 # ── parse_threshold ─────────────────────────────────────────────────────────

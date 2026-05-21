@@ -9,7 +9,7 @@ from unittest.mock import Mock
 import pytest
 import requests
 
-from app.services import pintu_air_fetcher as pa
+from services import pintu_air_fetcher as pa
 
 
 def _features():

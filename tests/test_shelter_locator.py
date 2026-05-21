@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.services import shelter_locator as sl
+from services import shelter_locator as sl
 
 
 _SHELTERS = (

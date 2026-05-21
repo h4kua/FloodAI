@@ -62,7 +62,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from app.utils.paths import REALTIME_NATIVE_BUNDLE_DIR  # noqa: E402
+from utils.paths import REALTIME_NATIVE_BUNDLE_DIR  # noqa: E402
 
 
 # ─── Asset names (relative to bundle dir) ────────────────────────────────────
@@ -117,7 +117,7 @@ def main() -> int:
 
 def _full_retrain(bundle_dir: Path) -> int:
     log.info("Full retrain against current runtime: %s", _runtime_versions())
-    from app.realtime_native.training import train_realtime_native_model
+    from realtime_native.training import train_realtime_native_model
 
     train_realtime_native_model()
     # train_realtime_native_model already writes the bundle directory; we
@@ -354,7 +354,7 @@ def _load_feature_schema(bundle_dir: Path) -> dict:
             features = json.load(fh)
     else:
         # Fall back to the canonical list from the feature builder.
-        from app.realtime_native.feature_builder import REALTIME_NATIVE_FEATURES
+        from realtime_native.feature_builder import REALTIME_NATIVE_FEATURES
         features = list(REALTIME_NATIVE_FEATURES)
     return {"feature_count": len(features), "features": list(features)}
 

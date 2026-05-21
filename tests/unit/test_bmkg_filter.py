@@ -1,5 +1,5 @@
-from app.agents.perception_agent import PerceptionAgent
-from app.services.bmkg_filter import filter_jakarta_bmkg_alerts, is_jakarta_bmkg_alert
+from agents.perception_agent import PerceptionAgent
+from services.bmkg_filter import filter_jakarta_bmkg_alerts, is_jakarta_bmkg_alert
 from poskobanjir.services.parser import build_realtime_snapshot
 
 

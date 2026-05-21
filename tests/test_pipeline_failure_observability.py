@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from app.pipeline.flood_pipeline import FloodDecisionPipeline
+from pipeline.flood_pipeline import FloodDecisionPipeline
 
 
 # ---------------------------------------------------------------------------

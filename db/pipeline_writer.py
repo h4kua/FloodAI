@@ -25,7 +25,7 @@ from db.psycopg2_connection import (
     Psycopg2ConnectionConfig,
     pooled_connection,
 )
-from app.api.observability import DB_RETRY_TOTAL
+from api.observability import DB_RETRY_TOTAL
 
 register_uuid()
 

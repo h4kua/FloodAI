@@ -23,7 +23,7 @@ import pytest
 from filelock import FileLock
 from filelock import Timeout as FileLockTimeout
 
-from app.realtime_native.feature_builder import _append_history, _load_history
+from realtime_native.feature_builder import _append_history, _load_history
 
 
 # ---------------------------------------------------------------------------
@@ -181,10 +181,10 @@ def test_lock_timeout_logs_warning_and_does_not_raise(tmp_path, caplog):
     csv = tmp_path / "hist.csv"
 
     with mock.patch(
-        "app.realtime_native.feature_builder.FileLock",
+        "realtime_native.feature_builder.FileLock",
         side_effect=FileLockTimeout(str(csv.with_suffix(".lock"))),
     ):
-        with caplog.at_level(logging.WARNING, logger="app.realtime_native.feature_builder"):
+        with caplog.at_level(logging.WARNING, logger="realtime_native.feature_builder"):
             _append_history(_row(_ts(0)), path=csv)  # must not raise
 
     assert any("lock timeout" in m for m in caplog.messages)

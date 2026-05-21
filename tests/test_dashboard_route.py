@@ -27,7 +27,7 @@ os.environ.setdefault("FLOOD_API_KEYS", "test-key")
 os.environ.setdefault("FLOOD_API_RATE_LIMIT", "1000")
 os.environ.setdefault("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver")
 
-from app.api.main import app  # noqa: E402
+from api.main import app  # noqa: E402
 
 
 MOCK_RESULT = {
@@ -88,7 +88,7 @@ def test_demo_route_renders_html(client_with_stub_pipeline):
     stub = _make_pipeline_stub(result=MOCK_RESULT)
     client = client_with_stub_pipeline(stub)
     try:
-        with patch("app.api.dashboard._load_snapshot", return_value=MOCK_SNAPSHOT):
+        with patch("api.dashboard._load_snapshot", return_value=MOCK_SNAPSHOT):
             response = client.get("/demo")
     finally:
         client.__exit__(None, None, None)
@@ -120,7 +120,7 @@ def test_demo_route_pipeline_failure_logs_correlation_id(client_with_stub_pipeli
     client = client_with_stub_pipeline(stub)
     fake_log = Mock()
     try:
-        with patch("app.api.dashboard._log", fake_log):
+        with patch("api.dashboard._log", fake_log):
             response = client.get("/demo")
     finally:
         client.__exit__(None, None, None)
@@ -137,9 +137,9 @@ def test_demo_route_snapshot_failure_shows_degraded_state(client_with_stub_pipel
     client = client_with_stub_pipeline(stub)
     fake_log = Mock()
     try:
-        with patch("app.api.dashboard._load_snapshot", side_effect=OSError("snapshot unreadable")), \
-             patch("app.api.dashboard._query_db_health", return_value={"connected": False}), \
-             patch("app.api.dashboard._log", fake_log):
+        with patch("api.dashboard._load_snapshot", side_effect=OSError("snapshot unreadable")), \
+             patch("api.dashboard._query_db_health", return_value={"connected": False}), \
+             patch("api.dashboard._log", fake_log):
             response = client.get("/demo")
     finally:
         client.__exit__(None, None, None)

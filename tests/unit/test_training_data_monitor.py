@@ -1,4 +1,4 @@
-from app.services.training_data_monitor import detect_out_of_distribution
+from services.training_data_monitor import detect_out_of_distribution
 
 
 def test_detect_out_of_distribution_flags_extreme_values():

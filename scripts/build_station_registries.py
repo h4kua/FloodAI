@@ -30,8 +30,8 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 # Make `app` importable when launched as a bare script (python scripts/...).
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
-_AWLR_DST = _PROJECT_ROOT / "app" / "data" / "awlr_stations.json"
-_ARR_DST = _PROJECT_ROOT / "app" / "data" / "arr_stations.json"
+_AWLR_DST = _PROJECT_ROOT / "data" / "bundled" / "awlr_stations.json"
+_ARR_DST = _PROJECT_ROOT / "data" / "bundled" / "arr_stations.json"
 
 _ARR_URL = (
     "https://jakartasatu.jakarta.go.id/server/rest/services/"
@@ -46,7 +46,7 @@ def _now() -> str:
 
 def build_awlr_stations() -> dict:
     """Reshape the AWLR threshold dataset into a station registry with coords."""
-    from app.services.awlr_threshold_fetcher import get_awlr_thresholds
+    from services.awlr_threshold_fetcher import get_awlr_thresholds
 
     payload = get_awlr_thresholds(force_refresh=True) or {}
     stations = []

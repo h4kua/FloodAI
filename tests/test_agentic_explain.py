@@ -21,11 +21,11 @@ os.environ.setdefault("FLOOD_API_KEYS", "test-key")
 os.environ.setdefault("FLOOD_API_RATE_LIMIT", "1000")
 os.environ.setdefault("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver")
 
-from app.agents.llm_orchestrator import (  # noqa: E402
+from agents.llm_orchestrator import (  # noqa: E402
     _fallback_explanation,
     explain_flood_prediction,
 )
-from app.api.main import app  # noqa: E402
+from api.main import app  # noqa: E402
 
 _HEADERS = {"host": "testserver", "X-API-Key": "test-key"}
 
@@ -101,7 +101,7 @@ def test_fallback_explanation_warning_status():
 
 def test_explain_uses_fallback_when_claude_unavailable():
     with patch(
-        "app.agents.llm_orchestrator._call_claude_sync",
+        "agents.llm_orchestrator._call_claude_sync",
         side_effect=RuntimeError("simulated_outage"),
     ):
         result = asyncio.run(explain_flood_prediction(_MOCK_PREDICTION))
@@ -114,7 +114,7 @@ def test_explain_endpoint_returns_envelope(explain_client):
     app.state.pipeline = _pipeline_stub(result=_MOCK_PREDICTION)
 
     with patch(
-        "app.agents.llm_orchestrator._call_claude_sync",
+        "agents.llm_orchestrator._call_claude_sync",
         side_effect=RuntimeError("force_fallback"),
     ):
         response = explain_client.post(

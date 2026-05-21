@@ -27,7 +27,7 @@ from pathlib import Path
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _SRC = _PROJECT_ROOT / "data" / "raw" / "Jumlah Penduduk Menurut Kelompok Umur dan Jenis Kelamin, 2026.csv"
-_DST = _PROJECT_ROOT / "app" / "data" / "population_age_structure.json"
+_DST = _PROJECT_ROOT / "data" / "bundled" / "population_age_structure.json"
 
 # Excel coerced some age labels into dates: "4/1/00"->0-4, "5/9/01"->5-9,
 # "10/14/01"->10-14. Map the lower bound of each age band for classification.

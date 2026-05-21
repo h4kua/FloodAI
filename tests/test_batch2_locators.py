@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from app.services import school_locator as sk
-from app.services import flood_prone_locator as fp
-from app.services import bnpb_context as bc
+from services import school_locator as sk
+from services import flood_prone_locator as fp
+from services import bnpb_context as bc
 
 
 # ── N8: school locator ──────────────────────────────────────────────────────

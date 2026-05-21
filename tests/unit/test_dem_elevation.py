@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-import app.services.dem_elevation as dem_elevation
+import services.dem_elevation as dem_elevation
 
 
 def _write_float32_strip_tiff(path: Path, rows: list[list[float]]) -> None:

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from app.services import bnpb_context as bc
-from app.services.bnpb_context import VulnerabilityContext
+from services import bnpb_context as bc
+from services.bnpb_context import VulnerabilityContext
 
 
 def _vc(district: str) -> VulnerabilityContext:

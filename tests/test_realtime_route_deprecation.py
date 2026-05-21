@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from app.api.main import app
+from api.main import app
 
 
 def test_predict_realtime_sets_deprecation_headers():
@@ -13,7 +13,7 @@ def test_predict_realtime_sets_deprecation_headers():
         "timestamp": "2026-05-17T00:00:00+00:00",
     }
 
-    with patch("app.api.main.predict_realtime", return_value=payload):
+    with patch("api.main.predict_realtime", return_value=payload):
         response = TestClient(app).get("/predict/realtime", headers={"host": "localhost"})
 
     assert response.status_code == 200

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.services import flood_prone_locator as fp
+from services import flood_prone_locator as fp
 
 
 _POINTS = (

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.services import bnpb_context as bc
+from services import bnpb_context as bc
 
 
 def test_kelurahan_lookup_known():

@@ -5,7 +5,7 @@ from pathlib import Path
 import joblib
 import pytest
 
-from app.realtime_native.bundle import (
+from realtime_native.bundle import (
     BundleCompatibilityError,
     load_runtime_bundle,
     runtime_version_report,

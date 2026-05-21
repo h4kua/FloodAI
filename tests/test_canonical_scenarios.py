@@ -16,8 +16,8 @@ from typing import List, Optional
 
 import pytest
 
-from app.contracts import DecisionAuthority, FailureSeverity, RiskLevel, SystemStatus
-from app.domain.decision import (
+from contracts import DecisionAuthority, FailureSeverity, RiskLevel, SystemStatus
+from domain.decision import (
     AdaptiveThresholds,
     Decision,
     FailureMode,

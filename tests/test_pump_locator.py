@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.services import pump_locator as pl
+from services import pump_locator as pl
 
 
 _PUMPS = tuple(

@@ -1,0 +1,34 @@
+.............F.......................................................... [ 16%]
+........................................................................ [ 32%]
+........................................................................ [ 48%]
+........................................................................ [ 64%]
+........................................................................ [ 80%]
+........................................................................ [ 96%]
+................                                                         [100%]
+================================== FAILURES ===================================
+___________________ test_explain_endpoint_returns_envelope ____________________
+
+explain_client = <starlette.testclient.TestClient object at 0x000001DB0EC5A060>
+
+    def test_explain_endpoint_returns_envelope(explain_client):
+        app.state.pipeline = _pipeline_stub(result=_MOCK_PREDICTION)
+    
+        with patch(
+            "agents.llm_orchestrator._call_claude_sync",
+            side_effect=RuntimeError("force_fallback"),
+        ):
+            response = explain_client.post(
+                "/predict/agentic/explain",
+                json=_VALID_PAYLOAD,
+                headers=_HEADERS,
+            )
+    
+>       assert response.status_code == 200, response.text
+E       AssertionError: {"detail":"invalid_api_key"}
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests\test_agentic_explain.py:126: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_agentic_explain.py::test_explain_endpoint_returns_envelope
+1 failed, 447 passed in 118.56s (0:01:58)

@@ -6,9 +6,9 @@ import pytest
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 
-from app.api import main, observability
-from app.api.main import app
-from app.api.observability import RequestIdMiddleware
+from api import main, observability
+from api.main import app
+from api.observability import RequestIdMiddleware
 
 
 def _request_id_test_app() -> FastAPI:

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 import re
 import xml.etree.ElementTree as ET
 
-from app.services.bmkg_filter import filter_jakarta_bmkg_alerts
+from services.bmkg_filter import filter_jakarta_bmkg_alerts
 
 
 CAP_NS = {"cap": "urn:oasis:names:tc:emergency:cap:1.2"}

@@ -39,7 +39,7 @@ python -m venv flood_env
 flood_env\Scripts\activate          # Windows
 pip install -r requirements.txt
 copy .env.example .env              # then fill in DB + API keys
-uvicorn app.api.main:app --reload
+uvicorn api.main:app --reload
 ```
 
 Open `http://localhost:8000/docs` for interactive Swagger UI.

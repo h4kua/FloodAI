@@ -5,7 +5,7 @@ from unittest.mock import Mock
 
 import requests
 
-from app.services.data_ingestion import tma_scraper
+from services.data_ingestion import tma_scraper
 
 
 def test_fetch_tma_data_stops_retrying_when_deadline_expires(monkeypatch):

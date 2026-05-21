@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from app.realtime_native import inference
+from realtime_native import inference
 
 
 def test_load_thresholds_uses_runtime_bundle_thresholds(monkeypatch):

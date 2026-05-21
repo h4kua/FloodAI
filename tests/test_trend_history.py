@@ -22,7 +22,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from app.services.trend_analysis import (
+from services.trend_analysis import (
     _compute_from_records,
     _insufficient,
     compute_trend,
@@ -166,9 +166,9 @@ def test_compute_trend_reads_from_db_not_process_state():
     produce exactly _compute_from_records(_RISING_3).
     """
     conn = _mock_conn()
-    with patch("app.services.trend_analysis.pooled_connection", return_value=_pooled(conn)):
+    with patch("services.trend_analysis.pooled_connection", return_value=_pooled(conn)):
         with patch(
-            "app.services.trend_analysis.get_recent_trend_records",
+            "services.trend_analysis.get_recent_trend_records",
             return_value=_RISING_3,
         ):
             result = compute_trend()
@@ -178,7 +178,7 @@ def test_compute_trend_reads_from_db_not_process_state():
 
 def test_compute_trend_fail_closed_on_connection_error():
     """DB connection failure → insufficient_data, not stale invented state."""
-    with patch("app.services.trend_analysis.pooled_connection", side_effect=Exception("connection refused")):
+    with patch("services.trend_analysis.pooled_connection", side_effect=Exception("connection refused")):
         result = compute_trend()
 
     assert result["risk_trend"] == "insufficient_data"
@@ -188,9 +188,9 @@ def test_compute_trend_fail_closed_on_connection_error():
 def test_compute_trend_fail_closed_on_read_error():
     """DB read failure mid-connection → insufficient_data."""
     conn = _mock_conn()
-    with patch("app.services.trend_analysis.pooled_connection", return_value=_pooled(conn)):
+    with patch("services.trend_analysis.pooled_connection", return_value=_pooled(conn)):
         with patch(
-            "app.services.trend_analysis.get_recent_trend_records",
+            "services.trend_analysis.get_recent_trend_records",
             side_effect=Exception("timeout"),
         ):
             result = compute_trend()
@@ -208,23 +208,23 @@ def test_restart_simulation():
     conn = _mock_conn()
 
     # Run 1 — before simulated restart
-    with patch("app.services.trend_analysis.pooled_connection", return_value=_pooled(conn)):
+    with patch("services.trend_analysis.pooled_connection", return_value=_pooled(conn)):
         with patch(
-            "app.services.trend_analysis.get_recent_trend_records",
+            "services.trend_analysis.get_recent_trend_records",
             return_value=_RISING_3,
         ):
             result_before = compute_trend()
 
     # Simulate restart: reset_history clears DB state; process memory is gone
-    with patch("app.services.trend_analysis.pooled_connection", return_value=_pooled(conn)):
-        with patch("app.services.trend_analysis.delete_trend_records") as mock_delete:
+    with patch("services.trend_analysis.pooled_connection", return_value=_pooled(conn)):
+        with patch("services.trend_analysis.delete_trend_records") as mock_delete:
             reset_history()
     assert mock_delete.call_count == 1
 
     # Run 2 — after restart, same DB records are available again
-    with patch("app.services.trend_analysis.pooled_connection", return_value=_pooled(conn)):
+    with patch("services.trend_analysis.pooled_connection", return_value=_pooled(conn)):
         with patch(
-            "app.services.trend_analysis.get_recent_trend_records",
+            "services.trend_analysis.get_recent_trend_records",
             return_value=_RISING_3,
         ):
             result_after = compute_trend()
@@ -234,8 +234,8 @@ def test_restart_simulation():
 
 def test_record_prediction_logs_warning_on_db_failure(caplog):
     """record_prediction DB failure is logged as WARNING, not raised."""
-    with patch("app.services.trend_analysis.pooled_connection", side_effect=OSError("no route to host")):
-        with caplog.at_level(logging.WARNING, logger="app.services.trend_analysis"):
+    with patch("services.trend_analysis.pooled_connection", side_effect=OSError("no route to host")):
+        with caplog.at_level(logging.WARNING, logger="services.trend_analysis"):
             record_prediction(0.5, "WARNING", 0.7, 10.0)  # must not raise
 
     assert any("DB write failed" in m for m in caplog.messages)
@@ -243,8 +243,8 @@ def test_record_prediction_logs_warning_on_db_failure(caplog):
 
 def test_reset_history_logs_warning_on_db_failure(caplog):
     """reset_history DB failure is logged as WARNING, not raised."""
-    with patch("app.services.trend_analysis.pooled_connection", side_effect=OSError("no route to host")):
-        with caplog.at_level(logging.WARNING, logger="app.services.trend_analysis"):
+    with patch("services.trend_analysis.pooled_connection", side_effect=OSError("no route to host")):
+        with caplog.at_level(logging.WARNING, logger="services.trend_analysis"):
             reset_history()  # must not raise
 
     assert any("DB delete failed" in m for m in caplog.messages)

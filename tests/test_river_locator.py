@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.services import river_locator as rl
+from services import river_locator as rl
 
 
 def test_nearest_river_runtime_returns_named_waterway():
@@ -35,7 +35,7 @@ def test_missing_data_returns_none(monkeypatch, tmp_path):
 
 
 def test_kecamatan_record_carries_nearest_river():
-    from app.services.bnpb_jakarta_mapper import get_kecamatan
+    from services.bnpb_jakarta_mapper import get_kecamatan
 
     rec = get_kecamatan("PASAR REBO")
     if rec is not None:  # index may be cold in some environments

@@ -1,5 +1,6 @@
 {
   "permissions": {
+    "defaultMode": "acceptEdits",
     "allow": [
       "Bash(flood_env/Scripts/python.exe -c ' *)",
       "Bash(python -c \"from db.psycopg2_connection import get_psycopg2_connection; print\\('db package importable'\\)\")",

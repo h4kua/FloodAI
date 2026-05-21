@@ -22,7 +22,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from app.services.jakarta_satu_scraper import (
+from services.jakarta_satu_scraper import (
     AffectedRT,
     JakartaSatuSnapshot,
     OutOfBandOnlyError,
@@ -452,8 +452,8 @@ def test_scrape_all_rejects_api_process_execution(monkeypatch):
     fake_log = Mock()
 
     monkeypatch.setenv("FLOOD_ALLOW_RUNTIME_SCRAPE", "1")
-    monkeypatch.setattr("app.services.jakarta_satu_scraper._is_api_process", lambda: True)
-    monkeypatch.setattr("app.services.jakarta_satu_scraper._log", fake_log)
+    monkeypatch.setattr("services.jakarta_satu_scraper._is_api_process", lambda: True)
+    monkeypatch.setattr("services.jakarta_satu_scraper._log", fake_log)
 
     with pytest.raises(OutOfBandOnlyError):
         scrape_all()

@@ -23,8 +23,8 @@ _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
-from app.agents.llm_orchestrator import explain_flood_prediction  # noqa: E402
-from app.pipeline.flood_pipeline import FloodDecisionPipeline  # noqa: E402
+from agents.llm_orchestrator import explain_flood_prediction  # noqa: E402
+from pipeline.flood_pipeline import FloodDecisionPipeline  # noqa: E402
 
 
 def _iso_now() -> str:
@@ -146,7 +146,7 @@ async def _run_scenario(
     if use_claude:
         explanation = await explain_flood_prediction(prediction)
     else:
-        from app.agents.llm_orchestrator import _fallback_explanation
+        from agents.llm_orchestrator import _fallback_explanation
         explanation = _fallback_explanation(prediction)
     _print_explanation(explanation)
 
