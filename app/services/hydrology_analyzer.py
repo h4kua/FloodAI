@@ -31,6 +31,14 @@ _STATION_THRESHOLDS: dict[str, dict[str, float]] = {
     "angke":        {"siaga1": 200.0, "siaga2": 170.0, "siaga3": 130.0, "siaga4": 100.0},
 }
 
+# Generic Jakarta fallback thresholds (cm) for stations with no calibrated
+# reference, no per-record siaga values, and no AWLR match. Without this an
+# unknown station reports "normal" for any water level (e.g. 280 cm), hiding
+# real flood conditions. Conservative generic standard: erring toward alerting.
+_GENERIC_DEFAULT_THRESHOLDS: dict[str, float] = {
+    "siaga1": 250.0, "siaga2": 200.0, "siaga3": 150.0,
+}
+
 _SIAGA_SEVERITY: dict[str, float] = {
     "siaga1": 1.00, "siaga2": 0.75, "siaga3": 0.50, "siaga4": 0.25, "normal": 0.00,
 }
@@ -100,7 +108,13 @@ def _resolve_thresholds(record: dict, station_id: str) -> dict[str, float]:
         k: _safe_float(record.get(k), defaults.get(k, 0.0))
         for k in ("siaga1", "siaga2", "siaga3", "siaga4")
     }
-    return {k: v for k, v in resolved.items() if v > 0}
+    resolved = {k: v for k, v in resolved.items() if v > 0}
+    # Last resort: an unknown station with no thresholds at all would otherwise
+    # report "normal" for any water level. Apply the generic Jakarta standard so
+    # high levels (e.g. 280 cm -> Siaga 1) still surface.
+    if not resolved:
+        return dict(_GENERIC_DEFAULT_THRESHOLDS)
+    return resolved
 
 
 def _determine_siaga_level(tinggi_air: float, thresholds: dict[str, float]) -> str:

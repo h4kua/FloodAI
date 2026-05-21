@@ -198,7 +198,14 @@ class ActionAgent:
             "recommended_action": recommended_action,
 
             # ── BNPB InaRISK vulnerability context ───────────────────────────
-            "vulnerability_context": vuln.to_dict() if vuln else None,
+            # Display the context whenever it was resolved, INDEPENDENT of the
+            # BNPB activation gate. The gate (bnpb_status.active) still governs
+            # whether BNPB *influences* the decision (advisory + thresholds via
+            # `vuln`); it must not blank out the informational context, which
+            # also carries the Batch-2 enrichment fields (hazard_index_2023,
+            # historical/kelurahan flood history). bnpb_status/bnpb_influence in
+            # this same output show whether it actually influenced the decision.
+            "vulnerability_context": raw_vuln.to_dict() if raw_vuln else None,
             "elevation": getattr(evaluation, "elevation", {}) or None,
 
             # ── Decision hierarchy trace (Tasks 10, 11) ──────────────────────

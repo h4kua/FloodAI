@@ -30,6 +30,8 @@ def is_jakarta_bmkg_alert(alert: dict) -> bool:
     if area_desc:
         return any(token in area_desc for token in _JAKARTA_TOKENS)
 
+    # Only GEOGRAPHIC fields decide locality. ``event`` is a hazard type
+    # ("HUJAN SANGAT LEBAT"), not a place, so it is intentionally excluded.
     composite = _normalize_text(
         " ".join(
             [
@@ -39,7 +41,14 @@ def is_jakarta_bmkg_alert(alert: dict) -> bool:
             ]
         )
     )
-    return any(token in composite for token in _JAKARTA_TOKENS)
+    if composite:
+        return any(token in composite for token in _JAKARTA_TOKENS)
+
+    # No geographic information at all. Such an alert names no region to reject,
+    # so treat it as local to the already location-scoped request rather than
+    # discarding a potentially valid alert (e.g. {"severity": "extreme",
+    # "event": "HUJAN SANGAT LEBAT"}).
+    return True
 
 
 def filter_jakarta_bmkg_alerts(alerts: list[dict] | None) -> list[dict]:
