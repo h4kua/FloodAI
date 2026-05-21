@@ -17,7 +17,7 @@ from psycopg2.pool import ThreadedConnectionPool
 
 if os.getenv("FLOOD_LOAD_DOTENV", "1") == "1":
     from pathlib import Path
-    load_dotenv(Path(__file__).resolve().parent.parent / "app" / ".env", override=True)
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=True)
 
 DB_HOST = os.getenv("DB_HOST")
 

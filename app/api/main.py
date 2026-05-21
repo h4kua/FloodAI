@@ -600,16 +600,16 @@ def _resolve_location_coords(snapshot_dict: dict, result: dict) -> "tuple[float,
     return _kota_centroid(kota)
 
 
-def _enrich_with_evacuation(result: dict, snapshot_dict: dict) -> dict:
+def _enrich_with_evacuation(result: dict, coords: "tuple[float, float] | None") -> dict:
     """
     Add nearest-shelter / evacuation_points to an agentic result when risk is
-    elevated and a location coordinate is resolvable. Additive and defensive:
-    on any failure the result is returned unchanged.
+    elevated and a location coordinate is available. ``coords`` is resolved once
+    by the caller. Additive and defensive: on any failure the result is
+    returned unchanged.
     """
     try:
         if result.get("risk_level") not in _EVACUATION_RISK_LEVELS:
             return result
-        coords = _resolve_location_coords(snapshot_dict, result)
         if coords is None:
             return result
         from app.services.shelter_locator import nearest_shelters
@@ -626,15 +626,88 @@ def _enrich_with_evacuation(result: dict, snapshot_dict: dict) -> dict:
         vuln = result.get("vulnerability_context")
         if isinstance(vuln, dict):
             vuln["nearest_shelter"] = shelters[0]
+    except Exception:  # noqa: BLE001 — never let enrichment break the prediction
+        return result
+    return result
 
-        # Vulnerable facilities (flood-prone schools = children) within 500 m.
+
+# Pump density that maps to a full drainage score of 1.0 (count / 10, capped).
+_PUMP_FULL_SCORE_COUNT = 10.0
+_PUMP_RADIUS_M = 5000.0
+_SCHOOL_RADIUS_M = 3000.0
+
+
+def _enrich_with_infrastructure(result: dict, coords: "tuple[float, float] | None") -> dict:
+    """
+    Populate infrastructure context from local JSON datasets via haversine only
+    (no Supabase / external calls). Reuses the already-resolved ``coords``.
+
+      * pump_drainage_score      -> vulnerability_context  (pumps within 5 km,
+                                     score = min(count / 10, 1.0))
+      * in_river_overflow_zone   -> vulnerability_context  (coords -> nearest
+                                     kecamatan centroid -> river-overflow set;
+                                     the source has no point geometry, so this
+                                     is a name join driven by the coordinate)
+      * vulnerable_facilities_nearby -> top-level list of schools within 3 km
+                                     ({name, kelurahan, distance_km})
+
+    Additive and defensive; never alters risk_level/probability/etc.
+    """
+    if coords is None:
+        return result
+    lat, lon = coords
+    try:
+        from app.services.shelter_locator import haversine_m
+
+        vuln = result.get("vulnerability_context")
+
+        # ── pump_drainage_score (pumps within 5 km) ──────────────────────────
+        try:
+            from app.services.pump_locator import load_pumps
+
+            count = 0
+            for p in load_pumps():
+                plat, plon = p.get("lat"), p.get("lon")
+                if isinstance(plat, (int, float)) and isinstance(plon, (int, float)) \
+                        and haversine_m(lat, lon, plat, plon) <= _PUMP_RADIUS_M:
+                    count += 1
+            score = round(min(count / _PUMP_FULL_SCORE_COUNT, 1.0), 4)
+            if isinstance(vuln, dict):
+                vuln["pump_drainage_score"] = score
+                vuln["pump_count_within_5km"] = count
+        except Exception:  # noqa: BLE001
+            pass
+
+        # ── in_river_overflow_zone (coord -> kecamatan -> overflow set) ──────
+        try:
+            from app.services.bnpb_jakarta_mapper import get_kecamatan_by_coords
+            from app.services.flood_prone_locator import river_overflow_zone
+
+            kec = get_kecamatan_by_coords(lat, lon) or {}
+            kec_name = kec.get("name")
+            ro = river_overflow_zone(kecamatan=kec_name) if kec_name else {
+                "in_river_overflow_zone": False, "affected_river": None,
+            }
+            if isinstance(vuln, dict):
+                vuln["in_river_overflow_zone"] = bool(ro.get("in_river_overflow_zone"))
+                vuln["affected_river"] = ro.get("affected_river")
+        except Exception:  # noqa: BLE001
+            pass
+
+        # ── vulnerable_facilities_nearby (schools within 3 km) ───────────────
         try:
             from app.services.school_locator import nearby_schools
 
-            schools = nearby_schools(coords[0], coords[1], radius_m=500.0, limit=5)
-            if schools:
-                result["vulnerable_facilities_nearby"] = schools
-        except Exception:  # noqa: BLE001 — best-effort enrichment
+            schools = nearby_schools(lat, lon, radius_m=_SCHOOL_RADIUS_M, limit=10)
+            result["vulnerable_facilities_nearby"] = [
+                {
+                    "name": s.get("name"),
+                    "kelurahan": s.get("kelurahan"),
+                    "distance_km": round((s.get("distance_m") or 0.0) / 1000.0, 2),
+                }
+                for s in schools
+            ]
+        except Exception:  # noqa: BLE001
             pass
     except Exception:  # noqa: BLE001 — never let enrichment break the prediction
         return result
@@ -662,7 +735,11 @@ async def predict_agentic_endpoint(
             origin=origin,
             destination=destination,
         )
-        result = _enrich_with_evacuation(result, snapshot_dict)
+        # Resolve the location coordinate ONCE, then reuse it for every
+        # geospatial enrichment (evacuation + infrastructure).
+        coords = _resolve_location_coords(snapshot_dict, result)
+        result = _enrich_with_evacuation(result, coords)
+        result = _enrich_with_infrastructure(result, coords)
         await _bounded_threadpool(_store_idempotent_response, idempotency_key, result)
         return result
     except FileNotFoundError as exc:
