@@ -335,6 +335,42 @@ def _hazard_2023_for(district: str) -> dict:
     return out
 
 
+_KELURAHAN_HISTORY_PATH = Path(__file__).resolve().parents[1] / "data" / "kelurahan_flood_history.json"
+
+
+@lru_cache(maxsize=1)
+def _load_kelurahan_flood_history() -> dict:
+    """Kelurahan flood history (per-kelurahan + per-kota). {} on any failure."""
+    try:
+        if not _KELURAHAN_HISTORY_PATH.exists():
+            return {}
+        return json.loads(_KELURAHAN_HISTORY_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        logger.warning("kelurahan_flood_history_load_failed: %s", exc)
+        return {}
+
+
+def kelurahan_flood_history(kelurahan: str) -> dict:
+    """
+    Public lookup: flood-event history for a single kelurahan (by name).
+    Returns {} when unknown. For callers that have a kelurahan-level location.
+    """
+    rec = _load_kelurahan_flood_history().get("kelurahan", {}).get((kelurahan or "").strip().upper())
+    return dict(rec) if rec else {}
+
+
+def _kelurahan_history_for_kota(district: str) -> dict:
+    """
+    Per-kota rollup of kelurahan flood history, for merging into
+    VulnerabilityContext.to_dict() (which is keyed on kota, not kelurahan).
+    Additive; empty when no record.
+    """
+    rec = _load_kelurahan_flood_history().get("by_kota", {}).get((district or "").strip())
+    if not rec:
+        return {}
+    return {"kelurahan_flood_history": rec}
+
+
 def _historical_for(district: str) -> dict:
     """
     Historical flood frequency/severity for a kota, suitable for merging into
@@ -394,6 +430,7 @@ class VulnerabilityContext:
         }
         base.update(_historical_for(self.district))
         base.update(_hazard_2023_for(self.district))
+        base.update(_kelurahan_history_for_kota(self.district))
         return base
 
 
