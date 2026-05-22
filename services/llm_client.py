@@ -48,6 +48,27 @@ def _max_retries() -> int:
         return _DEFAULT_MAX_RETRIES
 
 
+def get_llm_client():
+    """
+    Return a provider-aware LLM client based on LLM_PROVIDER ("groq" | "anthropic").
+
+    Groq is the default (OpenAI-compatible, HTTPS/443, Railway-friendly). The
+    Anthropic-specific helpers below (get_anthropic_client, safe_complete) are
+    left intact for the fallback provider and are not used by the Groq path.
+    """
+    provider = os.getenv("LLM_PROVIDER", "groq")
+    if provider == "groq":
+        from openai import OpenAI
+
+        return OpenAI(
+            api_key=os.getenv("GROQ_API_KEY"),
+            base_url="https://api.groq.com/openai/v1",
+        )
+    import anthropic
+
+    return anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+
 def get_anthropic_client(*, timeout: float | None = None):
     """
     Return a configured Anthropic client.

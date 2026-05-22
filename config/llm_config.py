@@ -82,3 +82,21 @@ def get_llm_config(*, require: list[str] | None = None) -> LLMConfig:
             raise ValueError(f"Unknown key name in require list: {name!r}")
 
     return cfg
+
+
+# ─── Provider configuration (module-level constants) ───────────────────────────
+# Groq is the primary backend (OpenAI-compatible, free, fast, Railway-friendly);
+# Anthropic is kept as a fallback. Consumers may read these constants or call
+# os.getenv directly — both resolve the same env vars.
+
+# Anthropic (fallback)
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514")
+
+# Groq (primary)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+
+# Active provider: "groq" | "anthropic"
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq")

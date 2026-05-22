@@ -380,6 +380,65 @@ def _call_claude_sync(
 
 
 # ---------------------------------------------------------------------------
+# Synchronous Groq call (OpenAI-compatible; run inside asyncio.to_thread)
+# ---------------------------------------------------------------------------
+
+
+def _call_groq_sync(
+    prompt: str,
+    system: str = "",
+    model: str | None = None,
+    max_tokens: int | None = None,
+) -> str:
+    from openai import OpenAI
+
+    client = OpenAI(
+        api_key=os.getenv("GROQ_API_KEY"),
+        base_url="https://api.groq.com/openai/v1",
+    )
+    model = model or os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+    if max_tokens is None:
+        max_tokens = int(os.getenv("ANTHROPIC_MAX_TOKENS", "1024"))
+
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
+
+    response = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        max_tokens=max_tokens,
+        temperature=0.1,  # low for consistent JSON output
+    )
+    return response.choices[0].message.content or ""
+
+
+# ---------------------------------------------------------------------------
+# Provider dispatcher — routes to Groq (default) or Anthropic
+# ---------------------------------------------------------------------------
+
+
+def _call_llm_sync(
+    user_content: str,
+    *,
+    model: str,
+    max_tokens: int,
+) -> str:
+    """
+    Route the synchronous LLM call based on LLM_PROVIDER ("groq" | "anthropic").
+
+    Groq is the default. The Anthropic ``model`` is only meaningful on the
+    anthropic branch; the groq branch uses GROQ_MODEL. Both paths receive the
+    same SYSTEM_PROMPT and max_tokens for output parity.
+    """
+    provider = os.getenv("LLM_PROVIDER", "groq").lower()
+    if provider == "groq":
+        return _call_groq_sync(user_content, system=SYSTEM_PROMPT, max_tokens=max_tokens)
+    return _call_claude_sync(user_content, model=model, max_tokens=max_tokens)
+
+
+# ---------------------------------------------------------------------------
 # Public async entry point
 # ---------------------------------------------------------------------------
 
@@ -407,7 +466,7 @@ async def explain_flood_prediction(prediction: dict) -> dict:
     try:
         user_content = _build_user_message(prediction)
         raw_text     = await asyncio.to_thread(
-            _call_claude_sync, user_content, model=model, max_tokens=max_tokens
+            _call_llm_sync, user_content, model=model, max_tokens=max_tokens
         )
         parsed    = _parse_claude_json(raw_text)
         validated = _validate_explanation_shape(parsed)

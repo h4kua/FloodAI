@@ -33,6 +33,9 @@ dependencies = [
     # db/supabase_client.py + execute_pipeline_supabase; must be declared so
     # Railway/Nixpacks installs it (it is not pulled in transitively).
     "supabase>=2.0.0",
+    # OpenAI-compatible client for the Groq LLM backend (primary LLM provider).
+    # Used by services/llm_client.get_llm_client + agents/llm_orchestrator._call_groq_sync.
+    "openai>=1.0.0",
 ]
 
 [project.optional-dependencies]
