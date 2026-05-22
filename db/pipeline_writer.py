@@ -1011,3 +1011,208 @@ def _as_decimal(value: float) -> Decimal:
 def result_to_dict(result: PipelineExecutionResult) -> Dict[str, str]:
     """Convenience helper for callers that prefer a plain dict response."""
     return result.as_dict()
+
+
+# ─── VPN-safe Supabase RPC write path ──────────────────────────────────────────
+#
+# When psycopg2 (port 5432/6543) is blocked, the pipeline write runs through the
+# fn_execute_pipeline stored function (migration 029) over Supabase RPC (HTTPS/443).
+# The function performs the SAME 6 inserts + finalize UPDATE atomically server-side.
+#
+# Division of labour (locked with maintainer):
+#   * Python validates + normalizes EVERYTHING (status/risk -> canonical, unit
+#     intervals, snapshot_hash) here, exactly as execute_pipeline does, then ships
+#     a flat JSON payload. The plpgsql function does no normalization — it inserts.
+#   * execute_pipeline (psycopg2) is NOT modified and remains the default path.
+
+
+def _serialize_pipeline_payload(
+    snapshot_input: Mapping[str, Any],
+    location: Optional[str],
+    perception: PerceptionPayload,
+    reasoning: ReasoningPayload,
+    evaluation: EvaluationPayload,
+    decision: DecisionPayload,
+    run_config: PipelineRunConfig,
+    now: datetime,
+) -> Dict[str, Any]:
+    """
+    Build the normalized JSONB payload consumed by fn_execute_pipeline.
+
+    Runs the SAME validation/normalization as execute_pipeline (so the RPC path
+    and the psycopg2 path are byte-for-byte equivalent on the wire), computes the
+    snapshot_hash Python-side, and emits canonical enum strings + ISO-8601
+    timestamps + plain JSON for the jsonb columns. Mirrors _run_transaction +
+    _finalize_pipeline_run field-for-field.
+    """
+    perception = validate_perception_payload(perception)
+    reasoning = validate_reasoning_payload(reasoning)
+    evaluation = validate_evaluation_payload(evaluation)
+    decision = validate_decision_payload(decision)
+
+    snapshot_hash = _compute_snapshot_hash(snapshot_input)
+    fetched_at_iso = now.isoformat()
+    status_value = _system_status_value(decision.system_status)
+    risk_value = _risk_level_value(decision.risk_level)
+
+    # Identical to _finalize_pipeline_run.final_decision. With a single pinned
+    # clock, started_at == completed_at, so execution_time_ms == 0 (matches the
+    # psycopg2 path, which derives the same zero from the pinned `now`).
+    final_decision = {
+        "decision_id": None,  # server fills the real id; kept for shape parity
+        "system_status": status_value,
+        "requires_manual_review": decision.requires_manual_review,
+        "decision_reason": decision.decision_reason,
+        "data_validity": decision.data_validity,
+        "ml_execution_mode": decision.ml_execution_mode,
+        "risk_level": risk_value,
+        "probability": float(decision.probability),
+        "confidence_score": float(decision.confidence_score),
+        "is_safe_for_automation": decision.is_safe_for_automation,
+        "pipeline_version": run_config.pipeline_version,
+    }
+
+    return {
+        "snapshot": {
+            "snapshot_hash": snapshot_hash,
+            "fetched_at_utc": fetched_at_iso,
+            "first_seen_at": fetched_at_iso,
+            "location": location,
+            "openweather": snapshot_input.get("openweather"),
+            "poskobanjir": snapshot_input.get("poskobanjir"),
+            "bmkg_alerts": snapshot_input.get("bmkg_alerts"),
+        },
+        "pipeline_run": {
+            "execution_mode": run_config.execution_mode,
+            "started_at": fetched_at_iso,
+            "origin": run_config.origin,
+            "destination": run_config.destination,
+            "api_version": run_config.api_version,
+            "pipeline_version": run_config.pipeline_version,
+        },
+        "perception": {
+            "data_freshness_minutes": float(perception.data_freshness_minutes),
+            "snapshot_completeness": float(perception.snapshot_completeness),
+            "signal_presence": dict(perception.signal_presence),
+        },
+        "reasoning": {
+            "probability": float(reasoning.probability),
+            "confidence_score": float(reasoning.confidence_score),
+            "model_variant": reasoning.model_variant,
+        },
+        "evaluation": {
+            "system_status": _system_status_value(evaluation.system_status),
+            "risk_level": _risk_level_value(evaluation.risk_level),
+            "probability": float(evaluation.probability),
+            "confidence_score": float(evaluation.confidence_score),
+            "requires_manual_review": evaluation.requires_manual_review,
+        },
+        "decision": {
+            "system_status": status_value,
+            "requires_manual_review": decision.requires_manual_review,
+            "decision_reason": decision.decision_reason,
+            "data_validity": decision.data_validity,
+            "ml_execution_mode": decision.ml_execution_mode,
+            "risk_level": risk_value,
+            "probability": float(decision.probability),
+            "confidence_score": float(decision.confidence_score),
+            "is_safe_for_automation": decision.is_safe_for_automation,
+            "decision_timestamp": fetched_at_iso,
+        },
+        "finalize": {
+            "completed_at": fetched_at_iso,
+            "execution_time_ms": 0,
+            "final_decision": final_decision,
+        },
+    }
+
+
+def execute_pipeline_supabase(data: dict) -> dict:
+    """VPN-safe write path via Supabase RPC (port 443).
+
+    ``data`` is the flat payload produced by ``_serialize_pipeline_payload``.
+    Returns the function's JSON result ({snapshot_id, pipeline_run_id, ...,
+    status:'ok'}). Raises (never swallows) when the RPC reports no data.
+    """
+    from db.supabase_client import get_supabase_client
+
+    client = get_supabase_client()
+    result = client.rpc("fn_execute_pipeline", {"payload": data}).execute()
+    if result.data is None:
+        raise RuntimeError(f"fn_execute_pipeline RPC failed: {result}")
+    return result.data
+
+
+def _result_from_rpc(data: dict) -> PipelineExecutionResult:
+    """
+    Wrap fn_execute_pipeline's JSON result into a PipelineExecutionResult so the
+    routed write path returns the SAME type regardless of transport. The function
+    returns UUIDs as JSON strings; we parse them back into UUID objects.
+
+    Raises (never swallows) when an expected id is missing or malformed.
+    """
+    try:
+        return PipelineExecutionResult(
+            snapshot_id=UUID(str(data["snapshot_id"])),
+            pipeline_run_id=UUID(str(data["pipeline_run_id"])),
+            perception_id=UUID(str(data["perception_id"])),
+            reasoning_id=UUID(str(data["reasoning_id"])),
+            evaluation_id=UUID(str(data["evaluation_id"])),
+            decision_id=UUID(str(data["decision_id"])),
+        )
+    except (KeyError, ValueError, TypeError) as exc:
+        raise RuntimeError(
+            "fn_execute_pipeline returned an unexpected shape: {0!r}".format(data)
+        ) from exc
+
+
+def execute_pipeline_routed(
+    snapshot_input: Mapping[str, Any],
+    location: Optional[str],
+    perception: PerceptionPayload,
+    reasoning: ReasoningPayload,
+    evaluation: EvaluationPayload,
+    decision: DecisionPayload,
+    pipeline_run: Optional[PipelineRunConfig] = None,
+    connection: Optional[PgConnection] = None,
+    db_config: Optional[Psycopg2ConnectionConfig] = None,
+    now: Optional[datetime] = None,
+) -> PipelineExecutionResult:
+    """
+    Auto-route the pipeline write to psycopg2 (direct TCP) or Supabase RPC
+    (HTTPS/443, VPN-safe) based on db.connection_router.get_db_transport().
+
+    Mirrors execute_pipeline's signature exactly and ALWAYS returns a
+    PipelineExecutionResult: the psycopg2 branch returns it directly (unchanged
+    behaviour); the supabase branch wraps fn_execute_pipeline's JSON result into
+    one so callers (e.g. flood_pipeline._persist) can call .as_dict() regardless
+    of transport.
+    """
+    from db.connection_router import get_db_transport
+
+    transport = get_db_transport()
+    if transport == "psycopg2":
+        return execute_pipeline(
+            snapshot_input=snapshot_input,
+            location=location,
+            perception=perception,
+            reasoning=reasoning,
+            evaluation=evaluation,
+            decision=decision,
+            pipeline_run=pipeline_run,
+            connection=connection,
+            db_config=db_config,
+            now=now,
+        )
+
+    payload = _serialize_pipeline_payload(
+        snapshot_input=snapshot_input,
+        location=location,
+        perception=perception,
+        reasoning=reasoning,
+        evaluation=evaluation,
+        decision=decision,
+        run_config=pipeline_run or PipelineRunConfig(),
+        now=now if now is not None else datetime.now(timezone.utc),
+    )
+    return _result_from_rpc(execute_pipeline_supabase(payload))

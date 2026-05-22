@@ -612,7 +612,7 @@ class FloodDecisionPipeline:
                 PerceptionPayload,
                 PipelineRunConfig,
                 ReasoningPayload,
-                execute_pipeline,
+                execute_pipeline_routed,
             )
 
             location = snapshot.get("location") if isinstance(snapshot, dict) else None
@@ -684,7 +684,7 @@ class FloodDecisionPipeline:
                 confidence_score=confidence_persist,
                 is_safe_for_automation=bool(result.get("is_safe_for_automation", False)),
             )
-            ids = execute_pipeline(
+            ids = execute_pipeline_routed(
                 snapshot_input=snapshot,
                 location=location,
                 perception=perception_payload,
