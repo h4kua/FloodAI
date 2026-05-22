@@ -1,0 +1,16 @@
+# Railway deploy excludes. NOTE: models/realtime_native_bundle/ is intentionally
+# NOT excluded — api.main's lifespan calls load_runtime_bundle() at startup, which
+# raises FileNotFoundError if that bundle is missing, crashing the deploy. Keep it.
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+tests/
+notebooks/
+# DEM elevation tiles (~130MB). Elevation degrades gracefully to "unknown" when
+# absent (services/dem_elevation.py), so excluding them only drops elevation
+# features — it does not crash the app.
+data/elevation/
+*.tif
+.env

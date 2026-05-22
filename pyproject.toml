@@ -29,6 +29,10 @@ dependencies = [
     "psycopg2-binary>=2.9.9",
     "prometheus-client>=0.20.0",
     "prometheus-fastapi-instrumentator>=7.0.0",
+    # VPN-safe DB transport (Supabase RPC over HTTPS/443). Required by
+    # db/supabase_client.py + execute_pipeline_supabase; must be declared so
+    # Railway/Nixpacks installs it (it is not pulled in transitively).
+    "supabase>=2.0.0",
 ]
 
 [project.optional-dependencies]
