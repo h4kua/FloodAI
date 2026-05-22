@@ -40,8 +40,33 @@ def _format_time(value: Any) -> str:
 
 
 def _load_snapshot(path: Path | str) -> dict:
-    with open(path, encoding="utf-8") as fh:
-        return json.load(fh)
+    """
+    Load the realtime snapshot, Supabase-first.
+
+    Order: (1) latest snapshot from Supabase (survives Railway's ephemeral
+    filesystem), (2) the bundled JSON file at ``path``, (3) empty dict. Signature
+    and return type are unchanged. Runs in the dashboard's worker thread, so the
+    synchronous repository core is used directly (no event loop involved).
+    """
+    try:
+        from db.snapshot_repository import _load_latest_snapshot_sync
+
+        remote = _load_latest_snapshot_sync()
+    except Exception as exc:  # noqa: BLE001 — never break the dashboard on load.
+        remote = None
+        _log.warning("dashboard_snapshot_supabase_error", error=str(exc))
+    if remote:
+        _log.info("snapshot loaded from supabase")
+        return remote
+
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = json.load(fh)
+        _log.info("snapshot loaded from file")
+        return data
+    except Exception as exc:  # noqa: BLE001 — fall back to empty dict.
+        _log.warning("dashboard_snapshot_file_error", error=str(exc))
+        return {}
 
 
 def _extract_location(snapshot: dict) -> str:

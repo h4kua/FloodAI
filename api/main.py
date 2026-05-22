@@ -9,10 +9,13 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 import asyncio
 import os
 import hashlib
+import hmac
 import json
 import logging
+import time
 import uuid
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from functools import lru_cache
 from typing import Optional
 
@@ -22,6 +25,8 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from psycopg2.extras import Json
+# Hard dependency: a missing APScheduler must fail loudly at import (no try/except).
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from api.dashboard import build_demo_page
 from api.routes.agentic_llm import router as agentic_llm_router
@@ -425,14 +430,94 @@ async def _bounded_threadpool(fn, *args, **kwargs):
         ) from exc
 
 
+# ─── Background snapshot scheduler ─────────────────────────────────────────────
+# Module-level singleton so the health check can read scheduler.running. The
+# AsyncIOScheduler import is a hard dependency (see top of module) — never wrapped
+# in a try/except that would swallow a missing-package ImportError.
+scheduler = AsyncIOScheduler(timezone="UTC")
+
+_DEFAULT_REFRESH_INTERVAL_MIN = 15
+_REFRESH_INTERVAL_MIN_BOUND = 1
+_REFRESH_INTERVAL_MAX_BOUND = 60
+
+
+def _refresh_interval_minutes() -> int:
+    """
+    Resolve SNAPSHOT_REFRESH_INTERVAL_MINUTES (default 15). Falls back to 15 with a
+    WARNING when the value is invalid: non-int, < 1, or > 60.
+    """
+    raw = os.getenv("SNAPSHOT_REFRESH_INTERVAL_MINUTES")
+    if raw is None:
+        return _DEFAULT_REFRESH_INTERVAL_MIN
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        _log.warning(
+            f"invalid SNAPSHOT_REFRESH_INTERVAL_MINUTES={raw!r} (not an int); "
+            f"falling back to {_DEFAULT_REFRESH_INTERVAL_MIN}"
+        )
+        return _DEFAULT_REFRESH_INTERVAL_MIN
+    if not (_REFRESH_INTERVAL_MIN_BOUND <= value <= _REFRESH_INTERVAL_MAX_BOUND):
+        _log.warning(
+            f"SNAPSHOT_REFRESH_INTERVAL_MINUTES={value} out of range "
+            f"[{_REFRESH_INTERVAL_MIN_BOUND}, {_REFRESH_INTERVAL_MAX_BOUND}]; "
+            f"falling back to {_DEFAULT_REFRESH_INTERVAL_MIN}"
+        )
+        return _DEFAULT_REFRESH_INTERVAL_MIN
+    return value
+
+
+async def _scheduled_refresh() -> None:
+    """
+    Rebuild the realtime snapshot and persist it to Supabase. Never raises — every
+    failure is logged so a bad run cannot kill the scheduler or the event loop.
+    """
+    from db.snapshot_repository import save_snapshot
+    from services.snapshot_refresh import build_fresh_snapshot
+
+    started = time.perf_counter()
+    _log.info("scheduled_refresh_start")
+    try:
+        snapshot = await build_fresh_snapshot()
+        saved = await save_snapshot(snapshot)
+        duration_ms = int((time.perf_counter() - started) * 1000)
+        if not saved:
+            _log.warning(f"snapshot built but save failed (duration_ms={duration_ms})")
+            return
+        _log.info(f"scheduled_refresh_finish (duration_ms={duration_ms})")
+    except Exception as exc:  # noqa: BLE001 — scheduled job must never raise.
+        duration_ms = int((time.perf_counter() - started) * 1000)
+        _log.error(
+            f"scheduled_refresh_failed error_type={type(exc).__name__} "
+            f"error={exc} duration_ms={duration_ms}"
+        )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     configure_logging()
     load_runtime_bundle()
     app.state.pipeline = FloodDecisionPipeline(persist=os.getenv("DB_PERSISTENCE_ENABLED", "true").lower() == "true")
+
+    interval_minutes = _refresh_interval_minutes()
+    scheduler.add_job(
+        _scheduled_refresh,
+        "interval",
+        minutes=interval_minutes,
+        id="snapshot_refresh",
+        replace_existing=True,
+        max_instances=1,
+    )
+    scheduler.start()
+    _log.info(f"snapshot_scheduler_started (interval_minutes={interval_minutes})")
+    # Immediate refresh so a fresh Railway deploy updates the snapshot right away
+    # instead of waiting a full interval.
+    asyncio.create_task(_scheduled_refresh())
+
     try:
         yield
     finally:
+        scheduler.shutdown(wait=False)
         close_pool()
 
 
@@ -464,7 +549,10 @@ app.include_router(agentic_llm_router)
 @app.get("/healthz")
 @app.get("/health")
 async def liveness() -> dict[str, str]:
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "scheduler": "running" if scheduler.running else "stopped",
+    }
 
 
 @app.get("/readyz")
@@ -487,6 +575,86 @@ async def readiness() -> dict[str, str]:
 @app.get("/metrics")
 async def metrics() -> Response:
     return metrics_response()
+
+
+# Overall budget for one refresh (build + save); the builder has its own inner cap.
+_REFRESH_TIMEOUT_S = 45.0
+# Reject refreshes that arrive less than this after the last stored snapshot.
+_REFRESH_MIN_INTERVAL_S = 300.0
+
+
+def _parse_snapshot_ts(value: object) -> Optional[datetime]:
+    """Parse an ISO-8601 fetched_at_utc into an aware datetime, or None."""
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return dt if dt.tzinfo is not None else dt.replace(tzinfo=timezone.utc)
+
+
+@app.post("/internal/refresh-snapshot")
+async def refresh_snapshot(
+    x_internal_secret: Optional[str] = Header(default=None),
+) -> dict:
+    """
+    Rebuild the realtime snapshot and upsert it to Supabase (id='latest').
+
+    Auth: header ``X-Internal-Secret`` must equal env ``INTERNAL_SECRET``. When
+    ``INTERNAL_SECRET`` is unset the endpoint is disabled (503). Rate-limited to one
+    refresh per 5 minutes (checked against the stored snapshot). Bounded to 45s.
+    """
+    expected = os.getenv("INTERNAL_SECRET")
+    if not expected:
+        raise HTTPException(status_code=503, detail="endpoint disabled")
+    if not x_internal_secret or not hmac.compare_digest(x_internal_secret, expected):
+        raise HTTPException(status_code=401, detail="invalid internal secret")
+
+    from db.snapshot_repository import load_latest_snapshot, save_snapshot
+    from services.snapshot_refresh import build_fresh_snapshot, summarize_sources
+
+    # Rate limit: reject if the stored snapshot is younger than the min interval.
+    last = await load_latest_snapshot()
+    if last:
+        prev_ts = _parse_snapshot_ts(last.get("fetched_at_utc"))
+        if prev_ts is not None:
+            age_s = (datetime.now(timezone.utc) - prev_ts).total_seconds()
+            if 0 <= age_s < _REFRESH_MIN_INTERVAL_S:
+                raise HTTPException(
+                    status_code=429,
+                    detail=(
+                        f"snapshot refreshed {int(age_s)}s ago; "
+                        f"min interval {int(_REFRESH_MIN_INTERVAL_S)}s"
+                    ),
+                )
+
+    started = time.perf_counter()
+    try:
+        snapshot = await asyncio.wait_for(build_fresh_snapshot(), timeout=_REFRESH_TIMEOUT_S)
+    except asyncio.TimeoutError as exc:
+        raise HTTPException(status_code=504, detail="snapshot build timed out") from exc
+
+    sources = summarize_sources(snapshot)
+    # Only persist when at least one source produced real data, so a failed build
+    # never clobbers the last good snapshot in Supabase.
+    saved = await save_snapshot(snapshot) if sources["ok"] else False
+    duration_ms = int((time.perf_counter() - started) * 1000)
+
+    if not sources["ok"]:
+        status = "no_data"
+    elif saved:
+        status = "ok"
+    else:
+        status = "save_failed"
+
+    return {
+        "status": status,
+        "fetched_at": snapshot.get("fetched_at_utc"),
+        "sources_ok": sources["ok"],
+        "sources_failed": sources["failed"],
+        "duration_ms": duration_ms,
+    }
 
 
 @app.get("/demo", response_class=HTMLResponse)
