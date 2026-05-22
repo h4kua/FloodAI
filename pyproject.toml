@@ -36,6 +36,7 @@ dependencies = [
     # OpenAI-compatible client for the Groq LLM backend (primary LLM provider).
     # Used by services/llm_client.get_llm_client + agents/llm_orchestrator._call_groq_sync.
     "openai>=1.0.0",
+    "filelock>=3.12.0",
 ]
 
 [project.optional-dependencies]
