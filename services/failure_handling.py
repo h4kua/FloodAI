@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from services.plausibility_check import plausibility_failure_record
+from services.plausibility_check import plausibility_failure_record, sensor_fault_failure_record
 from services.constants import (
     BMKG_CERTAINTY_WEIGHTS,
     BMKG_SEVERITY_WEIGHTS,
@@ -384,6 +384,13 @@ def detect_failures(
     )
     if plausibility_failure is not None:
         failures.append(plausibility_failure)
+    sensor_fault = (
+        sensor_fault_failure_record(plausibility)
+        if isinstance(plausibility, dict)
+        else None
+    )
+    if sensor_fault is not None:
+        failures.append(sensor_fault)
     failures.extend(
         conflicting_signals(
             _fallback_conflict_features(snapshot, features),
@@ -394,6 +401,50 @@ def detect_failures(
     )
     failures.extend(detect_ood_failures(ood_detection))
     return failures
+
+
+_MASS_FAULT_FRACTION = 0.50
+
+
+def detect_sensor_delta_failures(
+    sensor_anomalies: list[dict],
+    total_stations: int,
+) -> list[dict]:
+    """
+    Return a HIGH failure record when >50% of stations have implausible
+    water-level deltas (rate-of-change spike). Returns an empty list otherwise.
+
+    Called after detect_failures() in ReasoningAgent so the HIGH record
+    is included in failure_modes before EvaluationAgent applies penalties.
+    """
+    if not sensor_anomalies or total_stations == 0:
+        return []
+
+    fraction = len(sensor_anomalies) / total_stations
+    if fraction <= _MASS_FAULT_FRACTION:
+        return []
+
+    anomalous_ids = [a.get("station", "?") for a in sensor_anomalies]
+    return [
+        {
+            "type": "mass_sensor_failure",
+            "severity": "high",
+            "message": (
+                f"{len(sensor_anomalies)}/{total_stations} stations "
+                f"({100 * fraction:.0f}%) report implausible water-level deltas. "
+                "Confidence degraded; output requires manual review."
+            ),
+            "confidence_penalty": 0.15,
+            "risk_escalation": False,
+            "detail": {
+                "affected_stations": anomalous_ids,
+                "anomaly_count": len(sensor_anomalies),
+                "total_stations": total_stations,
+                "fraction": round(fraction, 4),
+                "sensor_anomalies": sensor_anomalies,
+            },
+        }
+    ]
 
 
 def compute_confidence_penalty(failures: list[dict]) -> float:

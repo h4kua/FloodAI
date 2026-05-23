@@ -129,6 +129,9 @@ class EvaluationResult:
     plausibility: dict = field(default_factory=dict)
     # Additive DEM enrichment carried through to ActionAgent output.
     elevation: dict = field(default_factory=dict)
+    # Stations filtered due to implausible water-level delta (rate-of-change spike).
+    # Carried from PerceptionResult for ActionAgent output transparency.
+    sensor_anomalies: list[dict] = field(default_factory=list)
 
 
 class EvaluationAgent:
@@ -449,6 +452,7 @@ class EvaluationAgent:
             risk_state=risk_state,
             plausibility=getattr(perception, "plausibility", {}) or {},
             elevation=elevation_data,
+            sensor_anomalies=list(getattr(perception, "sensor_anomalies", []) or []),
         )
 
     def _freshness_penalty(self, freshness_minutes: float) -> float:

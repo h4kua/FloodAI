@@ -19,7 +19,7 @@ import logging
 import os
 from typing import TYPE_CHECKING
 
-from services.data_ingestion.tma_scraper import fetch_tma_data
+from services.data_ingestion.tma_scraper import build_tma_from_poskobanjir, fetch_tma_data
 from services.flood_zones import build_flood_zones
 from services.routing.route_planner import compute_route_safety, get_routes, select_best_route
 
@@ -77,6 +77,7 @@ class RoutingAgent:
         destination: str | None,
         *,
         now: "datetime | None" = None,
+        poskobanjir: "list[dict] | None" = None,
     ) -> dict:
         """
         Execute routing stage.
@@ -127,6 +128,23 @@ class RoutingAgent:
         )
 
         tma_result = fetch_tma_data(now=now, cache_state=self._tma_cache_state)
+        # When no proxy is configured and fetch returned STALE/empty, synthesise
+        # a TMA-compatible response from the poskobanjir station readings.
+        # These already carry per-station tinggi_air values with the same semantics.
+        # The fallback returns source="poskobanjir_fallback" so _tma_failure_record
+        # treats it as OK and does NOT emit external_source_unreliable.
+        if (
+            tma_result.get("status") == "STALE"
+            and not os.getenv("TMA_PROXY_URL", "")
+            and poskobanjir
+        ):
+            fallback = build_tma_from_poskobanjir(poskobanjir, now=now)
+            if fallback.get("status") == "OK":
+                tma_result = fallback
+                _log.info(
+                    "tma_poskobanjir_fallback stations=%d",
+                    len(fallback.get("data") or []),
+                )
         tma_failure = self._tma_failure_record(tma_result)
         confidence_adjustment = -_TMA_DEGRADED_PENALTY if tma_failure else 0.0
         has_coords = bool(origin and destination)

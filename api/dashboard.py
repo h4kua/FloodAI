@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from fastapi.responses import HTMLResponse
+from imblearn import pipeline
 
 from api.observability import get_logger
 from utils.paths import DEFAULT_REALTIME_SNAPSHOT
@@ -202,7 +203,8 @@ def build_demo_page(
     destination: Optional[str] = None,
 ) -> HTMLResponse:
     try:
-        result = pipeline.run_from_file(origin=origin, destination=destination)
+        snapshot_for_pipeline = _load_snapshot(DEFAULT_REALTIME_SNAPSHOT)
+        result = pipeline.run(snapshot_for_pipeline, origin=origin, destination=destination)
     except FileNotFoundError as exc:
         return HTMLResponse(
             _render_error_html("Snapshot file not found", "snapshot_unavailable"),

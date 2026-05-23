@@ -266,28 +266,28 @@ class TestImpossibleSensorInput:
 
     Why it matters
     --------------
-    A system that silently accepts impossible values will either produce a
-    dangerously confident prediction based on phantom data, or incorrectly
-    classify an extreme corruption as a flood event. The plausibility checker
-    and EvaluationAgent._requires_manual_review must both react.
+    A single bad sensor must not invalidate the entire snapshot. The system
+    quarantines the faulty station, continues pipeline execution with the
+    remaining stations, and emits a MEDIUM failure record for operators.
+    Environmental criticals (temp, humidity, pressure) still hard-fail the
+    snapshot — per-station quarantine applies only to water-level readings.
 
-    Expected behaviour
-    ------------------
-    * failure_modes contains type="implausible_input" with severity="high"
-    * system_status != "OK"
-    * requires_manual_review = True
-    * confidence_score is penalised (< 0.80)
+    Expected behaviour (per-station quarantine)
+    --------------------------------------------
+    * station "manggarai" quarantined → excluded from feature extraction
+    * failure_modes contains type="sensor_fault_quarantined" with severity="medium"
+    * NO type="implausible_input" for a station-only fault
+    * is_plausible=True, has_critical_violation=False in plausibility_assessment
+    * quarantined_stations=["manggarai"] in plausibility_assessment
+    * confidence_score penalised via sensor_reliability
     * Pipeline does NOT crash
     """
 
-    def test_flags_implausible_input(self, pipeline: FloodDecisionPipeline) -> None:
+    def test_emits_sensor_fault_quarantined(self, pipeline: FloodDecisionPipeline) -> None:
         """
-        STRICT INVARIANT: a value outside its physical bounds MUST emit an
-        'implausible_input' failure. The plausibility_check hard physical gate
-        guarantees that any single critical-severity violation forces
-        is_plausible=False regardless of how the aggregate score averages out.
-        Falling back to 'ood_input' is unacceptable — physical truth is
-        absolute, not statistical.
+        INVARIANT: a water-level value outside physical bounds MUST emit a
+        'sensor_fault_quarantined' failure — not crash the pipeline, not
+        emit 'implausible_input'. The station is quarantined, not the snapshot.
         """
         snapshot = make_base_snapshot()
         snapshot["poskobanjir"][0]["tinggi_air"] = 9999.0
@@ -295,54 +295,62 @@ class TestImpossibleSensorInput:
         result = pipeline.run(snapshot)
         assert_structural_validity(result)
 
-        assert "implausible_input" in _failure_types(result), (
-            f"INVARIANT VIOLATION: 'implausible_input' missing for tinggi_air=9999 cm "
-            f"(physical limit 2500 cm). Got failure types: {_failure_types(result)}\n"
-            "score_plausibility() must force is_plausible=False on any critical "
-            "violation; plausibility_failure_record() must then emit the failure."
+        assert "sensor_fault_quarantined" in _failure_types(result), (
+            f"INVARIANT VIOLATION: 'sensor_fault_quarantined' missing for tinggi_air=9999 cm. "
+            f"Got failure types: {_failure_types(result)}\n"
+            "sensor_fault_failure_record() must emit this when quarantined_stations is non-empty."
+        )
+        assert "implausible_input" not in _failure_types(result), (
+            f"'implausible_input' must NOT fire for a station-only water-level fault. "
+            f"Got failure types: {_failure_types(result)}\n"
+            "Station faults are quarantined; the hard gate fires only for environmental criticals."
         )
 
-    def test_implausible_failure_has_high_severity(
+    def test_sensor_fault_has_medium_severity(
         self, pipeline: FloodDecisionPipeline
     ) -> None:
         snapshot = make_base_snapshot()
         snapshot["poskobanjir"][0]["tinggi_air"] = 9999.0
 
         result = pipeline.run(snapshot)
-        implausible = [
-            f for f in result["failure_modes"] if f.get("type") == "implausible_input"
-        ]
-        assert implausible, (
-            f"No 'implausible_input' failure record found. "
+        fault = next(
+            (f for f in result["failure_modes"] if f.get("type") == "sensor_fault_quarantined"),
+            None,
+        )
+        assert fault is not None, (
+            f"No 'sensor_fault_quarantined' failure record found. "
             f"Got: {result['failure_modes']}"
         )
-        assert implausible[0]["severity"] == "high", (
-            f"Expected severity='high' for water_level=9999 cm (critical violation). "
-            f"Got: {implausible[0]['severity']}. "
-            "plausibility_failure_record() sets severity='high' when n_critical_violations > 0."
+        assert fault["severity"] == "medium", (
+            f"Expected severity='medium' for a quarantined station fault. "
+            f"Got: {fault['severity']}. "
+            "A single bad sensor is MEDIUM — pipeline continues with remaining stations."
         )
 
-    def test_system_status_not_ok(self, pipeline: FloodDecisionPipeline) -> None:
+    def test_plausibility_assessment_marks_quarantine(
+        self, pipeline: FloodDecisionPipeline
+    ) -> None:
+        """
+        plausibility_assessment is the PostgreSQL-queryable audit record.
+        A station-only fault must appear as quarantined_stations, NOT as
+        has_critical_violation=True / is_plausible=False.
+        """
         snapshot = make_base_snapshot()
         snapshot["poskobanjir"][0]["tinggi_air"] = 9999.0
 
         result = pipeline.run(snapshot)
-        assert result["system_status"] != "OK", (
-            f"POTENTIAL LOGIC FLAW: system_status='OK' with water_level=9999 cm. "
-            "A critical plausibility failure must downgrade system_status to at least "
-            "DEGRADED. Got: " + result["system_status"]
+        assessment = result.get("plausibility_assessment", {})
+        assert assessment.get("is_plausible") is True, (
+            f"is_plausible must be True for a station-only fault (station is quarantined, "
+            f"not the snapshot). Got: {assessment}"
         )
-
-    def test_requires_manual_review(self, pipeline: FloodDecisionPipeline) -> None:
-        snapshot = make_base_snapshot()
-        snapshot["poskobanjir"][0]["tinggi_air"] = 9999.0
-
-        result = pipeline.run(snapshot)
-        assert result["requires_manual_review"] is True, (
-            "POTENTIAL LOGIC FLAW: requires_manual_review=False for severity='high' "
-            "implausible_input failure. "
-            "EvaluationAgent._requires_manual_review checks for severe_implausible "
-            "(type='implausible_input' AND severity='high') — this must trigger True."
+        assert assessment.get("has_critical_violation") is False, (
+            f"has_critical_violation must be False: the hard gate fires only for "
+            f"environmental criticals, not quarantined stations. Got: {assessment}"
+        )
+        quarantined = assessment.get("quarantined_stations") or []
+        assert "manggarai" in quarantined, (
+            f"quarantined_stations must contain 'manggarai'. Got: {quarantined}"
         )
 
     def test_confidence_is_penalised(self, pipeline: FloodDecisionPipeline) -> None:
@@ -350,10 +358,9 @@ class TestImpossibleSensorInput:
         snapshot["poskobanjir"][0]["tinggi_air"] = 9999.0
 
         result = pipeline.run(snapshot)
-        assert result["confidence_score"] < 0.80, (
+        assert result["confidence_score"] < 0.90, (
             f"Confidence {result['confidence_score']:.4f} is suspiciously high for "
-            "a critical plausibility failure (confidence_penalty=0.15 should apply). "
-            "Expected < 0.80."
+            "a sensor fault (sensor_reliability penalty should apply). Expected < 0.90."
         )
 
     def test_does_not_crash(self, pipeline: FloodDecisionPipeline) -> None:
@@ -363,131 +370,47 @@ class TestImpossibleSensorInput:
         result = pipeline.run(snapshot)
         assert result["system_status"] != "PIPELINE_FAILURE", (
             "Pipeline returned PIPELINE_FAILURE (crashed) on impossible sensor input. "
-            "This is an unacceptable failure mode — the pipeline must degrade gracefully "
-            "and always return a structured response."
+            "The pipeline must degrade gracefully and always return a structured response."
+        )
+
+    def test_decision_not_invalid_input(self, pipeline: FloodDecisionPipeline) -> None:
+        """
+        A station-only fault must NOT produce INVALID_INPUT — the snapshot is
+        plausible (faulty station quarantined). Pipeline runs on the RISK path.
+        """
+        snapshot = make_base_snapshot()
+        snapshot["poskobanjir"][0]["tinggi_air"] = 9999.0
+
+        result = pipeline.run(snapshot)
+        assert result["decision_reason"] != "INVALID_INPUT", (
+            f"decision_reason must NOT be 'INVALID_INPUT' for a station-only fault. "
+            f"Got: {result['decision_reason']}. "
+            "Station quarantine leaves the snapshot plausible — L0 guard must not fire."
         )
 
     # ───────────────────────────────────────────────────────────────────────
-    # ARCHITECTURAL INVARIANT — ML AUTHORITY SUPPRESSION (L0 GUARD)
+    # ARCHITECTURAL INVARIANT — L0 HARD GATE PRESERVED FOR ENVIRONMENTAL CRITICALS
     # ───────────────────────────────────────────────────────────────────────
 
-    def test_ml_authority_suppressed_on_critical_violation(
+    def test_environmental_critical_still_hard_fails(
         self, pipeline: FloodDecisionPipeline
     ) -> None:
         """
-        HARD INVARIANT: when has_critical_violation=True, the ML model's risk_level
-        MUST NOT control the final risk_level. The decision engine's L0 INVALID
-        INPUT GUARD overrides ML output. Post-audit (Phase G canonical
-        passthrough), the L0 guard returns UNKNOWN — the WARNING-rewrite step
-        was intentionally removed. UNKNOWN is the canonical authoritative
-        marker; WARNING is accepted for legacy-compat builds.
+        HARD INVARIANT: the station-quarantine fix must NOT weaken the L0 gate
+        for environmental criticals. humidity=200% (physically impossible) must
+        still force is_plausible=False → implausible_input → INVALID_INPUT / UNKNOWN.
         """
         snapshot = make_base_snapshot()
-        snapshot["poskobanjir"][0]["tinggi_air"] = 9999.0
+        snapshot["openweather"]["main"]["humidity"] = 200.0  # violates [0, 100]
 
         result = pipeline.run(snapshot)
+        assert_structural_validity(result)
 
-        assert result["risk_level"] in {"UNKNOWN", "WARNING"}, (
-            f"INVARIANT VIOLATION: risk_level='{result['risk_level']}' for "
-            f"physically invalid input. L0 INVALID INPUT GUARD must force UNKNOWN "
-            f"(canonical) or WARNING (legacy-compat) — ML cannot have decision "
-            f"authority over inputs that failed the hard plausibility gate."
+        assert "implausible_input" in _failure_types(result), (
+            f"INVARIANT VIOLATION: 'implausible_input' missing for humidity=200%. "
+            f"Environmental criticals (non-station-scoped) must still hard-fail. "
+            f"Got: {_failure_types(result)}"
         )
-        assert result.get("decision_source") == "invalid_input_fallback", (
-            f"INVARIANT VIOLATION: decision_source='{result.get('decision_source')}' "
-            "for physically invalid input. Expected 'invalid_input_fallback' — the "
-            "L0 guard is the only legitimate source for this decision."
-        )
-
-    def test_l0_guard_trace_is_present(self, pipeline: FloodDecisionPipeline) -> None:
-        """The L0 invalid-input override must leave an audit-grade trace marker."""
-        snapshot = make_base_snapshot()
-        snapshot["poskobanjir"][0]["tinggi_air"] = 9999.0
-
-        result = pipeline.run(snapshot)
-        trace_text = " ".join(result.get("decision_trace", []))
-        # Canonical trace marker is "[L0_PHYSICAL]" (DecisionAuthority.L0_PHYSICAL.value).
-        assert "[L0_PHYSICAL]" in trace_text, (
-            f"INVARIANT VIOLATION: decision_trace lacks the L0_PHYSICAL marker. "
-            f"The architectural override path must be auditable end-to-end. "
-            f"Got trace: {result.get('decision_trace')}"
-        )
-
-    def test_plausibility_assessment_marks_critical_violation(
-        self, pipeline: FloodDecisionPipeline
-    ) -> None:
-        """
-        plausibility_assessment is the PostgreSQL-queryable audit record for
-        physical input integrity. has_critical_violation=True must persist
-        through to the output dict.
-        """
-        snapshot = make_base_snapshot()
-        snapshot["poskobanjir"][0]["tinggi_air"] = 9999.0
-
-        result = pipeline.run(snapshot)
-        assessment = result.get("plausibility_assessment", {})
-        assert assessment.get("has_critical_violation") is True, (
-            f"plausibility_assessment.has_critical_violation must be True for "
-            f"tinggi_air=9999. Got: {assessment}"
-        )
-        assert assessment.get("is_plausible") is False, (
-            f"plausibility_assessment.is_plausible must be False when a critical "
-            f"violation is present. Got: {assessment}"
-        )
-
-    def test_is_safe_for_automation_is_false(
-        self, pipeline: FloodDecisionPipeline
-    ) -> None:
-        """
-        Single-bool downstream automation contract. Must be False whenever the
-        prediction is unsafe to act on without human verification.
-        """
-        snapshot = make_base_snapshot()
-        snapshot["poskobanjir"][0]["tinggi_air"] = 9999.0
-
-        result = pipeline.run(snapshot)
-        assert result.get("is_safe_for_automation") is False, (
-            f"is_safe_for_automation must be False for physically invalid input. "
-            f"Got: {result.get('is_safe_for_automation')}. "
-            "Downstream automation must NEVER act on this prediction."
-        )
-
-    def test_disambiguation_layer_for_invalid_input(
-        self, pipeline: FloodDecisionPipeline
-    ) -> None:
-        """
-        End-to-end positive check: physically invalid input produces the
-        complete invalid-input contract — INVALID data, INVALID_INPUT reason,
-        SHADOW_ONLY ML, conservative WARNING risk, unsafe for automation.
-        """
-        snapshot = make_base_snapshot()
-        snapshot["poskobanjir"][0]["tinggi_air"] = 9999.0
-
-        result = pipeline.run(snapshot)
-
-        assert result["decision_reason"] == "INVALID_INPUT", (
-            f"decision_reason must be 'INVALID_INPUT' for physically invalid input. "
-            f"Got: {result['decision_reason']}"
-        )
-        assert result["data_validity"] == "INVALID", (
-            f"data_validity must be 'INVALID' when has_critical_violation=True. "
-            f"Got: {result['data_validity']}"
-        )
-        assert result["ml_execution_mode"] == "SHADOW_ONLY", (
-            f"ml_execution_mode must be 'SHADOW_ONLY' when L0 guard fires. "
-            f"Got: {result['ml_execution_mode']}"
-        )
-        # Post-audit Phase G: canonical L0 returns UNKNOWN (the authoritative
-        # marker that the system has no trustworthy basis to act). The legacy
-        # rewrite to WARNING was intentionally removed; the disambiguation
-        # layer above (data_validity=INVALID, ml_execution_mode=SHADOW_ONLY,
-        # is_safe_for_automation=False) carries the safety semantics.
-        # WARNING is accepted for legacy-compat builds.
-        assert result["risk_level"] in {"UNKNOWN", "WARNING"}, (
-            f"risk_level must be 'UNKNOWN' (canonical) or 'WARNING' "
-            f"(legacy-compat) as L0 fallback. Got: {result['risk_level']}"
-        )
-        assert result["is_safe_for_automation"] is False
 
     # NOTE — A positive-control "is_safe_for_automation=True for normal input"
     # cannot be enforced in this test harness because the live TMA scraping

@@ -177,27 +177,42 @@ def score_plausibility(snapshot: dict) -> dict:
             })
 
     # ── Water level bounds (per Posko Banjir station) ────────────────────────
+    # Per-station triage: a physically impossible reading (severity="critical")
+    # is treated as a sensor fault and quarantined — the station is excluded
+    # from the aggregate rather than failing the entire snapshot.
+    # Non-station criticals (temp, humidity, pressure) still hard-fail below.
     posko = snapshot.get("poskobanjir") or []
-    wl_scores: list[float] = []
+    wl_scores: list[float] = []      # non-faulted stations only
+    station_faults: list[dict] = []  # critical-severity water-level violations
+
     for station in posko:
         wl = station.get("tinggi_air")
         if wl is None:
             continue
         n_lo, n_hi, p_lo, p_hi = _BOUNDS["water_level_cm"]
         score, severity = _field_plausibility(float(wl), n_lo, n_hi, p_lo, p_hi)
-        wl_scores.append(score)
-        if severity != "ok":
-            violations.append({
-                "field": f"water_level_cm[{station.get('id', '?')}]",
-                "value": wl,
-                "normal_range": [n_lo, n_hi],
-                "physical_bounds": [p_lo, p_hi],
-                "score": score,
-                "severity": severity,
-            })
+        entry = {
+            "field": f"water_level_cm[{station.get('id', '?')}]",
+            "value": wl,
+            "normal_range": [n_lo, n_hi],
+            "physical_bounds": [p_lo, p_hi],
+            "score": score,
+            "severity": severity,
+        }
+        if severity == "critical":
+            station_faults.append(entry)
+            violations.append(entry)
+            # Exclude from wl_scores: a quarantined sensor must not contaminate
+            # the aggregate for the remaining healthy stations.
+        else:
+            if severity != "ok":
+                violations.append(entry)
+            wl_scores.append(score)
+
     if wl_scores:
-        # Any station being impossible contaminates the full batch.
         field_scores["water_level_cm"] = round(min(wl_scores), 4)
+    # When all stations are quarantined, water_level_cm is absent from
+    # field_scores — no false 0.0 penalty on the aggregate.
 
     # ── Combination plausibility checks ─────────────────────────────────────
     combo_flags: list[dict] = []
@@ -233,18 +248,34 @@ def score_plausibility(snapshot: dict) -> dict:
     overall = round(sum(field_scores.values()) / len(field_scores), 4)
 
     # ── HARD PHYSICAL GATE (CRITICAL safety invariant) ───────────────────────
-    # Any single field outside its physical bounds (severity="critical") OR any
-    # impossible field combination (combo_flag with score=0.0) makes the entire
-    # observation invalid — averaging cannot dilute physical impossibility.
+    # Any non-station-scoped field outside its physical bounds (severity="critical")
+    # OR any impossible field combination (combo_flag with score=0.0) makes the
+    # entire observation invalid — averaging cannot dilute physical impossibility.
     #
-    # Without this gate, a single corrupted sensor (e.g. tinggi_air=9999 cm,
-    # field score 0.0) was being diluted by 6 normal weather fields to an
-    # aggregate ~0.857, passing the is_plausible threshold and reaching the
-    # ML model as trusted data — producing phantom DANGER predictions.
-    has_critical_field   = any(v.get("severity") == "critical" for v in violations)
+    # Station-scoped water-level criticals are EXCLUDED from this gate: they
+    # represent a single bad sensor, not a corrupt feed, and the station is
+    # quarantined rather than discarded. Environmental criticals (temp, humidity,
+    # pressure, wind) remain as hard-fail triggers — those indicate a broken
+    # upstream feed where no individual reading can be trusted.
+    _STATION_FAULT_PREFIX = "water_level_cm["
+
+    has_critical_non_station = any(
+        v.get("severity") == "critical"
+        and not v.get("field", "").startswith(_STATION_FAULT_PREFIX)
+        for v in violations
+    )
     has_impossible_combo = any(c.get("score", 1.0) == 0.0 for c in combo_flags)
-    has_critical_violation = has_critical_field or has_impossible_combo
+    has_critical_violation = has_critical_non_station or has_impossible_combo
     is_plausible = (overall >= 0.50) and not has_critical_violation
+
+    # Extract station IDs for the quarantine list so callers can filter them out.
+    quarantined_stations: list[str] = []
+    for fault in station_faults:
+        field = fault.get("field", "")
+        if "[" in field and field.endswith("]"):
+            sid = field[field.index("[") + 1 : -1]
+            if sid != "?":
+                quarantined_stations.append(sid)
 
     return {
         "plausibility_score": overall,
@@ -253,6 +284,36 @@ def score_plausibility(snapshot: dict) -> dict:
         "violations": violations,
         "field_scores": field_scores,
         "combo_flags": combo_flags,
+        "station_faults": station_faults,
+        "quarantined_stations": quarantined_stations,
+    }
+
+
+def sensor_fault_failure_record(plausibility: dict) -> dict | None:
+    """
+    Return a MEDIUM failure record when one or more stations were quarantined
+    for reporting a physically impossible water level. Returns None when no
+    stations were quarantined.
+
+    Carries confidence_penalty=0.0 because the penalty is already applied by
+    compute_sensor_reliability() in confidence_engine.py.
+    """
+    quarantined = plausibility.get("quarantined_stations") or []
+    if not quarantined:
+        return None
+    return {
+        "type": "sensor_fault_quarantined",
+        "severity": "medium",
+        "message": (
+            f"Station(s) {quarantined} excluded: water_level exceeds physical bound. "
+            "Pipeline continues with remaining stations."
+        ),
+        "confidence_penalty": 0.0,
+        "risk_escalation": False,
+        "detail": {
+            "affected_stations": quarantined,
+            "station_faults": plausibility.get("station_faults", []),
+        },
     }
 
 

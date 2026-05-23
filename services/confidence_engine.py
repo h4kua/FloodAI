@@ -18,6 +18,14 @@ _OOD_PENALTIES = {
     "SEVERE_ANOMALOUS": 0.20,
 }
 
+QUARANTINE_CONFIDENCE_PENALTY = 0.05
+
+
+def apply_sensor_fault_penalty(base_confidence: float, quarantined_count: int) -> float:
+    """Subtract a per-station penalty for quarantined sensor readings, capped at 0.20."""
+    penalty = min(quarantined_count * QUARANTINE_CONFIDENCE_PENALTY, 0.20)
+    return max(base_confidence - penalty, 0.0)
+
 
 @dataclass(frozen=True)
 class OODAssessment:
@@ -97,6 +105,10 @@ def compute_sensor_reliability(perception, failure_modes: list[dict]) -> float:
 
     if plausibility.get("has_critical_violation"):
         reliability -= 0.35
+
+    quarantined_count = len(plausibility.get("quarantined_stations") or [])
+    if quarantined_count > 0:
+        reliability = apply_sensor_fault_penalty(reliability, quarantined_count)
 
     if any(f.get("type") == "external_source_unreliable" for f in failure_modes):
         reliability -= 0.20

@@ -348,6 +348,66 @@ def _degraded_response(
     )
 
 
+# ─── Poskobanjir fallback ─────────────────────────────────────────────────────
+
+
+def build_tma_from_poskobanjir(
+    stations: list[dict],
+    *,
+    now: datetime | None = None,
+) -> dict:
+    """
+    Synthesise a TMA-compatible response from poskobanjir station tinggi_air
+    readings. Used when TMA_PROXY_URL is not configured so the pipeline can
+    continue without firing external_source_unreliable every run.
+
+    Returns status="OK" with source="poskobanjir_fallback" when at least one
+    station carries a valid tinggi_air value; status="STALE" when none do.
+    The caller (RoutingAgent) is responsible for deciding when to use this
+    instead of fetch_tma_data.
+    """
+    ref_now = now if now is not None else _utcnow()
+    records: list[dict] = []
+    for station in (stations or []):
+        raw = station.get("tinggi_air")
+        try:
+            height = float(raw) if raw not in (None, "") else None
+        except (TypeError, ValueError):
+            height = None
+        if height is None:
+            continue
+        if math.isnan(height) or math.isinf(height) or height < 0 or height > _height_max_cm():
+            continue
+        records.append(
+            {
+                "time": str(station.get("waktu") or station.get("time") or "N/A"),
+                "height_cm": height,
+                "station_id": str(station.get("id") or station.get("id_pintu_air") or "?"),
+            }
+        )
+
+    if not records:
+        return _build_response(
+            status="STALE",
+            reason=(
+                "poskobanjir_fallback: no valid tinggi_air readings "
+                "found in station data — TMA signals unavailable."
+            ),
+            source="poskobanjir_fallback",
+            data=[],
+            now=ref_now,
+        )
+
+    return _build_response(
+        status="OK",
+        reason=f"poskobanjir_fallback: synthesised from {len(records)} station reading(s).",
+        source="poskobanjir_fallback",
+        data=records,
+        now=ref_now,
+        fetched_at=ref_now,
+    )
+
+
 # ─── Public API ──────────────────────────────────────────────────────────────
 
 

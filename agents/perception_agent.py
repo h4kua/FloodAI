@@ -10,9 +10,22 @@ Explicitly does NOT make risk decisions — that belongs to ReasoningAgent.
 
 from __future__ import annotations
 
+import logging
+import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
+
+logger = logging.getLogger("flood.perception")
+
+# Configurable via SENSOR_MAX_DELTA_CM env var; per-station override via
+# station record field "max_delta_cm". Default 500 cm covers the realistic
+# worst-case Ciliwung flood surge (Manggarai highest-ever ≈ 1050 cm, rising
+# from ~200 cm baseline in ≈ 6 readings = ~140 cm/step; 500 cm is >3× that).
+_SENSOR_MAX_DELTA_DEFAULT: float = float(os.getenv("SENSOR_MAX_DELTA_CM", "500"))
+# Fraction of total stations that must be anomalous before the HIGH mass-failure
+# gate fires. Below this, anomalies are filtered quietly with sensor_anomalies list.
+_MASS_FAULT_FRACTION: float = 0.50
 
 from services.bmkg_filter import filter_jakarta_bmkg_alerts
 from services.bnpb_context import VulnerabilityContext, get_vulnerability_context
@@ -45,6 +58,12 @@ class PerceptionResult:
     # Physical plausibility score 0.0–1.0 from score_plausibility().
     plausibility_score: float = 1.0
     plausibility: dict = field(default_factory=dict)
+    # Station IDs quarantined for physically impossible water-level readings.
+    # These stations are removed from poskobanjir before feature extraction.
+    quarantined_stations: list[str] = field(default_factory=list)
+    # Stations filtered due to an implausible water-level delta (rate-of-change
+    # spike). Each entry: {"station", "reason", "value", "current_level", "previous_level"}.
+    sensor_anomalies: list[dict] = field(default_factory=list)
     # Per-station hydrology assessment from analyze_hydrology().
     hydrology_assessment: HydrologyAssessment = field(default_factory=HydrologyAssessment)
     # Non-blocking issues noted during parsing. No risk decisions made here.
@@ -106,14 +125,56 @@ class PerceptionAgent:
                 "Snapshot contains no poskobanjir water-level records — hydrology "
                 "signals will rely on cached or external TMA data if available."
             )
-        signal_presence = self._assess_signal_presence(openweather, poskobanjir, bmkg_alerts)
-        raw_features = self._extract_raw_features(openweather, poskobanjir, bmkg_alerts)
-        # score_plausibility returns a dict; extract the float here so
-        # PerceptionResult.plausibility_score is always a proper float as typed.
-        # Storing the raw dict previously forced downstream agents to carry a
-        # defensive dict-branch — fixing at the source removes that ambiguity.
+
+        # Score plausibility on the raw snapshot first so we can identify and
+        # quarantine stations before any feature extraction reads their values.
         plausibility_dict  = score_plausibility(snapshot)
         plausibility_float = float(plausibility_dict.get("plausibility_score", 1.0))
+
+        quarantined = plausibility_dict.get("quarantined_stations") or []
+        if quarantined:
+            logger.warning(
+                "quarantine_stations count=%d ids=%s",
+                len(quarantined), quarantined,
+            )
+            warnings.append(
+                f"Station(s) {quarantined} quarantined: water_level exceeds physical bound. "
+                "Excluded from feature extraction."
+            )
+            poskobanjir = [s for s in poskobanjir if s.get("id") not in quarantined]
+
+        # ── Delta-rate anomaly detection ─────────────────────────────────────
+        # Run on the post-physical-bounds list so already-quarantined stations
+        # are not double-counted. Uses per-station "max_delta_cm" if present,
+        # falling back to the deployment-wide env-var default.
+        delta_anomalies = self._detect_delta_anomalies(poskobanjir, _SENSOR_MAX_DELTA_DEFAULT)
+        if delta_anomalies:
+            anomalous_ids = [a["station"] for a in delta_anomalies]
+            logger.warning(
+                "delta_anomaly_stations count=%d ids=%s",
+                len(anomalous_ids), anomalous_ids,
+            )
+            warnings.append(
+                f"Station(s) {anomalous_ids} excluded: water_level delta exceeds threshold. "
+                "Filtered before feature extraction."
+            )
+            poskobanjir = [s for s in poskobanjir if s.get("id") not in anomalous_ids]
+
+        # >50% gate — both quarantine types combined against the original raw count.
+        total_raw = len(snapshot.get("poskobanjir") or [])
+        total_faulted = len(quarantined) + len(delta_anomalies)
+        if total_raw > 0 and (total_faulted / total_raw) > _MASS_FAULT_FRACTION:
+            logger.error(
+                "mass_sensor_failure total=%d faulted=%d fraction=%.2f",
+                total_raw, total_faulted, total_faulted / total_raw,
+            )
+            warnings.append(
+                f"MASS_SENSOR_FAILURE: {total_faulted}/{total_raw} stations faulted "
+                f"({100 * total_faulted / total_raw:.0f}%) — confidence degraded."
+            )
+
+        signal_presence = self._assess_signal_presence(openweather, poskobanjir, bmkg_alerts)
+        raw_features = self._extract_raw_features(openweather, poskobanjir, bmkg_alerts)
         water_level_delta = self._extract_water_level_delta(snapshot, poskobanjir)
         hydrology = analyze_hydrology(
             poskobanjir,
@@ -276,6 +337,8 @@ class PerceptionAgent:
             raw_features=raw_features,
             plausibility_score=plausibility_float,
             plausibility=plausibility_dict,
+            quarantined_stations=quarantined,
+            sensor_anomalies=delta_anomalies,
             hydrology_assessment=hydrology,
             perception_warnings=warnings,
             vulnerability_context=vuln_context,
@@ -414,6 +477,55 @@ class PerceptionAgent:
         if not thresholds:
             return None
         return max(thresholds)
+
+    def _detect_delta_anomalies(
+        self,
+        stations: list[dict],
+        max_delta_default: float,
+    ) -> list[dict]:
+        """
+        Flag stations whose water level jumped by more than max_delta_default cm
+        (or the station-level override "max_delta_cm") since the previous reading.
+
+        Stations with no previous reading are skipped — missing history is never
+        a false positive. Returns a list of anomaly dicts, one per flagged station.
+        """
+        anomalies: list[dict] = []
+        for s in stations:
+            current = self._safe_float(s.get("tinggi_air"))
+            if current is None:
+                continue
+            threshold = float(s.get("max_delta_cm") or max_delta_default)
+
+            previous: float | None = None
+            for key in self._PREVIOUS_LEVEL_KEYS:
+                previous = self._safe_float(s.get(key))
+                if previous is not None:
+                    break
+
+            if previous is None:
+                history = self._extract_numeric_series(s)
+                if len(history) >= 2:
+                    previous = history[-2]
+
+            if previous is None:
+                continue  # no baseline — cannot assert anomaly
+
+            delta = abs(current - previous)
+            if delta > threshold:
+                anomalies.append(
+                    {
+                        "station": s.get("id", "?"),
+                        "reason": (
+                            f"water_level_delta {delta:.0f} cm exceeds "
+                            f"threshold {threshold:.0f} cm"
+                        ),
+                        "value": delta,
+                        "current_level": current,
+                        "previous_level": previous,
+                    }
+                )
+        return anomalies
 
     def _safe_float(self, value: object) -> float | None:
         try:

@@ -240,6 +240,11 @@ class ActionAgent:
             # those whose inputs failed the gate (has_critical_violation=True).
             "plausibility_assessment": self._format_plausibility(evaluation.plausibility),
 
+            # ── Sensor anomaly transparency ──────────────────────────────────
+            # Stations excluded from feature extraction due to implausible
+            # water-level deltas (rate-of-change spikes). Empty list when clean.
+            "sensor_anomalies": list(getattr(evaluation, "sensor_anomalies", []) or []),
+
             # ── Failure transparency ─────────────────────────────────────────
             "failure_modes": self._format_failures(evaluation.failure_modes),
 

@@ -396,6 +396,7 @@ class FloodDecisionPipeline:
                 origin,
                 destination,
                 now=now_utc,
+                poskobanjir=list(getattr(perception, "poskobanjir", []) or []),
             )
             result["safe_route"] = routing["safe_route"]
             result["tma_data"] = routing["tma_data"]
