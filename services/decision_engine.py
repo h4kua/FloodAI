@@ -60,6 +60,7 @@ _AUTHORITY_TO_SOURCE = {
     DecisionAuthority.L1_SIAGA:    "physical_override",
     DecisionAuthority.L1_5_MULTI:  "signal_override",
     DecisionAuthority.L1_7_BMKG_SAFETY_FLOOR: "bmkg_safety_floor",
+    DecisionAuthority.L1_8_HYDRO_FLOOR: "hydro_floor",
     DecisionAuthority.L2_INTEGRITY: "system_guardrail",
     DecisionAuthority.L3_ML:       "ml_adaptive",
     DecisionAuthority.L4_TREND:    "trend_informed",

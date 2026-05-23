@@ -244,6 +244,9 @@ class ActionAgent:
             # Stations excluded from feature extraction due to implausible
             # water-level deltas (rate-of-change spikes). Empty list when clean.
             "sensor_anomalies": list(getattr(evaluation, "sensor_anomalies", []) or []),
+            # Stations excluded because their tanggal was > STATION_STALE_HOURS old
+            # relative to snapshot fetched_at_utc. Empty list when all stations are fresh.
+            "stale_stations": list(getattr(evaluation, "stale_stations", []) or []),
 
             # ── Failure transparency ─────────────────────────────────────────
             "failure_modes": self._format_failures(evaluation.failure_modes),

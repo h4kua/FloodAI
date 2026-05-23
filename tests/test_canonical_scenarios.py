@@ -210,7 +210,7 @@ _SCENARIOS: List[Scenario] = [
     ),
     Scenario(
         name="l1_6_rapid_hydrological_escalation",
-        # water_ratio=0.80: below L1 (0.95) and L1.5 (0.85) thresholds
+        # water_ratio=0.80: below L1 (0.90) and L1.5 (0.85) thresholds
         perc=_perc(water_ratio=0.80, rain_1h=5.0, bmkg=0.10),
         reason=_reason(prob=0.40),
         physical=_phys(rapid=True, hydro=0.55),

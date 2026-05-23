@@ -132,6 +132,9 @@ class EvaluationResult:
     # Stations filtered due to implausible water-level delta (rate-of-change spike).
     # Carried from PerceptionResult for ActionAgent output transparency.
     sensor_anomalies: list[dict] = field(default_factory=list)
+    # Stations excluded because their tanggal was > STATION_STALE_HOURS old.
+    # Carried from PerceptionResult for ActionAgent output transparency.
+    stale_stations: list[dict] = field(default_factory=list)
 
 
 class EvaluationAgent:
@@ -453,6 +456,7 @@ class EvaluationAgent:
             plausibility=getattr(perception, "plausibility", {}) or {},
             elevation=elevation_data,
             sensor_anomalies=list(getattr(perception, "sensor_anomalies", []) or []),
+            stale_stations=list(getattr(perception, "stale_stations", []) or []),
         )
 
     def _freshness_penalty(self, freshness_minutes: float) -> float:

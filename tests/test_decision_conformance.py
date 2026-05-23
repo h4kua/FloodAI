@@ -509,6 +509,7 @@ def test_decision_source_values_are_stable():
         "physical_override",
         "signal_override",
         "bmkg_safety_floor",
+        "hydro_floor",
         "system_guardrail",
         "ml_adaptive",
         "trend_informed",
@@ -558,11 +559,12 @@ def test_canonical_decide_L0_via_completeness():
 
 
 def test_canonical_decide_L1_5_compound_event():
+    # water_ratio=0.88: above L1.5 water threshold (0.85) but below L1 (0.90)
     perception = PerceptionInputs(
         physically_plausible=True,
         completeness=0.96,
         freshness_min=5.0,
-        max_water_level_ratio=0.92,
+        max_water_level_ratio=0.88,
         rainfall_1h_mm=72.0,
         bmkg_max_severity=0.85,
     )

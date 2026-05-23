@@ -26,6 +26,9 @@ _SENSOR_MAX_DELTA_DEFAULT: float = float(os.getenv("SENSOR_MAX_DELTA_CM", "500")
 # Fraction of total stations that must be anomalous before the HIGH mass-failure
 # gate fires. Below this, anomalies are filtered quietly with sensor_anomalies list.
 _MASS_FAULT_FRACTION: float = 0.50
+# Maximum age (hours) of a station's `tanggal` relative to snapshot `fetched_at_utc`
+# before the station is excluded from ratio/hydrology calculations.
+_STATION_STALE_HOURS: float = float(os.getenv("STATION_STALE_HOURS", "2"))
 
 from services.bmkg_filter import filter_jakarta_bmkg_alerts
 from services.bnpb_context import VulnerabilityContext, get_vulnerability_context
@@ -64,6 +67,10 @@ class PerceptionResult:
     # Stations filtered due to an implausible water-level delta (rate-of-change
     # spike). Each entry: {"station", "reason", "value", "current_level", "previous_level"}.
     sensor_anomalies: list[dict] = field(default_factory=list)
+    # Stations whose `tanggal` is > STATION_STALE_HOURS old relative to snapshot
+    # `fetched_at_utc`. Excluded from water level ratio and hydrology calculations.
+    # Each entry: {"station", "reason", "tanggal", "age_hours"}.
+    stale_stations: list[dict] = field(default_factory=list)
     # Per-station hydrology assessment from analyze_hydrology().
     hydrology_assessment: HydrologyAssessment = field(default_factory=HydrologyAssessment)
     # Non-blocking issues noted during parsing. No risk decisions made here.
@@ -160,9 +167,37 @@ class PerceptionAgent:
             )
             poskobanjir = [s for s in poskobanjir if s.get("id") not in anomalous_ids]
 
-        # >50% gate — both quarantine types combined against the original raw count.
+        # ── Stale station detection ───────────────────────────────────────────
+        # Reference: snapshot fetched_at_utc (not system clock) for reproducibility.
+        # Stations with tanggal > STATION_STALE_HOURS old are excluded from
+        # water level ratio and hydrology calculations but surfaced explicitly.
+        _fetched_at_raw = snapshot.get("fetched_at_utc")
+        _reference_dt: datetime | None = None
+        try:
+            _reference_dt = datetime.fromisoformat(
+                str(_fetched_at_raw).replace("Z", "+00:00")
+            )
+        except (ValueError, TypeError):
+            pass
+
+        stale_stations: list[dict] = []
+        if _reference_dt is not None:
+            stale_stations = self._detect_stale_stations(poskobanjir, _reference_dt)
+        if stale_stations:
+            stale_ids = [s["station"] for s in stale_stations]
+            logger.warning(
+                "stale_stations count=%d ids=%s",
+                len(stale_ids), stale_ids,
+            )
+            warnings.append(
+                f"Station(s) {stale_ids} excluded: tanggal > {_STATION_STALE_HOURS:.0f}h old "
+                "relative to fetched_at_utc. Excluded from water level and hydrology calculations."
+            )
+            poskobanjir = [s for s in poskobanjir if s.get("id") not in stale_ids]
+
+        # >50% gate — all fault types combined against the original raw count.
         total_raw = len(snapshot.get("poskobanjir") or [])
-        total_faulted = len(quarantined) + len(delta_anomalies)
+        total_faulted = len(quarantined) + len(delta_anomalies) + len(stale_stations)
         if total_raw > 0 and (total_faulted / total_raw) > _MASS_FAULT_FRACTION:
             logger.error(
                 "mass_sensor_failure total=%d faulted=%d fraction=%.2f",
@@ -339,6 +374,7 @@ class PerceptionAgent:
             plausibility=plausibility_dict,
             quarantined_stations=quarantined,
             sensor_anomalies=delta_anomalies,
+            stale_stations=stale_stations,
             hydrology_assessment=hydrology,
             perception_warnings=warnings,
             vulnerability_context=vuln_context,
@@ -526,6 +562,42 @@ class PerceptionAgent:
                     }
                 )
         return anomalies
+
+    def _detect_stale_stations(
+        self,
+        stations: list[dict],
+        reference_dt: datetime,
+    ) -> list[dict]:
+        """
+        Return stations whose `tanggal` timestamp is older than _STATION_STALE_HOURS
+        relative to `reference_dt` (snapshot fetched_at_utc).
+
+        Stations with no parseable tanggal are skipped — absence of a timestamp
+        is not treated as staleness to avoid false positives on partial records.
+        """
+        stale: list[dict] = []
+        for s in stations:
+            tanggal = s.get("tanggal")
+            if not tanggal:
+                continue
+            try:
+                station_dt = datetime.fromisoformat(
+                    str(tanggal).replace("Z", "+00:00")
+                )
+            except (ValueError, TypeError):
+                continue
+            age_hours = (reference_dt - station_dt).total_seconds() / 3600.0
+            if age_hours > _STATION_STALE_HOURS:
+                stale.append({
+                    "station": s.get("id", "?"),
+                    "reason": (
+                        f"tanggal {age_hours:.1f}h old "
+                        f"(threshold {_STATION_STALE_HOURS:.1f}h)"
+                    ),
+                    "tanggal": str(tanggal),
+                    "age_hours": round(age_hours, 2),
+                })
+        return stale
 
     def _safe_float(self, value: object) -> float | None:
         try:

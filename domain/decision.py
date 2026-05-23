@@ -9,12 +9,13 @@ the layering is explicit and the chosen layer is recorded in
 
 Decision hierarchy (top wins, evaluated top-to-bottom):
 
-  L0  PHYSICAL  - invalid input -> UNKNOWN/FAIL (non-bypassable)
-  L1  SIAGA     - water_level_ratio >= 0.95 anywhere -> DANGER (CRITICAL_HYDROLOGY)
-  L1.5 MULTI    - >=2 of {rainfall>=60, water>=0.85, bmkg>=0.80} -> DANGER (COMPOUND_EVENT)
-  L2  INTEGRITY - severe failures (>=HIGH, risk_escalation) -> escalate one level
-  L3  ML        - calibrated probability vs adaptive thresholds
-  L4  TREND     - sustained upward -> WARNING->DANGER (one-way, asymmetric)
+  L0   PHYSICAL       - invalid input -> UNKNOWN/FAIL (non-bypassable)
+  L1   SIAGA          - water_level_ratio >= 0.90 anywhere -> DANGER (CRITICAL_HYDROLOGY)
+  L1.5 MULTI          - >=2 of {rainfall>=60, water>=0.85, bmkg>=0.80} -> DANGER (COMPOUND_EVENT)
+  L2   INTEGRITY      - severe failures (>=HIGH, risk_escalation) -> escalate one level
+  L3   ML             - calibrated probability vs adaptive thresholds
+  L1.8 HYDRO_FLOOR    - post-ML: ratio>=0.75->WARNING, >=0.60->PRE_ALERT (one-way floor)
+  L4   TREND          - sustained upward -> WARNING->DANGER (one-way, asymmetric)
 
 This module has zero dependencies on FastAPI, psycopg2, sklearn, or any
 external service. Everything is a pure function over typed dataclasses.
@@ -157,6 +158,15 @@ _BMKG_SAFETY_FLOOR_SEVERITY_MIN = 0.80
 _BMKG_SAFETY_FLOOR_RAIN_MIN = 20.0
 _BMKG_SAFETY_FLOOR_CONFIDENCE_FLOOR = 0.50
 
+# ---------------------------------------------------------------------------
+# L1 / L1.8 water-level ratio thresholds — BNPB/BPBD Siaga standard.
+# ---------------------------------------------------------------------------
+# L1 fires unconditionally (pre-ML); L1.8 is a post-ML one-way floor.
+# These constants are the single source of truth for all ratio comparisons.
+_WL_DANGER_FLOOR = 0.90    # L1 hard gate  + L1.8 DANGER floor
+_WL_WARNING_FLOOR = 0.75   # L1.8 WARNING floor
+_WL_PRE_ALERT_FLOOR = 0.60 # L1.8 PRE_ALERT floor
+
 
 # ---------------------------------------------------------------------------
 # Output (typed, immutable)
@@ -257,9 +267,9 @@ def _resolve_system_status(
 
 def _select_driver(perception: PerceptionInputs, reasoning: ReasoningInputs) -> Driver:
     """Pick the dominant Driver based on signal magnitudes (deterministic)."""
-    if perception.max_water_level_ratio >= 0.95:
+    if perception.max_water_level_ratio >= _WL_DANGER_FLOOR:
         return Driver.CRITICAL_HYDROLOGY
-    if perception.max_water_level_ratio >= 0.85:
+    if perception.max_water_level_ratio >= _WL_WARNING_FLOOR:
         return Driver.HYDROLOGY_STRESS
     if perception.rainfall_1h_mm >= 60:
         return Driver.EXTREME_RAINFALL
@@ -458,7 +468,7 @@ def decide(
         )
 
     # ------------------------------------------------------------------ L1
-    if perception.max_water_level_ratio >= 0.95:
+    if perception.max_water_level_ratio >= _WL_DANGER_FLOOR:
         decision_trace.append(_trace(
             DecisionAuthority.L1_SIAGA,
             inputs={"max_water_level_ratio": perception.max_water_level_ratio},
@@ -686,6 +696,41 @@ def decide(
             reason=DecisionReason.MULTI_SIGNAL,
             authority=DecisionAuthority.L1_5_MULTI,
             driver=Driver.COMPOUND_EVENT,
+            is_safe_for_automation=False,
+            decision_trace=tuple(decision_trace),
+        )
+
+    # ------------------------------------------------------------------ L1.8
+    # HYDRO_FLOOR: post-ML one-way floor based on BNPB/BPBD water-level ratio.
+    # Closes the gap where low ML probability + channel near capacity → SAFE.
+    # Only escalates — never downgrades ML output.
+    if perception.max_water_level_ratio >= _WL_DANGER_FLOOR:
+        _hydro_floor: RiskLevel | None = RiskLevel.DANGER
+    elif perception.max_water_level_ratio >= _WL_WARNING_FLOOR:
+        _hydro_floor = RiskLevel.WARNING
+    elif perception.max_water_level_ratio >= _WL_PRE_ALERT_FLOOR:
+        _hydro_floor = RiskLevel.PRE_ALERT
+    else:
+        _hydro_floor = None
+
+    if _hydro_floor is not None and _RISK_RANK[_hydro_floor] > _RISK_RANK[decision.risk_level]:
+        decision_trace.append(_trace(
+            DecisionAuthority.L1_8_HYDRO_FLOOR,
+            inputs={
+                "max_water_level_ratio": perception.max_water_level_ratio,
+                "floor_applied": _hydro_floor.value,
+                "risk_before": decision.risk_level.value,
+            },
+            outputs={
+                "risk_after": _hydro_floor.value,
+                "override": "hydro_floor",
+            },
+        ))
+        decision = decision.with_(
+            risk_level=_hydro_floor,
+            reason=DecisionReason.SAFETY_FLOOR,
+            authority=DecisionAuthority.L1_8_HYDRO_FLOOR,
+            driver=_select_driver(perception, reasoning),
             is_safe_for_automation=False,
             decision_trace=tuple(decision_trace),
         )
