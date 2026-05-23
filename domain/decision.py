@@ -15,6 +15,7 @@ Decision hierarchy (top wins, evaluated top-to-bottom):
   L2   INTEGRITY      - severe failures (>=HIGH, risk_escalation) -> escalate one level
   L3   ML             - calibrated probability vs adaptive thresholds
   L1.8 HYDRO_FLOOR    - post-ML: ratio>=0.75->WARNING, >=0.60->PRE_ALERT (one-way floor)
+  L1.9 OOD_FLOOR      - post-ML: ood<-0.05->PRE_ALERT/70% cap, <-0.10->WARNING/55% cap
   L4   TREND          - sustained upward -> WARNING->DANGER (one-way, asymmetric)
 
 This module has zero dependencies on FastAPI, psycopg2, sklearn, or any
@@ -166,6 +167,18 @@ _BMKG_SAFETY_FLOOR_CONFIDENCE_FLOOR = 0.50
 _WL_DANGER_FLOOR = 0.90    # L1 hard gate  + L1.8 DANGER floor
 _WL_WARNING_FLOOR = 0.75   # L1.8 WARNING floor
 _WL_PRE_ALERT_FLOOR = 0.60 # L1.8 PRE_ALERT floor
+
+# ---------------------------------------------------------------------------
+# L1.9 OOD_FLOOR — conservative risk floor + confidence cap for OOD inputs.
+# ---------------------------------------------------------------------------
+# IsolationForest decision_function: more negative = further from training dist.
+# Two tiers (score is always <= 0 when is_outlier=True):
+#   moderate: score < -0.05 → PRE_ALERT floor, confidence capped at 0.70
+#   severe:   score < -0.10 → WARNING floor, confidence capped at 0.55
+_OOD_MODERATE_SCORE = -0.05
+_OOD_SEVERE_SCORE = -0.10
+_OOD_MODERATE_CONF_CAP = 0.70
+_OOD_SEVERE_CONF_CAP = 0.55
 
 
 # ---------------------------------------------------------------------------
@@ -734,6 +747,71 @@ def decide(
             is_safe_for_automation=False,
             decision_trace=tuple(decision_trace),
         )
+
+    # ------------------------------------------------------------------ L1.9
+    # OOD_FLOOR: IsolationForest out-of-distribution score imposes a minimum
+    # risk and confidence ceiling. One-way: only escalates, never downgrades.
+    # The floor fires regardless of how the ML layer classified the input;
+    # the confidence cap fires even when risk is already at/above the floor.
+    if reasoning.ood_score < _OOD_SEVERE_SCORE:
+        _ood_risk_floor: RiskLevel | None = RiskLevel.WARNING
+        _ood_conf_cap: float | None = _OOD_SEVERE_CONF_CAP
+    elif reasoning.ood_score < _OOD_MODERATE_SCORE:
+        _ood_risk_floor = RiskLevel.PRE_ALERT
+        _ood_conf_cap = _OOD_MODERATE_CONF_CAP
+    else:
+        _ood_risk_floor = None
+        _ood_conf_cap = None
+
+    if _ood_risk_floor is not None or _ood_conf_cap is not None:
+        _apply_ood_floor = (
+            _ood_risk_floor is not None
+            and _RISK_RANK[_ood_risk_floor] > _RISK_RANK[decision.risk_level]
+        )
+        _apply_ood_cap = (
+            _ood_conf_cap is not None
+            and decision.confidence > _ood_conf_cap
+        )
+        if _apply_ood_floor or _apply_ood_cap:
+            _ood_new_risk = _ood_risk_floor if _apply_ood_floor else decision.risk_level
+            _ood_new_conf = (
+                min(decision.confidence, _ood_conf_cap)
+                if _apply_ood_cap
+                else decision.confidence
+            )
+            decision_trace.append(_trace(
+                DecisionAuthority.L1_9_OOD_FLOOR,
+                inputs={
+                    "ood_score": reasoning.ood_score,
+                    "risk_before": decision.risk_level.value,
+                    "confidence_before": round(decision.confidence, 4),
+                    "floor": _ood_risk_floor.value if _ood_risk_floor else None,
+                    "conf_cap": _ood_conf_cap,
+                },
+                outputs={
+                    "risk_after": _ood_new_risk.value,
+                    "confidence_after": round(_ood_new_conf, 4),
+                    "override": "ood_floor",
+                },
+            ))
+            decision = decision.with_(
+                risk_level=_ood_new_risk,
+                confidence=_ood_new_conf,
+                reason=(
+                    DecisionReason.SAFETY_FLOOR
+                    if _apply_ood_floor
+                    else decision.reason
+                ),
+                authority=(
+                    DecisionAuthority.L1_9_OOD_FLOOR
+                    if _apply_ood_floor
+                    else decision.authority
+                ),
+                is_safe_for_automation=(
+                    False if _apply_ood_floor else decision.is_safe_for_automation
+                ),
+                decision_trace=tuple(decision_trace),
+            )
 
     # ------------------------------------------------------------------ L4
     # Trend extension. Two asymmetric (upward-only) paths:

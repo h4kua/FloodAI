@@ -61,6 +61,7 @@ _AUTHORITY_TO_SOURCE = {
     DecisionAuthority.L1_5_MULTI:  "signal_override",
     DecisionAuthority.L1_7_BMKG_SAFETY_FLOOR: "bmkg_safety_floor",
     DecisionAuthority.L1_8_HYDRO_FLOOR: "hydro_floor",
+    DecisionAuthority.L1_9_OOD_FLOOR:  "ood_floor",
     DecisionAuthority.L2_INTEGRITY: "system_guardrail",
     DecisionAuthority.L3_ML:       "ml_adaptive",
     DecisionAuthority.L4_TREND:    "trend_informed",
@@ -1040,6 +1041,105 @@ def compute_shadow_evaluation(
         "production_risk_level": production_risk_level,
         "threshold_delta_warning": delta_warning,
         "threshold_delta_danger": delta_danger,
+        "evaluated_at": ts,
+    }
+
+
+# ─── Hydrology-only shadow evaluation ────────────────────────────────────────
+# Runs a pure hydrology rule-engine in parallel with the ML pipeline.
+# Independent of ML probability, OOD score, and confidence engine —
+# so when the ML model is wrong, this shadow can still catch the miss.
+#
+# Decision mirrors L1/L1.8 hydro floors in domain/decision.py:
+#   ratio >= 0.90  → DANGER
+#   ratio >= 0.75  → WARNING
+#   ratio >= 0.60  → PRE_ALERT
+#   else           → SAFE
+#   FLOOR: >= 3 stations at siaga3 or above → minimum WARNING
+#
+# ``shadow_danger_triggered`` is True when shadow_risk exceeds production_risk
+# by >= 2 levels — indicating the hydrology engine sees materially higher risk
+# than the ML pipeline. Added to failure_modes by the pipeline orchestrator.
+
+_SHADOW_HYDRO_PROFILE = "hydro_rule"
+_SHADOW_HYDRO_DANGER_RATIO: float = 0.90
+_SHADOW_HYDRO_WARNING_RATIO: float = 0.75
+_SHADOW_HYDRO_PRE_ALERT_RATIO: float = 0.60
+_SHADOW_HYDRO_SIAGA3_FLOOR_COUNT: int = 3
+_SHADOW_HYDRO_DISAGREE_LEVELS: int = 2
+
+_HYDRO_SHADOW_RISK_RANK: dict[str, int] = {
+    "SAFE": 0, "PRE_ALERT": 1, "WARNING": 2, "DANGER": 3,
+}
+
+
+def compute_hydro_shadow_evaluation(
+    *,
+    max_water_level_ratio: float,
+    siaga3_or_above_count: int,
+    production_risk_level: str,
+    evaluated_at: str | None = None,
+) -> dict:
+    """
+    Hydrology-only shadow evaluation — independent of the ML pipeline.
+
+    Pure function — never reads or modifies any production decision field.
+    Returns a dict for inclusion in the pipeline output payload under
+    "shadow_evaluation". Pass evaluated_at for deterministic replay; when
+    omitted, the current UTC time is used.
+    """
+    ratio = float(max_water_level_ratio)
+    siaga3_count = int(siaga3_or_above_count)
+
+    if ratio >= _SHADOW_HYDRO_DANGER_RATIO:
+        shadow_risk = "DANGER"
+    elif ratio >= _SHADOW_HYDRO_WARNING_RATIO:
+        shadow_risk = "WARNING"
+    elif ratio >= _SHADOW_HYDRO_PRE_ALERT_RATIO:
+        shadow_risk = "PRE_ALERT"
+    else:
+        shadow_risk = "SAFE"
+
+    if (
+        siaga3_count >= _SHADOW_HYDRO_SIAGA3_FLOOR_COUNT
+        and _HYDRO_SHADOW_RISK_RANK.get(shadow_risk, 0)
+        < _HYDRO_SHADOW_RISK_RANK["WARNING"]
+    ):
+        shadow_risk = "WARNING"
+
+    prod_rank = _HYDRO_SHADOW_RISK_RANK.get(
+        str(production_risk_level or "").upper(), 0
+    )
+    shadow_rank = _HYDRO_SHADOW_RISK_RANK.get(shadow_risk, 0)
+    disagreement_levels = shadow_rank - prod_rank
+    shadow_danger_triggered = disagreement_levels >= _SHADOW_HYDRO_DISAGREE_LEVELS
+
+    ts = evaluated_at or datetime.now(timezone.utc).isoformat()
+
+    _log.info(
+        "hydro_shadow shadow_risk=%s production_risk=%s ratio=%.4f "
+        "siaga3_count=%d disagreement_levels=%d triggered=%s",
+        shadow_risk,
+        production_risk_level,
+        ratio,
+        siaga3_count,
+        disagreement_levels,
+        shadow_danger_triggered,
+    )
+
+    return {
+        "shadow_risk_level": shadow_risk,
+        "shadow_warning_triggered": shadow_rank >= _HYDRO_SHADOW_RISK_RANK["WARNING"],
+        "shadow_danger_triggered": shadow_danger_triggered,
+        "shadow_max_water_level_ratio": round(ratio, 4),
+        "shadow_siaga3_or_above_count": siaga3_count,
+        "shadow_threshold_profile": _SHADOW_HYDRO_PROFILE,
+        "shadow_hydro_danger_threshold": _SHADOW_HYDRO_DANGER_RATIO,
+        "shadow_hydro_warning_threshold": _SHADOW_HYDRO_WARNING_RATIO,
+        "shadow_hydro_pre_alert_threshold": _SHADOW_HYDRO_PRE_ALERT_RATIO,
+        "shadow_siaga3_warning_floor": _SHADOW_HYDRO_SIAGA3_FLOOR_COUNT,
+        "production_risk_level": str(production_risk_level),
+        "shadow_disagreement_levels": disagreement_levels,
         "evaluated_at": ts,
     }
 

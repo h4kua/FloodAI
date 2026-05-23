@@ -406,6 +406,44 @@ def detect_failures(
 _MASS_FAULT_FRACTION = 0.50
 
 
+_OOD_ESCALATION_MODERATE = -0.05  # L1.9 moderate tier (PRE_ALERT floor)
+_OOD_ESCALATION_SEVERE = -0.10    # L1.9 severe tier (WARNING floor)
+
+
+def detect_ood_escalation(ood_detection: dict) -> list[dict]:
+    """
+    Return an ood_escalation failure record when the IsolationForest score
+    crosses the moderate (-0.05) or severe (-0.10) threshold.
+
+    Distinct from detect_ood_failures() (binary is_outlier flag): this function
+    uses the continuous score so partial OOD states are captured. The failure
+    record is for operator transparency only — the actual risk floor and
+    confidence cap are enforced by L1.9 in domain/decision.py.
+    """
+    payload = ood_detection or {}
+    score = float(payload.get("score", 0.0))
+
+    if score >= _OOD_ESCALATION_MODERATE:
+        return []
+
+    tier = "severe" if score < _OOD_ESCALATION_SEVERE else "moderate"
+    floor_label = "WARNING" if tier == "severe" else "PRE_ALERT"
+    return [
+        {
+            "type": "ood_escalation",
+            "severity": "medium",
+            "message": (
+                f"OOD {tier} (IsolationForest score={score:.3f}): model is operating "
+                f"outside its training distribution. "
+                f"Risk floor {floor_label} applied; confidence capped."
+            ),
+            "confidence_penalty": 0.0,
+            "risk_escalation": False,
+            "detail": {"ood_score": score, "tier": tier, "floor": floor_label},
+        }
+    ]
+
+
 def detect_sensor_delta_failures(
     sensor_anomalies: list[dict],
     total_stations: int,

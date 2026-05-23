@@ -42,7 +42,7 @@ from core.output_contract import (
     safe_fallback_output,
     validate_output_schema,
 )
-from services.decision_engine import compute_shadow_evaluation
+from services.decision_engine import compute_hydro_shadow_evaluation
 from utils.paths import DEFAULT_REALTIME_SNAPSHOT
 from api.observability import PERSISTENCE_FAILED_TOTAL, RESULT_HASH_MISMATCH_TOTAL
 
@@ -487,20 +487,62 @@ class FloodDecisionPipeline:
                 f"({result.get('confidence_score', 0.0):.0%} confidence)."
             )
 
-        # ── Shadow threshold evaluation (DATA-2, conservative, read-only) ─────
-        # Runs conservative thresholds (warning=0.12, danger=0.22) in parallel
-        # with the production decision. Never modifies risk_level, system_status,
-        # authority, or decision_trace. Results stored for later analysis only.
+        # ── Shadow threshold evaluation (DATA-2, hydrology-only, read-only) ────
+        # Pure hydrology rule-engine — independent of ML probability, OOD score,
+        # and confidence engine. Catches cases where the ML model is wrong and
+        # the hydrology signals alone mandate a higher risk level.
+        # Never modifies risk_level, system_status, authority, or decision_trace.
         try:
-            result["shadow_evaluation"] = compute_shadow_evaluation(
-                evaluation.probability,
-                production_risk_level=result.get("risk_level", "UNKNOWN"),
+            _shadow_hydro = getattr(perception, "hydrology_assessment", None)
+            _shadow_max_ratio = 0.0
+            _shadow_siaga3_count = 0
+            if _shadow_hydro is not None:
+                _shadow_stations = getattr(_shadow_hydro, "stations", None)
+                if isinstance(_shadow_stations, list):
+                    if _shadow_stations:
+                        _shadow_max_ratio = max(
+                            (float(getattr(s, "water_level_ratio", 0.0) or 0.0)
+                             for s in _shadow_stations),
+                            default=0.0,
+                        )
+                        _shadow_siaga3_count = sum(
+                            1 for s in _shadow_stations
+                            if str(getattr(s, "siaga_level", "normal") or "normal")
+                            in ("siaga1", "siaga2", "siaga3")
+                        )
+            _shadow_prod_risk = result.get("risk_level", "UNKNOWN")
+            _shadow_eval = compute_hydro_shadow_evaluation(
+                max_water_level_ratio=_shadow_max_ratio,
+                siaga3_or_above_count=_shadow_siaga3_count,
+                production_risk_level=_shadow_prod_risk,
                 evaluated_at=now_utc.isoformat(),
             )
+            result["shadow_evaluation"] = _shadow_eval
+            if _shadow_eval.get("shadow_danger_triggered"):
+                _gap = _shadow_eval.get("shadow_disagreement_levels", 0)
+                result["failure_modes"].append({
+                    "type": "shadow_hydro_disagreement",
+                    "severity": "high",
+                    "message": (
+                        f"Shadow hydrology model disagrees with production decision "
+                        f"(shadow={_shadow_eval['shadow_risk_level']}, "
+                        f"production={_shadow_prod_risk}, gap={_gap} levels). "
+                        "Pure hydrology rules indicate higher flood risk than ML pipeline."
+                    ),
+                    "risk_escalation": False,
+                    "confidence_penalty": 0.0,
+                    "detail": {
+                        "shadow_risk": _shadow_eval["shadow_risk_level"],
+                        "production_risk": _shadow_prod_risk,
+                        "disagreement_levels": _gap,
+                        "max_water_level_ratio": _shadow_max_ratio,
+                        "siaga3_or_above_count": _shadow_siaga3_count,
+                    },
+                })
         except Exception as _shadow_exc:
             _log.warning("shadow_evaluation failed (non-fatal): %s", _shadow_exc)
             result["shadow_evaluation"] = {
-                "shadow_threshold_profile": "conservative",
+                "shadow_threshold_profile": "hydro_rule",
                 "error": str(_shadow_exc),
             }
 

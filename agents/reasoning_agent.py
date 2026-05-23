@@ -32,7 +32,7 @@ from services.decision_logic import (
     extract_signals,
     generate_risk_interpretation,
 )
-from services.failure_handling import detect_failures, detect_sensor_delta_failures
+from services.failure_handling import detect_failures, detect_ood_escalation, detect_sensor_delta_failures
 
 if TYPE_CHECKING:
     from agents.perception_agent import PerceptionResult
@@ -210,6 +210,7 @@ class ReasoningAgent:
         failure_modes.extend(
             detect_sensor_delta_failures(sensor_anomalies, total_stations)
         )
+        failure_modes.extend(detect_ood_escalation(ood_detection))
 
         trend_state: dict = diagnostics.get("trend_state") or {}
         plausibility_score: float = perception.plausibility_score

@@ -510,6 +510,7 @@ def test_decision_source_values_are_stable():
         "signal_override",
         "bmkg_safety_floor",
         "hydro_floor",
+        "ood_floor",
         "system_guardrail",
         "ml_adaptive",
         "trend_informed",
