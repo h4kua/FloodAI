@@ -7,32 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir \
-    fastapi \
-    uvicorn \
-    openai \
-    apscheduler \
-    psycopg2-binary \
-    python-dotenv \
-    pydantic \
-    httpx \
-    requests \
-    beautifulsoup4 \
-    "scikit-learn==1.8.0" \
-    xgboost \
-    "numpy==1.26.4" \
-    pandas \
-    joblib \
-    structlog \
-    python-json-logger \
-    prometheus-fastapi-instrumentator \
-    prometheus_client \
-    tenacity \
-    PyJWT \
-    python-multipart \
-    argon2-cffi \
-    imbalanced-learn \
-    shap
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy semua source code (yang tidak di-exclude .dockerignore)
 COPY . .
