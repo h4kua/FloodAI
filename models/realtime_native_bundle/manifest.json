@@ -2,7 +2,7 @@
   "bundle_version": "2.0.0",
   "model_variant": "realtime_native",
   "schema_version": "2",
-  "created_at": "2026-05-18T16:55:23.870283+00:00",
+  "created_at": "2026-05-23T04:31:37.342297+00:00",
   "training_dataset_fingerprint": "sha256:a83f1cc3ebd492428f9a2a059138069e0f6ba1add63fdcd16df6673953e7d082",
   "feature_schema": {
     "feature_count": 16,
@@ -42,11 +42,11 @@
     "model.pkl": "41dda66c22a4a103f9238ab53f9b9b262fb4a447e4bdffc1396ed62c661e5a1b",
     "scaler.pkl": "e05f5972ffe8cb0d18ab2c7cc894f488e8e35ca3dc8e3ee86b7139762cad20c9",
     "ood.pkl": "bb6400005ea862e4d61bc5c6acd12362b019e1f17486062f72c3685599f6520a",
-    "threshold.json": "a554ebcb249dad4d376a1e9843ac2ea0bc3f067fe999f82d2c70f34ce10c6bba",
-    "calibration.json": "3a7f69f234d74cbe8dd630d79e598b03ca2fe9d3550a44822db8afbb4b30ae70",
-    "feature_list.json": "1447969382b45597d038d515f46c4770ae960ad3716835d9f60f47a75fd414c2",
-    "model_card.json": "77917e492e46575cef1bb123cc923e382e8389204763b6b762a32a79321e57e2",
-    "training_stats.json": "d5d4e54806c11ea280c68837802096749bc164c3160dc17d8574a2fdd520a400",
+    "threshold.json": "1c34c1ec07e3353244e4fc522b1ed9b142a0f66aac0693894130c7f94d5dd561",
+    "calibration.json": "7d693f01e24723e3f5a818eba22fa91c6e191616e8ec6857946a0f555c81ec6b",
+    "feature_list.json": "05147596e12c2fed5af930f2823903857a471d594e05aa5db28f6f5a72f59020",
+    "model_card.json": "ff35b4ae98c023614a5b4cc077cab9b19af74f3234739aae41fbe6d2fd2d7063",
+    "training_stats.json": "bb46768761abd59f4d212b794c42804396f49c317f003a10990f3c123dde5f6a",
     "xgboost_model.json": "e4bf3e97cf53f24f0ac156bf12f610e56a4174094f0b1d827134e439455556ef"
   }
 }

@@ -278,12 +278,14 @@ def _render_dashboard(
     trend_analysis = result.get("trend_analysis") or {}
     shadow = result.get("shadow_evaluation") or {}
 
+    poskobanjir_list = snapshot.get("poskobanjir", [])
+    poskobanjir_level = str(poskobanjir_list[0].get("tinggi_air", "—")) if poskobanjir_list else "—"
     snapshot_summary = _render_table([
         ("Location", location),
         ("OpenWeather coord", _safe_text(snapshot.get("openweather", {}).get("coord", {}))),
         ("Rain 1h (mm)", str(snapshot.get("openweather", {}).get("rain", {}).get("1h", "—"))),
         ("Rain 3h (mm)", str(snapshot.get("openweather", {}).get("rain", {}).get("3h", "—"))),
-        ("Poskobanjir water level", str(snapshot.get("poskobanjir", [{}])[0].get("tinggi_air", "—"))),
+        ("Poskobanjir water level", poskobanjir_level),
         ("Snapshot source", _safe_text(DEFAULT_REALTIME_SNAPSHOT)),
     ])
 

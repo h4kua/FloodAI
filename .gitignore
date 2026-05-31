@@ -76,11 +76,22 @@ logs/
 # Cache
 .cache/
 cache/
+.pytest_cache/
+**/__pycache__/
+*.pyc
+*.pyo
 
 # Temporary
 temp/
 tmp/
 *.tmp
+*.txt.bak
+
+# Deployment configs (old platforms - tidak dipakai)
+Procfile
+railway.json
+vercel.json
+.railwayignore
 
 data/raw/awlr_thresholds.json
 data/raw/pintu_air_latest.json

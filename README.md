@@ -1,130 +1,239 @@
-# AI Flood Response Agent System
+# FloodAI — Agentic Flood Decision System
 
-Production-grade, multi-agent flood prediction and decision system for DKI
-Jakarta. Fuses real-time hydrometeorological signals with administrative
-vulnerability data and serves explainable risk decisions over a FastAPI surface.
+Production-grade, multi-agent flood prediction and decision system for DKI Jakarta.
+Fuses real-time hydrometeorological signals with administrative vulnerability data
+and serves explainable risk decisions over a FastAPI surface.
+
+---
 
 ## Overview
 
-- Dual ML models: `legacy_geospatial` (historical, feature-rich) and
-  `realtime_native` (operationally aligned, deployment-ready).
-- Four-agent pipeline — Perception, Reasoning, Evaluation, Action — orchestrated
-  by `FloodDecisionPipeline` with per-stage timeouts and idempotency.
-- BNPB InaRISK vulnerability gate with kecamatan-level resolution and static
-  fallback when the upstream API is unreachable.
-- DEMNAS elevation context (flood-zone classification, flow direction) when DEM
-  tiles are available; falls open when missing.
-- Postgres persistence for snapshots, agent stages, decisions, trust
-  breakdowns, and replay scenarios.
+- **Dual ML models** — `legacy_geospatial` (historical, feature-rich) dan `realtime_native` (operationally aligned, deployment-ready)
+- **Four-agent pipeline** — Perception → Reasoning → Evaluation → Action — diorkestrasikan oleh `FloodDecisionPipeline` dengan per-stage timeouts dan idempotency
+- **LLM-assisted reasoning** via [Groq](https://groq.com) (`llama-3.3-70b-versatile`) — cepat, free-tier friendly
+- **BNPB InaRISK** vulnerability gate dengan resolusi kecamatan + static fallback
+- **DEMNAS elevation context** (flood-zone classification, flow direction) ketika DEM tiles tersedia
+- **Postgres / Supabase** persistence untuk snapshots, agent stages, decisions, trust breakdowns, dan replay
+
+---
 
 ## Architecture
 
 ```
-[Snapshot In] -> SnapshotIn (Pydantic, location-normalised)
-              -> FloodDecisionPipeline
-                 |- PerceptionAgent  (BNPB + DEM + signals)
-                 |- ReasoningAgent   (model inference + adaptive threshold)
-                 |- EvaluationAgent  (plausibility + failure modes)
-                 |- ActionAgent      (decision + routing)
-              -> Postgres (pipeline_runs, perception, reasoning,
-                 evaluation, decisions, trust_breakdowns)
-              -> JSON response (risk_level, probability, bnpb_status,
-                 elevation, decision_trace, safe_route)
+[POST /predict/agentic]
+        │
+        ▼
+  SnapshotIn (Pydantic, location-normalised)
+        │
+        ▼
+  FloodDecisionPipeline
+  ├── PerceptionAgent   → BNPB + DEM + sensor signals
+  ├── ReasoningAgent    → ML inference + adaptive threshold + Groq LLM
+  ├── EvaluationAgent   → plausibility check + failure mode detection
+  └── ActionAgent       → risk decision + safe-route generation
+        │
+        ▼
+  Supabase (PostgreSQL)
+  └── pipeline_runs, perception, reasoning, evaluation, decisions, trust_breakdowns
+        │
+        ▼
+  JSON Response
+  └── risk_level, probability, bnpb_status, elevation, decision_trace, safe_route
 ```
+
+---
+
+## Project Structure
+
+```
+FloodAI/
+├── api/                → FastAPI app, routes, middleware
+├── agents/             → AI agents (Groq LLM — Perception, Reasoning, Evaluation, Action)
+├── core/               → Core business logic
+├── domain/             → Domain models & entities
+├── contracts/          → API schemas & contracts (Pydantic)
+├── services/           → Integrasi layanan eksternal (BMKG, BNPB, OpenWeather)
+├── pipeline/           → Data processing pipeline
+├── db/                 → Database layer (migrations, repositories)
+├── config/             → Configuration loaders
+├── monitoring/         → Observability & Prometheus metrics
+├── evaluation/         → ML model evaluation
+├── realtime_native/    → Realtime native model module
+├── utils/              → Shared utilities
+├── models/             → ML model files (.pkl, .json, thresholds)
+├── data/               → Datasets (raw, processed, bundled, elevation)
+├── notebooks/          → Jupyter notebooks (exploratory & production)
+├── tests/              → Test suite (unit, integration, fixtures)
+├── scripts/            → Utility & migration scripts
+├── docs/               → Guides & documentation
+├── frontend/           → Frontend dashboard
+├── artifacts/          → Reports, visualizations, configurations
+├── poskobanjir/        → Flood monitoring post data service
+├── Dockerfile          → Container build untuk Fly.io
+├── fly.toml            → Konfigurasi deployment Fly.io
+├── requirements.txt    → Python dependencies
+├── pyproject.toml      → Project configuration
+└── .env.example        → Environment variable template
+```
+
+---
 
 ## Quick Start
 
 ```bash
-python -m venv flood_env
-flood_env\Scripts\activate          # Windows
+# 1. Clone
+git clone https://github.com/h4kua/FloodAI.git
+cd FloodAI
+
+# 2. Setup virtual environment
+python -m venv .venv
+.venv\Scripts\activate        # Windows
+# source .venv/bin/activate   # Linux/Mac
+
+# 3. Install dependencies
 pip install -r requirements.txt
-copy .env.example .env              # then fill in DB + API keys
-uvicorn api.main:app --reload
+
+# 4. Configure environment
+copy .env.example .env        # Windows
+# cp .env.example .env        # Linux/Mac
+# Edit .env dan isi API keys + DB credentials
+
+# 5. Run
+uvicorn api.main:app --reload --port 8000
 ```
 
-Open `http://localhost:8000/docs` for interactive Swagger UI.
+Buka `http://localhost:8000/docs` untuk Swagger UI interaktif.
 
-## API Usage
+---
 
-| Method | Path                       | Auth | Purpose                          |
-|--------|----------------------------|------|----------------------------------|
-| GET    | `/healthz`                 | no   | Liveness                         |
-| GET    | `/readyz`                  | no   | DB + thresholds readiness        |
-| GET    | `/metrics`                 | yes  | Prometheus metrics               |
-| GET    | `/predict/realtime`        | yes  | Legacy model on latest snapshot  |
-| GET    | `/predict/realtime-native` | no   | Realtime-native model            |
-| POST   | `/predict/agentic`         | yes  | Full agentic pipeline on payload |
-| GET    | `/demo`                    | yes  | HTML dashboard                   |
+## API Endpoints
 
-### Working demo
+| Method | Path                         | Auth | Purpose                           |
+|--------|------------------------------|------|-----------------------------------|
+| GET    | `/healthz`                   | ✗    | Liveness check                    |
+| GET    | `/readyz`                    | ✗    | DB + thresholds readiness         |
+| GET    | `/metrics`                   | ✓    | Prometheus metrics                |
+| GET    | `/predict/realtime`          | ✓    | Legacy model on latest snapshot   |
+| GET    | `/predict/realtime-native`   | ✗    | Realtime-native model             |
+| POST   | `/predict/agentic`           | ✓    | Full agentic pipeline on payload  |
+| GET    | `/demo`                      | ✓    | HTML dashboard                    |
+
+### Contoh Request
 
 ```bash
 curl -X POST http://localhost:8000/predict/agentic \
-  -H "x-api-key: dev-local-key" \
+  -H "x-api-key: demo123" \
   -H "Content-Type: application/json" \
   -d '{
     "fetched_at_utc": "2026-05-18T11:30:00Z",
     "location": "Jakarta Utara",
-    "openweather": {"main": {"temp": 27.9, "humidity": 91}, "rain": {"1h": 20}, "coord": {"lat": -6.2088, "lon": 106.8456}},
-    "poskobanjir": [{"wilayah": "Jakarta Utara", "tinggi_air": 120, "status": "Siaga 3"}],
-    "bmkg_alerts": [{"headline": "Hujan Lebat Jakarta", "severity": "Moderate", "certainty": "Observed", "urgency": "Immediate"}]
+    "openweather": {
+      "main": {"temp": 27.9, "humidity": 91},
+      "rain": {"1h": 20},
+      "coord": {"lat": -6.2088, "lon": 106.8456}
+    },
+    "poskobanjir": [
+      {"wilayah": "Jakarta Utara", "tinggi_air": 120, "status": "Siaga 3"}
+    ],
+    "bmkg_alerts": [
+      {
+        "headline": "Hujan Lebat Jakarta",
+        "severity": "Moderate",
+        "certainty": "Observed",
+        "urgency": "Immediate"
+      }
+    ]
   }'
 ```
 
-`location` accepts a canonical kota string (e.g. `"Jakarta Utara"`), a
-kecamatan name (`"Menteng"` → Jakarta Pusat), or a dict
-(`{"district": "Menteng"}`) — the schema-level validator normalises all forms
-and falls back to `Jakarta Utara` on ambiguous input. `Idempotency-Key` is
-honoured for one hour.
+`location` menerima nama kota (`"Jakarta Utara"`), kecamatan (`"Menteng"` → Jakarta Pusat),
+atau dict (`{"district": "Menteng"}`). Schema validator menormalkan semua bentuk input.
 
-## Key Features
+---
 
-- Schema-level location normaliser — never raises, always yields a valid kota.
-- BNPB vulnerability gate with status codes `ACTIVE` / `STATIC_FALLBACK` /
-  `DEFAULT` / `NOT_APPLICABLE`.
-- Adaptive risk threshold with shadow evaluation and override trace.
-- Out-of-distribution detection on `realtime_native` features.
-- Per-stage circuit breakers, request budget, and graceful degradation.
-- Idempotent POST with response-hash drift detection.
-- Audit-grade observability: request-id middleware, structured logs,
-  Prometheus metrics, trust breakdowns.
+## Environment Variables
+
+Salin `.env.example` ke `.env` lalu isi nilai-nilainya:
+
+| Variable                                  | Keterangan                                        |
+|-------------------------------------------|---------------------------------------------------|
+| `FLOOD_API_KEYS`                          | API keys untuk header `x-api-key` (koma-separated)|
+| `FLOOD_API_RATE_LIMIT`                    | Max request per menit per key                     |
+| `FLOOD_REQUEST_BUDGET_S`                  | Budget timeout per request (detik)                |
+| `ALLOWED_HOSTS`                           | Trusted host allowlist                            |
+| `DATABASE_URL`                            | PostgreSQL connection string (Supabase)           |
+| `DB_HOST` / `DB_PORT` / `DB_NAME`         | DB credentials                                    |
+| `DB_USER` / `DB_PASSWORD`                 | DB credentials                                    |
+| `SUPABASE_URL`                            | Supabase project URL                              |
+| `SUPABASE_KEY`                            | Supabase anon key                                 |
+| `LLM_PROVIDER`                            | `groq` (default) atau `anthropic`                 |
+| `GROQ_API_KEY`                            | API key dari [console.groq.com](https://console.groq.com) |
+| `GROQ_MODEL`                              | Model Groq (default: `llama-3.3-70b-versatile`)   |
+| `OPENWEATHER_API_KEY`                     | Snapshot ingestion cuaca                          |
+| `GOOGLE_MAPS_API_KEY`                     | Generasi safe-route                               |
+| `BNPB_DEFAULT_VINTAGE_DAYS`               | Fallback vintage saat InaRISK tidak tersedia      |
+| `FLOOD_ALLOW_RUNTIME_SCRAPE`              | Set `1` untuk enable on-demand scraping           |
+| `MODEL_PATH` / `SCALER_PATH`              | Path ke file model ML                             |
+| `THRESHOLD_PATH`                          | Path ke file optimal threshold                    |
+
+---
 
 ## Data Sources
 
-- **Posko Banjir DKI** — water heights and siaga status (`poskobanjir/`).
-- **BMKG CAP / Nowcast** — severity, certainty, urgency alerts.
-- **OpenWeather** — temperature, humidity, rainfall, coordinates.
-- **BNPB InaRISK** — kelurahan vulnerability index (live + static fallback in
-  `data/bundled/bnpb_jakarta_fallback.json`).
-- **DEMNAS** — 8 m DEM tiles for elevation context. Place tiles in `data/elevation/`:
-  `DEMNAS_1209-42_v1.0.tif`, `DEMNAS_1209-43_v1.0.tif`,
-  `DEMNAS_1209-44_v1.0.tif`. Missing tiles fail open — elevation fields
-  return `None` / `"unknown"` and the API keeps serving.
+| Sumber | Keterangan |
+|--------|------------|
+| **Posko Banjir DKI** | Tinggi air & status siaga (`poskobanjir/`) |
+| **BMKG CAP / Nowcast** | Alert severity, certainty, urgency |
+| **OpenWeather** | Suhu, kelembaban, curah hujan, koordinat |
+| **BNPB InaRISK** | Indeks kerentanan kelurahan (live + static fallback di `data/bundled/`) |
+| **DEMNAS** | DEM 8 m untuk konteks elevasi — letakkan tile di `data/elevation/` |
 
-## Test Suite
+---
+
+## Key Features
+
+- **Location normaliser** — menerima kota, kecamatan, atau dict; tidak pernah raise error
+- **BNPB vulnerability gate** — status `ACTIVE` / `STATIC_FALLBACK` / `DEFAULT` / `NOT_APPLICABLE`
+- **Adaptive risk threshold** — shadow evaluation + override trace
+- **Out-of-distribution detection** pada fitur `realtime_native`
+- **Per-stage circuit breakers** — request budget + graceful degradation
+- **Idempotent POST** — response-hash drift detection (berlaku 1 jam)
+- **Audit-grade observability** — request-id middleware, structured logs, Prometheus metrics, trust breakdowns
+
+---
+
+## Tests
 
 ```bash
 pytest tests/ --tb=short
 ```
 
-Current baseline: **393 passed / 4 known failures** (failure-simulation x3 +
-migration-runner x1, all unrelated to the serving path). Coverage spans unit,
-integration, route, persistence, and failure-injection layers.
+Baseline: **393 passed / 4 known failures** (failure-simulation ×3 + migration-runner ×1, semua di luar serving path).
+Coverage: unit, integration, route, persistence, dan failure-injection.
 
-## Environment Variables
+---
 
-See `.env.example` for the full template. The critical ones:
+## Deployment (Fly.io)
 
-| Variable                   | Purpose                                  |
-|----------------------------|------------------------------------------|
-| `FLOOD_API_KEYS`           | Comma-separated keys for `x-api-key`     |
-| `FLOOD_API_RATE_LIMIT`     | Per-key requests / minute                |
-| `FLOOD_REQUEST_BUDGET_S`   | Per-request timeout budget               |
-| `ALLOWED_HOSTS`            | Trusted-host allowlist                   |
-| `DB_HOST` / `DB_PORT` / `DB_NAME` / `DB_USER` / `DB_PASSWORD` | Postgres |
-| `OPENWEATHER_API_KEY`      | Snapshot ingestion                       |
-| `ANTHROPIC_API_KEY`        | LLM-assisted reasoning narratives        |
-| `GOOGLE_MAPS_API_KEY`      | Safe-route generation                    |
-| `BNPB_DEFAULT_VINTAGE_DAYS`| Fallback vintage when InaRISK is silent  |
-| `FLOOD_ALLOW_RUNTIME_SCRAPE` | Set `1` to enable on-demand scraping   |
-| `MODEL_PATH` / `SCALER_PATH` / `THRESHOLD_PATH` | Model artifacts paths |
+Project ini dikonfigurasi untuk deploy ke [Fly.io](https://fly.io) menggunakan Docker.
+
+```bash
+# Install flyctl terlebih dahulu:
+# https://fly.io/docs/hands-on/install-flyctl/
+
+flyctl auth login
+flyctl deploy
+```
+
+Konfigurasi ada di `fly.toml` (region: Singapore, port: 8080, memory: 512MB).
+Set environment variables via Fly.io dashboard atau CLI:
+
+```bash
+flyctl secrets set GROQ_API_KEY=your_key FLOOD_API_KEYS=your_key DATABASE_URL=your_url
+```
+
+---
+
+## License
+
+MIT

@@ -1,6 +1,5 @@
 {
   "permissions": {
-    "defaultMode": "acceptEdits",
     "allow": [
       "Bash(grep \"\\\\.py$\")",
       "Bash(python -m pytest tests/test_failure_simulation.py --collect-only -q)",
@@ -37,7 +36,9 @@
       "Bash(netstat -ano)",
       "Bash(findstr :8000)",
       "Bash(curl -s -o nul -w \"health: %{http_code}\\\\n\" http://localhost:8000/healthz)",
-      "Bash(curl -s -i -X OPTIONS http://localhost:8000/predict/agentic/explain -H \"Origin: http://localhost:5173\" -H \"Access-Control-Request-Method: POST\" -H \"Access-Control-Request-Headers: content-type,x-api-key\")"
-    ]
+      "Bash(curl -s -i -X OPTIONS http://localhost:8000/predict/agentic/explain -H \"Origin: http://localhost:5173\" -H \"Access-Control-Request-Method: POST\" -H \"Access-Control-Request-Headers: content-type,x-api-key\")",
+      "PowerShell(Get-ChildItem -Path \"D:\\\\FloodAI - Copy\" -Recurse -Force | Where-Object { $_.FullName -notmatch '\\\\.venv|node_modules|__pycache__|\\\\.git' } | Select-Object FullName, PSIsContainer | Sort-Object FullName | ForEach-Object { if \\($_.PSIsContainer\\) { $_.FullName + \" [DIR]\" } else { $_.FullName } })"
+    ],
+    "defaultMode": "acceptEdits"
   }
 }
