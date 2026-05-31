@@ -193,9 +193,14 @@ def snapshot_missing_or_stale(snapshot: dict, *, now: "datetime | None" = None) 
         elif isinstance(section, list) and len(section) == 0:
             failures.append(
                 {
-                    "type": "missing_data",
+                    "type": "missing_data" if key != "bmkg_alerts" else "bmkg_detail_unavailable",
                     "severity": "low" if key == "bmkg_alerts" else "medium",
-                    "message": f"Section '{key}' is empty — {label} unavailable.",
+                    "message": (
+                        f"BMKG detail fetch failed — alert details unavailable. "
+                        f"bmkg_feed may contain raw feed items."
+                        if key == "bmkg_alerts"
+                        else f"Section '{key}' is empty — {label} unavailable."
+                    ),
                     "confidence_penalty": round(penalty / 2, 4),
                     "risk_escalation": False,
                     "detail": {"section": key, "count": 0},

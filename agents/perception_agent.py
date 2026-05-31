@@ -588,14 +588,19 @@ class PerceptionAgent:
                 continue
             age_hours = (reference_dt - station_dt).total_seconds() / 3600.0
             if age_hours > _STATION_STALE_HOURS:
+                station_name = (
+                    s.get("nama_pintu_air") or s.get("name") or
+                    s.get("wilayah") or s.get("id") or "unknown"
+                )
                 stale.append({
-                    "station": s.get("id", "?"),
+                    "station": station_name,
                     "reason": (
                         f"tanggal {age_hours:.1f}h old "
                         f"(threshold {_STATION_STALE_HOURS:.1f}h)"
                     ),
                     "tanggal": str(tanggal),
                     "age_hours": round(age_hours, 2),
+                    "status": str(s.get("status_siaga") or s.get("status") or ""),
                 })
         return stale
 

@@ -363,7 +363,7 @@ def _render_dashboard(
             [
                 ("System status", _safe_text(result.get("system_status"))),
                 ("Risk level", _safe_text(result.get("risk_level"))),
-                ("Confidence", f"{result.get('confidence_score', '—'):.2%}" if isinstance(result.get("confidence_score"), (int, float)) else _safe_text(result.get("confidence_score"))),
+                ("Confidence", conf_display),
                 ("Decision reason", _safe_text(result.get("decision_reason"))),
                 ("Dominant risk driver", _safe_text(result.get("dominant_risk_driver"))),
                 ("Risk interpretation", _safe_text(result.get("risk_interpretation"))),
@@ -390,19 +390,49 @@ def _render_dashboard(
         + _render_list(recommended_action)
     )
 
+    # C5: add OOD label to confidence display
+    conf_val = result.get("confidence_score")
+    ood_active = any(f.get("type") in ("ood_input", "ood_escalation") for f in failure_modes)
+    conf_display = (
+        f"{conf_val:.2%} [OOD — REDUCED RELIABILITY]"
+        if isinstance(conf_val, (int, float)) and ood_active
+        else (f"{conf_val:.2%}" if isinstance(conf_val, (int, float)) else _safe_text(conf_val))
+    )
+
+    # C3: BMKG feed summary
+    bmkg_feed_items = snapshot.get("bmkg_feed") or []
+    bmkg_feed_summary = ""
+    if bmkg_feed_items:
+        titles = [html.escape(item.get("title", "")[:80]) for item in bmkg_feed_items[:5]]
+        bmkg_feed_summary = (
+            f"<h3>BMKG feed ({len(bmkg_feed_items)} items — not all Jakarta-relevant)</h3>"
+            f"<ul style=\"font-size:.85rem;color:#555;\">"
+            + "".join(f"<li>{t}</li>" for t in titles)
+            + ("..." if len(bmkg_feed_items) > 5 else "")
+            + "</ul>"
+        )
+
     metrics_section = _render_section(
         "Trend + shadow analysis",
         _render_table([
+            ("Confidence", conf_display),
             ("Risk delta 1h", _safe_text(trend_analysis.get("risk_delta_1h"))),
             ("Risk trend", _safe_text(trend_analysis.get("risk_trend"))),
+            ("Trend basis", _safe_text(trend_analysis.get("trend_basis", "composite_hydro_rainfall"))),
             ("Water level trend", _safe_text(trend_analysis.get("water_level_trend"))),
             ("Rainfall trend", _safe_text(trend_analysis.get("rainfall_trend"))),
             ("Trend points", _safe_text(trend_analysis.get("data_points"))),
-            ("Shadow profile", _safe_text(shadow.get("shadow_threshold_profile"))),
-            ("Shadow error", _safe_text(shadow.get("error"))),
         ])
-        + "<h3>Shadow evaluation payload</h3>"
-        + _render_pre(shadow)
+        # M4: human-readable shadow summary instead of raw JSON
+        + "<h3>Shadow model assessment</h3>"
+        + (f"<p style=\"font-size:.95rem;padding:8px 0;\">{html.escape(shadow.get('shadow_summary', ''))}</p>" if shadow.get("shadow_summary") else "")
+        + _render_table([
+            ("Shadow risk", _safe_text(shadow.get("shadow_risk_level"))),
+            ("Agrees with production", "Yes ✅" if shadow.get("shadow_agreement") else "No ⚠️"),
+            ("Disagreement levels", _safe_text(shadow.get("shadow_disagreement_levels"))),
+            ("Profile", f"{_safe_text(shadow.get('shadow_threshold_profile'))} — pure hydrology rules (ratio + siaga3 count), independent of ML"),
+        ])
+        + bmkg_feed_summary
     )
 
     snapshot_section = _render_section(

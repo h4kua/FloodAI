@@ -1141,10 +1141,27 @@ def compute_hydro_shadow_evaluation(
         shadow_danger_triggered,
     )
 
+    # C4/M4: human-readable shadow summary
+    _agree = disagreement_levels == 0
+    _agree_emoji = "✅" if _agree else "⚠️"
+    _shadow_summary = (
+        f"{_agree_emoji} Shadow model ({_SHADOW_HYDRO_PROFILE} profile): "
+        f"{shadow_risk} — "
+        + (
+            f"agrees with production ({production_risk_level})."
+            if _agree
+            else f"DISAGREES with production ({production_risk_level}) by {disagreement_levels} level(s)."
+        )
+        + f" Hydro ratio={ratio:.2f}, Siaga3+ stations={siaga3_count}."
+        + (f" shadow_danger_triggered={shadow_danger_triggered} means disagreement≥{_SHADOW_HYDRO_DISAGREE_LEVELS} levels." if not shadow_danger_triggered and shadow_risk == "DANGER" else "")
+    )
+
     return {
         "shadow_risk_level": shadow_risk,
         "shadow_warning_triggered": shadow_rank >= _HYDRO_SHADOW_RISK_RANK["WARNING"],
         "shadow_danger_triggered": shadow_danger_triggered,
+        "shadow_agreement": _agree,
+        "shadow_summary": _shadow_summary,
         "shadow_max_water_level_ratio": round(ratio, 4),
         "shadow_siaga3_or_above_count": siaga3_count,
         "shadow_threshold_profile": _SHADOW_HYDRO_PROFILE,

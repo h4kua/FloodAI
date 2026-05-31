@@ -332,12 +332,17 @@ class EvaluationAgent:
 
         # ── Recommended actions (signal-driven, station-aware) ──────────────
         signals = {**reasoning.signals, "dominant_driver": reasoning.dominant_driver}
+        _stale_names = {
+            s.get("station", "") for s in (getattr(perception, "stale_stations", None) or [])
+            if s.get("station")
+        }
         recommended_action = generate_recommended_action(
             signals,
             failure_modes,
             final_risk,
             poskobanjir_records=list(getattr(perception, "poskobanjir", None) or []),
             bmkg_alerts=list(getattr(perception, "bmkg_alerts", None) or []),
+            stale_station_names=_stale_names,
         )
 
         # Re-evaluate manual review after engine may have escalated risk.

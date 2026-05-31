@@ -267,10 +267,14 @@ STATION_AREA_MAP: dict[str, dict] = {
 _SIAGA_RANK = {"Siaga 1": 4, "Siaga 2": 3, "Siaga 3": 2, "Siaga 4": 1}
 
 
-def _build_station_actions(poskobanjir_records: list[dict]) -> list[str]:
+def _build_station_actions(
+    poskobanjir_records: list[dict],
+    stale_names: set[str] | None = None,
+) -> list[str]:
     """Generate location-specific actions sorted by siaga severity (highest first)."""
     if not poskobanjir_records:
         return []
+    _stale = stale_names or set()
     elevated = []
     for record in poskobanjir_records:
         # Field name from XML parser is status_siaga (e.g. "Status : Siaga 1")
@@ -284,9 +288,10 @@ def _build_station_actions(poskobanjir_records: list[dict]) -> list[str]:
         tinggi = record.get("tinggi_air")
         siaga_level = next((s for s in ("Siaga 1", "Siaga 2", "Siaga 3", "Siaga 4") if s in status), "")
         area = STATION_AREA_MAP.get(nama, {})
+        is_stale = nama in _stale
         elevated.append({"nama": nama, "tinggi": tinggi, "siaga": siaga_level,
                          "rank": _SIAGA_RANK.get(siaga_level, 0), "area": area,
-                         "record": record})
+                         "record": record, "stale": is_stale})
 
     elevated.sort(key=lambda x: x["rank"], reverse=True)
     actions = []
@@ -295,6 +300,8 @@ def _build_station_actions(poskobanjir_records: list[dict]) -> list[str]:
         tinggi = station["tinggi"]
         siaga = station["siaga"]
         area = station["area"]
+        is_stale = station.get("stale", False)
+        stale_suffix = " [DATA STALE — VERIFY BEFORE ACTION]" if is_stale else ""
         location_str = f"{area.get('risk_area', '')} ({area.get('wilayah', '')})" if area else ""
 
         if siaga == "Siaga 1":
@@ -315,19 +322,19 @@ def _build_station_actions(poskobanjir_records: list[dict]) -> list[str]:
             msg = f"CRITICAL [SIAGA 1]: {nama} water level at {detail}."
             if location_str:
                 msg += f" Immediate evacuation coordination required for {location_str}."
-            actions.append(msg)
+            actions.append(msg + stale_suffix)
         elif siaga == "Siaga 2":
             tinggi_str = str(tinggi) if tinggi is not None else "?"
             msg = f"HIGH ALERT [SIAGA 2]: {nama} at {tinggi_str}cm — approaching critical threshold."
             if location_str:
                 msg += f" Pre-position resources at {location_str}."
-            actions.append(msg)
+            actions.append(msg + stale_suffix)
         elif siaga == "Siaga 3":
             tinggi_str = str(tinggi) if tinggi is not None else "?"
             msg = f"ELEVATED [SIAGA 3]: {nama} at {tinggi_str}cm — monitor closely."
             if location_str:
                 msg += f" Alert field teams at {location_str}."
-            actions.append(msg)
+            actions.append(msg + stale_suffix)
     return actions
 
 
@@ -337,6 +344,7 @@ def generate_recommended_action(
     risk_level: str,
     poskobanjir_records: list[dict] | None = None,
     bmkg_alerts: list[dict] | None = None,
+    stale_station_names: set[str] | None = None,
 ) -> list[str]:
     """
     Produce a prioritized, signal-driven action list.
@@ -350,8 +358,10 @@ def generate_recommended_action(
     driver = signals.get("dominant_driver", "low_background_risk")
 
     # ── Station-specific actions (highest priority — always first) ───────────
-    station_actions = _build_station_actions(poskobanjir_records or [])
+    _stale = stale_station_names or set()
+    station_actions = _build_station_actions(poskobanjir_records or [], stale_names=_stale)
     actions.extend(station_actions)
+    _has_station_actions = bool(station_actions)
 
     # ── Upstream BMKG watershed alert ────────────────────────────────────────
     if bmkg_alerts:
@@ -374,8 +384,8 @@ def generate_recommended_action(
                 msg += f" Valid until: {expires}."
             actions.append(msg)
 
-    # ── Immediate safety ─────────────────────────────────────────────────────
-    if signals.get("critical_water_level") or driver == "critical_hydrology":
+    # ── Immediate safety (suppressed when station-specific actions already cover this) ──
+    if (signals.get("critical_water_level") or driver == "critical_hydrology") and not _has_station_actions:
         actions.append(
             "IMMEDIATE: Activate evacuation protocols for flood-prone zones "
             "near water-monitoring stations exceeding threshold ratio."
