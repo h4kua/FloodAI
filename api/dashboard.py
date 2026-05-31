@@ -344,6 +344,28 @@ def _render_dashboard(
         )
     )
 
+    # C5: OOD label — must be computed before pipeline_section uses conf_display
+    conf_val = result.get("confidence_score")
+    ood_active = any(f.get("type") in ("ood_input", "ood_escalation") for f in failure_modes)
+    conf_display = (
+        f"{conf_val:.2%} [OOD — REDUCED RELIABILITY]"
+        if isinstance(conf_val, (int, float)) and ood_active
+        else (f"{conf_val:.2%}" if isinstance(conf_val, (int, float)) else _safe_text(conf_val))
+    )
+
+    # C3: BMKG feed summary — computed before metrics_section uses it
+    bmkg_feed_items = snapshot.get("bmkg_feed") or []
+    bmkg_feed_summary = ""
+    if bmkg_feed_items:
+        titles = [html.escape(item.get("title", "")[:80]) for item in bmkg_feed_items[:5]]
+        bmkg_feed_summary = (
+            f"<h3>BMKG feed ({len(bmkg_feed_items)} items — not all Jakarta-relevant)</h3>"
+            f"<ul style=\"font-size:.85rem;color:#555;\">"
+            + "".join(f"<li>{t}</li>" for t in titles)
+            + ("..." if len(bmkg_feed_items) > 5 else "")
+            + "</ul>"
+        )
+
     stale_stations = result.get("stale_stations") or []
     stale_banner = ""
     if stale_stations:
@@ -389,28 +411,6 @@ def _render_dashboard(
         + "<h3>Recommended actions</h3>"
         + _render_list(recommended_action)
     )
-
-    # C5: add OOD label to confidence display
-    conf_val = result.get("confidence_score")
-    ood_active = any(f.get("type") in ("ood_input", "ood_escalation") for f in failure_modes)
-    conf_display = (
-        f"{conf_val:.2%} [OOD — REDUCED RELIABILITY]"
-        if isinstance(conf_val, (int, float)) and ood_active
-        else (f"{conf_val:.2%}" if isinstance(conf_val, (int, float)) else _safe_text(conf_val))
-    )
-
-    # C3: BMKG feed summary
-    bmkg_feed_items = snapshot.get("bmkg_feed") or []
-    bmkg_feed_summary = ""
-    if bmkg_feed_items:
-        titles = [html.escape(item.get("title", "")[:80]) for item in bmkg_feed_items[:5]]
-        bmkg_feed_summary = (
-            f"<h3>BMKG feed ({len(bmkg_feed_items)} items — not all Jakarta-relevant)</h3>"
-            f"<ul style=\"font-size:.85rem;color:#555;\">"
-            + "".join(f"<li>{t}</li>" for t in titles)
-            + ("..." if len(bmkg_feed_items) > 5 else "")
-            + "</ul>"
-        )
 
     metrics_section = _render_section(
         "Trend + shadow analysis",
