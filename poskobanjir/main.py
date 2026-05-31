@@ -15,6 +15,30 @@ from services.parser import (
 from storage.saver import save_csv, save_json
 
 
+def _feed_item_to_basic_alert(item: dict) -> dict:
+    """Build a minimal alert struct from RSS feed item when CAP detail fetch fails."""
+    title = item.get("title", "")
+    description = item.get("description", "")
+    area_desc = title.split("—")[-1].strip() if "—" in title else description[:120]
+    return {
+        "identifier": item.get("alert_code", ""),
+        "alert_code": item.get("alert_code", ""),
+        "event": title.split("—")[0].strip() if "—" in title else title,
+        "urgency": "Unknown",
+        "severity": "Moderate",
+        "certainty": "Possible",
+        "effective": item.get("pub_date", ""),
+        "expires": "",
+        "headline": title,
+        "description": description,
+        "instruction": "",
+        "area_desc": area_desc,
+        "polygons": [],
+        "parameters": {},
+        "_source": "feed_fallback",
+    }
+
+
 def _fetch_bmkg_alerts(feed_items):
     alerts = []
     for item in feed_items:
@@ -29,7 +53,9 @@ def _fetch_bmkg_alerts(feed_items):
             alerts.append(alert)
             print(f"[BMKG] Detail berhasil diambil untuk {alert_code}")
         except Exception as exc:
-            print(f"[BMKG] Gagal mengambil detail {alert_code}: {exc}")
+            print(f"[BMKG] Gagal detail {alert_code}: {exc} — pakai feed fallback")
+            # C2 fix: use feed metadata so bmkg_alerts is never empty when feed has items
+            alerts.append(_feed_item_to_basic_alert(item))
     return alerts
 
 

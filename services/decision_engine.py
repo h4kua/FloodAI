@@ -278,6 +278,20 @@ def run_decision_engine(
         canonical_inputs = _build_canonical_inputs(kwargs_snapshot)
         decision = canonical_decide(**canonical_inputs)
         result = _decision_to_legacy_result(decision, kwargs_snapshot)
+
+        # OOD confidence dampening — applied unconditionally after canonical_decide()
+        # because L1/L1.5/L1.7 do early returns that skip L1.9 OOD cap.
+        # Formula: confidence * (1 + ood_score); ood_score negative → reduces confidence.
+        _ood_score = canonical_inputs["reasoning"].ood_score
+        if _ood_score < -0.05 and result.confidence_score > 0.0:
+            _cap = 0.55 if _ood_score < -0.10 else 0.70
+            _pre_damp = result.confidence_score
+            _dampened = round(min(_pre_damp * (1.0 + _ood_score), _cap), 4)
+            result.confidence_score = max(0.05, _dampened)
+            result.decision_trace.append(
+                f"[OOD-DAMP] confidence {_pre_damp:.2f} → {result.confidence_score:.2f} "
+                f"(ood_score={_ood_score:.3f}, cap={_cap})"
+            )
         adjusted_risk, threshold_delta, reason = _apply_elevation_adjustment(
             result.risk_level,
             kwargs_snapshot.get("elevation_data") or {},

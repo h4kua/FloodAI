@@ -199,6 +199,21 @@ def _render_list(items: list[Any]) -> str:
     return f"<ul>{rendered}</ul>"
 
 
+def _render_data_quality(result: dict) -> str:
+    dq = (result.get("diagnostics") or {}).get("data_quality_report") or {}
+    excluded = dq.get("excluded_stations") or []
+    used = dq.get("stations_used_in_model")
+    if not excluded and used is None:
+        return "<h3>Data quality</h3><p class=\"muted\">No stations excluded.</p>"
+    names = ", ".join(html.escape(s.get("nama", "?")) for s in excluded)
+    return (
+        "<h3>Data quality</h3>"
+        f"<p><strong>{used or '?'}</strong> stations used in model. "
+        + (f"<strong>{len(excluded)}</strong> excluded (non-standard datum): {names}." if excluded else "No exclusions.")
+        + "</p>"
+    )
+
+
 def build_demo_page(
     *,
     pipeline,
@@ -329,9 +344,22 @@ def _render_dashboard(
         )
     )
 
+    stale_stations = result.get("stale_stations") or []
+    stale_banner = ""
+    if stale_stations:
+        oldest = max(stale_stations, key=lambda s: s.get("age_hours", 0))
+        stale_banner = (
+            f"<p style=\"background:#fef3c7;border:1px solid #d97706;border-radius:8px;"
+            f"padding:10px 14px;margin-bottom:12px;color:#92400e;font-size:.9rem;\">"
+            f"⚠️ <strong>{len(stale_stations)} stale station(s) excluded:</strong> "
+            f"oldest is <strong>{html.escape(str(oldest.get('station','?')))}</strong> "
+            f"({oldest.get('age_hours',0):.1f}h ago). "
+            f"Data freshness indicator shows median only.</p>"
+        )
+
     pipeline_section = _render_section(
         "Current pipeline output",
-        _render_table(
+        stale_banner + _render_table(
             [
                 ("System status", _safe_text(result.get("system_status"))),
                 ("Risk level", _safe_text(result.get("risk_level"))),
@@ -339,7 +367,13 @@ def _render_dashboard(
                 ("Decision reason", _safe_text(result.get("decision_reason"))),
                 ("Dominant risk driver", _safe_text(result.get("dominant_risk_driver"))),
                 ("Risk interpretation", _safe_text(result.get("risk_interpretation"))),
-                ("Data freshness (min)", _safe_text(result.get("data_freshness_minutes"))),
+                # C7: flag when freshness exceeds scheduler interval (15 min)
+                ("Data freshness (min)", (
+                    f"{result.get('data_freshness_minutes')} ⚠️ STALE (>15 min refresh interval)"
+                    if isinstance(result.get("data_freshness_minutes"), (int, float))
+                    and result.get("data_freshness_minutes", 0) > 15
+                    else _safe_text(result.get("data_freshness_minutes"))
+                )),
                 ("Pipeline version", _safe_text(result.get("pipeline_version"))),
                 ("Model name", _safe_text(result.get("model_name"))),
                 ("Safe route available", _safe_text(safe_route.get("available"))),
@@ -347,6 +381,7 @@ def _render_dashboard(
                 ("Persistence error", _safe_text(result.get("persistence_error"))),
             ]
         )
+        + _render_data_quality(result)
         + "<h3>Failure modes</h3>"
         + _render_list([f"{fm.get('severity', 'unknown').upper()}: {fm.get('type')} — {fm.get('message')}" for fm in failure_modes])
         + "<h3>Routing failures</h3>"

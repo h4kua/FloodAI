@@ -308,11 +308,13 @@ def _snapshot_history_trend_state(history, current_row):
             "water_level_trend": "insufficient_data",
             "rainfall_trend": "insufficient_data",
             "data_points": 0,
+            "risk_delta_1h": 0.0,
             "risk_rate_per_hour": 0.0,
             "trend_strength": 0.0,
             "trend_confidence": 0.0,
             "anomaly_detected": False,
             "anomaly_type": None,
+            "trend_basis": "composite_hydro_rainfall",
         }
 
     recent = history.tail(4).copy()
@@ -343,11 +345,13 @@ def _snapshot_history_trend_state(history, current_row):
             "water_level_trend": "insufficient_data",
             "rainfall_trend": "insufficient_data",
             "data_points": int(len(history)),
+            "risk_delta_1h": 0.0,
             "risk_rate_per_hour": 0.0,
             "trend_strength": 0.0,
             "trend_confidence": 0.0,
             "anomaly_detected": False,
             "anomaly_type": None,
+            "trend_basis": "composite_hydro_rainfall",
         }
 
     delta = float(composite.iloc[-1] - composite.iloc[0])
@@ -391,11 +395,15 @@ def _snapshot_history_trend_state(history, current_row):
         "water_level_trend": water_trend,
         "rainfall_trend": rainfall_trend,
         "data_points": int(len(history)),
+        # C9 fix: risk_delta_1h uses the same composite score delta as risk_trend
+        # so they can never contradict each other.
+        "risk_delta_1h": round(delta, 4),
         "risk_rate_per_hour": 0.0,
         "trend_strength": round(min(abs(delta) / 0.40, 1.0), 4),
         "trend_confidence": confidence,
         "anomaly_detected": anomaly_type is not None,
         "anomaly_type": anomaly_type,
+        "trend_basis": "composite_hydro_rainfall",
     }
 
 

@@ -273,7 +273,11 @@ def _build_station_actions(poskobanjir_records: list[dict]) -> list[str]:
         return []
     elevated = []
     for record in poskobanjir_records:
-        status = str(record.get("status") or record.get("keterangan") or "")
+        # Field name from XML parser is status_siaga (e.g. "Status : Siaga 1")
+        status = str(
+            record.get("status_siaga") or record.get("status") or
+            record.get("keterangan") or record.get("level") or ""
+        )
         if not any(s in status for s in ("Siaga 1", "Siaga 2", "Siaga 3")):
             continue
         nama = str(record.get("nama_pintu_air") or record.get("wilayah") or "")
@@ -294,7 +298,12 @@ def _build_station_actions(poskobanjir_records: list[dict]) -> list[str]:
         location_str = f"{area.get('risk_area', '')} ({area.get('wilayah', '')})" if area else ""
 
         if siaga == "Siaga 1":
-            siaga1_val = station["record"].get("siaga1")
+            # siaga1 may be stored as string from XML parser
+            raw = station["record"].get("siaga1")
+            try:
+                siaga1_val = int(float(raw)) if raw is not None else None
+            except (TypeError, ValueError):
+                siaga1_val = None
             if tinggi is not None and siaga1_val is not None:
                 try:
                     excess = int(tinggi) - int(siaga1_val)
@@ -308,12 +317,14 @@ def _build_station_actions(poskobanjir_records: list[dict]) -> list[str]:
                 msg += f" Immediate evacuation coordination required for {location_str}."
             actions.append(msg)
         elif siaga == "Siaga 2":
-            msg = f"HIGH ALERT [SIAGA 2]: {nama} at {tinggi}cm — approaching critical threshold."
+            tinggi_str = str(tinggi) if tinggi is not None else "?"
+            msg = f"HIGH ALERT [SIAGA 2]: {nama} at {tinggi_str}cm — approaching critical threshold."
             if location_str:
                 msg += f" Pre-position resources at {location_str}."
             actions.append(msg)
         elif siaga == "Siaga 3":
-            msg = f"ELEVATED [SIAGA 3]: {nama} at {tinggi}cm — monitor closely."
+            tinggi_str = str(tinggi) if tinggi is not None else "?"
+            msg = f"ELEVATED [SIAGA 3]: {nama} at {tinggi_str}cm — monitor closely."
             if location_str:
                 msg += f" Alert field teams at {location_str}."
             actions.append(msg)

@@ -96,10 +96,24 @@ def extract_alert_code(link):
     return match.group(1) if match else ""
 
 
+def _derive_location(weather: dict) -> str:
+    """Derive a location string from OpenWeather response."""
+    name = (weather.get("name") or "").strip()
+    coord = (weather.get("coord") or {})
+    lat = coord.get("lat")
+    lon = coord.get("lon")
+    if name and lat is not None and lon is not None:
+        return f"{name} ({lat:.4f}, {lon:.4f})"
+    if lat is not None and lon is not None:
+        return f"{lat:.4f}, {lon:.4f}"
+    return name or "Jakarta, Indonesia"
+
+
 def build_realtime_snapshot(poskobanjir_records, weather, bmkg_feed, bmkg_alerts):
     jakarta_alerts = filter_jakarta_bmkg_alerts(bmkg_alerts)
     return {
         "fetched_at_utc": datetime.now(timezone.utc).isoformat(),
+        "location": _derive_location(weather),
         "source_attribution": {
             "poskobanjir": "https://poskobanjir.dsdadki.web.id/",
             "bmkg": "BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)",
