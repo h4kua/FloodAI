@@ -1,7 +1,38 @@
+# Secrets
 .env
-*.pyc
-__pycache__/
+.env.*
+
+# Git
 .git/
-tests/
-*.log
+.gitignore
+
+# Python cache
+*.pyc
+*.pyo
+__pycache__/
 .pytest_cache/
+.python-version
+
+# Virtual environment (JANGAN ikut masuk container)
+.venv/
+venv/
+env/
+
+# Frontend build deps (berat, tidak dibutuhkan backend)
+frontend/node_modules/
+frontend/dist/
+
+# Notebooks & data mentah (tidak dibutuhkan saat runtime)
+notebooks/
+data/raw/
+data/processed/
+
+# Dev tools
+.claude/
+.vscode/
+docs/
+scripts/
+
+# Logs
+*.log
+logs/

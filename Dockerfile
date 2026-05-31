@@ -34,13 +34,7 @@ RUN pip install --no-cache-dir \
     imbalanced-learn \
     shap
 
-COPY api/ ./api/
-COPY agents/ ./agents/
-COPY services/ ./services/
-COPY pipeline/ ./pipeline/
-COPY config/ ./config/
-COPY db/ ./db/
-COPY models/ ./models/
-COPY artifacts/ ./artifacts/
+# Copy semua source code (yang tidak di-exclude .dockerignore)
+COPY . .
 
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080"]
