@@ -253,10 +253,79 @@ def generate_risk_interpretation(signals: dict, failures: list[dict]) -> str:
     return " ".join(parts)
 
 
+# Maps elevated station names to their geographic area for targeted actions.
+STATION_AREA_MAP: dict[str, dict] = {
+    "P.A. Marina Ancol (Laut)":  {"kecamatan": "Penjaringan", "wilayah": "Jakarta Utara", "risk_area": "Pesisir utara, kawasan Ancol"},
+    "Pompa Pasar Ikan 1":        {"kecamatan": "Penjaringan", "wilayah": "Jakarta Utara", "risk_area": "Pelabuhan, Pasar Ikan"},
+    "P.A. Karet 1":              {"kecamatan": "Tanah Abang", "wilayah": "Jakarta Selatan", "risk_area": "Karet, Kuningan hilir"},
+    "Pompa Yos Sudarso 1":       {"kecamatan": "Tanjung Priok", "wilayah": "Jakarta Utara", "risk_area": "Yos Sudarso, Sunter Agung"},
+    "P.A. Hek":                  {"kecamatan": "Matraman", "wilayah": "Jakarta Timur", "risk_area": "Hek, Cipinang Melayu"},
+    "P.A. Cengkareng Drain":     {"kecamatan": "Cengkareng", "wilayah": "Jakarta Barat", "risk_area": "Cengkareng, Kapuk"},
+    "P.A. Manggarai":            {"kecamatan": "Tebet", "wilayah": "Jakarta Selatan", "risk_area": "Manggarai, Tebet"},
+}
+
+_SIAGA_RANK = {"Siaga 1": 4, "Siaga 2": 3, "Siaga 3": 2, "Siaga 4": 1}
+
+
+def _build_station_actions(poskobanjir_records: list[dict]) -> list[str]:
+    """Generate location-specific actions sorted by siaga severity (highest first)."""
+    if not poskobanjir_records:
+        return []
+    elevated = []
+    for record in poskobanjir_records:
+        status = str(record.get("status") or record.get("keterangan") or "")
+        if not any(s in status for s in ("Siaga 1", "Siaga 2", "Siaga 3")):
+            continue
+        nama = str(record.get("nama_pintu_air") or record.get("wilayah") or "")
+        tinggi = record.get("tinggi_air")
+        siaga_level = next((s for s in ("Siaga 1", "Siaga 2", "Siaga 3", "Siaga 4") if s in status), "")
+        area = STATION_AREA_MAP.get(nama, {})
+        elevated.append({"nama": nama, "tinggi": tinggi, "siaga": siaga_level,
+                         "rank": _SIAGA_RANK.get(siaga_level, 0), "area": area,
+                         "record": record})
+
+    elevated.sort(key=lambda x: x["rank"], reverse=True)
+    actions = []
+    for station in elevated:
+        nama = station["nama"]
+        tinggi = station["tinggi"]
+        siaga = station["siaga"]
+        area = station["area"]
+        location_str = f"{area.get('risk_area', '')} ({area.get('wilayah', '')})" if area else ""
+
+        if siaga == "Siaga 1":
+            siaga1_val = station["record"].get("siaga1")
+            if tinggi is not None and siaga1_val is not None:
+                try:
+                    excess = int(tinggi) - int(siaga1_val)
+                    detail = f"{tinggi}cm — {excess:+d}cm above Siaga 1 threshold ({siaga1_val}cm)"
+                except (TypeError, ValueError):
+                    detail = f"{tinggi}cm"
+            else:
+                detail = f"{tinggi}cm" if tinggi else ""
+            msg = f"CRITICAL [SIAGA 1]: {nama} water level at {detail}."
+            if location_str:
+                msg += f" Immediate evacuation coordination required for {location_str}."
+            actions.append(msg)
+        elif siaga == "Siaga 2":
+            msg = f"HIGH ALERT [SIAGA 2]: {nama} at {tinggi}cm — approaching critical threshold."
+            if location_str:
+                msg += f" Pre-position resources at {location_str}."
+            actions.append(msg)
+        elif siaga == "Siaga 3":
+            msg = f"ELEVATED [SIAGA 3]: {nama} at {tinggi}cm — monitor closely."
+            if location_str:
+                msg += f" Alert field teams at {location_str}."
+            actions.append(msg)
+    return actions
+
+
 def generate_recommended_action(
     signals: dict,
     failures: list[dict],
     risk_level: str,
+    poskobanjir_records: list[dict] | None = None,
+    bmkg_alerts: list[dict] | None = None,
 ) -> list[str]:
     """
     Produce a prioritized, signal-driven action list.
@@ -268,6 +337,31 @@ def generate_recommended_action(
     actions: list[str] = []
     failure_types = {f.get("type") for f in failures}
     driver = signals.get("dominant_driver", "low_background_risk")
+
+    # ── Station-specific actions (highest priority — always first) ───────────
+    station_actions = _build_station_actions(poskobanjir_records or [])
+    actions.extend(station_actions)
+
+    # ── Upstream BMKG watershed alert ────────────────────────────────────────
+    if bmkg_alerts:
+        from services.bmkg_filter import filter_upstream_watershed_alerts
+        upstream = filter_upstream_watershed_alerts(bmkg_alerts)
+        for alert in upstream:
+            urgency = alert.get("urgency", "")
+            areas = alert.get("area_desc", "upstream watershed")
+            alert_code = alert.get("alert_code") or alert.get("identifier") or ""
+            expires = alert.get("expires", "")
+            msg = (
+                f"UPSTREAM ALERT: BMKG reports {alert.get('event', 'heavy rain')} "
+                f"in {areas} watershed ({alert_code}). "
+                f"Estimated increased Ciliwung/Citarum flow in 3-6 hours. "
+                f"Pre-position resources at Manggarai, Katulampa monitoring points."
+            )
+            if urgency == "Immediate":
+                msg = "IMMEDIATE — " + msg
+            if expires:
+                msg += f" Valid until: {expires}."
+            actions.append(msg)
 
     # ── Immediate safety ─────────────────────────────────────────────────────
     if signals.get("critical_water_level") or driver == "critical_hydrology":

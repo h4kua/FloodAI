@@ -190,6 +190,11 @@ class ActionAgent:
             "decision_summary": dec.decision_summary if dec else "",
             "final_reason": dec.final_reason if dec else "",
 
+            # ── C1: Decision override transparency ───────────────────────────
+            "decision_override_reason": self._build_override_reason(evaluation),
+            "confidence_basis": self._build_confidence_basis(evaluation),
+            "uncertainty_flags": self._build_uncertainty_flags(evaluation),
+
             # ── Explainability ───────────────────────────────────────────────
             "dominant_risk_driver": evaluation.dominant_risk_driver,
             "risk_interpretation": evaluation.risk_interpretation,
@@ -789,6 +794,105 @@ class ActionAgent:
                 "confidence is below operational threshold"
             ),
         }
+
+    def _build_override_reason(self, evaluation: "EvaluationResult") -> str:
+        """
+        Explain why the final decision may diverge from raw ML probability.
+        Surfaces OOD suppression, sensor contamination, and rule-based overrides.
+        """
+        dec = evaluation.decision
+        model_prob = evaluation.probability
+        risk = evaluation.risk_level
+        failure_types = {f.get("type") for f in evaluation.failure_modes}
+        parts: list[str] = []
+
+        ood_failures = [f for f in evaluation.failure_modes if f.get("type") in ("ood_input", "ood_escalation")]
+        if ood_failures:
+            ood_score = (ood_failures[0].get("detail") or {}).get("ood_score", 0.0)
+            parts.append(
+                f"XGBoost probability ({model_prob:.2f}) suppressed — "
+                f"OOD flag active (IsolationForest score {ood_score:.3f}, model operating "
+                "outside training distribution)."
+            )
+
+        dq = evaluation.reasoning.diagnostics.get("data_quality_report", {})
+        excluded = dq.get("excluded_stations", [])
+        if excluded:
+            names = ", ".join(s.get("nama", "?") for s in excluded)
+            parts.append(
+                f"Sensor contamination suspected: {len(excluded)} station(s) excluded "
+                f"({names}) — non-standard datum values outside model training range."
+            )
+
+        if dec and dec.decision_source not in ("ml_adaptive", "trend_informed"):
+            source_map = {
+                "physical_override": "SIAGA water-level threshold breached",
+                "signal_override": "multi-signal compound event",
+                "bmkg_safety_floor": "BMKG severe alert + active conditions",
+                "hydro_floor": "hydrology post-ML floor applied",
+                "ood_floor": "OOD floor applied",
+                "system_guardrail": "system integrity guardrail",
+            }
+            reason = source_map.get(dec.decision_source, dec.decision_source)
+            parts.append(f"Rule-based engine activated: {reason} → {risk} applied.")
+
+        return " ".join(parts) if parts else ""
+
+    def _build_confidence_basis(self, evaluation: "EvaluationResult") -> str:
+        """Return the source of confidence: 'model', 'rule_engine', or 'ood_dampened'."""
+        dec = evaluation.decision
+        if not dec:
+            return "unknown"
+        ood_active = any(f.get("type") in ("ood_input", "ood_escalation") for f in evaluation.failure_modes)
+        if ood_active:
+            return "ood_dampened"
+        if dec.decision_source in ("physical_override", "signal_override", "bmkg_safety_floor",
+                                    "hydro_floor", "ood_floor"):
+            return "rule_engine"
+        return "model"
+
+    def _build_uncertainty_flags(self, evaluation: "EvaluationResult") -> list[str]:
+        """List all factors that increase uncertainty in this prediction."""
+        flags: list[str] = []
+        for f in evaluation.failure_modes:
+            ftype = f.get("type", "")
+            detail = f.get("detail") or {}
+            if ftype == "ood_input":
+                score = detail.get("ood_score", 0.0)
+                flags.append(
+                    f"ood_input: IsolationForest score {score:.3f} "
+                    "(model operating outside training distribution)"
+                )
+            elif ftype == "ood_escalation":
+                flags.append(f"ood_escalation: {f.get('message', 'OOD moderate/severe')}")
+            elif ftype == "signal_conflict":
+                flags.append(f"signal_conflict: {f.get('message', '')}")
+            elif ftype == "stale_data":
+                flags.append(f"stale_data: {f.get('message', 'data freshness exceeded')}")
+
+        dq = evaluation.reasoning.diagnostics.get("data_quality_report", {})
+        excluded = dq.get("excluded_stations", [])
+        if excluded:
+            names = ", ".join(s.get("nama", "?") for s in excluded)
+            flags.append(f"sensor_contamination: {len(excluded)} station(s) excluded ({names})")
+
+        stale = getattr(evaluation, "stale_stations", [])
+        for s in (stale or []):
+            flags.append(
+                f"stale_data: {s.get('name', '?')} last updated "
+                f"{s.get('hours_stale', '?')}h ago, status {s.get('status', '?')}"
+            )
+
+        model_prob = evaluation.probability
+        baseline_prob = evaluation.baseline_check.get("baseline_probability", 0.0)
+        gap = abs(model_prob - baseline_prob)
+        if gap > 0.25:
+            flags.append(
+                f"model_rule_gap: XGBoost {model_prob:.2f} vs rule-based {baseline_prob:.2f} "
+                f"(gap {gap:.2f})"
+            )
+
+        return flags
 
     def _safe_to_dict(self, obj) -> dict | None:
         """Call obj.to_dict() if obj is not None; return None on any failure."""

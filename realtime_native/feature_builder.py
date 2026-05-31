@@ -125,6 +125,12 @@ def _water_level_ratio_from_records(records):
     best_ratio = 0.0
     for record in (records or []):
         current_level = _safe_float(record.get("tinggi_air"))
+        # Skip stations with non-standard datum (negative water levels).
+        # Pump/bendung stations use relative datum that cannot be normalized to
+        # the standard Siaga threshold scale. Including them contaminates the
+        # feature vector and suppresses ML probability toward 0.00.
+        if current_level < 0:
+            continue
         thresholds = [
             _safe_float(record.get("siaga1")),
             _safe_float(record.get("siaga2")),
@@ -137,6 +143,20 @@ def _water_level_ratio_from_records(records):
         ratio = current_level / max(thresholds)
         best_ratio = max(best_ratio, ratio)
     return min(best_ratio, 1.5)
+
+
+def _get_excluded_stations(records) -> list[dict]:
+    """Return stations excluded from model features due to non-standard datum."""
+    excluded = []
+    for record in (records or []):
+        current_level = _safe_float(record.get("tinggi_air"))
+        if current_level < 0:
+            excluded.append({
+                "nama": str(record.get("nama_pintu_air") or record.get("wilayah") or "unknown"),
+                "tinggi_air": current_level,
+                "exclusion_reason": "non_standard_datum — values outside model training range",
+            })
+    return excluded
 
 
 def _load_history(path=REALTIME_NATIVE_HISTORY_PATH):
@@ -404,6 +424,8 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
     rainfall_3h_proxy_mm = max(_safe_float(rain_data.get("3h")), rainfall_mm * 3)
     humidity_pct = _safe_float(main_weather.get("humidity"), 75.0)
     temperature_c = _safe_float(main_weather.get("temp"), 30.0)
+    excluded_stations = _get_excluded_stations(poskobanjir_records)
+    valid_records = [r for r in poskobanjir_records if _safe_float(r.get("tinggi_air")) >= 0]
     water_level_ratio = _water_level_ratio_from_records(poskobanjir_records)
     bmkg_scores = _bmkg_category_scores_from_alerts(alerts)
 
@@ -437,6 +459,12 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
         "bmkg_alerts_used": len(alerts),
         "bmkg_alerts_filtered_out": max(len(raw_alerts) - len(alerts), 0),
         "water_level_records": len(poskobanjir_records),
+        "data_quality_report": {
+            "excluded_stations": excluded_stations,
+            "exclusion_reason": "Non-standard datum — values outside model training range",
+            "stations_used_in_model": len(valid_records),
+            "stations_total": len(poskobanjir_records),
+        },
         # Momentum scalars (top-level for direct diagnostics consumers).
         "rainfall_trend_mm_h": round(current_row["rainfall_mm"] - _rf_lag1, 4),
         "rainfall_acc_3h": round(current_row.get("rainfall_3h_proxy_mm", 0.0), 4),

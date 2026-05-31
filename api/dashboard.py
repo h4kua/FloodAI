@@ -27,6 +27,9 @@ def _safe_text(value: Any) -> str:
         return "—"
     if isinstance(value, bool):
         return "Yes" if value else "No"
+    # M4: render dicts/lists as JSON (double quotes) not Python repr (single quotes)
+    if isinstance(value, (dict, list)):
+        return html.escape(json.dumps(value, ensure_ascii=False))
     return html.escape(str(value))
 
 
@@ -280,14 +283,29 @@ def _render_dashboard(
 
     poskobanjir_list = snapshot.get("poskobanjir", [])
     poskobanjir_level = str(poskobanjir_list[0].get("tinggi_air", "—")) if poskobanjir_list else "—"
-    snapshot_summary = _render_table([
-        ("Location", location),
-        ("OpenWeather coord", _safe_text(snapshot.get("openweather", {}).get("coord", {}))),
-        ("Rain 1h (mm)", str(snapshot.get("openweather", {}).get("rain", {}).get("1h", "—"))),
-        ("Rain 3h (mm)", str(snapshot.get("openweather", {}).get("rain", {}).get("3h", "—"))),
-        ("Poskobanjir water level", poskobanjir_level),
-        ("Snapshot source", _safe_text(DEFAULT_REALTIME_SNAPSHOT)),
-    ])
+    # L3: make coordinates a clickable Google Maps link
+    coord = (snapshot.get("openweather", {}) or {}).get("coord", {}) or {}
+    lat_val = coord.get("lat")
+    lon_val = coord.get("lon")
+    if lat_val is not None and lon_val is not None:
+        location_cell = (
+            f'<a href="https://maps.google.com/?q={lat_val},{lon_val}" target="_blank">'
+            f'{html.escape(location)}</a>'
+        )
+    else:
+        location_cell = html.escape(location)
+    # M5: show 0.0 mm when OpenWeather omits the rain field (not raining)
+    rain_1h = snapshot.get("openweather", {}).get("rain", {}).get("1h", 0.0)
+    rain_3h = snapshot.get("openweather", {}).get("rain", {}).get("3h", 0.0)
+    snapshot_summary = (
+        f"<table class=\"detail-table\">"
+        f"<tr><th>Location</th><td>{location_cell}</td></tr>"
+        f"<tr><th>OpenWeather coord</th><td>{_safe_text(coord)}</td></tr>"
+        f"<tr><th>Rain 1h (mm)</th><td>{html.escape(str(rain_1h))}</td></tr>"
+        f"<tr><th>Rain 3h (mm)</th><td>{html.escape(str(rain_3h))}</td></tr>"
+        f"<tr><th>Poskobanjir water level</th><td>{html.escape(poskobanjir_level)}</td></tr>"
+        f"</table>"
+    )
 
     db_section = _render_section(
         "PostgreSQL status",
@@ -325,12 +343,10 @@ def _render_dashboard(
                 ("Pipeline version", _safe_text(result.get("pipeline_version"))),
                 ("Model name", _safe_text(result.get("model_name"))),
                 ("Safe route available", _safe_text(safe_route.get("available"))),
-                ("Persistence IDs", _safe_text(result.get("persistence"))),
+                ("Persistence IDs", _safe_text(result.get("persistence"))),  # M4: dict → JSON via _safe_text
                 ("Persistence error", _safe_text(result.get("persistence_error"))),
             ]
         )
-        + "<h3>Safe route</h3>"
-        + _render_pre(safe_route)
         + "<h3>Failure modes</h3>"
         + _render_list([f"{fm.get('severity', 'unknown').upper()}: {fm.get('type')} — {fm.get('message')}" for fm in failure_modes])
         + "<h3>Routing failures</h3>"
@@ -367,14 +383,35 @@ def _render_dashboard(
         + _render_pre(snapshot)
     )
 
+    # C4: routing form + M7: only show origin/destination when set
+    routing_rows = []
+    if origin:
+        routing_rows.append(f"<tr><th>Origin</th><td>{_safe_text(origin)}</td></tr>")
+    if destination:
+        routing_rows.append(f"<tr><th>Destination</th><td>{_safe_text(destination)}</td></tr>")
+    routing_table = f"<table class=\"detail-table\">{''.join(routing_rows)}</table>" if routing_rows else ""
+
     query_context = _render_section(
-        "Dashboard query",
-        _render_table(
-            [
-                ("Origin", _safe_text(origin)),
-                ("Destination", _safe_text(destination)),
-                ("Snapshot path", _safe_text(DEFAULT_REALTIME_SNAPSHOT)),
-            ]
+        "Safe Route Finder",
+        "<form method=\"get\" action=\"/demo\" style=\"display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;\">"
+        "<div><label style=\"font-size:.9rem;font-weight:600;display:block;margin-bottom:4px;\">Origin</label>"
+        f"<input name=\"origin\" value=\"{html.escape(origin or '')}\" placeholder=\"e.g. Menteng, Jakarta Pusat\" "
+        "style=\"padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:.95rem;width:280px;\"/></div>"
+        "<div><label style=\"font-size:.9rem;font-weight:600;display:block;margin-bottom:4px;\">Destination</label>"
+        f"<input name=\"destination\" value=\"{html.escape(destination or '')}\" placeholder=\"e.g. Monas, Jakarta Pusat\" "
+        "style=\"padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:.95rem;width:280px;\"/></div>"
+        "<button type=\"submit\" style=\"padding:8px 20px;background:#4f46e5;color:#fff;border:none;border-radius:8px;"
+        "font-size:.95rem;font-weight:600;cursor:pointer;\">Find Safe Route</button>"
+        "</form>"
+        + routing_table
+        + (
+            "<h3>Route result</h3>" + _render_pre(safe_route)
+            if safe_route and safe_route.get("available")
+            else (
+                f"<p class=\"muted\">{html.escape(safe_route.get('reason', 'Enter origin and destination above to find a safe route.'))}</p>"
+                if safe_route
+                else "<p class=\"muted\">Enter origin and destination above to find a safe route.</p>"
+            )
         )
     )
 
@@ -382,6 +419,8 @@ def _render_dashboard(
         "<html><head><title>Jakarta Flood Prediction Demo</title>"
         "<meta charset=\"utf-8\" />"
         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />"
+        # L7: auto-refresh every 15 minutes (matches snapshot scheduler interval)
+        "<meta http-equiv=\"refresh\" content=\"900\" />"
         "<style>"
         "body{margin:0;font-family:Segoe UI,Arial,Helvetica,sans-serif;background:#f3f5f7;color:#111;}"
         "main{max-width:1200px;margin:0 auto;padding:24px;}"
@@ -416,7 +455,24 @@ def _render_dashboard(
         f"{metrics_section}"
         f"{snapshot_section}"
         f"{db_section}"
-        "</main></body></html>"
+        "</main>"
+        # L7: auto-refresh countdown banner
+        "<div id=\"refresh-bar\" style=\"position:fixed;bottom:0;left:0;right:0;background:#1e293b;color:#94a3b8;"
+        "font-size:.85rem;padding:8px 24px;display:flex;justify-content:space-between;align-items:center;\">"
+        "<span>Jakarta Flood AI — Agentic Pipeline v2.0</span>"
+        "<span>Next refresh in: <strong id=\"countdown\">15:00</strong></span>"
+        "</div>"
+        "<script>"
+        "var secs=900;"
+        "function tick(){"
+        "secs--;"
+        "if(secs<=0){location.reload();return;}"
+        "var m=Math.floor(secs/60),s=secs%60;"
+        "document.getElementById('countdown').textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;"
+        "setTimeout(tick,1000);}"
+        "setTimeout(tick,1000);"
+        "</script>"
+        "</body></html>"
     )
     return rendered
 

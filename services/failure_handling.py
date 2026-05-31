@@ -286,7 +286,7 @@ def conflicting_signals(
         failures.append(
             {
                 "type": "signal_conflict",
-                "severity": "medium",
+                "severity": "high",
                 "message": (
                     f"Water level rising rapidly (Δ{wdelta:.2f}/step) without active rainfall. "
                     "Possible: upstream surge, tidal backflow, drainage blockage, or sensor drift."
@@ -307,7 +307,7 @@ def conflicting_signals(
         failures.append(
             {
                 "type": "signal_conflict",
-                "severity": "high" if baseline_gap > 0.45 else "medium",
+                "severity": "high" if baseline_gap > 0.30 else "medium",
                 "message": (
                     f"Model probability ({model_prob:.2f}) is {direction} than the "
                     f"rule-based baseline ({baseline_prob:.2f}) by {baseline_gap:.2f}. "
@@ -337,8 +337,8 @@ def detect_ood_failures(ood_detection: dict) -> list[dict]:
         return []
 
     ood_score = ood_detection.get("score", 0.0)
-    # More negative decision-function score = more anomalous input.
-    severity = "high" if ood_score < -0.30 else "medium"
+    # OOD input is always HIGH — model reliability is compromised regardless of score magnitude.
+    severity = "high"
     return [
         {
             "type": "ood_input",
@@ -431,7 +431,7 @@ def detect_ood_escalation(ood_detection: dict) -> list[dict]:
     return [
         {
             "type": "ood_escalation",
-            "severity": "medium",
+            "severity": "high",
             "message": (
                 f"OOD {tier} (IsolationForest score={score:.3f}): model is operating "
                 f"outside its training distribution. "

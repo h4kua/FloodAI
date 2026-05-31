@@ -330,9 +330,15 @@ class EvaluationAgent:
                     f"likely cause; see override_trace"
                 )
 
-        # ── Recommended actions (signal-driven, not just risk_level-driven) ──
+        # ── Recommended actions (signal-driven, station-aware) ──────────────
         signals = {**reasoning.signals, "dominant_driver": reasoning.dominant_driver}
-        recommended_action = generate_recommended_action(signals, failure_modes, final_risk)
+        recommended_action = generate_recommended_action(
+            signals,
+            failure_modes,
+            final_risk,
+            poskobanjir_records=list(getattr(perception, "poskobanjir", None) or []),
+            bmkg_alerts=list(getattr(perception, "bmkg_alerts", None) or []),
+        )
 
         # Re-evaluate manual review after engine may have escalated risk.
         # uncertainty_score passed here so the gate is unified in one place —
