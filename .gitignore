@@ -20,6 +20,9 @@ downloads/
 eggs/
 .eggs/
 lib/
+# Keep frontend src/lib (React utility modules)
+!frontend/src/lib/
+!frontend/src/lib/**
 lib64/
 parts/
 sdist/
@@ -90,8 +93,9 @@ tmp/
 # Deployment configs (old platforms - tidak dipakai)
 Procfile
 railway.json
-vercel.json
 .railwayignore
+# vercel.json is now used for Vercel deployment — do not ignore
+!vercel.json
 
 data/raw/awlr_thresholds.json
 data/raw/pintu_air_latest.json
