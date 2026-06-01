@@ -1,13 +1,11 @@
 import { useState } from "react";
 import Home from "./pages/Home";
 import Alert from "./pages/Alert";
-import Chat from "./pages/Chat";
 import AlertBanner from "./components/AlertBanner";
 
 const NAV = [
   { id: "home",  label: "Dashboard" },
-  { id: "alert", label: "Evakuasi" },
-  { id: "chat",  label: "Tanya AI" },
+  { id: "alert", label: "Evakuasi"  },
 ];
 
 export default function App() {
@@ -37,21 +35,25 @@ export default function App() {
           ))}
         </nav>
 
-        <div className="live-badge">
-          <span className="live-dot" />
-          Live
+        <div className="topbar-right">
+          <div className="status-pill live">
+            <span className="live-dot" />
+            System Online
+          </div>
+          <div className="status-pill">
+            Jakarta, DKI
+          </div>
         </div>
       </header>
 
       <main className="main">
-        {page === "home"  && <Home setRiskLevel={setRiskLevel} />}
+        {page === "home"  && <Home setRiskLevel={setRiskLevel} riskLevel={riskLevel} />}
         {page === "alert" && <Alert riskLevel={riskLevel} />}
-        {page === "chat"  && <Chat riskLevel={riskLevel} />}
       </main>
 
       <footer className="footer">
-        <span>deFlood.ai — Sistem Peringatan Banjir Jakarta</span>
-        <span>Data diperbarui otomatis setiap 15 menit</span>
+        <span>deFlood.ai — Jakarta Flood Intelligence System</span>
+        <span>XGBoost · 16 features · AUC-ROC 0.945 · &lt;1s latency</span>
       </footer>
     </div>
   );

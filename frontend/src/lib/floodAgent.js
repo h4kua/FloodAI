@@ -1,29 +1,28 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
+// Concise, structured system prompt — max 3-4 sentences or bullet points
 const SYSTEM_PROMPT = `
-Kamu adalah deFlood.ai, asisten AI sistem peringatan banjir Indonesia.
-Gunakan Bahasa Indonesia yang jelas, ringkas, dan mudah dipahami masyarakat umum.
-Selalu tenang, empatis, dan berikan langkah konkret yang bisa langsung dilakukan.
-Hindari jargon teknis. Jika kondisi darurat, sarankan hubungi BPBD: 117 atau Basarnas: 115.
+Kamu adalah deFlood.ai, asisten banjir Jakarta.
+
+ATURAN JAWABAN:
+- Maksimal 3-4 kalimat ATAU 3-4 bullet points singkat
+- Gunakan bullet points jika ada daftar/langkah
+- Bahasa Indonesia, langsung ke inti
+- Jangan ulangi pertanyaan
+- Jika darurat: sebut BPBD 117 atau Basarnas 115
+- JANGAN tulis paragraf panjang
 `.trim();
 
 export async function sendToFloodAgent(message, history = [], riskContext = {}) {
   const contextPrefix = riskContext.level
-    ? `[Konteks sistem: Level risiko saat ini ${riskContext.level}, curah hujan ${riskContext.rainfall ?? "tidak diketahui"} mm/jam]\n\n`
+    ? `[Konteks: risiko ${riskContext.level}, hujan ${riskContext.rainfall ?? 0} mm/jam]\n`
     : "";
 
   try {
     const url = API_BASE ? `${API_BASE}/api/chat` : null;
+    if (!url) return { success: false, reply: "Backend tidak terhubung. Darurat: BPBD 117." };
 
-    if (!url) {
-      return {
-        success: false,
-        reply:
-          "Layanan chat membutuhkan koneksi ke server. Untuk kondisi darurat, hubungi BPBD: 117.",
-      };
-    }
-
-    const response = await fetch(url, {
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -33,23 +32,19 @@ export async function sendToFloodAgent(message, history = [], riskContext = {}) 
       }),
     });
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
     return { success: true, reply: data.reply ?? data.content };
   } catch {
-    return {
-      success: false,
-      reply:
-        "Asisten AI tidak dapat dijangkau saat ini. Untuk kondisi darurat, hubungi BPBD: 117.",
-    };
+    return { success: false, reply: "AI tidak tersedia. Darurat: BPBD 117 · Basarnas 115." };
   }
 }
 
 export const quickReplies = [
-  "Apa tanda-tanda banjir akan datang?",
-  "Ke mana saya harus mengungsi?",
+  "Status banjir sekarang?",
   "Apa yang harus dibawa saat evakuasi?",
-  "Bagaimana mengamankan rumah dari banjir?",
-  "Siapa yang harus dihubungi saat darurat?",
-  "Bagaimana melindungi anak-anak saat banjir?",
+  "Tanda-tanda banjir akan datang?",
+  "Lokasi shelter terdekat?",
+  "Bagaimana amankan dokumen penting?",
+  "Hubungi siapa saat darurat?",
 ];

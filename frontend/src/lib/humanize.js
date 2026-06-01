@@ -2,27 +2,27 @@ export function humanizeRiskLevel(level) {
   const map = {
     aman: {
       label: "AMAN",
-      color: "var(--aman)",
+      color: "var(--safe)",
       desc: "Tidak ada risiko banjir yang terdeteksi saat ini.",
-      recommendation: "Kondisi normal. Tetap pantau pembaruan berkala.",
+      recommendation: "Kondisi normal. Pantau pembaruan berkala.",
     },
     waspada: {
       label: "WASPADA",
-      color: "var(--waspada)",
-      desc: "Risiko banjir rendah hingga sedang. Pantau perkembangan cuaca.",
-      recommendation: "Siapkan barang penting dan waspadai perubahan cuaca.",
+      color: "var(--warning)",
+      desc: "Risiko banjir sedang. Pantau perkembangan cuaca.",
+      recommendation: "Siapkan barang penting. Ikuti perkembangan cuaca.",
     },
     siaga: {
       label: "SIAGA",
-      color: "var(--siaga)",
-      desc: "Risiko banjir tinggi. Bersiap untuk evakuasi jika diperlukan.",
-      recommendation: "Siapkan tas darurat dan ikuti arahan petugas BPBD.",
+      color: "#f97316",
+      desc: "Risiko tinggi. Bersiap evakuasi jika diperlukan.",
+      recommendation: "Siapkan tas darurat. Ikuti arahan petugas BPBD.",
     },
     bahaya: {
       label: "BAHAYA",
-      color: "var(--bahaya)",
-      desc: "Risiko banjir sangat tinggi. Segera evakuasi ke lokasi aman.",
-      recommendation: "Evakuasi segera. Hubungi BPBD 117 atau Basarnas 115.",
+      color: "var(--danger)",
+      desc: "Risiko sangat tinggi. Evakuasi segera ke lokasi aman.",
+      recommendation: "Evakuasi sekarang. Hubungi BPBD 117 atau Basarnas 115.",
     },
   };
   return map[level] ?? map.waspada;
@@ -30,18 +30,9 @@ export function humanizeRiskLevel(level) {
 
 export function humanizeRainfall(mmPerHour) {
   if (!mmPerHour || mmPerHour === 0) return "Tidak ada hujan";
-  if (mmPerHour < 5)   return "Gerimis ringan";
+  if (mmPerHour < 5)   return "Gerimis";
   if (mmPerHour < 20)  return "Hujan sedang";
   if (mmPerHour < 50)  return "Hujan lebat";
   if (mmPerHour < 100) return "Hujan sangat lebat";
   return "Hujan ekstrem";
-}
-
-export function humanizeWaterLevel(cm) {
-  if (!cm) return "Tidak tersedia";
-  if (cm < 50)  return `${cm} cm — Bawah lutut`;
-  if (cm < 100) return `${cm} cm — Setinggi lutut`;
-  if (cm < 150) return `${cm} cm — Setinggi pinggang`;
-  if (cm < 200) return `${cm} cm — Setinggi dada`;
-  return `${cm} cm — Di atas kepala`;
 }
