@@ -1153,7 +1153,6 @@ def compute_hydro_shadow_evaluation(
             else f"DISAGREES with production ({production_risk_level}) by {disagreement_levels} level(s)."
         )
         + f" Hydro ratio={ratio:.2f}, Siaga3+ stations={siaga3_count}."
-        + (f" shadow_danger_triggered={shadow_danger_triggered} means disagreement≥{_SHADOW_HYDRO_DISAGREE_LEVELS} levels." if not shadow_danger_triggered and shadow_risk == "DANGER" else "")
     )
 
     return {

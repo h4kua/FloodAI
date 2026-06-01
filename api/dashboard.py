@@ -3,16 +3,17 @@ from __future__ import annotations
 import html
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from fastapi.responses import HTMLResponse
-from imblearn import pipeline
 
 from api.observability import get_logger
-from utils.paths import DEFAULT_REALTIME_SNAPSHOT
+from utils.paths import ARTIFACTS_DIR, DEFAULT_REALTIME_SNAPSHOT, REPORTS_DIR
 from db.psycopg2_connection import pooled_connection
+
+_MODEL_REPORT_PATH = REPORTS_DIR / "realtime_native_model_report.json"
 
 _REQUIRED_DB_TABLES = [
     "schema_migrations",
@@ -199,6 +200,164 @@ def _render_list(items: list[Any]) -> str:
     return f"<ul>{rendered}</ul>"
 
 
+def _load_model_metrics() -> dict:
+    """Load model performance metrics from the report JSON file."""
+    try:
+        with open(_MODEL_REPORT_PATH, encoding="utf-8") as fh:
+            report = json.load(fh)
+        perf = report.get("performance") or {}
+        cal = report.get("calibration") or {}
+        return {
+            "test_roc_auc": perf.get("test_roc_auc"),
+            "test_f1": perf.get("test_f1"),
+            "test_precision": perf.get("test_precision"),
+            "test_recall": perf.get("test_recall"),
+            "test_accuracy": perf.get("test_accuracy"),
+            "test_brier": cal.get("test_brier"),
+            "test_ece": cal.get("test_ece"),
+            "training_rows": report.get("training_rows"),
+            "test_rows": report.get("test_rows"),
+            "calibration_method": report.get("calibration", {}).get("method"),
+        }
+    except Exception:
+        return {}
+
+
+def _query_risk_history() -> list[dict]:
+    """Query last 24h of pipeline runs for the sparkline chart."""
+    try:
+        with pooled_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT started_at, risk_level, system_status
+                    FROM pipeline_runs
+                    WHERE started_at >= NOW() - INTERVAL '24 hours'
+                    ORDER BY started_at ASC
+                    LIMIT 200
+                    """
+                )
+                rows = cur.fetchall()
+            conn.commit()
+        _RISK_SCORE = {"SAFE": 0, "PRE_ALERT": 1, "WARNING": 2, "DANGER": 3, "UNKNOWN": 0}
+        return [
+            {"ts": str(r[0]), "score": _RISK_SCORE.get(str(r[1] or ""), 0), "risk": str(r[1] or "")}
+            for r in rows
+        ]
+    except Exception:
+        return []
+
+
+def _render_sparkline(points: list[dict]) -> str:
+    """Render a minimal SVG sparkline of risk scores over time."""
+    if len(points) < 2:
+        return "<p class=\"muted\">Not enough data for chart (need ≥2 points in last 24h).</p>"
+
+    scores = [p["score"] for p in points]
+    n = len(scores)
+    w, h = 600, 80
+    pad = 8
+    x_step = (w - 2 * pad) / max(n - 1, 1)
+
+    # Color per risk level for dots
+    _colors = {"SAFE": "#22c55e", "PRE_ALERT": "#facc15", "WARNING": "#f97316", "DANGER": "#ef4444", "UNKNOWN": "#94a3b8"}
+
+    pts = " ".join(
+        f"{pad + i * x_step:.1f},{h - pad - scores[i] * (h - 2 * pad) / 3:.1f}"
+        for i in range(n)
+    )
+
+    dots = "".join(
+        f'<circle cx="{pad + i * x_step:.1f}" cy="{h - pad - scores[i] * (h - 2 * pad) / 3:.1f}" '
+        f'r="3" fill="{_colors.get(points[i].get("risk", ""), "#94a3b8")}" />'
+        for i in range(n)
+    )
+
+    # Y-axis labels
+    labels = "".join(
+        f'<text x="{pad - 4}" y="{h - pad - lvl * (h - 2 * pad) / 3 + 4}" '
+        f'font-size="8" fill="#94a3b8" text-anchor="end">'
+        f'{["SAFE", "PRE", "WARN", "DANG"][lvl]}</text>'
+        for lvl in range(4)
+    )
+
+    latest_risk = points[-1].get("risk", "")
+    latest_color = _colors.get(latest_risk, "#94a3b8")
+
+    return (
+        f'<p style="font-size:.8rem;color:#6b7280;margin-bottom:4px;">'
+        f'Last 24h — {n} data points — latest: '
+        f'<strong style="color:{latest_color}">{latest_risk}</strong></p>'
+        f'<svg width="{w}" height="{h}" style="display:block;max-width:100%;" '
+        f'xmlns="http://www.w3.org/2000/svg">'
+        f'<rect width="{w}" height="{h}" fill="#0f172a" rx="8"/>'
+        f'{labels}'
+        f'<polyline points="{pts}" fill="none" stroke="#60a5fa" stroke-width="1.5"/>'
+        f'{dots}'
+        f'</svg>'
+    )
+
+
+def _render_model_metrics(metrics: dict) -> str:
+    """Render model performance panel."""
+    if not metrics:
+        return "<p class=\"muted\">Model report not available.</p>"
+    auc = metrics.get("test_roc_auc")
+    f1 = metrics.get("test_f1")
+    prec = metrics.get("test_precision")
+    rec = metrics.get("test_recall")
+    acc = metrics.get("test_accuracy")
+    brier = metrics.get("test_brier")
+    rows = metrics.get("training_rows", "?")
+    test_n = metrics.get("test_rows", "?")
+    cal = metrics.get("calibration_method", "?")
+
+    def _fmt(v, pct=True):
+        if v is None:
+            return "—"
+        return f"{v:.1%}" if pct else f"{v:.4f}"
+
+    return (
+        _render_table([
+            ("AUC-ROC", _fmt(auc)),
+            ("F1-Score", _fmt(f1)),
+            ("Precision", _fmt(prec)),
+            ("Recall", _fmt(rec)),
+            ("Accuracy", _fmt(acc)),
+            ("Brier Score", _fmt(brier, pct=False)),
+            ("Calibration", cal),
+            ("Training rows", str(rows)),
+            ("Test rows", str(test_n)),
+        ])
+        + "<p class=\"muted\" style=\"font-size:.8rem;margin-top:8px;\">"
+        "Trained on bootstrap proxy data (chronological 80/15/5 split). "
+        "Recall on live production data verified via shadow-mode monitoring.</p>"
+    )
+
+
+def _render_uncalibrated_stations(poskobanjir_list: list) -> str:
+    """Flag stations where all siaga thresholds are identical (placeholder data)."""
+    uncal = []
+    for s in poskobanjir_list:
+        try:
+            s1 = int(float(s.get("siaga1") or 0))
+            s2 = int(float(s.get("siaga2") or 0))
+            s3 = int(float(s.get("siaga3") or 0))
+            if s1 == s2 == s3 and s1 > 0:
+                uncal.append(html.escape(str(s.get("nama_pintu_air") or "?")))
+        except (TypeError, ValueError):
+            pass
+    if not uncal:
+        return ""
+    return (
+        f"<p style=\"background:#fff7ed;border:1px solid #fb923c;border-radius:8px;"
+        f"padding:8px 12px;font-size:.85rem;color:#9a3412;margin-top:8px;\">"
+        f"⚠️ <strong>{len(uncal)} uncalibrated station(s)</strong> — "
+        f"siaga1=siaga2=siaga3 (placeholder thresholds, not operationally calibrated): "
+        f"{', '.join(uncal[:5])}{'...' if len(uncal) > 5 else ''}</p>"
+    )
+
+
 def _render_data_quality(result: dict) -> str:
     dq = (result.get("diagnostics") or {}).get("data_quality_report") or {}
     excluded = dq.get("excluded_stations") or []
@@ -260,6 +419,8 @@ def build_demo_page(
         )
 
     db_health = _query_db_health()
+    model_metrics = _load_model_metrics()
+    risk_history = _query_risk_history()
     body = _render_dashboard(
         result,
         snapshot,
@@ -267,6 +428,8 @@ def build_demo_page(
         origin,
         destination,
         snapshot_notice=snapshot_notice,
+        model_metrics=model_metrics,
+        risk_history=risk_history,
     )
     return HTMLResponse(body)
 
@@ -287,6 +450,8 @@ def _render_dashboard(
     origin: Optional[str],
     destination: Optional[str],
     snapshot_notice: str | None = None,
+    model_metrics: dict | None = None,
+    risk_history: list | None = None,
 ) -> str:
     location = _extract_location(snapshot)
     safe_route = result.get("safe_route") or {}
@@ -297,7 +462,30 @@ def _render_dashboard(
     shadow = result.get("shadow_evaluation") or {}
 
     poskobanjir_list = snapshot.get("poskobanjir", [])
-    poskobanjir_level = str(poskobanjir_list[0].get("tinggi_air", "—")) if poskobanjir_list else "—"
+    # Show highest-alert station — lower rank = higher severity
+    _SIAGA_RANK_MAP = {"Siaga 1": 0, "Siaga 2": 1, "Siaga 3": 2}
+
+    def _station_siaga_rank(st: dict) -> int:
+        s = str(st.get("status_siaga", ""))
+        for lvl, rank in _SIAGA_RANK_MAP.items():
+            if lvl in s:
+                return rank
+        return 99
+
+    _elevated = [s for s in poskobanjir_list if _station_siaga_rank(s) < 99]
+    if _elevated:
+        _top = sorted(_elevated, key=_station_siaga_rank)[0]
+        _top_name = _top.get("nama_pintu_air", "?")
+        _top_status = next((x for x in _SIAGA_RANK_MAP if x in str(_top.get("status_siaga", ""))), "")
+        poskobanjir_level = f"{_top.get('tinggi_air', '?')}cm — {_top_name} [{_top_status}]"
+    else:
+        def _safe_level(st: dict) -> bool:
+            try:
+                return float(st.get("tinggi_air") or -1) >= 0
+            except (TypeError, ValueError):
+                return False
+        _valid = [s for s in poskobanjir_list if _safe_level(s)]
+        poskobanjir_level = f"{_valid[0].get('tinggi_air', '—')}cm" if _valid else "—"
     # L3: make coordinates a clickable Google Maps link
     coord = (snapshot.get("openweather", {}) or {}).get("coord", {}) or {}
     lat_val = coord.get("lat")
@@ -444,8 +632,23 @@ def _render_dashboard(
             else ""
         )
         + snapshot_summary
+        + _render_uncalibrated_stations(poskobanjir_list)
         + "<h3>Raw snapshot metadata</h3>"
         + _render_pre(snapshot)
+    )
+
+    # Model performance + historical chart sections
+    model_section = _render_section(
+        "Model Performance (XGBoost Flood Predictor — Realtime Native)",
+        _render_model_metrics(model_metrics or {})
+    )
+
+    history_section = _render_section(
+        "Risk Level History — Last 24h",
+        _render_sparkline(risk_history or [])
+        + f"<p class=\"muted\" style=\"font-size:.8rem;margin-top:8px;\">"
+        f"Total pipeline runs in DB: <strong>{db_health.get('pipeline_runs_total', '?')}</strong>. "
+        "Chart shows last 24h only. Each dot = one prediction cycle (15-min interval).</p>"
     )
 
     # C4: routing form + M7: only show origin/destination when set
@@ -518,6 +721,8 @@ def _render_dashboard(
         f"{query_context}"
         f"{pipeline_section}"
         f"{metrics_section}"
+        f"{history_section}"
+        f"{model_section}"
         f"{snapshot_section}"
         f"{db_section}"
         "</main>"
