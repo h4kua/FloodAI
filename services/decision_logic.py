@@ -285,6 +285,7 @@ def _build_station_actions(
         if not any(s in status for s in ("Siaga 1", "Siaga 2", "Siaga 3")):
             continue
         nama = str(record.get("nama_pintu_air") or record.get("wilayah") or "")
+        # FIX 8: always use tinggi_air (current reading), never tinggi_air_sebelumnya
         tinggi = record.get("tinggi_air")
         siaga_level = next((s for s in ("Siaga 1", "Siaga 2", "Siaga 3", "Siaga 4") if s in status), "")
         area = STATION_AREA_MAP.get(nama, {})
@@ -345,6 +346,7 @@ def generate_recommended_action(
     poskobanjir_records: list[dict] | None = None,
     bmkg_alerts: list[dict] | None = None,
     stale_station_names: set[str] | None = None,
+    stale_elevated_records: list[dict] | None = None,
 ) -> list[str]:
     """
     Produce a prioritized, signal-driven action list.
@@ -362,6 +364,37 @@ def generate_recommended_action(
     station_actions = _build_station_actions(poskobanjir_records or [], stale_names=_stale)
     actions.extend(station_actions)
     _has_station_actions = bool(station_actions)
+
+    # ── Stale-but-elevated stations — excluded from model but still actionable ──
+    # These stations are stale (>2h) so they cannot influence ML features, but their
+    # last known siaga level still warrants a verification advisory. Show them with
+    # an explicit [STALE DATA] caveat so operators know verification is required.
+    for stale_rec in (stale_elevated_records or []):
+        status = str(
+            stale_rec.get("status_siaga") or stale_rec.get("status") or
+            stale_rec.get("keterangan") or ""
+        )
+        if not any(s in status for s in ("Siaga 1", "Siaga 2", "Siaga 3")):
+            continue
+        nama = str(stale_rec.get("nama_pintu_air") or stale_rec.get("station") or
+                   stale_rec.get("wilayah") or "?")
+        tinggi = stale_rec.get("tinggi_air")
+        tinggi_str = f"{tinggi}cm" if tinggi is not None else "?"
+        siaga_level = next(
+            (s for s in ("Siaga 1", "Siaga 2", "Siaga 3") if s in status), "Siaga 3"
+        )
+        hours_stale = float(stale_rec.get("age_hours") or stale_rec.get("hours_stale") or 0)
+        area = STATION_AREA_MAP.get(nama, {})
+        location_str = f"{area.get('risk_area', '')} ({area.get('wilayah', '')})" if area else ""
+        msg = (
+            f"ELEVATED [{siaga_level} — STALE DATA]: {nama} at {tinggi_str} — "
+            f"data {hours_stale:.1f}h old."
+        )
+        if location_str:
+            msg += f" Alert field teams at {location_str}."
+        msg += " Manual field verification required before operational action."
+        actions.append(msg)
+        _has_station_actions = True
 
     # ── Upstream BMKG watershed alert ────────────────────────────────────────
     if bmkg_alerts:
@@ -432,12 +465,6 @@ def generate_recommended_action(
         actions.append(
             "High atmospheric humidity indicates additional rainfall likely even if current "
             "BMKG alert intensity appears moderate. Maintain elevated operational readiness."
-        )
-
-    if risk_level in ("DANGER", "WARNING"):
-        actions.append(
-            "Deploy field verification teams to the top 3 flood-prone areas "
-            "for ground-truth validation of sensor readings."
         )
 
     if signals.get("hmi_high"):

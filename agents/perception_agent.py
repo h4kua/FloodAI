@@ -32,6 +32,50 @@ _STATION_STALE_HOURS: float = float(os.getenv("STATION_STALE_HOURS", "2"))
 
 from services.bmkg_filter import filter_jakarta_bmkg_alerts
 from services.bnpb_context import VulnerabilityContext, get_vulnerability_context
+
+# Jakarta + Jabodetabek tokens used to filter raw bmkg_feed items when
+# bmkg_alerts (CAP detail) is empty. Intentionally broader than the strict
+# Jakarta-only set so upstream watershed signals are not silently dropped.
+_JABODETABEK_TOKENS = (
+    "jakarta", "dki jakarta", "jabodetabek", "bodetabek",
+    "depok", "tangerang", "bekasi", "bogor",
+    "katulampa", "ciliwung", "citarum",
+)
+
+
+def _feed_items_to_alerts(feed_items: list) -> list:
+    """
+    Convert bmkg_feed RSS items to minimal alert dicts when bmkg_alerts is empty.
+
+    Only items whose title or description contains a Jakarta/Jabodetabek token
+    are included so we don't treat national alerts as local risk signals.
+    """
+    result = []
+    for item in feed_items:
+        text = " ".join([
+            str(item.get("title") or ""),
+            str(item.get("description") or ""),
+        ]).lower()
+        if not any(tok in text for tok in _JABODETABEK_TOKENS):
+            continue
+        result.append({
+            "identifier": item.get("alert_code", ""),
+            "alert_code": item.get("alert_code", ""),
+            "event": str(item.get("title") or "").split("—")[0].strip(),
+            "urgency": "Unknown",
+            "severity": "Moderate",
+            "certainty": "Possible",
+            "effective": item.get("pub_date", ""),
+            "expires": "",
+            "headline": str(item.get("title") or ""),
+            "description": str(item.get("description") or ""),
+            "instruction": "",
+            "area_desc": str(item.get("title") or "").split("—")[-1].strip(),
+            "polygons": [],
+            "parameters": {},
+            "_source": "bmkg_feed_fallback",
+        })
+    return result
 from services.dem_elevation import (
     classify_flood_zone,
     estimate_flow_direction,
@@ -103,6 +147,7 @@ class PerceptionAgent:
     _EXPECTED_SECTIONS = ("fetched_at_utc", "openweather", "poskobanjir", "bmkg_alerts")
     _NORMALIZED_DELTA_KEYS = ("water_level_delta", "water_level_delta_cur")
     _PREVIOUS_LEVEL_KEYS = (
+        "tinggi_air_sebelumnya",   # primary Indonesian field name from Posko XML
         "previous_tinggi_air",
         "tinggi_air_prev",
         "tinggi_air_previous",
@@ -118,6 +163,12 @@ class PerceptionAgent:
         openweather = snapshot.get("openweather") or {}
         poskobanjir = snapshot.get("poskobanjir") or []
         bmkg_alerts = filter_jakarta_bmkg_alerts(snapshot.get("bmkg_alerts") or [])
+
+        # When bmkg_alerts is empty (CAP detail fetch failed or no active alerts),
+        # fall back to bmkg_feed RSS items filtered for Jakarta/Jabodetabek relevance
+        # and use them as a lightweight risk signal via basic alert structs.
+        if not bmkg_alerts:
+            bmkg_alerts = _feed_items_to_alerts(snapshot.get("bmkg_feed") or [])
 
         freshness = self._compute_freshness(snapshot, warnings, now=now)
         completeness = self._compute_completeness(snapshot)
@@ -184,16 +235,24 @@ class PerceptionAgent:
         if _reference_dt is not None:
             stale_stations = self._detect_stale_stations(poskobanjir, _reference_dt)
         if stale_stations:
-            stale_ids = [s["station"] for s in stale_stations]
+            stale_names = {s["station"] for s in stale_stations}
             logger.warning(
-                "stale_stations count=%d ids=%s",
-                len(stale_ids), stale_ids,
+                "stale_stations count=%d names=%s",
+                len(stale_names), sorted(stale_names),
             )
             warnings.append(
-                f"Station(s) {stale_ids} excluded: tanggal > {_STATION_STALE_HOURS:.0f}h old "
+                f"Station(s) {sorted(stale_names)} excluded: tanggal > {_STATION_STALE_HOURS:.0f}h old "
                 "relative to fetched_at_utc. Excluded from water level and hydrology calculations."
             )
-            poskobanjir = [s for s in poskobanjir if s.get("id") not in stale_ids]
+            # Match by station name (all name-field variants) so ALL stale stations
+            # are excluded — not just ones where id happens to equal the name string.
+            def _station_name(s: dict) -> str:
+                return (
+                    s.get("nama_pintu_air") or s.get("nama") or
+                    s.get("name") or s.get("wilayah") or
+                    s.get("id") or ""
+                )
+            poskobanjir = [s for s in poskobanjir if _station_name(s) not in stale_names]
 
         # >50% gate — all fault types combined against the original raw count.
         total_raw = len(snapshot.get("poskobanjir") or [])
@@ -601,6 +660,10 @@ class PerceptionAgent:
                     "tanggal": str(tanggal),
                     "age_hours": round(age_hours, 2),
                     "status": str(s.get("status_siaga") or s.get("status") or ""),
+                    # Include current water level so action generator can cite it
+                    "tinggi_air": s.get("tinggi_air"),
+                    "siaga1": s.get("siaga1"),
+                    "_raw_record": s,
                 })
         return stale
 

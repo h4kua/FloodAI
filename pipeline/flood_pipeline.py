@@ -176,6 +176,128 @@ def _verbose_persistence_errors() -> bool:
     )
 
 
+def _build_dynamic_decision_reason(perception, failure_modes: list) -> str:
+    """
+    Build a human-readable decision_reason string from actual station siaga states.
+    Called AFTER DB persistence so the enum value is saved correctly.
+    """
+    try:
+        posko = list(getattr(perception, "poskobanjir", None) or [])
+        ood_flag = any(
+            f.get("type") in ("ood_input", "ood_escalation") for f in (failure_modes or [])
+        )
+        parts: list[str] = []
+
+        _SIAGA_RANK_MAP = {"Siaga 1": 1, "Siaga 2": 2, "Siaga 3": 3}
+        for record in posko:
+            status = str(
+                record.get("status_siaga") or record.get("status") or
+                record.get("keterangan") or ""
+            )
+            siaga_num = next(
+                (v for k, v in _SIAGA_RANK_MAP.items() if k in status), None
+            )
+            if siaga_num is None:
+                continue
+            nama = str(record.get("nama_pintu_air") or record.get("wilayah") or "?")
+            tinggi = record.get("tinggi_air")
+            tinggi_str = f"{tinggi}cm" if tinggi is not None else ""
+
+            # For Siaga 2, include margin to Siaga 1
+            if siaga_num <= 2:
+                try:
+                    s1 = float(record.get("siaga1") or 0)
+                    if s1 > 0 and tinggi is not None:
+                        margin = int(s1 - float(tinggi))
+                        margin_note = f", {margin}cm to Siaga 1"
+                    else:
+                        margin_note = ""
+                except (TypeError, ValueError):
+                    margin_note = ""
+                parts.append(
+                    f"siaga{siaga_num}_{nama.replace(' ', '_').lower()}"
+                    f" ({tinggi_str}{margin_note})"
+                )
+            elif siaga_num == 3 and len(parts) < 4:  # cap at 4 Siaga 3 entries
+                parts.append(
+                    f"siaga3_{nama.replace(' ', '_').lower()} ({tinggi_str})"
+                )
+
+        if ood_flag:
+            parts.append("ood_rule_engine_override")
+
+        return " + ".join(parts) if parts else "low_background_risk"
+    except Exception:  # noqa: BLE001
+        return "low_background_risk"
+
+
+def _build_decision_override_reason(reasoning, result: dict) -> str | None:
+    """
+    Build a human-readable override explanation when OOD is active or model-rule gap
+    exceeds 0.20. Returns None when no override occurred (no field in response).
+    """
+    try:
+        ood_failures = [
+            f for f in (result.get("failure_modes") or [])
+            if f.get("type") in ("ood_input", "ood_escalation")
+        ]
+        model_prob = float(result.get("probability") or 0.0)
+        baseline_prob = float(
+            (result.get("baseline_check") or {}).get("baseline_probability") or 0.0
+        )
+        gap = abs(model_prob - baseline_prob)
+
+        if not ood_failures and gap < 0.20:
+            return None  # no override — omit field from response
+
+        reasons: list[str] = []
+
+        if ood_failures:
+            detail = ood_failures[0].get("detail") or {}
+            ood_score = float(detail.get("ood_score", 0.0))
+            reasons.append(
+                f"XGBoost suppressed: IsolationForest score {ood_score:.3f} indicates "
+                "input outside training distribution"
+            )
+
+        if gap >= 0.20:
+            reasons.append(
+                f"Model-rule gap: XGBoost {model_prob:.2f} vs rule-based {baseline_prob:.2f} "
+                f"(gap {gap:.2f}) — rule engine takes precedence"
+            )
+
+        ood_det = (getattr(reasoning, "prediction", None) or {}).get("ood_detection") or {}
+        raw_conf = float(ood_det.get("raw_confidence") or 0.0)
+        was_capped = bool(ood_det.get("confidence_capped_by_ood_floor", False))
+        ood_floor = float(ood_det.get("confidence_floor_on_outlier") or 0.6)
+        final_conf = float(result.get("confidence_score") or 0.0)
+        if raw_conf > 0:
+            if was_capped:
+                # OOD floor cap reduced confidence: raw_conf > floor, capped down.
+                # Correct direction: first number always > second number.
+                reasons.append(
+                    f"Confidence dampened: {raw_conf * 100:.1f}% -> {ood_floor * 100:.1f}% "
+                    f"(OOD floor cap applied)"
+                )
+            elif ood_failures:
+                # OOD active but ML confidence already below floor — no cap fired.
+                # Show two-value format only when first > second; use plain text otherwise.
+                reasons.append(
+                    f"ML model confidence: {raw_conf * 100:.1f}% (below OOD reliability "
+                    f"floor {ood_floor * 100:.0f}% — no cap needed). "
+                    f"Rule engine confidence: {final_conf * 100:.1f}%"
+                )
+
+        final_risk = result.get("risk_level", "UNKNOWN")
+        reasons.append(
+            f"Final decision '{final_risk}' determined by rule engine, not model probability"
+        )
+
+        return " | ".join(reasons) if reasons else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
 class FloodDecisionPipeline:
     """
     Orchestrates the 5-stage agentic flood decision pipeline.
@@ -613,6 +735,18 @@ class FloodDecisionPipeline:
                     result_hash_before_persist,
                     result_hash_after_persist,
                 )
+
+        # FIX 3: Override decision_reason with a human-readable string built from
+        # actual station states AFTER persistence (DB needs the enum value).
+        result["decision_reason"] = _build_dynamic_decision_reason(
+            perception, result.get("failure_modes", [])
+        )
+
+        # FIX 4: Add decision_override_reason when OOD or model-rule gap is significant.
+        result["decision_override_reason"] = _build_decision_override_reason(
+            reasoning, result
+        )
+
         return result
 
     def run_from_file(

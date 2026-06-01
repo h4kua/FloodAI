@@ -121,6 +121,60 @@ def _bmkg_category_scores_from_rainfall(rainfall_mm, rainfall_recent_mm):
     }
 
 
+_STEP_DELTA_MAX_CM = 300.0  # maximum physically plausible change per 15-min interval
+
+
+def _validate_step_delta(record: dict) -> dict:
+    """
+    Flag records whose water level changed by more than _STEP_DELTA_MAX_CM since
+    the previous reading. Sets use_delta_in_model=False when flagged so lag/delta
+    features are suppressed for this station.
+    """
+    try:
+        cur = _safe_float(record.get("tinggi_air"))
+        prev_raw = (
+            record.get("tinggi_air_sebelumnya")
+            or record.get("tinggi_air_prev")
+            or record.get("previous_tinggi_air")
+        )
+        if prev_raw is None or prev_raw == "":
+            record["use_delta_in_model"] = True
+            return record
+        prev = _safe_float(prev_raw)
+        delta = cur - prev
+        if abs(delta) > _STEP_DELTA_MAX_CM:
+            record["step_delta_flag"] = (
+                f"SPIKE: delta {delta:+.0f}cm exceeds threshold {_STEP_DELTA_MAX_CM:.0f}cm"
+            )
+            record["step_delta_direction"] = "rise" if delta > 0 else "drop"
+            record["use_delta_in_model"] = False
+            return record
+    except (TypeError, ValueError):
+        pass
+    record["use_delta_in_model"] = True
+    return record
+
+
+def _is_calibrated_station(record: dict) -> bool:
+    """
+    Return False for stations with placeholder thresholds (siaga1=siaga2=siaga3 equal).
+    All-identical thresholds mean the station was never operationally calibrated;
+    including them produces near-zero ratios that bias ML toward SAFE.
+    Stations with distinct threshold values (even high ones) are kept.
+    """
+    try:
+        s1 = int(float(record.get("siaga1") or 0))
+        s2 = int(float(record.get("siaga2") or 0))
+        s3 = int(float(record.get("siaga3") or 0))
+        if s1 == 0 and s2 == 0 and s3 == 0:
+            return False  # No thresholds at all
+        if s1 == s2 == s3 and s1 > 0:
+            return False  # All identical — placeholder (never operationally set)
+        return True
+    except (TypeError, ValueError):
+        return True
+
+
 def _water_level_ratio_from_records(records):
     best_ratio = 0.0
     for record in (records or []):
@@ -130,6 +184,10 @@ def _water_level_ratio_from_records(records):
         # the standard Siaga threshold scale. Including them contaminates the
         # feature vector and suppresses ML probability toward 0.00.
         if current_level < 0:
+            continue
+        # Skip uncalibrated stations — placeholder thresholds produce near-zero
+        # ratios that bias ML toward SAFE regardless of actual water level.
+        if not _is_calibrated_station(record):
             continue
         thresholds = [
             _safe_float(record.get("siaga1")),
@@ -432,8 +490,33 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
     rainfall_3h_proxy_mm = max(_safe_float(rain_data.get("3h")), rainfall_mm * 3)
     humidity_pct = _safe_float(main_weather.get("humidity"), 75.0)
     temperature_c = _safe_float(main_weather.get("temp"), 30.0)
+    # Step-delta spike detection — annotate records before any feature use.
+    # Stations with spikes get use_delta_in_model=False; their current level
+    # is still used but delta/lag features are suppressed to avoid contamination.
+    poskobanjir_records = [_validate_step_delta(dict(r)) for r in poskobanjir_records]
+    spike_flagged = [
+        {
+            "nama": str(r.get("nama_pintu_air") or r.get("wilayah") or "unknown"),
+            "delta_cm": abs(
+                _safe_float(r.get("tinggi_air"))
+                - _safe_float(
+                    r.get("tinggi_air_sebelumnya")
+                    or r.get("tinggi_air_prev")
+                    or r.get("previous_tinggi_air")
+                )
+            ),
+            "direction": r.get("step_delta_direction", "unknown"),
+        }
+        for r in poskobanjir_records
+        if not r.get("use_delta_in_model", True)
+    ]
+
     excluded_stations = _get_excluded_stations(poskobanjir_records)
     valid_records = [r for r in poskobanjir_records if _safe_float(r.get("tinggi_air")) >= 0]
+    # Count uncalibrated stations for data quality reporting
+    uncalibrated_count = sum(
+        1 for r in valid_records if not _is_calibrated_station(r)
+    )
     water_level_ratio = _water_level_ratio_from_records(poskobanjir_records)
     bmkg_scores = _bmkg_category_scores_from_alerts(alerts)
 
@@ -472,6 +555,10 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
             "exclusion_reason": "Non-standard datum — values outside model training range",
             "stations_used_in_model": len(valid_records),
             "stations_total": len(poskobanjir_records),
+            # Spike detection results (step-delta > 300cm per 15-min interval)
+            "spike_flagged_stations": spike_flagged,
+            # Stations with placeholder thresholds excluded from water_level_ratio
+            "uncalibrated_stations_excluded_from_ratio": uncalibrated_count,
         },
         # Momentum scalars (top-level for direct diagnostics consumers).
         "rainfall_trend_mm_h": round(current_row["rainfall_mm"] - _rf_lag1, 4),

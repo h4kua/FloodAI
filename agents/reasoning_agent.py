@@ -163,6 +163,132 @@ class ReasoningResult:
     baseline_result: dict
 
 
+def _siaga_int(level_str: str) -> int:
+    """Convert 'siaga1'/'siaga2'/'siaga3' string to int 1/2/3; 0 for normal."""
+    s = str(level_str or "").lower().strip()
+    for n in (1, 2, 3, 4):
+        if f"siaga{n}" == s or f"siaga {n}" == s:
+            return n
+    return 0
+
+
+def _derive_risk_driver_from_stations(
+    hydro,
+    *,
+    ml_driver: str,
+    ood_flag: bool,
+    bmkg_upstream: bool,
+) -> str:
+    """
+    Derive dominant_risk_driver from actual station siaga levels.
+
+    When OOD suppresses the ML model, the feature-derived driver is unreliable.
+    This function uses the hydrology assessment (actual siaga states) as ground truth
+    so the driver always reflects observable physical conditions, not model internals.
+    """
+    if hydro is None or not getattr(hydro, "stations", None):
+        if ood_flag:
+            return "ood_precautionary"
+        return ml_driver
+
+    stations = hydro.stations
+    siaga1 = [s for s in stations if _siaga_int(s.siaga_level) == 1]
+    siaga2 = [s for s in stations if _siaga_int(s.siaga_level) == 2]
+    siaga3 = [s for s in stations if _siaga_int(s.siaga_level) == 3]
+
+    if siaga1:
+        return "critical_coastal_siaga1"
+    if siaga2:
+        coastal = any(
+            "laut" in s.station_name.lower() or "coastal" in s.station_name.lower()
+            for s in siaga2
+        )
+        return "coastal_tidal_siaga2" if coastal else "active_siaga2_stations"
+    if len(siaga3) >= 3:
+        return "multiple_siaga3_stations"
+    if siaga3:
+        return "active_siaga3_stations"
+    if bmkg_upstream:
+        return "upstream_bmkg_alert"
+    if ood_flag:
+        return "ood_precautionary"
+    return ml_driver
+
+
+def _generate_dynamic_risk_interpretation(
+    hydro,
+    *,
+    ml_interpretation: str,
+    ood_flag: bool,
+    rain_1h: float,
+    failure_modes: list,
+) -> str:
+    """
+    Generate a risk interpretation that names actual elevated stations explicitly.
+
+    Falls back to ml_interpretation when no stations are elevated, so the
+    standard ML-derived narrative is still used for SAFE/PRE_ALERT conditions.
+    """
+    if hydro is None or not getattr(hydro, "stations", None):
+        return ml_interpretation
+
+    elevated = [
+        s for s in hydro.stations
+        if _siaga_int(s.siaga_level) in (1, 2, 3)
+    ]
+    if not elevated:
+        return ml_interpretation
+
+    # Sort by severity (siaga1 first, then 2, then 3) then by water level
+    elevated_sorted = sorted(elevated, key=lambda s: (_siaga_int(s.siaga_level), -s.tinggi_air_cm))
+    station_summary = ", ".join(
+        f"{s.station_name} {s.tinggi_air_cm:.0f}cm (Siaga {_siaga_int(s.siaga_level)})"
+        for s in elevated_sorted
+    )
+
+    if rain_1h > 0:
+        rain_note = f"Rainfall: {rain_1h:.1f}mm/1h."
+    else:
+        rain_note = "No active rainfall — rise may indicate tidal influence or upstream drainage."
+
+    ood_note = (
+        " Model operating outside training distribution — rule engine primary."
+        if ood_flag else ""
+    )
+
+    # For all Siaga 2 stations, show distance to Siaga 1 threshold explicitly.
+    # Always uses tinggi_air_cm (current level) from StationAssessment — never tinggi_air_sebelumnya.
+    siaga2_stations = [s for s in elevated if _siaga_int(s.siaga_level) == 2]
+    threshold_notes: list[str] = []
+    for s in siaga2_stations[:2]:
+        siaga1_cm = s.thresholds.get("siaga1", 0.0)
+        if siaga1_cm > 0:
+            margin = int(siaga1_cm - s.tinggi_air_cm)
+            threshold_notes.append(
+                f"{s.station_name} at {s.tinggi_air_cm:.0f}cm, "
+                f"{margin}cm below Siaga 1 threshold ({siaga1_cm:.0f}cm)"
+            )
+
+    # For Siaga 3 stations nearing Siaga 2, add escalation note.
+    near_siaga2 = [s for s in elevated if _siaga_int(s.siaga_level) == 3 and s.near_threshold]
+    for s in near_siaga2[:1]:
+        next_cm = s.thresholds.get(s.next_siaga_level, 0.0)
+        if next_cm > 0:
+            threshold_notes.append(
+                f"{s.station_name} at {s.tinggi_air_cm:.0f}cm, "
+                f"{s.near_threshold_margin_cm:.0f}cm below {s.next_siaga_level.replace('siaga', 'Siaga ')} "
+                f"threshold ({next_cm:.0f}cm)"
+            )
+
+    threshold_note = (" " + ". ".join(threshold_notes) + ".") if threshold_notes else ""
+
+    return (
+        f"{len(elevated)} station(s) elevated: {station_summary}. "
+        f"{rain_note}{threshold_note} "
+        f"Monitor for escalation toward Siaga 1 thresholds.{ood_note}"
+    )
+
+
 class ReasoningAgent:
     """
     Stage 2: Reasoning.
@@ -223,6 +349,16 @@ class ReasoningAgent:
 
         signals = extract_signals(features, plausibility_score=plausibility_score)
         driver = dominant_risk_driver(features, plausibility_score=plausibility_score)
+
+        # Override ML-derived driver with actual siaga station states.
+        # When OOD suppresses the model, the feature-derived driver is unreliable;
+        # the actual station siaga levels are the ground truth.
+        hydro = getattr(perception, "hydrology_assessment", None)
+        ood_flag = prediction.get("ood_detection", {}).get("is_outlier", False)
+        bmkg_upstream = bool(getattr(perception, "bmkg_alerts", None))
+        driver = _derive_risk_driver_from_stations(
+            hydro, ml_driver=driver, ood_flag=ood_flag, bmkg_upstream=bmkg_upstream
+        )
         signals["dominant_driver"] = driver
 
         context_summary = build_context_summary(
@@ -233,6 +369,18 @@ class ReasoningAgent:
             plausibility_score=plausibility_score,
         )
         risk_interpretation = generate_risk_interpretation(signals, failure_modes)
+
+        # Override interpretation dynamically when actual stations are elevated.
+        # The ML feature-based interpretation may say "no flood indication" even
+        # when siaga stations are active (OOD model cannot be trusted at such moments).
+        rain_1h = float(features.get("rainfall_mm") or signals.get("_rainfall_mm") or 0.0)
+        risk_interpretation = _generate_dynamic_risk_interpretation(
+            hydro=hydro,
+            ml_interpretation=risk_interpretation,
+            ood_flag=ood_flag,
+            rain_1h=rain_1h,
+            failure_modes=failure_modes,
+        )
 
         return ReasoningResult(
             features=features,

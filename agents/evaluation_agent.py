@@ -332,10 +332,20 @@ class EvaluationAgent:
 
         # ── Recommended actions (signal-driven, station-aware) ──────────────
         signals = {**reasoning.signals, "dominant_driver": reasoning.dominant_driver}
-        _stale_names = {
-            s.get("station", "") for s in (getattr(perception, "stale_stations", None) or [])
-            if s.get("station")
-        }
+        _stale_station_dicts = list(getattr(perception, "stale_stations", None) or [])
+        _stale_names = {s.get("station", "") for s in _stale_station_dicts if s.get("station")}
+
+        # Build stale-elevated records so the action generator can emit verification
+        # advisories for Siaga stations excluded from the model due to age.
+        _stale_elevated: list[dict] = []
+        for sd in _stale_station_dicts:
+            raw = sd.get("_raw_record") or {}
+            status = str(
+                raw.get("status_siaga") or raw.get("status") or sd.get("status") or ""
+            )
+            if any(s in status for s in ("Siaga 1", "Siaga 2", "Siaga 3")):
+                _stale_elevated.append({**raw, **sd})
+
         recommended_action = generate_recommended_action(
             signals,
             failure_modes,
@@ -343,6 +353,7 @@ class EvaluationAgent:
             poskobanjir_records=list(getattr(perception, "poskobanjir", None) or []),
             bmkg_alerts=list(getattr(perception, "bmkg_alerts", None) or []),
             stale_station_names=_stale_names,
+            stale_elevated_records=_stale_elevated,
         )
 
         # Re-evaluate manual review after engine may have escalated risk.

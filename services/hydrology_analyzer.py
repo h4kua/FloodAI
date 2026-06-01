@@ -225,8 +225,15 @@ def analyze_hydrology(
 
     assessments: list[StationAssessment] = []
     for record in poskobanjir_records:
-        sid   = str(record.get("id") or record.get("name") or "unknown").lower()
-        sname = str(record.get("name") or sid)
+        # Raw Posko Banjir XML records use id_pintu_air/nama_pintu_air, not id/name.
+        sid   = str(
+            record.get("id_pintu_air") or record.get("id") or
+            record.get("nama_pintu_air") or record.get("name") or "unknown"
+        ).lower()
+        sname = str(
+            record.get("nama_pintu_air") or record.get("name") or sid
+        )
+        # Always use tinggi_air (current level), never tinggi_air_sebelumnya (previous).
         ta    = _safe_float(record.get("tinggi_air"))
 
         thresholds   = _resolve_thresholds(record, sid)
