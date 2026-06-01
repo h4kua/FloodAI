@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 const POLL_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 
 export function useFloodRisk() {
