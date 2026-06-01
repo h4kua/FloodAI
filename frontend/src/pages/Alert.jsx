@@ -1,39 +1,51 @@
 import { humanizeRiskLevel } from "../lib/humanize";
 import EmergencyContacts from "../components/EmergencyContacts";
 
-const evacuationSteps = [
-  { icon: "📦", title: "Siapkan Tas Darurat",   desc: "Dokumen penting, obat-obatan, pakaian 3 hari, air minum" },
-  { icon: "🔌", title: "Matikan Listrik & Gas",  desc: "Cabut semua peralatan listrik dan matikan kompor gas" },
-  { icon: "📞", title: "Hubungi Keluarga",        desc: "Beritahu anggota keluarga tentang rencana evakuasi" },
-  { icon: "🚶", title: "Pergi ke Titik Kumpul",  desc: "Menuju lokasi pengungsian terdekat yang aman" },
-  { icon: "📋", title: "Daftar di Posko",         desc: "Laporkan diri ke petugas di tempat pengungsian" },
+const STEPS = [
+  {
+    title: "Siapkan Tas Darurat",
+    desc: "Kemas dokumen penting, obat-obatan, pakaian untuk 3 hari, air minum, dan senter.",
+  },
+  {
+    title: "Matikan Listrik dan Gas",
+    desc: "Cabut semua peralatan listrik dari stop kontak dan matikan kompor gas.",
+  },
+  {
+    title: "Beritahu Anggota Keluarga",
+    desc: "Pastikan semua anggota keluarga mengetahui rencana evakuasi dan titik kumpul.",
+  },
+  {
+    title: "Menuju Titik Kumpul",
+    desc: "Evakuasi ke lokasi pengungsian resmi terdekat. Hindari area genangan air.",
+  },
+  {
+    title: "Daftar di Pos Pengungsian",
+    desc: "Laporkan diri kepada petugas di pos pengungsian untuk pendataan dan bantuan.",
+  },
 ];
 
 export default function Alert({ riskLevel = "waspada" }) {
   const config = humanizeRiskLevel(riskLevel);
-  const s = {
-    container: { maxWidth: "600px", margin: "0 auto", padding: "16px", display: "flex", flexDirection: "column", gap: "16px" },
-    card: { background: "#1e293b", borderRadius: "12px", padding: "20px" },
-    step: { display: "flex", alignItems: "flex-start", gap: "14px", background: "#0f172a", borderRadius: "10px", padding: "14px" },
-  };
 
   return (
-    <div style={s.container}>
-      <div style={{ ...s.card, borderLeft: `4px solid ${config.color}`, textAlign: "center" }}>
-        <p style={{ fontSize: "48px", margin: "0 0 8px" }}>{config.emoji}</p>
-        <h2 style={{ margin: "0 0 6px", fontSize: "24px", color: config.color }}>{config.label}</h2>
-        <p style={{ margin: 0, color: "#cbd5e1" }}>{config.desc}</p>
+    <>
+      {/* Alert hero */}
+      <div className={`alert-hero ${riskLevel}`}>
+        <div className="alert-level-tag">{config.label}</div>
+        <p className={`alert-level-label`}>{config.label}</p>
+        <p className="alert-desc">{config.desc}</p>
       </div>
 
-      <div style={s.card}>
-        <h3 style={{ margin: "0 0 14px", fontSize: "18px" }}>🚨 Langkah Evakuasi</h3>
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {evacuationSteps.map((step, i) => (
-            <div key={i} style={s.step}>
-              <span style={{ fontSize: "28px", flexShrink: 0 }}>{step.icon}</span>
+      {/* Evacuation steps */}
+      <div className="card">
+        <p className="section-label">Langkah Evakuasi</p>
+        <div className="steps">
+          {STEPS.map((step, i) => (
+            <div key={i} className="step">
+              <span className="step-num">{i + 1}</span>
               <div>
-                <p style={{ margin: "0 0 4px", fontWeight: "bold" }}>{i + 1}. {step.title}</p>
-                <p style={{ margin: 0, color: "#94a3b8", fontSize: "14px" }}>{step.desc}</p>
+                <p className="step-title">{step.title}</p>
+                <p className="step-desc">{step.desc}</p>
               </div>
             </div>
           ))}
@@ -41,6 +53,6 @@ export default function Alert({ riskLevel = "waspada" }) {
       </div>
 
       <EmergencyContacts />
-    </div>
+    </>
   );
 }

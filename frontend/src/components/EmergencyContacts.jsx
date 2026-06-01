@@ -1,45 +1,20 @@
 const contacts = [
-  { name: "BPBD Nasional", number: "117", icon: "🏛️" },
-  { name: "Basarnas",       number: "115", icon: "🚁" },
-  { name: "Ambulans",       number: "118", icon: "🚑" },
-  { name: "Pemadam",        number: "113", icon: "🚒" },
+  { org: "BPBD Nasional",  number: "117", role: "Badan Penanggulangan Bencana" },
+  { org: "Basarnas",       number: "115", role: "Badan SAR Nasional" },
+  { org: "Ambulans",       number: "118", role: "Layanan Medis Darurat" },
+  { org: "Pemadam",        number: "113", role: "Dinas Pemadam Kebakaran" },
 ];
 
 export default function EmergencyContacts() {
   return (
-    <div
-      style={{
-        background: "#450a0a",
-        border: "1px solid #dc2626",
-        borderRadius: "12px",
-        padding: "16px",
-      }}
-    >
-      <p style={{ color: "#fca5a5", fontWeight: "bold", margin: "0 0 12px" }}>
-        📞 Nomor Darurat
-      </p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+    <div className="emergency">
+      <p className="section-label">Kontak Darurat</p>
+      <div className="emergency-grid">
         {contacts.map((c) => (
-          <a
-            key={c.name}
-            href={`tel:${c.number}`}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              background: "#7f1d1d",
-              borderRadius: "8px",
-              padding: "10px",
-              color: "white",
-              textDecoration: "none",
-              minHeight: "44px",
-            }}
-          >
-            <span style={{ fontSize: "24px" }}>{c.icon}</span>
-            <div>
-              <p style={{ fontSize: "11px", color: "#fca5a5", margin: 0 }}>{c.name}</p>
-              <p style={{ fontWeight: "bold", margin: 0 }}>{c.number}</p>
-            </div>
+          <a key={c.org} href={`tel:${c.number}`} className="contact-link">
+            <span className="contact-org">{c.org}</span>
+            <span className="contact-num">{c.number}</span>
+            <span className="contact-role">{c.role}</span>
           </a>
         ))}
       </div>

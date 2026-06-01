@@ -4,6 +4,25 @@ import { humanizeRiskLevel, humanizeRainfall } from "../lib/humanize";
 import EmergencyContacts from "../components/EmergencyContacts";
 import LoadingSpinner from "../components/LoadingSpinner";
 
+function ScoreBar({ value, color }) {
+  return (
+    <div className="score-bar-wrap">
+      <div className="score-bar-header">
+        <span className="score-bar-label">Skor Risiko</span>
+        <span className="score-bar-value" style={{ color }}>
+          {value}<span style={{ fontSize: "0.75rem", fontWeight: 400, color: "var(--text-2)", marginLeft: 2 }}>/100</span>
+        </span>
+      </div>
+      <div className="score-bar-track">
+        <div
+          className="score-bar-fill"
+          style={{ width: `${value}%`, background: color }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Home({ setRiskLevel }) {
   const { riskData, loading, lastUpdated, error, refresh } = useFloodRisk();
 
@@ -11,62 +30,82 @@ export default function Home({ setRiskLevel }) {
     if (riskData?.level) setRiskLevel(riskData.level);
   }, [riskData, setRiskLevel]);
 
-  const s = {
-    container: { maxWidth: "600px", margin: "0 auto", padding: "16px", display: "flex", flexDirection: "column", gap: "16px" },
-    card:      { background: "#1e293b", borderRadius: "12px", padding: "20px" },
-    heading:   { margin: "0 0 12px", fontSize: "20px", fontWeight: "bold" },
-    stat:      { display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid #334155" },
-    label:     { color: "#94a3b8", fontSize: "15px" },
-    value:     { fontWeight: "600", fontSize: "15px" },
-    btn:       { background: "#3b82f6", color: "white", border: "none", borderRadius: "8px", padding: "12px 20px", fontSize: "16px", cursor: "pointer", minHeight: "44px", width: "100%" },
-    errBox:    { background: "#450a0a", border: "1px solid #dc2626", borderRadius: "8px", padding: "12px", color: "#fca5a5" },
-  };
-
   if (loading) return <LoadingSpinner />;
 
   if (error) {
     return (
-      <div style={s.container}>
-        <div style={s.errBox}>
-          <p style={{ margin: 0 }}>❌ {error}</p>
-          <button onClick={refresh} style={{ ...s.btn, marginTop: "12px" }}>Coba Lagi</button>
+      <>
+        <div className="error-box">
+          <p className="error-title">Gagal memuat data</p>
+          <p className="error-msg">{error}</p>
+          <button className="btn btn-ghost" onClick={refresh}>Coba Lagi</button>
         </div>
         <EmergencyContacts />
-      </div>
+      </>
     );
   }
 
-  const config = humanizeRiskLevel(riskData?.level ?? "waspada");
+  const level  = riskData?.level ?? "waspada";
+  const config = humanizeRiskLevel(level);
+  const score  = riskData?.riskScore ?? 0;
 
   return (
-    <div style={s.container}>
-      <div style={{ ...s.card, borderLeft: `4px solid ${config.color}` }}>
-        <h2 style={s.heading}>📊 Status Banjir Jakarta</h2>
-        <div style={s.stat}>
-          <span style={s.label}>🎯 Level Risiko</span>
-          <span style={{ ...s.value, color: config.color }}>{config.emoji} {config.label}</span>
-        </div>
-        <div style={s.stat}>
-          <span style={s.label}>🌧️ Curah Hujan</span>
-          <span style={s.value}>{humanizeRainfall(riskData?.rainfall)}</span>
-        </div>
-        <div style={{ ...s.stat, borderBottom: "none" }}>
-          <span style={s.label}>📈 Skor Risiko</span>
-          <span style={s.value}>{riskData?.riskScore ?? "—"} / 100</span>
-        </div>
-        {riskData?.interpretation && (
-          <p style={{ margin: "12px 0 0", color: "#cbd5e1", fontSize: "14px" }}>
-            {riskData.interpretation}
-          </p>
-        )}
-        <p style={{ margin: "8px 0 0", color: "#475569", fontSize: "12px" }}>
-          Diperbarui: {lastUpdated?.toLocaleTimeString("id-ID") ?? "—"} · otomatis setiap 15 menit
-        </p>
+    <>
+      {/* Risk hero */}
+      <div className={`risk-hero ${level}`}>
+        <p className="risk-eyebrow">Status Banjir Jakarta</p>
+        <p className={`risk-level ${level}`}>{config.label}</p>
+        <p className="risk-desc">{config.recommendation}</p>
+        <ScoreBar value={score} color={config.color} />
       </div>
 
-      <button onClick={refresh} style={s.btn}>🔄 Perbarui Data</button>
+      {/* Metrics */}
+      <div className="metrics">
+        <div className="metric">
+          <span className="metric-label">Probabilitas</span>
+          <span className="metric-value">
+            {score}<span className="metric-unit">%</span>
+          </span>
+          <span className="metric-sub">kemungkinan banjir</span>
+        </div>
+
+        <div className="metric">
+          <span className="metric-label">Curah Hujan</span>
+          <span className="metric-value">
+            {riskData?.rainfall ?? 0}<span className="metric-unit">mm</span>
+          </span>
+          <span className="metric-sub">{humanizeRainfall(riskData?.rainfall)}</span>
+        </div>
+
+        <div className="metric">
+          <span className="metric-label">Level</span>
+          <span className="metric-value" style={{ fontSize: "1.1rem", color: config.color }}>
+            {config.label}
+          </span>
+          <span className="metric-sub">{level}</span>
+        </div>
+      </div>
+
+      {/* Interpretation */}
+      {riskData?.interpretation && (
+        <div className="interpretation">
+          {riskData.interpretation}
+        </div>
+      )}
+
+      {/* Update row */}
+      <div className="update-row">
+        <span className="updated-at">
+          {lastUpdated
+            ? `Diperbarui pukul ${lastUpdated.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
+            : "Belum ada data"}
+        </span>
+        <button className="btn btn-ghost" onClick={refresh}>
+          Perbarui
+        </button>
+      </div>
 
       <EmergencyContacts />
-    </div>
+    </>
   );
 }

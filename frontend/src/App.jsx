@@ -4,10 +4,10 @@ import Alert from "./pages/Alert";
 import Chat from "./pages/Chat";
 import AlertBanner from "./components/AlertBanner";
 
-const navItems = [
-  { id: "home",  label: "🏠 Beranda" },
-  { id: "alert", label: "⚠️ Peringatan" },
-  { id: "chat",  label: "💬 Tanya AI" },
+const NAV = [
+  { id: "home",  label: "Dashboard" },
+  { id: "alert", label: "Evakuasi" },
+  { id: "chat",  label: "Tanya AI" },
 ];
 
 export default function App() {
@@ -15,39 +15,43 @@ export default function App() {
   const [riskLevel, setRiskLevel] = useState("waspada");
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0f172a", color: "#f1f5f9", fontFamily: "system-ui, sans-serif" }}>
+    <div className="shell">
       <AlertBanner level={riskLevel} />
 
-      <nav style={{ display: "flex", gap: "4px", padding: "8px 16px", background: "#1e293b", borderBottom: "1px solid #334155" }}>
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setPage(item.id)}
-            style={{
-              background: page === item.id ? "#3b82f6" : "transparent",
-              color: page === item.id ? "white" : "#94a3b8",
-              border: "none",
-              borderRadius: "8px",
-              padding: "10px 16px",
-              fontSize: "15px",
-              cursor: "pointer",
-              fontWeight: page === item.id ? "600" : "400",
-              minHeight: "44px",
-            }}
-          >
-            {item.label}
-          </button>
-        ))}
-      </nav>
+      <header className="topbar">
+        <span className="logo">
+          <span className="logo-de">de</span>
+          <span className="logo-flood">Flood</span>
+          <span className="logo-ai">.ai</span>
+        </span>
 
-      <main>
+        <nav className="nav">
+          {NAV.map((item) => (
+            <button
+              key={item.id}
+              className={`nav-btn${page === item.id ? " active" : ""}`}
+              onClick={() => setPage(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="live-badge">
+          <span className="live-dot" />
+          Live
+        </div>
+      </header>
+
+      <main className="main">
         {page === "home"  && <Home setRiskLevel={setRiskLevel} />}
         {page === "alert" && <Alert riskLevel={riskLevel} />}
         {page === "chat"  && <Chat riskLevel={riskLevel} />}
       </main>
 
-      <footer style={{ textAlign: "center", padding: "24px 16px", color: "#475569", fontSize: "13px", borderTop: "1px solid #1e293b" }}>
-        © {new Date().getFullYear()} FloodAI — Sistem Peringatan Banjir Jakarta
+      <footer className="footer">
+        <span>deFlood.ai — Sistem Peringatan Banjir Jakarta</span>
+        <span>Data diperbarui otomatis setiap 15 menit</span>
       </footer>
     </div>
   );
