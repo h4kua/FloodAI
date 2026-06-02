@@ -20,7 +20,7 @@ async function geocodeAddress(address) {
   });
   if (!res.ok) throw new Error("Geocoding gagal");
   const data = await res.json();
-  if (!data.length) throw new Error("Alamat tidak ditemukan");
+  if (!data.length) throw new Error("Alamat tidak ditemukan. Coba tambahkan kelurahan atau kecamatan.");
   return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
 }
 
@@ -48,7 +48,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const [showSugg, setShowSugg]         = useState(false);
   const debounceRef = useRef(null);
 
-  const config      = humanizeRiskLevel(riskLevel);
+  const config       = humanizeRiskLevel(riskLevel);
   const selectedDest = destId ? DESTINATIONS.find((d) => d.id === destId) ?? null : null;
 
   const fetchSuggestions = async (query) => {
@@ -85,7 +85,6 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     setSuggestions([]);
     setShowSugg(false);
     setGeoError("");
-
     const lat = parseFloat(s.lat);
     const lng = parseFloat(s.lon);
     const nearest = findNearestShelter(lat, lng);
@@ -108,7 +107,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
       setUserLocation({ lat: loc.lat, lng: loc.lng, name: addr });
       setDestId(nearest.id);
     } catch (e) {
-      setGeoError(e.message ?? "Alamat tidak ditemukan. Coba tambahkan nama kelurahan atau kecamatan.");
+      setGeoError(e.message ?? "Alamat tidak ditemukan.");
     } finally {
       setGeocoding(false);
     }
@@ -131,89 +130,76 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
       </div>
 
       <div className="evac-grid fade-in">
-        {/* Left: map */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-          <div className="panel evac-map-panel" style={{ position: "relative" }}>
+        {/* Left: search + map */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
 
-            {/* Address input + autocomplete */}
-            <div className="route-controls">
-              <span className="route-label from">DARI</span>
-              <input
-                className="route-input"
-                type="text"
-                placeholder="Ketik alamat Anda di Jakarta..."
-                value={addressInput}
-                onChange={handleInputChange}
-                onFocus={() => suggestions.length > 0 && setShowSugg(true)}
-                onBlur={() => setTimeout(() => setShowSugg(false), 180)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !geocoding) { setShowSugg(false); handleGeocode(); }
-                  if (e.key === "Escape") setShowSugg(false);
-                }}
-                disabled={geocoding}
-              />
-              <button
-                className="route-search-btn"
-                onClick={() => { setShowSugg(false); handleGeocode(); }}
-                disabled={geocoding || !addressInput.trim()}
-              >
-                {geocoding ? "..." : "Cari"}
-              </button>
+          {/* Search panel — above the map, NOT overlaid */}
+          <div className="panel route-controls">
+            <span className="route-label from">DARI</span>
+            <input
+              className="route-input"
+              type="text"
+              placeholder="Ketik alamat Anda di Jakarta..."
+              value={addressInput}
+              onChange={handleInputChange}
+              onFocus={() => suggestions.length > 0 && setShowSugg(true)}
+              onBlur={() => setTimeout(() => setShowSugg(false), 180)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !geocoding) { setShowSugg(false); handleGeocode(); }
+                if (e.key === "Escape") setShowSugg(false);
+              }}
+              disabled={geocoding}
+            />
+            <button
+              className="route-search-btn"
+              onClick={() => { setShowSugg(false); handleGeocode(); }}
+              disabled={geocoding || !addressInput.trim()}
+            >
+              {geocoding ? "..." : "Cari"}
+            </button>
 
-              {/* Shelter dropdown — muncul setelah lokasi ditemukan */}
-              {userLocation && selectedDest && (
-                <>
-                  <span style={{ color: "var(--muted)", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.75rem" }}>→</span>
-                  <span className="route-label to">SHELTER</span>
-                  <select
-                    className="route-select"
-                    value={destId}
-                    onChange={(e) => setDestId(e.target.value)}
-                  >
-                    {DESTINATIONS.map((d) => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </select>
-                </>
-              )}
-
-              {/* Autocomplete suggestions */}
-              {showSugg && suggestions.length > 0 && (
-                <div className="suggestions-dropdown">
-                  {suggestions.map((s, i) => {
-                    const { main, sub } = formatSuggestion(s);
-                    return (
-                      <div
-                        key={i}
-                        className="suggestion-item"
-                        onMouseDown={() => handleSelectSuggestion(s)}
-                      >
-                        <span className="suggestion-main">{main}</span>
-                        {sub && <span className="suggestion-sub">{sub}</span>}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Geocode error */}
-            {geoError && (
-              <div style={{
-                position: "absolute", top: 72, left: 12, right: 12, zIndex: 1001,
-                background: "rgba(255,61,90,0.12)", border: "1px solid rgba(255,61,90,0.3)",
-                borderRadius: 10, padding: "0.5rem 0.875rem",
-                fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", color: "#ff9dac",
-              }}>
-                {geoError}
-              </div>
+            {userLocation && selectedDest && (
+              <>
+                <span className="route-sep">→</span>
+                <span className="route-label to">SHELTER</span>
+                <select
+                  className="route-select"
+                  value={destId}
+                  onChange={(e) => setDestId(e.target.value)}
+                >
+                  {DESTINATIONS.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </>
             )}
 
+            {showSugg && suggestions.length > 0 && (
+              <div className="suggestions-dropdown">
+                {suggestions.map((s, i) => {
+                  const { main, sub } = formatSuggestion(s);
+                  return (
+                    <div key={i} className="suggestion-item" onMouseDown={() => handleSelectSuggestion(s)}>
+                      <span className="suggestion-main">{main}</span>
+                      {sub && <span className="suggestion-sub">{sub}</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {geoError && (
+            <div className="geo-error-banner">{geoError}</div>
+          )}
+
+          {/* Map */}
+          <div className="panel evac-map-panel">
             <EvacuationMap origin={userLocation} dest={selectedDest} />
           </div>
 
-          {/* Map legend */}
-          <div style={{ display: "flex", gap: "1.5rem", padding: "0.25rem 0" }}>
+          {/* Legend */}
+          <div style={{ display: "flex", gap: "1.5rem", padding: "0.1rem 0.25rem" }}>
             {[["#ff3d5a","Titik berangkat"],["#00cfff","Rute evakuasi"],["#00e5a0","Shelter aman"]].map(([c, l]) => (
               <div key={l} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                 <span style={{ width: 8, height: 8, borderRadius: "50%", background: c, boxShadow: `0 0 6px ${c}88`, flexShrink: 0 }} />
@@ -223,9 +209,8 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           </div>
         </div>
 
-        {/* Right: steps + contacts */}
+        {/* Right: status + steps + contacts */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-          {/* Alert level hero */}
           <div className="panel panel-body" style={{ background: `linear-gradient(160deg,${config.color}0d,${config.color}06)`, border: `1px solid ${config.color}22`, textAlign: "center" }}>
             <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.66rem", color: config.color, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.5rem" }}>Status Aktif</p>
             <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "2.25rem", fontWeight: 800, letterSpacing: "-0.03em", color: config.color, lineHeight: 1, marginBottom: "0.5rem" }}>
@@ -234,7 +219,6 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
             <p style={{ fontSize: "0.83rem", color: "var(--muted)", lineHeight: 1.5 }}>{config.desc}</p>
           </div>
 
-          {/* Steps */}
           <div className="panel panel-body">
             <p className="panel-title">Langkah Evakuasi</p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>

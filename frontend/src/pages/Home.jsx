@@ -16,12 +16,35 @@ const BASE_ZONES = [
   { zone: "Kebayoran",   district: "Jakarta Selatan", bias: -22, tma_base: 340, is_ood: false },
 ];
 
-const MOCK_AGENTS = [
-  { name: "Prediction Agent",   status: "running",    action: "Memproses data sensor Penjaringan" },
-  { name: "Decision Agent",     status: "analyzing",  action: "Evaluasi protokol Siaga aktif"     },
-  { name: "Coordination Agent", status: "escalating", action: "Koordinasi zona aktif"             },
-  { name: "Execution Agent",    status: "active",     action: "Notifikasi dikirim ke kelurahan"   },
-];
+function getAgentStatuses(level) {
+  const map = {
+    aman: [
+      { name: "Prediction Agent",   status: "idle",     action: "Standby — tidak ada anomali terdeteksi" },
+      { name: "Decision Agent",     status: "idle",     action: "Standby — kondisi normal" },
+      { name: "Coordination Agent", status: "idle",     action: "Standby — tidak ada koordinasi aktif" },
+      { name: "Execution Agent",    status: "idle",     action: "Standby — tidak ada notifikasi aktif" },
+    ],
+    waspada: [
+      { name: "Prediction Agent",   status: "running",   action: "Analisis pola curah hujan realtime" },
+      { name: "Decision Agent",     status: "analyzing", action: "Mengevaluasi ambang batas peringatan" },
+      { name: "Coordination Agent", status: "idle",      action: "Standby — menunggu keputusan" },
+      { name: "Execution Agent",    status: "idle",      action: "Standby" },
+    ],
+    siaga: [
+      { name: "Prediction Agent",   status: "running",    action: "Monitoring elevasi air sungai aktif" },
+      { name: "Decision Agent",     status: "analyzing",  action: "Protokol Siaga 2 diaktifkan" },
+      { name: "Coordination Agent", status: "escalating", action: "Koordinasi multi-zona aktif" },
+      { name: "Execution Agent",    status: "active",     action: "Notifikasi warga sedang dikirim" },
+    ],
+    bahaya: [
+      { name: "Prediction Agent",   status: "running",    action: "Mode darurat — semua sensor aktif" },
+      { name: "Decision Agent",     status: "analyzing",  action: "Protokol SIAGA 1 diaktifkan" },
+      { name: "Coordination Agent", status: "escalating", action: "Koordinasi BPBD dan Basarnas" },
+      { name: "Execution Agent",    status: "active",     action: "Evakuasi sedang dikoordinasikan" },
+    ],
+  };
+  return map[level] ?? map.waspada;
+}
 
 function deriveZones(riskScore) {
   return BASE_ZONES.map((z) => {
@@ -100,35 +123,38 @@ function AlertRibbon({ siaga1Count, siaga2Count, lastSync }) {
   return null;
 }
 
-function MetricsRow({ siaga1, siaga2, zones, score }) {
+function MetricsRow({ siaga1, siaga2, zones, score, rainfall }) {
   const waspada = zones.filter((z) => z.risk_level === "WASPADA").length;
-  const shelterCapacity = Math.round(40 + score * 0.35);
-  const wargaTerdampak = ((siaga1 * 4800 + siaga2 * 3200 + waspada * 800)).toLocaleString("id-ID");
+  const wargaEst = (siaga1 * 4800 + siaga2 * 3200 + waspada * 800).toLocaleString("id-ID");
 
   const cards = [
     {
       label: "Zona Siaga",
       value: siaga1 + siaga2,
       sub: `${siaga1} Siaga 1 · ${siaga2} Siaga 2`,
+      note: "estimasi model",
       color: siaga1 > 0 ? "red" : siaga2 > 0 ? "orange" : "green",
     },
     {
       label: "Warga Terdampak",
-      value: wargaTerdampak,
-      sub: `${waspada} zona waspada aktif`,
-      color: "orange",
+      value: (siaga1 + siaga2 + waspada) > 0 ? `~${wargaEst}` : "0",
+      sub: `perkiraan kasar · ${waspada} zona waspada`,
+      note: "estimasi",
+      color: siaga1 > 0 ? "red" : siaga2 > 0 ? "orange" : "green",
     },
     {
       label: "Skor Risiko",
       value: score,
       sub: `dari 100 · model XGBoost`,
+      note: "data real",
       color: score >= 70 ? "red" : score >= 45 ? "orange" : "green",
     },
     {
-      label: "Shelter Terisi",
-      value: `${shelterCapacity}%`,
-      sub: `9 shelter aktif · kapasitas terpakai`,
-      color: shelterCapacity > 80 ? "orange" : "green",
+      label: "Curah Hujan",
+      value: `${rainfall ?? 0}`,
+      sub: `mm/jam · sensor realtime`,
+      note: "data real",
+      color: (rainfall ?? 0) >= 50 ? "red" : (rainfall ?? 0) >= 20 ? "orange" : "green",
     },
   ];
 
@@ -136,7 +162,18 @@ function MetricsRow({ siaga1, siaga2, zones, score }) {
     <div className="cmd-metrics">
       {cards.map((c) => (
         <div key={c.label} className={`metric-card ${c.color}`}>
-          <span className="metric-label">{c.label}</span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span className="metric-label">{c.label}</span>
+            {c.note && (
+              <span style={{
+                fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem",
+                color: c.note === "data real" ? "var(--safe)" : "var(--muted-2)",
+                letterSpacing: "0.06em", opacity: 0.8,
+              }}>
+                {c.note === "data real" ? "● real" : "○ est."}
+              </span>
+            )}
+          </div>
           <div>
             <div className={`metric-value ${c.color}`}>{c.value}</div>
             <div className="metric-sub">{c.sub}</div>
@@ -175,16 +212,17 @@ function AlertPanel({ alertZones }) {
   );
 }
 
-function AgentPanel({ score }) {
-  const agents = useMemo(() => {
-    const base = [...MOCK_AGENTS];
-    if (score < 30) base.forEach((a) => { a = { ...a, status: "idle" }; return a; });
-    return base;
-  }, [score]);
+function AgentPanel({ level }) {
+  const agents = useMemo(() => getAgentStatuses(level), [level]);
 
   return (
     <div className="panel panel-body">
-      <p className="panel-title">Status Agen AI</p>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+        <p className="panel-title" style={{ marginBottom: 0 }}>Status Agen AI</p>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)", letterSpacing: "0.06em" }}>
+          simulasi
+        </span>
+      </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
         {agents.map((a, i) => (
           <div key={i} className="agent-row">
@@ -319,7 +357,7 @@ export default function Home({ setRiskContext, riskLevel }) {
       </div>
 
       {/* 4 Metric cards */}
-      <MetricsRow siaga1={siaga1Count} siaga2={siaga2Count} zones={zones} score={score} />
+      <MetricsRow siaga1={siaga1Count} siaga2={siaga2Count} zones={zones} score={score} rainfall={riskData?.rainfall} />
 
       {/* Map + Sidebar */}
       <div className="cmd-main fade-in">
@@ -357,7 +395,7 @@ export default function Home({ setRiskContext, riskLevel }) {
         {/* Right: Sidebar */}
         <div className="cmd-sidebar">
           <AlertPanel alertZones={alertZones} />
-          <AgentPanel score={score} />
+          <AgentPanel level={level} />
           <RecommendationsPanel alertZones={alertZones} />
         </div>
       </div>
