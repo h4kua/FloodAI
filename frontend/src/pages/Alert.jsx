@@ -3,14 +3,9 @@ import { humanizeRiskLevel } from "../lib/humanize";
 import EvacuationMap, { DESTINATIONS, findNearestShelter } from "../components/EvacuationMap";
 import EmergencyContacts from "../components/EmergencyContacts";
 import ChatBot from "../components/ChatBot";
+import { useT } from "../lib/appContext";
 
-const STEPS = [
-  { title: "Siapkan Tas Darurat",       desc: "Dokumen penting, obat, pakaian 3 hari, air minum, senter, power bank." },
-  { title: "Matikan Listrik & Gas",     desc: "Cabut semua peralatan listrik dan tutup katup gas sebelum keluar." },
-  { title: "Beritahu Seluruh Keluarga", desc: "Pastikan semua anggota tahu rencana evakuasi dan titik kumpul." },
-  { title: "Ikuti Rute di Peta",        desc: "Gunakan rute yang ditampilkan. Hindari genangan dan jalan terputus." },
-  { title: "Daftar di Pos Pengungsian", desc: "Laporkan diri ke petugas BPBD untuk pendataan dan bantuan." },
-];
+const STEP_KEYS = ["1","2","3","4","5"];
 
 async function geocodeAddress(address) {
   const q = encodeURIComponent(address + ", Jakarta, Indonesia");
@@ -39,6 +34,7 @@ function formatSuggestion(s) {
 }
 
 export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
+  const t = useT();
   const [addressInput, setAddressInput] = useState("");
   const [userLocation, setUserLocation] = useState(null);
   const [destId, setDestId]             = useState(null);
@@ -118,7 +114,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
       {/* Page header */}
       <div className="page-header fade-in">
         <div>
-          <h1 className="page-title">Rute Evakuasi</h1>
+          <h1 className="page-title">{t("evac.title")}</h1>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 0.875rem", borderRadius: "999px", border: `1px solid ${config.color}33`, background: `${config.color}0d` }}>
           <span style={{ width: 7, height: 7, borderRadius: "50%", background: config.color, animation: "blink 1.2s infinite", flexShrink: 0 }} />
@@ -134,11 +130,11 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
 
           {/* Search panel — above the map, NOT overlaid */}
           <div className="panel route-controls">
-            <span className="route-label from">DARI</span>
+            <span className="route-label from">{t("evac.from")}</span>
             <input
               className="route-input"
               type="text"
-              placeholder="Ketik alamat Anda di Jakarta..."
+              placeholder={t("evac.placeholder")}
               value={addressInput}
               onChange={handleInputChange}
               onFocus={() => suggestions.length > 0 && setShowSugg(true)}
@@ -154,13 +150,13 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
               onClick={() => { setShowSugg(false); handleGeocode(); }}
               disabled={geocoding || !addressInput.trim()}
             >
-              {geocoding ? "..." : "Cari"}
+              {geocoding ? t("evac.searching") : t("evac.search")}
             </button>
 
             {userLocation && selectedDest && (
               <>
                 <span className="route-sep">→</span>
-                <span className="route-label to">SHELTER</span>
+                <span className="route-label to">{t("evac.shelter")}</span>
                 <select
                   className="route-select"
                   value={destId}
@@ -199,10 +195,10 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
 
           {/* Legend */}
           <div style={{ display: "flex", gap: "1.5rem", padding: "0.1rem 0.25rem" }}>
-            {[["#ff3d5a","Titik berangkat"],["#00cfff","Rute evakuasi"],["#00e5a0","Shelter aman"]].map(([c, l]) => (
-              <div key={l} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+            {[["#ff3d5a","evac.leg.from"],["#00cfff","evac.leg.route"],["#00e5a0","evac.leg.shelter"]].map(([c, k]) => (
+              <div key={k} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                 <span style={{ width: 8, height: 8, borderRadius: "50%", background: c, boxShadow: `0 0 6px ${c}88`, flexShrink: 0 }} />
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)" }}>{l}</span>
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)" }}>{t(k)}</span>
               </div>
             ))}
           </div>
@@ -211,7 +207,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
         {/* Right: status + steps + contacts */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
           <div className="panel panel-body" style={{ background: `linear-gradient(160deg,${config.color}0d,${config.color}06)`, border: `1px solid ${config.color}22`, textAlign: "center" }}>
-            <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.66rem", color: config.color, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.5rem" }}>Status Aktif</p>
+            <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.66rem", color: config.color, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.5rem" }}>{t("evac.status")}</p>
             <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "2.25rem", fontWeight: 800, letterSpacing: "-0.03em", color: config.color, lineHeight: 1, marginBottom: "0.5rem" }}>
               {config.label}
             </p>
@@ -219,14 +215,14 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           </div>
 
           <div className="panel panel-body">
-            <p className="panel-title">Langkah Evakuasi</p>
+            <p className="panel-title">{t("evac.steps")}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              {STEPS.map((s, i) => (
-                <div key={i} className="step">
-                  <span className="step-num">{i + 1}</span>
+              {STEP_KEYS.map((k) => (
+                <div key={k} className="step">
+                  <span className="step-num">{k}</span>
                   <div>
-                    <p className="step-title">{s.title}</p>
-                    <p className="step-desc">{s.desc}</p>
+                    <p className="step-title">{t(`step.${k}.t`)}</p>
+                    <p className="step-desc">{t(`step.${k}.d`)}</p>
                   </div>
                 </div>
               ))}

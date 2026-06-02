@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { useChat } from "../hooks/useChat";
-import { quickReplies } from "../lib/floodAgent";
+import { useT, useApp } from "../lib/appContext";
 
 export default function ChatBot({ riskContext = {} }) {
+  const t = useT();
+  const { lang } = useApp();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [hasUnread, setHasUnread] = useState(true);
-  const { messages, loading, sendMessage } = useChat(riskContext);
+  const { messages, loading, sendMessage } = useChat(riskContext, lang);
+  const quickReplies = [t("chat.q1"), t("chat.q2"), t("chat.q3")];
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -31,10 +34,10 @@ export default function ChatBot({ riskContext = {} }) {
           <div className="chatbot-header">
             <div className="ai-avatar">AI</div>
             <div>
-              <p className="chatbot-title">deFlood Assistant</p>
+              <p className="chatbot-title">{t("chat.title")}</p>
               <div className="chatbot-status">
                 <span className="online-dot" />
-                <span>online · Groq llama-3.3-70b</span>
+                <span>{t("chat.online")}</span>
               </div>
             </div>
             <button className="chatbot-close" onClick={() => setOpen(false)} aria-label="Tutup chat">
@@ -75,7 +78,7 @@ export default function ChatBot({ riskContext = {} }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-              placeholder="Tanya tentang banjir..."
+              placeholder={t("chat.placeholder")}
               disabled={loading}
             />
             <button

@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { sendToFloodAgent } from "../lib/floodAgent";
+import { translate } from "../lib/translations";
 
-const WELCOME =
-  "Halo, saya deFlood.ai — asisten informasi banjir Jakarta. Silakan tanyakan apa saja seputar kondisi banjir, panduan evakuasi, atau langkah keselamatan.";
-
-export function useChat(riskContext = {}) {
+export function useChat(riskContext = {}, lang = "id") {
+  const welcome = translate(lang, "chat.welcome");
   const [messages, setMessages] = useState([
-    { role: "assistant", content: WELCOME },
+    { role: "assistant", content: welcome },
   ]);
   const [loading, setLoading] = useState(false);
 
@@ -16,7 +15,7 @@ export function useChat(riskContext = {}) {
     setLoading(true);
 
     const history = messages.map((m) => ({ role: m.role, content: m.content }));
-    const result = await sendToFloodAgent(text, history, riskContext);
+    const result = await sendToFloodAgent(text, history, riskContext, lang);
 
     setMessages((prev) => [
       ...prev,

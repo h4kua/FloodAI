@@ -1,12 +1,14 @@
 import { useMemo } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import { useApp, useT } from "../lib/appContext";
 
-const TILE_URL = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-const TILE_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
+const TILE_DARK  = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+const TILE_LIGHT = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+const TILE_ATTR  = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
 const JAKARTA_CENTER = [-6.2088, 106.8456];
+// Lock map to Greater Jakarta area
+const JAKARTA_BOUNDS = [[-6.45, 106.65], [-6.05, 107.05]];
 
-// Historical flood risk distribution across Jakarta wilayah
-// Barat & Utara are lowest elevation, most flood-prone
 const DISTRICT_OFFSETS = [
   { id: "barat",   name: "Jakarta Barat",   lat: -6.182, lng: 106.751, bias: +12 },
   { id: "utara",   name: "Jakarta Utara",   lat: -6.121, lng: 106.900, bias: +6  },
@@ -22,14 +24,18 @@ function scoreToColor(score) {
   return "#00e5a0";
 }
 
-function scoreToLabel(score) {
-  if (score >= 80) return "BAHAYA";
-  if (score >= 60) return "SIAGA";
-  if (score >= 40) return "WASPADA";
-  return "AMAN";
+function scoreToLabelKey(score) {
+  if (score >= 80) return "risk.BAHAYA";
+  if (score >= 60) return "risk.SIAGA";
+  if (score >= 40) return "risk.WASPADA";
+  return "risk.AMAN";
 }
 
-export default function FloodMap({ riskScore = 45, level = "waspada" }) {
+export default function FloodMap({ riskScore = 45 }) {
+  const t = useT();
+  const { theme } = useApp();
+  const tileUrl = theme === "light" ? TILE_LIGHT : TILE_DARK;
+
   const districts = useMemo(() => {
     return DISTRICT_OFFSETS.map((d) => {
       const raw = Math.max(5, Math.min(97, riskScore + d.bias));
@@ -38,15 +44,18 @@ export default function FloodMap({ riskScore = 45, level = "waspada" }) {
   }, [riskScore]);
 
   return (
-    <div style={{ position: "relative", height: "380px" }}>
+    <div style={{ position: "relative", flex: 1, minHeight: "320px" }}>
       <MapContainer
         center={JAKARTA_CENTER}
         zoom={11}
+        minZoom={10}
+        maxBounds={JAKARTA_BOUNDS}
+        maxBoundsViscosity={1.0}
         zoomControl={true}
         scrollWheelZoom={true}
-        style={{ height: "380px", width: "100%" }}
+        style={{ height: "100%", width: "100%", minHeight: "320px" }}
       >
-        <TileLayer url={TILE_URL} attribution={TILE_ATTR} />
+        <TileLayer url={tileUrl} attribution={TILE_ATTR} />
 
         {districts.map((d) => {
           const color = scoreToColor(d.score);
@@ -56,23 +65,15 @@ export default function FloodMap({ riskScore = 45, level = "waspada" }) {
               key={d.id}
               center={[d.lat, d.lng]}
               radius={radius}
-              pathOptions={{
-                fillColor: color,
-                fillOpacity: 0.28,
-                color: color,
-                weight: 2,
-                opacity: 0.9,
-              }}
+              pathOptions={{ fillColor: color, fillOpacity: 0.28, color, weight: 2, opacity: 0.9 }}
             >
               <Popup>
                 <div style={{ fontFamily: "'Inter', sans-serif", minWidth: 160 }}>
                   <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 14 }}>{d.name}</p>
-                  <p style={{ fontSize: 12, color: color, fontWeight: 700, marginBottom: 4 }}>
-                    {scoreToLabel(d.score)} — {d.score}%
+                  <p style={{ fontSize: 12, color, fontWeight: 700, marginBottom: 4 }}>
+                    {t(scoreToLabelKey(d.score))} — {d.score}%
                   </p>
-                  <p style={{ fontSize: 11, color: "#8f96a9", margin: 0 }}>
-                    Skor risiko banjir berdasarkan model XGBoost + data cuaca realtime.
-                  </p>
+                  <p style={{ fontSize: 11, color: "#8f96a9", margin: 0 }}>{t("map.popupNote")}</p>
                 </div>
               </Popup>
             </CircleMarker>
@@ -80,25 +81,21 @@ export default function FloodMap({ riskScore = 45, level = "waspada" }) {
         })}
       </MapContainer>
 
-      {/* Legend overlay */}
       <div className="map-legend">
-        <p style={{ fontSize: "0.65rem", color: "#5a6277", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
-          Risiko Banjir
+        <p style={{ fontSize: "0.65rem", color: "var(--muted-2)", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
+          {t("legend.title")}
         </p>
         {[
-          { label: "Bahaya  ≥80%", color: "#ff3d5a" },
-          { label: "Siaga   ≥60%", color: "#f97316" },
-          { label: "Waspada ≥40%", color: "#f5a623" },
-          { label: "Aman    <40%", color: "#00e5a0" },
-        ].map((r) => (
-          <div className="legend-row" key={r.label}>
-            <span className="legend-dot" style={{ background: r.color }} />
-            {r.label}
+          ["legend.danger", "#ff3d5a"],
+          ["legend.alert",  "#f97316"],
+          ["legend.warning","#f5a623"],
+          ["legend.safe",   "#00e5a0"],
+        ].map(([key, color]) => (
+          <div className="legend-row" key={key}>
+            <span className="legend-dot" style={{ background: color }} />
+            {t(key)}
           </div>
         ))}
-        <p style={{ fontSize: "0.6rem", color: "#3d4558", fontFamily: "'JetBrains Mono',monospace", marginTop: 4 }}>
-          Klik wilayah untuk detail
-        </p>
       </div>
     </div>
   );

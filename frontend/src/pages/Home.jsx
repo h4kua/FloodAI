@@ -4,6 +4,7 @@ import { humanizeRainfall } from "../lib/humanize";
 import FloodMap from "../components/FloodMap";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ChatBot from "../components/ChatBot";
+import { useT } from "../lib/appContext";
 
 /* ── Constants ─────────────────────────────────────────── */
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -16,34 +17,34 @@ const BASE_ZONES = [
   { zone: "Kebayoran",   district: "Jakarta Selatan", bias: -22, tma_base: 340, is_ood: false },
 ];
 
-function getAgentStatuses(level) {
+function getAgentStatuses(level, t) {
   const map = {
     aman: [
-      { name: "Prediction Agent",   status: "idle",     action: "Standby — tidak ada anomali terdeteksi" },
-      { name: "Decision Agent",     status: "idle",     action: "Standby — kondisi normal" },
-      { name: "Coordination Agent", status: "idle",     action: "Standby — tidak ada koordinasi aktif" },
-      { name: "Execution Agent",    status: "idle",     action: "Standby — tidak ada notifikasi aktif" },
+      { name: "Prediction Agent",   status: "idle",     actionKey: "agent.idle1" },
+      { name: "Decision Agent",     status: "idle",     actionKey: "agent.idle2" },
+      { name: "Coordination Agent", status: "idle",     actionKey: "agent.idle3" },
+      { name: "Execution Agent",    status: "idle",     actionKey: "agent.idle4" },
     ],
     waspada: [
-      { name: "Prediction Agent",   status: "running",   action: "Analisis pola curah hujan realtime" },
-      { name: "Decision Agent",     status: "analyzing", action: "Mengevaluasi ambang batas peringatan" },
-      { name: "Coordination Agent", status: "idle",      action: "Standby — menunggu keputusan" },
-      { name: "Execution Agent",    status: "idle",      action: "Standby" },
+      { name: "Prediction Agent",   status: "running",   actionKey: "agent.w1" },
+      { name: "Decision Agent",     status: "analyzing", actionKey: "agent.w2" },
+      { name: "Coordination Agent", status: "idle",      actionKey: "agent.w3" },
+      { name: "Execution Agent",    status: "idle",      actionKey: "agent.idle4" },
     ],
     siaga: [
-      { name: "Prediction Agent",   status: "running",    action: "Monitoring elevasi air sungai aktif" },
-      { name: "Decision Agent",     status: "analyzing",  action: "Protokol Siaga 2 diaktifkan" },
-      { name: "Coordination Agent", status: "escalating", action: "Koordinasi multi-zona aktif" },
-      { name: "Execution Agent",    status: "active",     action: "Notifikasi warga sedang dikirim" },
+      { name: "Prediction Agent",   status: "running",    actionKey: "agent.s1" },
+      { name: "Decision Agent",     status: "analyzing",  actionKey: "agent.s2" },
+      { name: "Coordination Agent", status: "escalating", actionKey: "agent.s3" },
+      { name: "Execution Agent",    status: "active",     actionKey: "agent.s4" },
     ],
     bahaya: [
-      { name: "Prediction Agent",   status: "running",    action: "Mode darurat — semua sensor aktif" },
-      { name: "Decision Agent",     status: "analyzing",  action: "Protokol SIAGA 1 diaktifkan" },
-      { name: "Coordination Agent", status: "escalating", action: "Koordinasi BPBD dan Basarnas" },
-      { name: "Execution Agent",    status: "active",     action: "Evakuasi sedang dikoordinasikan" },
+      { name: "Prediction Agent",   status: "running",    actionKey: "agent.d1" },
+      { name: "Decision Agent",     status: "analyzing",  actionKey: "agent.d2" },
+      { name: "Coordination Agent", status: "escalating", actionKey: "agent.d3" },
+      { name: "Execution Agent",    status: "active",     actionKey: "agent.d4" },
     ],
   };
-  return map[level] ?? map.waspada;
+  return (map[level] ?? map.waspada).map(a => ({ ...a, action: t(a.actionKey) }));
 }
 
 function deriveZones(riskScore) {
@@ -124,36 +125,37 @@ function AlertRibbon({ siaga1Count, siaga2Count, lastSync }) {
 }
 
 function MetricsRow({ siaga1, siaga2, zones, score, rainfall }) {
+  const t = useT();
   const waspada = zones.filter((z) => z.risk_level === "WASPADA").length;
   const wargaEst = (siaga1 * 4800 + siaga2 * 3200 + waspada * 800).toLocaleString("id-ID");
 
   const cards = [
     {
-      label: "Zona Siaga",
+      label: t("metric.alertZones"),
       value: siaga1 + siaga2,
-      sub: `${siaga1} Siaga 1 · ${siaga2} Siaga 2`,
-      note: "estimasi model",
+      sub: t("metric.alertSub", { s1: siaga1, s2: siaga2 }),
+      note: t("metric.est"),
       color: siaga1 > 0 ? "red" : siaga2 > 0 ? "orange" : "green",
     },
     {
-      label: "Warga Terdampak",
+      label: t("metric.affected"),
       value: (siaga1 + siaga2 + waspada) > 0 ? `~${wargaEst}` : "0",
-      sub: `perkiraan kasar · ${waspada} zona waspada`,
-      note: "estimasi",
+      sub: t("metric.affectedSub", { n: waspada }),
+      note: t("metric.est"),
       color: siaga1 > 0 ? "red" : siaga2 > 0 ? "orange" : "green",
     },
     {
-      label: "Skor Risiko",
+      label: t("metric.riskScore"),
       value: score,
-      sub: `dari 100 · model XGBoost`,
-      note: "data real",
+      sub: t("metric.riskSub"),
+      note: t("metric.real"),
       color: score >= 70 ? "red" : score >= 45 ? "orange" : "green",
     },
     {
-      label: "Curah Hujan",
+      label: t("metric.rainfall"),
       value: `${rainfall ?? 0}`,
-      sub: `mm/jam · sensor realtime`,
-      note: "data real",
+      sub: t("metric.rainSub"),
+      note: t("metric.real"),
       color: (rainfall ?? 0) >= 50 ? "red" : (rainfall ?? 0) >= 20 ? "orange" : "green",
     },
   ];
@@ -185,17 +187,18 @@ function MetricsRow({ siaga1, siaga2, zones, score, rainfall }) {
 }
 
 function AlertPanel({ alertZones }) {
+  const t = useT();
   if (alertZones.length === 0) return (
     <div className="panel panel-body">
-      <p className="panel-title">Alert Aktif</p>
+      <p className="panel-title">{t("alert.title")}</p>
       <p style={{ fontSize: "0.8rem", color: "var(--muted)", fontFamily: "'JetBrains Mono',monospace" }}>
-        Tidak ada zona siaga aktif.
+        {t("alert.none")}
       </p>
     </div>
   );
   return (
     <div className="panel panel-body">
-      <p className="panel-title">Alert Aktif</p>
+      <p className="panel-title">{t("alert.title")}</p>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         {alertZones.map((z, i) => (
           <div key={i} className={`alert-item ${riskClass(z.risk_level)}`}>
@@ -213,14 +216,15 @@ function AlertPanel({ alertZones }) {
 }
 
 function AgentPanel({ level }) {
-  const agents = useMemo(() => getAgentStatuses(level), [level]);
+  const t = useT();
+  const agents = useMemo(() => getAgentStatuses(level, t), [level, t]);
 
   return (
     <div className="panel panel-body">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-        <p className="panel-title" style={{ marginBottom: 0 }}>Status Agen AI</p>
+        <p className="panel-title" style={{ marginBottom: 0 }}>{t("agent.title")}</p>
         <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)", letterSpacing: "0.06em" }}>
-          simulasi
+          {t("agent.sim")}
         </span>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
@@ -239,22 +243,23 @@ function AgentPanel({ level }) {
 }
 
 function RecommendationsPanel({ alertZones }) {
+  const t = useT();
   const zone1 = alertZones.find((z) => z.risk_level === "SIAGA_1");
   const zone2 = alertZones.find((z) => z.risk_level === "SIAGA_2");
 
   const actions = [
     zone1
-      ? { label: `Evakuasi ${zone1.zone}`, primary: true,  icon: "!" }
-      : { label: "Pantau kondisi sensor",   primary: false, icon: "◉" },
+      ? { label: t("rec.evacuate", { zone: zone1.zone }), primary: true,  icon: "!" }
+      : { label: t("rec.monitor"),   primary: false, icon: "◉" },
     zone2
-      ? { label: `Rute alternatif ${zone2.zone}`, primary: false, icon: "↗" }
-      : { label: "Perbarui data cuaca",           primary: false, icon: "↻" },
-    { label: "Notifikasi zona Siaga 1", primary: false, icon: "✉" },
+      ? { label: t("rec.route", { zone: zone2.zone }), primary: false, icon: "↗" }
+      : { label: t("rec.weather"),  primary: false, icon: "↻" },
+    { label: t("rec.notify"), primary: false, icon: "✉" },
   ];
 
   return (
     <div className="panel panel-body">
-      <p className="panel-title">Rekomendasi Aksi</p>
+      <p className="panel-title">{t("rec.title")}</p>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         {actions.map((a, i) => (
           <button key={i} className={`action-btn${a.primary ? " primary" : ""}`}>
@@ -268,14 +273,15 @@ function RecommendationsPanel({ alertZones }) {
 }
 
 function ZoneTable({ zones }) {
+  const t = useT();
   return (
     <div className="panel panel-body fade-in">
-      <p className="panel-title">Status Semua Zona DKI Jakarta</p>
+      <p className="panel-title">{t("zone.title")}</p>
       <div className="zone-table-wrap">
         <table className="zone-table">
           <thead>
             <tr>
-              {["Zona", "Wilayah", "TMA (cm)", "Hujan mm/j", "Probabilitas", "Status"].map((h) => (
+              {[t("zone.zone"), t("zone.area"), t("zone.tma"), t("zone.rain"), t("zone.prob"), t("zone.status")].map((h) => (
                 <th key={h}>{h}</th>
               ))}
             </tr>
@@ -300,8 +306,7 @@ function ZoneTable({ zones }) {
       <div style={{ marginTop: "0.875rem", padding: "0.625rem 0.75rem", background: "rgba(245,166,35,0.06)", border: "1px solid rgba(245,166,35,0.15)", borderRadius: "10px", display: "flex", alignItems: "center", gap: "0.625rem" }}>
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--wsp)", flexShrink: 0 }} />
         <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.68rem", color: "var(--muted-2)" }}>
-          OOD = Out-of-Distribution — data sensor di luar distribusi training. Prediksi perlu diverifikasi manual.
-          Kalibrasi ECE 0.38 — confidence belum sepenuhnya dapat dipercaya.
+          {t("zone.ood")}
         </span>
       </div>
     </div>
@@ -310,6 +315,7 @@ function ZoneTable({ zones }) {
 
 /* ── Page ──────────────────────────────────────────────── */
 export default function Home({ setRiskContext, riskLevel }) {
+  const t = useT();
   const { riskData, loading, error, refresh, lastUpdated } = useFloodRisk();
   const level = riskData?.level ?? riskLevel ?? "waspada";
   const score = riskData?.riskScore ?? 45;
@@ -329,9 +335,9 @@ export default function Home({ setRiskContext, riskLevel }) {
 
   if (error) return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem", padding: "3rem 1rem", textAlign: "center" }}>
-      <p style={{ fontWeight: 700, color: "var(--text)" }}>Gagal memuat data</p>
+      <p style={{ fontWeight: 700, color: "var(--text)" }}>{t("error.load")}</p>
       <p style={{ fontSize: "0.82rem", color: "var(--muted)" }}>{error}</p>
-      <button className="btn btn-ghost" onClick={refresh}>Coba Lagi</button>
+      <button className="btn btn-ghost" onClick={refresh}>{t("error.retry")}</button>
     </div>
   );
 
@@ -343,15 +349,15 @@ export default function Home({ setRiskContext, riskLevel }) {
       {/* Page header */}
       <div className="page-header fade-in">
         <div>
-          <h1 className="page-title">Jakarta Flood Intelligence</h1>
+          <h1 className="page-title">{t("home.title")}</h1>
         </div>
         <div className="header-actions">
           <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.68rem", color: "var(--muted-2)" }}>
             {lastUpdated
-              ? `Sync ${lastUpdated.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB`
-              : "Menunggu sync"}
+              ? t("home.sync", { time: lastUpdated.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) })
+              : t("home.syncing")}
           </span>
-          <button className="btn btn-ghost" onClick={refresh}>Refresh</button>
+          <button className="btn btn-ghost" onClick={refresh}>{t("home.refresh")}</button>
         </div>
       </div>
 
@@ -360,19 +366,21 @@ export default function Home({ setRiskContext, riskLevel }) {
 
       {/* Map + Sidebar */}
       <div className="cmd-main fade-in">
-        {/* Left: Map */}
-        <div className="panel map-panel">
-          <div className="panel-body" style={{ paddingBottom: "0.75rem" }}>
-            <p className="panel-title" style={{ marginBottom: 0 }}>Peta Risiko Banjir — DKI Jakarta · Real-time</p>
-          </div>
-          <FloodMap riskScore={score} level={level} />
-          <div className="map-footer">
-            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.63rem", color: "var(--muted-2)" }}>
-              ○ est. · skor per wilayah diturunkan dari model ML + bias historis
-            </span>
-            <span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.63rem", color: "var(--muted-2)" }}>
-              Klik wilayah untuk detail
-            </span>
+        {/* Left: Map — cmd-left stretches to match sidebar */}
+        <div className="cmd-left">
+          <div className="panel map-panel">
+            <div className="panel-body" style={{ paddingBottom: "0.75rem" }}>
+              <p className="panel-title" style={{ marginBottom: 0 }}>{t("map.title")}</p>
+            </div>
+            <FloodMap riskScore={score} level={level} />
+            <div className="map-footer">
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.63rem", color: "var(--muted-2)" }}>
+                {t("map.estNote")}
+              </span>
+              <span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.63rem", color: "var(--muted-2)" }}>
+                {t("map.clickDetail")}
+              </span>
+            </div>
           </div>
         </div>
 

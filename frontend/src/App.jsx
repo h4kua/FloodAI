@@ -1,13 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import Home from "./pages/Home";
 import Alert from "./pages/Alert";
+import { AppContext, useT } from "./lib/appContext";
 
-const NAV = [
-  { id: "home",  label: "Command Center" },
-  { id: "alert", label: "Evakuasi"       },
-];
-
-export default function App() {
+function AppShell() {
+  const t = useT();
+  const { lang, setLang, theme, setTheme } = useContext(AppContext);
   const [page, setPage] = useState("home");
   const [riskContext, setRiskContext] = useState({ level: "waspada", rainfall: 0 });
 
@@ -21,7 +19,10 @@ export default function App() {
         </span>
 
         <nav className="nav">
-          {NAV.map((item) => (
+          {[
+            { id: "home",  label: t("nav.home") },
+            { id: "alert", label: t("nav.evac") },
+          ].map((item) => (
             <button
               key={item.id}
               className={`nav-btn${page === item.id ? " active" : ""}`}
@@ -33,9 +34,15 @@ export default function App() {
         </nav>
 
         <div className="topbar-right">
+          <button className="topbar-toggle" onClick={() => setLang(l => l === "id" ? "en" : "id")} title="Switch language">
+            {lang === "id" ? "EN" : "ID"}
+          </button>
+          <button className="topbar-toggle" onClick={() => setTheme(th => th === "dark" ? "light" : "dark")} title="Toggle theme">
+            {theme === "dark" ? "☀" : "🌙"}
+          </button>
           <div className="chip live">
             <span className="live-dot" />
-            System Online
+            {t("topbar.online")}
           </div>
           <div className="chip">Jakarta, DKI</div>
         </div>
@@ -51,5 +58,25 @@ export default function App() {
         <span>XGBoost · 16 features · AUC-ROC 0.945 · ECE 0.38 · &lt;1s latency</span>
       </footer>
     </div>
+  );
+}
+
+export default function App() {
+  const [lang,  setLang]  = useState(() => localStorage.getItem("deflood_lang")  || "id");
+  const [theme, setTheme] = useState(() => localStorage.getItem("deflood_theme") || "dark");
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("deflood_theme", theme);
+  }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem("deflood_lang", lang);
+  }, [lang]);
+
+  return (
+    <AppContext.Provider value={{ lang, setLang, theme, setTheme }}>
+      <AppShell />
+    </AppContext.Provider>
   );
 }
