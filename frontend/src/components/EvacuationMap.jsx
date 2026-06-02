@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMap, useMapEvents } from "react-leaflet";
 import { useApp, useT } from "../lib/appContext";
 
 const TILE_DARK  = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
@@ -32,6 +32,15 @@ export function findNearestShelter(lat, lng) {
   }, { ...DESTINATIONS[0], dist: Infinity });
 }
 
+function MapClickHandler({ onMapClick }) {
+  useMapEvents({
+    click(e) {
+      if (onMapClick) onMapClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
+
 function FitBounds({ positions }) {
   const map = useMap();
   useEffect(() => {
@@ -50,7 +59,7 @@ function secToMin(s) {
   return m < 60 ? m + " min" : Math.floor(m / 60) + "h " + (m % 60) + "m";
 }
 
-export default function EvacuationMap({ origin = null, dest = null }) {
+export default function EvacuationMap({ origin = null, dest = null, onMapClick = null }) {
   const t = useT();
   const { theme } = useApp();
   const tileUrl = theme === "light" ? TILE_LIGHT : TILE_DARK;
@@ -90,6 +99,7 @@ export default function EvacuationMap({ origin = null, dest = null }) {
         style={{ height: "100%", width: "100%", minHeight: "420px" }}
       >
         <TileLayer url={tileUrl} attribution={TILE_ATTR} />
+        {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
 
         {route && (
           <>

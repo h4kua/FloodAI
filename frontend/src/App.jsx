@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import Home from "./pages/Home";
 import Alert from "./pages/Alert";
+import About from "./pages/About";
 import { AppContext, useT } from "./lib/appContext";
 
 function AppShell() {
@@ -22,6 +23,7 @@ function AppShell() {
           {[
             { id: "home",  label: t("nav.home") },
             { id: "alert", label: t("nav.evac") },
+            { id: "about", label: t("nav.about") },
           ].map((item) => (
             <button
               key={item.id}
@@ -51,6 +53,7 @@ function AppShell() {
       <main className="main">
         {page === "home"  && <Home setRiskContext={setRiskContext} riskLevel={riskContext.level} />}
         {page === "alert" && <Alert riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
+        {page === "about" && <About riskContext={riskContext} />}
       </main>
 
       <footer className="footer">

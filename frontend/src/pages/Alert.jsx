@@ -89,6 +89,36 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     setDestId(nearest.id);
   };
 
+  const handleMapClick = async (lat, lng) => {
+    setGeoError("");
+    setSuggestions([]);
+    setShowSugg(false);
+    setGeocoding(true);
+    setUserLocation(null);
+    setDestId(null);
+    try {
+      // Reverse geocode clicked point
+      const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=${lang}`;
+      const res = await fetch(url, { headers: { "User-Agent": "deFlood.ai/1.0" } });
+      const data = await res.json();
+      const name = data.display_name
+        ? data.display_name.split(",").slice(0, 3).join(", ")
+        : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      setAddressInput(name);
+      const nearest = findNearestShelter(lat, lng);
+      setUserLocation({ lat, lng, name });
+      setDestId(nearest.id);
+    } catch {
+      const name = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      setAddressInput(name);
+      const nearest = findNearestShelter(lat, lng);
+      setUserLocation({ lat, lng, name });
+      setDestId(nearest.id);
+    } finally {
+      setGeocoding(false);
+    }
+  };
+
   const handleGeocode = async () => {
     const addr = addressInput.trim();
     if (!addr) return;
@@ -189,10 +219,15 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
             <div className="geo-error-banner">{geoError}</div>
           )}
 
-          {/* Map */}
-          <div className="panel evac-map-panel">
-            <EvacuationMap origin={userLocation} dest={selectedDest} />
+          {/* Map — klik untuk set lokasi */}
+          <div className="panel evac-map-panel" style={{ cursor: "crosshair" }}>
+            <EvacuationMap origin={userLocation} dest={selectedDest} onMapClick={handleMapClick} />
           </div>
+          {!userLocation && (
+            <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)", textAlign: "center" }}>
+              {lang === "en" ? "💡 Tip: Type address above or click directly on the map" : "💡 Tip: Ketik alamat di atas atau klik langsung di peta"}
+            </p>
+          )}
 
           {/* Legend */}
           <div style={{ display: "flex", gap: "1.5rem", padding: "0.1rem 0.25rem" }}>

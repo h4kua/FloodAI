@@ -74,11 +74,12 @@ function riskClass(rl) {
 }
 
 function RiskBadge({ level }) {
+  const t = useT();
   const cls = riskClass(level);
   return (
     <span className={`risk-badge badge-${cls}`}>
       <span style={{ width: 5, height: 5, borderRadius: "50%", background: "currentColor", display: "inline-block" }} />
-      {level.replace("_", " ")}
+      {t(`risk.${level}`) || level.replace("_", " ")}
     </span>
   );
 }
@@ -100,25 +101,20 @@ function ProbBar({ value }) {
 
 /* ── Sub-components ────────────────────────────────────── */
 function AlertRibbon({ siaga1Count, siaga2Count, lastSync }) {
+  const t = useT();
+  const ts = lastSync?.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
   if (siaga1Count > 0) return (
     <div className="alert-ribbon siaga1">
       <span className="ribbon-dot" />
-      <span>
-        SIAGA 1 AKTIF — <strong>{siaga1Count} zona</strong> memerlukan evakuasi segera.
-        Segera hubungi BPBD 117.
-      </span>
-      <span className="ribbon-ts">
-        {lastSync?.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB
-      </span>
+      <span>{t("ribbon.s1", { n: siaga1Count })}</span>
+      {ts && <span className="ribbon-ts">{ts} WIB</span>}
     </div>
   );
   if (siaga2Count > 0) return (
     <div className="alert-ribbon siaga2">
       <span className="ribbon-dot" />
-      <span>SIAGA 2 — <strong>{siaga2Count} zona</strong> membutuhkan perhatian. Pantau perkembangan.</span>
-      <span className="ribbon-ts">
-        {lastSync?.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB
-      </span>
+      <span>{t("ribbon.s2", { n: siaga2Count })}</span>
+      {ts && <span className="ribbon-ts">{ts} WIB</span>}
     </div>
   );
   return null;
@@ -395,7 +391,7 @@ export default function Home({ setRiskContext, riskLevel }) {
       {/* Model interpretation — full width, no gap */}
       {riskData?.interpretation && (
         <div className="fade-in" style={{ background: "rgba(0,207,255,0.05)", border: "1px solid rgba(0,207,255,0.15)", borderLeft: "3px solid var(--cyan)", borderRadius: "12px", padding: "0.875rem 1.25rem", fontSize: "0.82rem", color: "var(--muted)", lineHeight: 1.7 }}>
-          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--cyan)", letterSpacing: "0.1em", textTransform: "uppercase", marginRight: 10 }}>Model Output</span>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--cyan)", letterSpacing: "0.1em", textTransform: "uppercase", marginRight: 10 }}>{t("home.modelOut")}</span>
           {riskData.interpretation}
         </div>
       )}
