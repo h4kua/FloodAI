@@ -32,7 +32,7 @@ export function useFloodRisk() {
       setRiskData({
         level: levelMap[json.risk_level] ?? "waspada",
         rainfall: Math.round(json.features?.rainfall_mm ?? 0),
-        riskScore: Math.round((json.probability ?? 0) * 100),
+        riskScore: (() => { const v = (json.probability ?? 0) * 100; return v > 0 && v < 1 ? 1 : Math.round(v); })(),
         interpretation: json.risk_interpretation ?? "",
       });
       setLastUpdated(new Date());
