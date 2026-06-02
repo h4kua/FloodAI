@@ -79,13 +79,13 @@ export default function EvacuationMap({ originId = "barat", destId = "kemayoran"
   const center = [-6.2, 106.83];
 
   return (
-    <div style={{ position: "relative", height: "100%" }}>
+    <div style={{ position: "relative", height: "520px" }}>
       <MapContainer
         center={center}
         zoom={11}
         zoomControl={true}
         scrollWheelZoom={true}
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: "520px", width: "100%" }}
       >
         <TileLayer url={TILE_URL} attribution={TILE_ATTR} />
 

@@ -38,13 +38,13 @@ export default function FloodMap({ riskScore = 45, level = "waspada" }) {
   }, [riskScore]);
 
   return (
-    <div style={{ position: "relative", height: "100%" }}>
+    <div style={{ position: "relative", height: "380px" }}>
       <MapContainer
         center={JAKARTA_CENTER}
         zoom={11}
         zoomControl={true}
         scrollWheelZoom={true}
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: "380px", width: "100%" }}
       >
         <TileLayer url={TILE_URL} attribution={TILE_ATTR} />
 
