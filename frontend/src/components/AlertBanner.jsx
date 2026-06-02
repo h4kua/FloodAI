@@ -1,7 +1,9 @@
 import { humanizeRiskLevel } from "../lib/humanize";
+import { useApp } from "../lib/appContext";
 
 export default function AlertBanner({ level = "waspada" }) {
-  const config = humanizeRiskLevel(level);
+  const { lang } = useApp();
+  const config = humanizeRiskLevel(level, lang);
   return (
     <div className={`alert-banner ${level}`}>
       <span className="banner-dot" />

@@ -3,7 +3,7 @@ import { humanizeRiskLevel } from "../lib/humanize";
 import EvacuationMap, { DESTINATIONS, findNearestShelter } from "../components/EvacuationMap";
 import EmergencyContacts from "../components/EmergencyContacts";
 import ChatBot from "../components/ChatBot";
-import { useT } from "../lib/appContext";
+import { useT, useApp } from "../lib/appContext";
 
 const STEP_KEYS = ["1","2","3","4","5"];
 
@@ -35,6 +35,7 @@ function formatSuggestion(s) {
 
 export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const t = useT();
+  const { lang } = useApp();
   const [addressInput, setAddressInput] = useState("");
   const [userLocation, setUserLocation] = useState(null);
   const [destId, setDestId]             = useState(null);
@@ -44,7 +45,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const [showSugg, setShowSugg]         = useState(false);
   const debounceRef = useRef(null);
 
-  const config       = humanizeRiskLevel(riskLevel);
+  const config       = humanizeRiskLevel(riskLevel, lang);
   const selectedDest = destId ? DESTINATIONS.find((d) => d.id === destId) ?? null : null;
 
   const fetchSuggestions = async (query) => {
