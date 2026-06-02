@@ -1,6 +1,6 @@
 # deFlood.ai — Project Context
 
-> Last updated: 2026-06-02. Update this file whenever architecture, known issues, or deployment state changes.
+> Last updated: 2026-06-02 (rev2). Update this file whenever architecture, known issues, or deployment state changes.
 
 ---
 
@@ -230,9 +230,21 @@ frontend/src/
 | TMA sensor DSDADKI offline | Server fisik mati, bukan kode. TMA masih estimasi sampai DSDADKI aktif kembali |
 | Zone data masih estimasi | 5 zona derived dari 1 ML score + bias, bukan sensor per-kecamatan. Fix butuh sensor DSDADKI |
 | BNPB kecamatan write-back | Mapping kota → kecamatan reverse belum fully populated di pipeline output |
-| DB lokal timeout | Supabase hanya tersambung dari Railway, bukan lokal. CSV fallback aktif sebagai solusi |
-| Chatbot Groq downtime | Jika Railway/GROQ down, offline KB hanya cover 6 topik umum |
-| catalog.json path stale | `artifacts/production/catalog.json` berisi path lama (`app/services/...`). Tidak runtime-critical |
+| DB lokal timeout | Supabase hanya tersambung dari Railway/Fly.dev, bukan lokal. CSV fallback aktif |
+
+### SELESAI (batch 2) ✅
+| Issue | Fix |
+|---|---|
+| catalog.json path stale | Path `app/` prefix dihapus — sekarang `services/prediction_service.py`, `api/main.py`, dll |
+| Chatbot offline KB terbatas | Expanded dari 6 → 10 topik: cuaca, pasca banjir, prediksi, pompa |
+| Snapshot fallback saat TMA+OW offline | `snapshot_refresh.py` coba Supabase cache sebelum return empty snapshot |
+| Snapshot file missing (fresh clone) | `feature_builder.py` fallback ke Supabase sebelum raise FileNotFoundError |
+| Frontend tidak bisa konek backend lokal | `frontend/.env.local` dibuat dengan `VITE_API_BASE_URL=http://localhost:8080` |
+| FloodMap bias salah (Jakarta Selatan -18) | Di-fix ke +18 sesuai BPBD data — sekarang konsisten dengan zone table |
+| `evac.searching` translation key hilang | Ditambahkan di `translations.js` (ID+EN) |
+| ChatBot quick replies hanya 3 | Diperluas ke 6 quick replies dengan translation keys baru |
+| `useChat.js` loading macet jika error | Ditambahkan try/catch/finally sehingga loading selalu di-reset |
+| `psycopg2_connection.py` indentasi jelek | `get_psycopg2_connection()` diformat ulang, DSN dipisah ke variabel |
 
 ---
 
@@ -261,7 +273,10 @@ frontend/src/styles.css                         — semua CSS
 - **`FEATURE_HISTORY_DB_ENABLED=false`** ada di `.env` — ini **sengaja** (DB lokal tidak tersambung). Jangan hapus. Fallback CSV sudah diimplementasikan
 - **Zone 0 di dashboard** bukan error — memang tidak ada banjir. `probability 0.32%` rounds ke 0, sekarang tampil sebagai 1
 - **`apscheduler`** wajib terinstall lokal: `pip install apscheduler`
-- **Supabase connection timeout** dari lokal adalah normal — Railway deployment tersambung langsung
+- **Supabase connection timeout** dari lokal adalah normal — Railway/Fly.dev deployment tersambung langsung
 - **Frontend build check**: `cd frontend && npm run build` harus clean sebelum push
 - **BMKG alerts filtered out = 0** adalah benar jika semua alert untuk luar Jakarta (Sulawesi, dll)
 - **`_CALIBRATION_CACHE` path**: `services/decision_engine.py` — harus satu level `".."` dari `services/`, bukan dua
+- **`VITE_API_BASE_URL`** untuk Vite harus ada di `frontend/.env` atau `frontend/.env.local`, BUKAN di root `.env`. Root `.env` hanya dibaca backend Python. Untuk lokal: `http://localhost:8080`. Untuk Vercel: set di dashboard Vercel.
+- **Backend deploy URL**: root `.env` punya `VITE_API_BASE_URL=https://floodai.fly.dev` → backend di Fly.dev (bukan Railway lagi)
+- **Snapshot fallback**: jika `poskobanjir/data/clean/realtime_snapshot.json` tidak ada (fresh clone), `feature_builder.py` otomatis coba load dari Supabase

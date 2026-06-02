@@ -13,15 +13,21 @@ export function useChat(riskContext = {}, lang = "id") {
     const userMsg = { role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
-
-    const history = messages.map((m) => ({ role: m.role, content: m.content }));
-    const result = await sendToFloodAgent(text, history, riskContext, lang);
-
-    setMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: result.reply },
-    ]);
-    setLoading(false);
+    try {
+      const history = messages.map((m) => ({ role: m.role, content: m.content }));
+      const result = await sendToFloodAgent(text, history, riskContext, lang);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: result.reply },
+      ]);
+    } catch {
+      const fallback = lang === "en"
+        ? "An unexpected error occurred. For emergencies: BPBD 117 · Basarnas 115."
+        : "Terjadi kesalahan tidak terduga. Darurat: BPBD 117 · Basarnas 115.";
+      setMessages((prev) => [...prev, { role: "assistant", content: fallback }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return { messages, loading, sendMessage };

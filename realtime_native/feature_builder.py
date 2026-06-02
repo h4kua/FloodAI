@@ -589,6 +589,25 @@ def build_realtime_native_features_from_file(
     *,
     as_of=None,
 ):
+    path = Path(snapshot_path)
+    if not path.exists():
+        # Local file missing — try Supabase cached snapshot before giving up.
+        # This handles fresh clones and Railway ephemeral-filesystem restarts before
+        # the first scheduled refresh completes.
+        try:
+            from db.snapshot_repository import _load_latest_snapshot_sync
+            cached = _load_latest_snapshot_sync()
+            if cached and isinstance(cached, dict) and cached.get("fetched_at_utc"):
+                logger.info(
+                    "feature_builder: local snapshot missing, using Supabase cache "
+                    "(fetched_at=%s)", cached.get("fetched_at_utc"),
+                )
+                return build_realtime_native_features_from_snapshot(
+                    cached, persist_history=persist_history, as_of=as_of,
+                )
+        except Exception as _supabase_exc:
+            logger.warning("feature_builder: Supabase fallback failed — %s", _supabase_exc)
+        raise FileNotFoundError(f"Snapshot not found: {snapshot_path}")
     with open(snapshot_path, "r", encoding="utf-8") as file:
         snapshot = json.load(file)
     return build_realtime_native_features_from_snapshot(

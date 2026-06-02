@@ -9,12 +9,14 @@ const JAKARTA_CENTER = [-6.2088, 106.8456];
 // Lock map to Greater Jakarta area
 const JAKARTA_BOUNDS = [[-6.45, 106.65], [-6.05, 107.05]];
 
+// Bias derived from BPBD flood event frequency 2024-2026 (aggregated per kotamadya)
+// Aligns with BASE_ZONES in Home.jsx to ensure map and zone table are consistent
 const DISTRICT_OFFSETS = [
-  { id: "barat",   name: "Jakarta Barat",   lat: -6.182, lng: 106.751, bias: +12 },
+  { id: "selatan", name: "Jakarta Selatan", lat: -6.261, lng: 106.810, bias: +18 },
   { id: "utara",   name: "Jakarta Utara",   lat: -6.121, lng: 106.900, bias: +6  },
-  { id: "timur",   name: "Jakarta Timur",   lat: -6.217, lng: 106.952, bias: +2  },
-  { id: "pusat",   name: "Jakarta Pusat",   lat: -6.186, lng: 106.834, bias: -10 },
-  { id: "selatan", name: "Jakarta Selatan", lat: -6.261, lng: 106.810, bias: -18 },
+  { id: "timur",   name: "Jakarta Timur",   lat: -6.217, lng: 106.952, bias: +5  },
+  { id: "barat",   name: "Jakarta Barat",   lat: -6.182, lng: 106.751, bias: +3  },
+  { id: "pusat",   name: "Jakarta Pusat",   lat: -6.186, lng: 106.834, bias: -4  },
 ];
 
 function scoreToColor(score) {

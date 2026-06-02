@@ -133,11 +133,20 @@ async def build_fresh_snapshot() -> dict:
         logger.warning("snapshot_build_subprocess_failed error_type=%s error=%s", type(exc).__name__, exc)
         return _empty_snapshot()
 
-    # The canonical pipeline aborts (without writing) when poskobanjir returns no
-    # records, so a successful exit does not guarantee a fresh file. Require the
-    # file's mtime to have advanced.
+    # The canonical pipeline aborts (without writing) when all data sources fail.
+    # If the file's mtime did not advance, fall back to the last Supabase snapshot
+    # rather than returning an empty snapshot — this keeps the API responsive during
+    # transient outages (TMA offline, OpenWeather rate-limit, etc.).
     if _mtime(DEFAULT_REALTIME_SNAPSHOT) <= mtime_before:
-        logger.warning("snapshot_build_no_fresh_file path=%s", str(DEFAULT_REALTIME_SNAPSHOT))
+        logger.warning("snapshot_build_no_fresh_file path=%s — trying Supabase fallback", str(DEFAULT_REALTIME_SNAPSHOT))
+        try:
+            from db.snapshot_repository import _load_latest_snapshot_sync
+            cached = _load_latest_snapshot_sync()
+            if cached and isinstance(cached, dict) and cached.get("fetched_at_utc"):
+                logger.info("snapshot_build_using_supabase_fallback fetched_at=%s", cached.get("fetched_at_utc"))
+                return cached
+        except Exception as _fb_exc:
+            logger.warning("snapshot_build_supabase_fallback_failed error=%s", _fb_exc)
         return _empty_snapshot()
 
     try:

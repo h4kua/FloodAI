@@ -137,8 +137,12 @@ def get_psycopg2_connection(
     entire multi-stage pipeline write.
     """
     active_config = config or Psycopg2ConnectionConfig()
-    connection = psycopg2.connect(
-    f"postgresql://{active_config.user}:{active_config.password}@{active_config.host}:{active_config.port}/{active_config.database}?sslmode=require&connect_timeout={active_config.connect_timeout}&application_name={active_config.application_name}"
-)
+    dsn = (
+        f"postgresql://{active_config.user}:{active_config.password}"
+        f"@{active_config.host}:{active_config.port}/{active_config.database}"
+        f"?sslmode=require&connect_timeout={active_config.connect_timeout}"
+        f"&application_name={active_config.application_name}"
+    )
+    connection = psycopg2.connect(dsn)
     connection.autocommit = False
     return connection

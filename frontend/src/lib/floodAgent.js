@@ -30,6 +30,10 @@ const OFFLINE_KB = {
     shelter: `Untuk menemukan shelter terdekat:\n1. Buka halaman Evakuasi di menu atas\n2. Masukkan alamat Anda\n3. Sistem akan menampilkan rute ke shelter terdekat\n\nAlternatif: Hubungi BPBD Jakarta di 117 atau datangi kantor kelurahan/kecamatan terdekat. Sekolah dan GOR biasanya dijadikan posko pengungsian sementara.`,
     kontak: `Kontak darurat banjir Jakarta:\n• BPBD Jakarta: 117\n• Basarnas: 115\n• PMI Jakarta: (021) 390-6666\n• Ambulans: 118 / 119\n• Damkar: 113\n• Call Center DKI: 112\n\nSimpan nomor-nomor ini di ponsel Anda sebelum dibutuhkan.`,
     dokumen: `Cara mengamankan dokumen penting:\n• Scan/foto semua dokumen → simpan di Google Drive atau email\n• Masukkan aslinya ke plastik zip-lock kedap air\n• Bawa serta saat evakuasi (jangan tinggal di rumah)\n• Prioritaskan: KTP, KK, akta lahir, sertifikat tanah, BPJS\n\nDokumen digital di cloud bisa diakses dari mana saja jika fisik hilang.`,
+    cuaca: `Untuk prakiraan cuaca Jakarta:\n• BMKG resmi: bmkg.go.id atau aplikasi Info BMKG\n• Sistem deFlood.ai menggunakan data OpenWeather realtime, bukan prakiraan\n• Hujan > 50 mm/jam tergolong ekstrem dan dapat memicu banjir kilat\n• Musim hujan Jakarta: November–Maret (puncak Januari–Februari)\n\nSelalu pantau peringatan dini BMKG untuk potensi cuaca ekstrem.`,
+    pasca: `Langkah aman setelah banjir surut:\n• Jangan langsung masuk rumah — cek struktur bangunan dari luar dulu\n• Matikan listrik sebelum masuk (cabut MCB)\n• Gunakan sarung tangan & sepatu boot saat bersih-bersih\n• Buang makanan yang terkena banjir\n• Waspadai penyakit: leptospirosis, diare, infeksi kulit\n• Laporkan kerusakan ke kelurahan untuk pendataan bantuan\n\nHubungi Puskesmas terdekat jika ada anggota keluarga yang sakit setelah banjir.`,
+    prediksi: `Cara membaca prediksi deFlood.ai:\n• Skor Risiko 0–100: makin tinggi makin berisiko\n• NORMAL = < 30% probabilitas banjir\n• WASPADA = 30–55% — pantau lebih ketat\n• SIAGA 2 = 55–80% — siapkan tas darurat\n• SIAGA 1 = > 80% — segera evakuasi jika di zona rendah\n\nData diperbarui tiap 15 menit dari sensor cuaca & ML model XGBoost dengan akurasi 94%.`,
+    pompa: `Pompa banjir dan drainase Jakarta:\n• Jakarta memiliki 600+ unit pompa stasioner dan mobile\n• Status pompa dipantau DSDADKI (Dinas SDA DKI)\n• Saat banjir: pompa aktif membantu mengalirkan genangan ke laut\n• Titik pompa utama: Ancol, Muara Baru, Pluit, Manggarai\n\nUntuk laporan pompa rusak: hubungi Dinas SDA 021-3855555 atau Call Center DKI 112.`,
   },
   en: {
     evakuasi: `Essential items for flood evacuation:\n• Important documents (ID, family card, certificates)\n• Personal medications & first aid kit\n• Clothing for 3 days\n• Drinking water & snacks\n• Flashlight + spare batteries, power bank\n• Sufficient cash\n• Raincoat or large plastic bags\n\nPack everything in a waterproof bag. Call BPBD 117 for nearest shelter info.`,
@@ -38,6 +42,10 @@ const OFFLINE_KB = {
     shelter: `To find the nearest shelter:\n1. Open the Evacuation page from the top menu\n2. Enter your address\n3. The system will show the route to the nearest shelter\n\nAlternative: Call BPBD Jakarta at 117 or go to the nearest kelurahan/kecamatan office. Schools and sports halls are typically used as temporary shelters.`,
     kontak: `Emergency contacts for Jakarta flooding:\n• BPBD Jakarta: 117\n• Basarnas (SAR): 115\n• PMI Jakarta: (021) 390-6666\n• Ambulance: 118 / 119\n• Fire Dept: 113\n• DKI Call Center: 112\n\nSave these numbers before you need them.`,
     dokumen: `How to secure important documents:\n• Scan/photo all documents → save to Google Drive or email\n• Put originals in a waterproof zip-lock bag\n• Bring them when evacuating (don't leave at home)\n• Priority: ID card, family card, birth certificate, land certificate, BPJS\n\nDigital documents in the cloud can be accessed from anywhere if the physical copies are lost.`,
+    cuaca: `For Jakarta weather forecasts:\n• Official BMKG: bmkg.go.id or the Info BMKG app\n• deFlood.ai uses realtime OpenWeather data, not forecasts\n• Rain > 50 mm/h is considered extreme and can trigger flash floods\n• Jakarta rainy season: November–March (peak January–February)\n\nAlways monitor BMKG early warnings for extreme weather potential.`,
+    pasca: `Safe steps after the flood recedes:\n• Don't enter immediately — check the building structure from outside first\n• Turn off electricity before entering (disconnect the circuit breaker)\n• Wear gloves and rubber boots when cleaning\n• Discard food that came into contact with floodwater\n• Watch for diseases: leptospirosis, diarrhea, skin infections\n• Report damage to the kelurahan office for aid registration\n\nContact the nearest health center if any family members feel ill after the flood.`,
+    prediksi: `How to read deFlood.ai predictions:\n• Risk Score 0–100: higher = more risk\n• NORMAL = < 30% flood probability\n• WASPADA (watch) = 30–55% — monitor more closely\n• SIAGA 2 (alert) = 55–80% — prepare emergency bag\n• SIAGA 1 (danger) = > 80% — evacuate immediately if in low-lying areas\n\nData refreshes every 15 minutes from weather sensors & XGBoost ML model with 94% accuracy.`,
+    pompa: `Jakarta flood pumps and drainage:\n• Jakarta has 600+ stationary and mobile pump units\n• Pump status is monitored by DSDADKI (DKI Water Resources Agency)\n• During floods: pumps actively drain standing water to the sea\n• Major pump stations: Ancol, Muara Baru, Pluit, Manggarai\n\nTo report a broken pump: call Dinas SDA 021-3855555 or DKI Call Center 112.`,
   },
 };
 
@@ -50,6 +58,10 @@ function _matchOffline(text, lang) {
   if (t.includes("shelter") || t.includes("pengungsian") || t.includes("tempat aman") || t.includes("refuge")) return kb.shelter;
   if (t.includes("kontak") || t.includes("contact") || t.includes("nomor") || t.includes("telepon") || t.includes("phone") || t.includes("hubungi") || t.includes("call")) return kb.kontak;
   if (t.includes("dokumen") || t.includes("document") || t.includes("surat") || t.includes("secure") || t.includes("aman")) return kb.dokumen;
+  if (t.includes("cuaca") || t.includes("weather") || t.includes("prakiraan") || t.includes("forecast") || t.includes("hujan") || t.includes("rain") || t.includes("bmkg")) return kb.cuaca;
+  if (t.includes("pasca") || t.includes("setelah banjir") || t.includes("after flood") || t.includes("surut") || t.includes("bersih") || t.includes("clean up") || t.includes("sakit") || t.includes("leptospir") || t.includes("penyakit")) return kb.pasca;
+  if (t.includes("prediksi") || t.includes("predict") || t.includes("skor") || t.includes("score") || t.includes("siaga") || t.includes("waspada") || t.includes("akurasi") || t.includes("cara baca") || t.includes("how to read")) return kb.prediksi;
+  if (t.includes("pompa") || t.includes("pump") || t.includes("drainase") || t.includes("drainage") || t.includes("saluran") || t.includes("got") || t.includes("dsdadki")) return kb.pompa;
   return null;
 }
 
@@ -95,6 +107,8 @@ export const quickReplies = [
   "Apa yang harus dibawa saat evakuasi?",
   "Tanda-tanda banjir akan datang?",
   "Lokasi shelter terdekat?",
-  "Bagaimana amankan dokumen penting?",
+  "Cara membaca prediksi risiko?",
+  "Langkah aman setelah banjir surut?",
   "Hubungi siapa saat darurat?",
+  "Prakiraan cuaca Jakarta?",
 ];

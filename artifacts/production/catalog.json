@@ -21,10 +21,11 @@
     "realtime_native_comparison": "artifacts/reports/realtime_native_model_comparison.json"
   },
   "runtime_services": {
-    "prediction_service": "app/services/prediction_service.py",
-    "api": "app/api/main.py",
+    "prediction_service": "services/prediction_service.py",
+    "api": "api/main.py",
     "realtime_pipeline_input": "poskobanjir/data/clean/realtime_snapshot.json",
-    "realtime_native_training": "app/realtime_native/training.py",
-    "realtime_native_inference": "app/realtime_native/inference.py"
+    "realtime_native_bundle": "models/realtime_native_bundle/",
+    "realtime_native_training": "realtime_native/training.py",
+    "realtime_native_inference": "realtime_native/inference.py"
   }
 }

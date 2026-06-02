@@ -9,7 +9,10 @@ export default function ChatBot({ riskContext = {} }) {
   const [input, setInput] = useState("");
   const [hasUnread, setHasUnread] = useState(true);
   const { messages, loading, sendMessage } = useChat(riskContext, lang);
-  const quickReplies = [t("chat.q1"), t("chat.q2"), t("chat.q3")];
+  const quickReplies = [
+    t("chat.q1"), t("chat.q2"), t("chat.q3"),
+    t("chat.q4"), t("chat.q5"), t("chat.q6"),
+  ];
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -64,7 +67,7 @@ export default function ChatBot({ riskContext = {} }) {
 
           {/* Quick replies */}
           <div className="chatbot-quickies">
-            {quickReplies.slice(0, 3).map((q) => (
+            {quickReplies.map((q) => (
               <button key={q} className="quickie" onClick={() => !loading && sendMessage(q)} disabled={loading}>
                 {q}
               </button>
