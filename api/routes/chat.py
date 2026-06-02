@@ -13,6 +13,13 @@ class ChatRequest(BaseModel):
     history: list[dict] = []
     system: str = ""
 
+@router.get("/api/chat/health")
+async def chat_health() -> dict:
+    """Returns whether the Groq API key is configured."""
+    configured = bool(os.getenv("GROQ_API_KEY"))
+    return {"groq_configured": configured}
+
+
 @router.post("/api/chat")
 async def chat_endpoint(req: ChatRequest) -> dict:
     api_key = os.getenv("GROQ_API_KEY")

@@ -1,6 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { sendToFloodAgent } from "../lib/floodAgent";
 import { translate } from "../lib/translations";
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+
+async function probeGroqHealth() {
+  try {
+    const res = await fetch(`${API_BASE}/api/chat/health`);
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data.groq_configured === true;
+  } catch {
+    return false;
+  }
+}
 
 export function useChat(riskContext = {}, lang = "id") {
   const welcome = translate(lang, "chat.welcome");
@@ -8,8 +21,15 @@ export function useChat(riskContext = {}, lang = "id") {
     { role: "assistant", content: welcome, isAI: true },
   ]);
   const [loading, setLoading] = useState(false);
-  // null = unknown (no message sent yet), true = last reply used real AI, false = offline KB
+  // null = probe in-flight, true = AI ready, false = offline KB
   const [aiOnline, setAiOnline] = useState(null);
+  const probed = useRef(false);
+
+  useEffect(() => {
+    if (probed.current) return;
+    probed.current = true;
+    probeGroqHealth().then((ok) => setAiOnline(ok));
+  }, []);
 
   const sendMessage = async (text) => {
     const userMsg = { role: "user", content: text };
