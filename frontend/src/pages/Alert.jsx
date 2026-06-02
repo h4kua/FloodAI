@@ -43,6 +43,8 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const [geoError, setGeoError]         = useState("");
   const [suggestions, setSuggestions]   = useState([]);
   const [showSugg, setShowSugg]         = useState(false);
+  const [locating, setLocating]         = useState(false);
+  const [locateError, setLocateError]   = useState("");
   const debounceRef = useRef(null);
 
   const config       = humanizeRiskLevel(riskLevel, lang);
@@ -87,6 +89,49 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     const nearest = findNearestShelter(lat, lng);
     setUserLocation({ lat, lng, name: label });
     setDestId(nearest.id);
+  };
+
+  const handleLocateMe = () => {
+    if (!navigator.geolocation) {
+      setLocateError(lang === "en" ? "Geolocation not supported by your browser." : "Browser tidak mendukung geolocation.");
+      return;
+    }
+    setLocating(true);
+    setLocateError("");
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        try {
+          const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=${lang}`;
+          const res = await fetch(url, { headers: { "User-Agent": "deFlood.ai/1.0" } });
+          const data = await res.json();
+          const name = data.display_name
+            ? data.display_name.split(",").slice(0, 3).join(", ")
+            : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          setAddressInput(name);
+          const nearest = findNearestShelter(lat, lng);
+          setUserLocation({ lat, lng, name, isGPS: true });
+          setDestId(nearest.id);
+          setGeoError("");
+        } catch {
+          const name = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          setAddressInput(name);
+          const nearest = findNearestShelter(lat, lng);
+          setUserLocation({ lat, lng, name, isGPS: true });
+          setDestId(nearest.id);
+        }
+        setLocating(false);
+      },
+      (err) => {
+        setLocating(false);
+        const msg = err.code === 1
+          ? (lang === "en" ? "Location access denied. Please allow location in browser settings." : "Akses lokasi ditolak. Izinkan lokasi di pengaturan browser.")
+          : (lang === "en" ? "Could not get your location. Try again." : "Tidak dapat mengambil lokasi. Coba lagi.");
+        setLocateError(msg);
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+    );
   };
 
   const handleMapClick = async (lat, lng) => {
@@ -183,6 +228,14 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
             >
               {geocoding ? t("evac.searching") : t("evac.search")}
             </button>
+            <button
+              className="locate-me-btn"
+              onClick={handleLocateMe}
+              disabled={locating}
+              title={lang === "en" ? "Use my current location" : "Gunakan lokasi saya"}
+            >
+              {locating ? "…" : "⊕"}
+            </button>
 
             {userLocation && selectedDest && (
               <>
@@ -215,13 +268,18 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
             )}
           </div>
 
-          {geoError && (
-            <div className="geo-error-banner">{geoError}</div>
+          {(geoError || locateError) && (
+            <div className="geo-error-banner">{geoError || locateError}</div>
           )}
 
-          {/* Map — klik untuk set lokasi */}
+          {/* Map — klik atau GPS untuk set lokasi */}
           <div className="panel evac-map-panel" style={{ cursor: "crosshair" }}>
-            <EvacuationMap origin={userLocation} dest={selectedDest} onMapClick={handleMapClick} />
+            <EvacuationMap
+              origin={userLocation}
+              dest={selectedDest}
+              onMapClick={handleMapClick}
+              onLocateMe={handleLocateMe}
+            />
           </div>
           {!userLocation && (
             <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)", textAlign: "center" }}>
