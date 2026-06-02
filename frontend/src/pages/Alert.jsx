@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { humanizeRiskLevel } from "../lib/humanize";
-import EvacuationMap, { ORIGINS, DESTINATIONS } from "../components/EvacuationMap";
+import EvacuationMap, { DESTINATIONS, findNearestShelter } from "../components/EvacuationMap";
 import EmergencyContacts from "../components/EmergencyContacts";
 import ChatBot from "../components/ChatBot";
 
@@ -12,10 +12,53 @@ const STEPS = [
   { title: "Daftar di Pos Pengungsian", desc: "Laporkan diri ke petugas BPBD untuk pendataan dan bantuan." },
 ];
 
-export default function Alert({ riskLevel = "waspada" }) {
-  const [originId, setOriginId] = useState("barat");
-  const [destId,   setDestId]   = useState("kemayoran");
+async function geocodeAddress(address) {
+  const q = encodeURIComponent(address + ", Jakarta, Indonesia");
+  const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=id`;
+  const res = await fetch(url, {
+    headers: { "Accept-Language": "id", "User-Agent": "deFlood.ai/1.0" },
+  });
+  if (!res.ok) throw new Error("Geocoding gagal");
+  const data = await res.json();
+  if (!data.length) throw new Error("Alamat tidak ditemukan");
+  return {
+    lat: parseFloat(data[0].lat),
+    lng: parseFloat(data[0].lon),
+    displayName: data[0].display_name,
+  };
+}
+
+export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
+  const [addressInput, setAddressInput] = useState("");
+  const [userLocation, setUserLocation]  = useState(null);
+  const [destId, setDestId]              = useState(null);
+  const [geocoding, setGeocoding]        = useState(false);
+  const [geoError, setGeoError]          = useState("");
+
   const config = humanizeRiskLevel(riskLevel);
+
+  const selectedDest = destId
+    ? DESTINATIONS.find((d) => d.id === destId) ?? null
+    : null;
+
+  const handleGeocode = async () => {
+    const addr = addressInput.trim();
+    if (!addr) return;
+    setGeocoding(true);
+    setGeoError("");
+    setUserLocation(null);
+    setDestId(null);
+    try {
+      const loc = await geocodeAddress(addr);
+      const nearest = findNearestShelter(loc.lat, loc.lng);
+      setUserLocation({ lat: loc.lat, lng: loc.lng, name: addr });
+      setDestId(nearest.id);
+    } catch (e) {
+      setGeoError(e.message ?? "Alamat tidak ditemukan. Coba tambahkan nama kelurahan atau kecamatan.");
+    } finally {
+      setGeocoding(false);
+    }
+  };
 
   return (
     <>
@@ -37,19 +80,57 @@ export default function Alert({ riskLevel = "waspada" }) {
         {/* Left: map */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
           <div className="panel evac-map-panel" style={{ position: "relative" }}>
-            {/* Route controls */}
+            {/* Address input + geocode */}
             <div className="route-controls">
               <span className="route-label from">DARI</span>
-              <select className="route-select" value={originId} onChange={(e) => setOriginId(e.target.value)}>
-                {ORIGINS.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-              </select>
-              <span style={{ color: "var(--muted-2)", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.75rem" }}>→</span>
-              <span className="route-label to">KE</span>
-              <select className="route-select" value={destId} onChange={(e) => setDestId(e.target.value)}>
-                {DESTINATIONS.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-              </select>
+              <input
+                className="route-input"
+                type="text"
+                placeholder="Ketik alamat Anda di Jakarta..."
+                value={addressInput}
+                onChange={(e) => setAddressInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !geocoding && handleGeocode()}
+                disabled={geocoding}
+              />
+              <button
+                className="route-search-btn"
+                onClick={handleGeocode}
+                disabled={geocoding || !addressInput.trim()}
+              >
+                {geocoding ? "..." : "Cari"}
+              </button>
+
+              {/* Shelter result */}
+              {userLocation && selectedDest && (
+                <>
+                  <span style={{ color: "var(--muted)", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.75rem" }}>→</span>
+                  <span className="route-label to">SHELTER</span>
+                  <select
+                    className="route-select"
+                    value={destId}
+                    onChange={(e) => setDestId(e.target.value)}
+                  >
+                    {DESTINATIONS.map((d) => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                </>
+              )}
             </div>
-            <EvacuationMap originId={originId} destId={destId} />
+
+            {/* Geocode error */}
+            {geoError && (
+              <div style={{
+                position: "absolute", top: 72, left: 12, right: 12, zIndex: 1001,
+                background: "rgba(255,61,90,0.12)", border: "1px solid rgba(255,61,90,0.3)",
+                borderRadius: 10, padding: "0.5rem 0.875rem",
+                fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", color: "#ff9dac",
+              }}>
+                {geoError}
+              </div>
+            )}
+
+            <EvacuationMap origin={userLocation} dest={selectedDest} />
           </div>
 
           {/* Map legend */}
@@ -94,7 +175,7 @@ export default function Alert({ riskLevel = "waspada" }) {
         </div>
       </div>
 
-      <ChatBot riskContext={{ level: riskLevel }} />
+      <ChatBot riskContext={{ level: riskLevel, rainfall }} />
     </>
   );
 }

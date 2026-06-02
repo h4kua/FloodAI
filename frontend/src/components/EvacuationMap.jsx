@@ -4,15 +4,6 @@ import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMap } from "
 const TILE_URL = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 const TILE_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
 
-export const ORIGINS = [
-  { id: "barat",   name: "Jakarta Barat",   lat: -6.182, lng: 106.751 },
-  { id: "utara",   name: "Jakarta Utara",   lat: -6.121, lng: 106.900 },
-  { id: "timur",   name: "Jakarta Timur",   lat: -6.217, lng: 106.952 },
-  { id: "pusat",   name: "Jakarta Pusat",   lat: -6.186, lng: 106.834 },
-  { id: "selatan", name: "Jakarta Selatan", lat: -6.261, lng: 106.810 },
-];
-
-// Verified safe shelters / higher-ground destinations
 export const DESTINATIONS = [
   { id: "kemayoran", name: "Kemayoran (Shelter)",     lat: -6.1528, lng: 106.8559 },
   { id: "ancol",     name: "Ancol (Pos Evakuasi)",    lat: -6.1246, lng: 106.8350 },
@@ -20,6 +11,23 @@ export const DESTINATIONS = [
   { id: "gbk",       name: "GBK Senayan (Shelter)",   lat: -6.2181, lng: 106.8022 },
   { id: "cipete",    name: "Cipete (Pos Aman)",       lat: -6.2824, lng: 106.8043 },
 ];
+
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+export function findNearestShelter(lat, lng) {
+  return DESTINATIONS.reduce((best, d) => {
+    const dist = haversineKm(lat, lng, d.lat, d.lng);
+    return dist < best.dist ? { ...d, dist } : best;
+  }, { ...DESTINATIONS[0], dist: Infinity });
+}
 
 function FitBounds({ positions }) {
   const map = useMap();
@@ -41,16 +49,21 @@ function secToMin(s) {
   return m < 60 ? m + " menit" : Math.floor(m / 60) + " j " + (m % 60) + " m";
 }
 
-export default function EvacuationMap({ originId = "barat", destId = "kemayoran" }) {
+// origin: { lat, lng, name } | null
+// dest:   { lat, lng, name } | null
+export default function EvacuationMap({ origin = null, dest = null }) {
   const [route, setRoute] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const origin = ORIGINS.find((o) => o.id === originId) ?? ORIGINS[0];
-  const dest   = DESTINATIONS.find((d) => d.id === destId) ?? DESTINATIONS[0];
-
   const fetchRoute = useCallback(async () => {
+    if (!origin || !dest) {
+      setRoute(null);
+      setRouteInfo(null);
+      setError(null);
+      return;
+    }
     setLoading(true);
     setError(null);
     setRoute(null);
@@ -63,16 +76,13 @@ export default function EvacuationMap({ originId = "barat", destId = "kemayoran"
       if (!data.routes?.length) throw new Error("No route found");
       const coords = data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
       setRoute(coords);
-      setRouteInfo({
-        distance: data.routes[0].distance,
-        duration: data.routes[0].duration,
-      });
-    } catch (e) {
+      setRouteInfo({ distance: data.routes[0].distance, duration: data.routes[0].duration });
+    } catch {
       setError("Rute tidak tersedia.");
     } finally {
       setLoading(false);
     }
-  }, [origin.lat, origin.lng, dest.lat, dest.lng]);
+  }, [origin?.lat, origin?.lng, dest?.lat, dest?.lng]);
 
   useEffect(() => { fetchRoute(); }, [fetchRoute]);
 
@@ -99,39 +109,62 @@ export default function EvacuationMap({ originId = "barat", destId = "kemayoran"
           </>
         )}
 
-        {/* Origin marker */}
-        <CircleMarker
-          center={[origin.lat, origin.lng]}
-          radius={12}
-          pathOptions={{ fillColor: "#ff3d5a", fillOpacity: 0.9, color: "#ff3d5a", weight: 2 }}
-        >
-          <Popup>
-            <div style={{ fontFamily: "'Inter',sans-serif" }}>
-              <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{origin.name}</p>
-              <p style={{ fontSize: 11, color: "#ff9dac", margin: 0 }}>Titik keberangkatan</p>
-            </div>
-          </Popup>
-        </CircleMarker>
+        {origin && (
+          <CircleMarker
+            center={[origin.lat, origin.lng]}
+            radius={12}
+            pathOptions={{ fillColor: "#ff3d5a", fillOpacity: 0.9, color: "#ff3d5a", weight: 2 }}
+          >
+            <Popup>
+              <div style={{ fontFamily: "'Inter',sans-serif" }}>
+                <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{origin.name}</p>
+                <p style={{ fontSize: 11, color: "#ff9dac", margin: 0 }}>Titik keberangkatan</p>
+              </div>
+            </Popup>
+          </CircleMarker>
+        )}
 
-        {/* Destination marker */}
-        <CircleMarker
-          center={[dest.lat, dest.lng]}
-          radius={12}
-          pathOptions={{ fillColor: "#00e5a0", fillOpacity: 0.9, color: "#00e5a0", weight: 2 }}
-        >
-          <Popup>
-            <div style={{ fontFamily: "'Inter',sans-serif" }}>
-              <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{dest.name}</p>
-              <p style={{ fontSize: 11, color: "#8cffd8", margin: 0 }}>Titik evakuasi aman</p>
-              {routeInfo && (
-                <p style={{ fontSize: 11, color: "#8f96a9", marginTop: 4 }}>
-                  {metersToKm(routeInfo.distance)} · {secToMin(routeInfo.duration)}
-                </p>
-              )}
-            </div>
-          </Popup>
-        </CircleMarker>
+        {dest && (
+          <CircleMarker
+            center={[dest.lat, dest.lng]}
+            radius={12}
+            pathOptions={{ fillColor: "#00e5a0", fillOpacity: 0.9, color: "#00e5a0", weight: 2 }}
+          >
+            <Popup>
+              <div style={{ fontFamily: "'Inter',sans-serif" }}>
+                <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{dest.name}</p>
+                <p style={{ fontSize: 11, color: "#8cffd8", margin: 0 }}>Titik evakuasi aman</p>
+                {routeInfo && (
+                  <p style={{ fontSize: 11, color: "#8f96a9", marginTop: 4 }}>
+                    {metersToKm(routeInfo.distance)} · {secToMin(routeInfo.duration)}
+                  </p>
+                )}
+              </div>
+            </Popup>
+          </CircleMarker>
+        )}
       </MapContainer>
+
+      {/* Placeholder overlay — sebelum user input alamat */}
+      {!origin && (
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 1000, display: "flex",
+          alignItems: "center", justifyContent: "center", pointerEvents: "none",
+        }}>
+          <div style={{
+            background: "rgba(9,9,13,0.82)", backdropFilter: "blur(10px)",
+            border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14,
+            padding: "1rem 1.5rem", textAlign: "center",
+          }}>
+            <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.72rem", color: "var(--cyan)", letterSpacing: "0.08em", marginBottom: "0.3rem" }}>
+              MASUKKAN ALAMAT
+            </p>
+            <p style={{ fontSize: "0.8rem", color: "var(--muted)", margin: 0 }}>
+              Ketik alamat di atas untuk menemukan shelter terdekat
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Route info overlay */}
       {(loading || error || routeInfo) && (

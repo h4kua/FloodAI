@@ -29,7 +29,7 @@ async def chat_endpoint(req: ChatRequest) -> dict:
         response = client.chat.completions.create(
             model=model,
             messages=messages,
-            max_tokens=512,
+            max_tokens=1200,
         )
         return {"reply": response.choices[0].message.content}
     except Exception as exc:

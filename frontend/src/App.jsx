@@ -9,7 +9,7 @@ const NAV = [
 
 export default function App() {
   const [page, setPage] = useState("home");
-  const [riskLevel, setRiskLevel] = useState("waspada");
+  const [riskContext, setRiskContext] = useState({ level: "waspada", rainfall: 0 });
 
   return (
     <div className="shell">
@@ -42,8 +42,8 @@ export default function App() {
       </header>
 
       <main className="main">
-        {page === "home"  && <Home setRiskLevel={setRiskLevel} riskLevel={riskLevel} />}
-        {page === "alert" && <Alert riskLevel={riskLevel} />}
+        {page === "home"  && <Home setRiskContext={setRiskContext} riskLevel={riskContext.level} />}
+        {page === "alert" && <Alert riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
       </main>
 
       <footer className="footer">

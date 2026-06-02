@@ -271,14 +271,16 @@ function ZoneTable({ zones }) {
 }
 
 /* ── Page ──────────────────────────────────────────────── */
-export default function Home({ setRiskLevel, riskLevel }) {
+export default function Home({ setRiskContext, riskLevel }) {
   const { riskData, loading, error, refresh, lastUpdated } = useFloodRisk();
   const level = riskData?.level ?? riskLevel ?? "waspada";
   const score = riskData?.riskScore ?? 45;
 
   useEffect(() => {
-    if (riskData?.level) setRiskLevel(riskData.level);
-  }, [riskData, setRiskLevel]);
+    if (riskData?.level) {
+      setRiskContext({ level: riskData.level, rainfall: riskData.rainfall ?? 0 });
+    }
+  }, [riskData, setRiskContext]);
 
   const zones       = useMemo(() => deriveZones(score), [score]);
   const siaga1Count = zones.filter((z) => z.risk_level === "SIAGA_1").length;
