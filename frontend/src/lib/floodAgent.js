@@ -70,36 +70,40 @@ export async function sendToFloodAgent(message, history = [], riskContext = {}, 
     ? `[flood_risk: ${riskContext.level} | rainfall: ${riskContext.rainfall ?? 0} mm/h]\n`
     : "";
 
-  // Try backend first
-  if (API_BASE) {
-    try {
-      const res = await fetch(`${API_BASE}/api/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: contextPrefix + message,
-          history: history.map((m) => ({ role: m.role, content: m.content })),
-          system: SYSTEM_PROMPT,
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return { success: true, reply: data.reply ?? data.content };
-      }
-    } catch {
-      // Fall through to offline KB
+  // Always attempt the backend — works via Vite proxy in dev (no CORS)
+  // and via VITE_API_BASE_URL in production.
+  try {
+    const res = await fetch(`${API_BASE}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: contextPrefix + message,
+        history: history.map((m) => ({ role: m.role, content: m.content })),
+        system: SYSTEM_PROMPT,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const reply = data.reply ?? data.content;
+      if (reply) return { success: true, reply, isAI: true };
     }
+    // Non-ok HTTP response — fall through to offline KB
+    console.warn("[deFlood] chat backend returned", res.status);
+  } catch (err) {
+    // Network error (backend not running, CORS blocked, etc.)
+    console.warn("[deFlood] chat backend unreachable:", err?.message ?? err);
   }
 
   // Offline fallback: keyword matching
   const offline = _matchOffline(message, lang);
-  if (offline) return { success: true, reply: offline };
+  if (offline) return { success: true, reply: offline, isAI: false };
 
   // Generic offline fallback
   const generic = lang === "en"
     ? "I'm currently offline. For emergencies: BPBD 117 · Basarnas 115 · Ambulance 119.\n\nYou can ask me about: what to pack for evacuation, flood warning signs, nearest shelter, or emergency contacts."
     : "AI sedang offline. Darurat: BPBD 117 · Basarnas 115 · Ambulans 119.\n\nAnda bisa tanya: barang yang dibawa saat evakuasi, tanda-tanda banjir, cara menemukan shelter, atau kontak darurat.";
-  return { success: false, reply: generic };
+  return { success: false, reply: generic, isAI: false };
 }
 
 export const quickReplies = [

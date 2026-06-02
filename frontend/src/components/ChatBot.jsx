@@ -8,7 +8,7 @@ export default function ChatBot({ riskContext = {} }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [hasUnread, setHasUnread] = useState(true);
-  const { messages, loading, sendMessage } = useChat(riskContext, lang);
+  const { messages, loading, sendMessage, aiOnline } = useChat(riskContext, lang);
   const quickReplies = [
     t("chat.q1"), t("chat.q2"), t("chat.q3"),
     t("chat.q4"), t("chat.q5"), t("chat.q6"),
@@ -29,6 +29,12 @@ export default function ChatBot({ riskContext = {} }) {
     await sendMessage(text);
   };
 
+  // Status indicator: null = belum ada percobaan, true = AI, false = offline KB
+  const statusDot   = aiOnline === false ? "offline-dot" : "online-dot";
+  const statusLabel = aiOnline === false
+    ? (lang === "en" ? "Offline (KB)" : "Offline (KB)")
+    : (lang === "en" ? "AI Online" : "AI Online");
+
   return (
     <div className="chatbot-fab">
       {open && (
@@ -39,8 +45,8 @@ export default function ChatBot({ riskContext = {} }) {
             <div>
               <p className="chatbot-title">{t("chat.title")}</p>
               <div className="chatbot-status">
-                <span className="online-dot" />
-                <span>{t("chat.online")}</span>
+                <span className={statusDot} />
+                <span>{statusLabel}</span>
               </div>
             </div>
             <button className="chatbot-close" onClick={() => setOpen(false)} aria-label="Tutup chat">
@@ -52,7 +58,22 @@ export default function ChatBot({ riskContext = {} }) {
           <div className="chatbot-messages">
             {messages.map((m, i) => (
               <div key={i} className={`msg ${m.role}`}>
-                <div className="msg-bubble"><pre>{m.content}</pre></div>
+                <div className="msg-bubble">
+                  <pre>{m.content}</pre>
+                  {/* Show KB badge on offline replies */}
+                  {m.role === "assistant" && m.isAI === false && i > 0 && (
+                    <span style={{
+                      display: "block",
+                      marginTop: "0.3rem",
+                      fontSize: "0.6rem",
+                      opacity: 0.5,
+                      fontFamily: "'JetBrains Mono', monospace",
+                      letterSpacing: "0.05em",
+                    }}>
+                      {lang === "en" ? "offline KB" : "offline KB"}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
             {loading && (

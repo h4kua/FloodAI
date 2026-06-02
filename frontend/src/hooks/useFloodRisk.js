@@ -12,12 +12,10 @@ export function useFloodRisk() {
   const fetchRisk = useCallback(async () => {
     setError(null);
     try {
-      const url = API_BASE ? `${API_BASE}/predict/realtime-native` : null;
-
-      if (!url) {
-        setError("Backend URL belum dikonfigurasi.");
-        return;
-      }
+      // Use relative path when API_BASE is empty so the Vite dev proxy
+      // forwards the request to the backend (no CORS issues in dev).
+      // In production, VITE_API_BASE_URL is the full backend URL.
+      const url = `${API_BASE}/predict/realtime-native`;
 
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Server membalas ${res.status}`);
@@ -31,13 +29,21 @@ export function useFloodRisk() {
       };
       setRiskData({
         level: levelMap[json.risk_level] ?? "waspada",
-        rainfall: Math.round(json.features?.rainfall_mm ?? 0),
-        riskScore: (() => { const v = (json.probability ?? 0) * 100; return v > 0 && v < 1 ? 1 : Math.round(v); })(),
+        rainfall: json.features?.rainfall_mm ?? 0,
+        riskScore: (() => {
+          const v = (json.probability ?? 0) * 100;
+          return v > 0 && v < 1 ? 1 : Math.round(v);
+        })(),
         interpretation: json.risk_interpretation ?? "",
       });
       setLastUpdated(new Date());
-    } catch {
-      setError("Gagal memuat data. Coba lagi.");
+    } catch (err) {
+      const msg = err?.message ?? "";
+      if (msg.includes("fetch") || msg.includes("NetworkError") || msg.includes("Failed")) {
+        setError("Backend tidak terjangkau. Pastikan server berjalan di port 8080.");
+      } else {
+        setError(`Gagal memuat data: ${msg}`);
+      }
     } finally {
       setLoading(false);
     }

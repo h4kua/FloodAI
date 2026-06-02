@@ -4,10 +4,9 @@ import { humanizeRainfall } from "../lib/humanize";
 import FloodMap from "../components/FloodMap";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ChatBot from "../components/ChatBot";
-import { useT } from "../lib/appContext";
+import { useT, useApp } from "../lib/appContext";
 
 /* ── Constants ─────────────────────────────────────────── */
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 // Bias values derived from BPBD flood event frequency 2024-2026 (scripts/process_bpbd.py)
 // Higher bias = more flood-prone based on actual kejadian data
@@ -124,8 +123,10 @@ function AlertRibbon({ siaga1Count, siaga2Count, lastSync }) {
 
 function MetricsRow({ siaga1, siaga2, zones, score, rainfall }) {
   const t = useT();
+  const { lang } = useApp();
   const waspada = zones.filter((z) => z.risk_level === "WASPADA").length;
   const wargaEst = (siaga1 * 4800 + siaga2 * 3200 + waspada * 800).toLocaleString("id-ID");
+  const rainMm = rainfall ?? 0;
 
   const cards = [
     {
@@ -151,10 +152,11 @@ function MetricsRow({ siaga1, siaga2, zones, score, rainfall }) {
     },
     {
       label: t("metric.rainfall"),
-      value: `${rainfall ?? 0}`,
-      sub: t("metric.rainSub"),
+      // Use humanizeRainfall so 0 shows "Tidak ada hujan" instead of plain "0"
+      value: humanizeRainfall(rainMm, lang),
+      sub: rainMm > 0 ? `${Math.round(rainMm)} mm/jam` : t("metric.rainSub"),
       note: t("metric.real"),
-      color: (rainfall ?? 0) >= 50 ? "red" : (rainfall ?? 0) >= 20 ? "orange" : "green",
+      color: rainMm >= 50 ? "red" : rainMm >= 20 ? "orange" : "green",
     },
   ];
 
@@ -309,7 +311,12 @@ function ZoneTable({ zones }) {
                 </td>
                 <td><span className="zone-district">{z.district}</span></td>
                 <td style={{ fontVariantNumeric: "tabular-nums", color: "var(--text)", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem" }}>{z.tma}</td>
-                <td style={{ fontVariantNumeric: "tabular-nums", color: "var(--safe)", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem" }}>{z.rainfall}</td>
+                <td style={{
+                  fontVariantNumeric: "tabular-nums",
+                  color: z.rainfall >= 50 ? "var(--s1)" : z.rainfall >= 20 ? "var(--wsp)" : "var(--safe)",
+                  fontFamily: "'JetBrains Mono',monospace",
+                  fontSize: "0.82rem",
+                }}>{z.rainfall > 0 ? `${z.rainfall} mm` : "–"}</td>
                 <td><ProbBar value={z.probability} /></td>
                 <td><RiskBadge level={z.risk_level} /></td>
               </tr>

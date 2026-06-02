@@ -477,7 +477,8 @@ body {
   font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
   color: var(--muted); display: flex; align-items: center; gap: 0.4rem; margin-top: 2px;
 }
-.online-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--safe); box-shadow: var(--safe-glow); }
+.online-dot  { width: 6px; height: 6px; border-radius: 50%; background: var(--safe); box-shadow: var(--safe-glow); }
+.offline-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); opacity: 0.6; }
 .chatbot-close {
   margin-left: auto; background: none; border: none;
   color: var(--muted); cursor: pointer; font-size: 1rem;

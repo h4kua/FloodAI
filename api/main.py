@@ -31,6 +31,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from api.dashboard import build_demo_page
 from api.routes.agentic_llm import router as agentic_llm_router
 from api.routes.chat import router as chat_router
+from api.routes.crew_analysis import router as crew_analysis_router
 from api.observability import (
     RequestIdMiddleware,
     SecurityHeadersMiddleware,
@@ -546,6 +547,7 @@ _register_middleware(app, RawCORSMiddleware)
 
 app.include_router(agentic_llm_router)
 app.include_router(chat_router)
+app.include_router(crew_analysis_router)
 
 
 @app.get("/healthz")
