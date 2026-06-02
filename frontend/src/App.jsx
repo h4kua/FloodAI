@@ -1,11 +1,10 @@
 import { useState } from "react";
 import Home from "./pages/Home";
 import Alert from "./pages/Alert";
-import AlertBanner from "./components/AlertBanner";
 
 const NAV = [
-  { id: "home",  label: "Dashboard" },
-  { id: "alert", label: "Evakuasi"  },
+  { id: "home",  label: "Command Center" },
+  { id: "alert", label: "Evakuasi"       },
 ];
 
 export default function App() {
@@ -14,8 +13,6 @@ export default function App() {
 
   return (
     <div className="shell">
-      <AlertBanner level={riskLevel} />
-
       <header className="topbar">
         <span className="logo">
           <span className="logo-de">de</span>
@@ -36,13 +33,11 @@ export default function App() {
         </nav>
 
         <div className="topbar-right">
-          <div className="status-pill live">
+          <div className="chip live">
             <span className="live-dot" />
             System Online
           </div>
-          <div className="status-pill">
-            Jakarta, DKI
-          </div>
+          <div className="chip">Jakarta, DKI</div>
         </div>
       </header>
 
@@ -52,8 +47,8 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        <span>deFlood.ai — Jakarta Flood Intelligence System</span>
-        <span>XGBoost · 16 features · AUC-ROC 0.945 · &lt;1s latency</span>
+        <span>deFlood.ai — Jakarta Flood Intelligence System · Operator BPBD</span>
+        <span>XGBoost · 16 features · AUC-ROC 0.945 · ECE 0.38 · &lt;1s latency</span>
       </footer>
     </div>
   );
