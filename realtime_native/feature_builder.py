@@ -224,7 +224,13 @@ def _load_history(path=REALTIME_NATIVE_HISTORY_PATH):
         return pd.read_csv(path)
     # Allow operators to disable the history DB read entirely (e.g. when the
     # database is unreachable) so it never consumes the reasoning-stage budget.
+    # Still fall back to the local CSV so temporal features aren't zeroed out.
     if os.getenv("FEATURE_HISTORY_DB_ENABLED", "true").lower() == "false":
+        if REALTIME_NATIVE_HISTORY_PATH.exists():
+            try:
+                return pd.read_csv(REALTIME_NATIVE_HISTORY_PATH)
+            except Exception:
+                pass
         return pd.DataFrame()
     try:
         with pooled_connection() as conn:
@@ -242,6 +248,12 @@ def _load_history(path=REALTIME_NATIVE_HISTORY_PATH):
     except Exception as exc:
         FEATURE_HISTORY_DB_FAILURE_TOTAL.labels("load").inc()
         logger.warning("feature_builder._load_history: DB read failed - %s", exc)
+        # Fallback to local CSV so temporal features survive DB outage
+        if REALTIME_NATIVE_HISTORY_PATH.exists():
+            try:
+                return pd.read_csv(REALTIME_NATIVE_HISTORY_PATH)
+            except Exception:
+                pass
         return pd.DataFrame()
 
     records: list[dict] = []
@@ -264,22 +276,6 @@ def _filter_history_as_of(history: pd.DataFrame, as_of=None) -> pd.DataFrame:
         cutoff = cutoff.tz_convert("UTC")
     mask = timestamps.notna() & (timestamps <= cutoff)
     return history.loc[mask].reset_index(drop=True)
-
-
-def _append_history(row, path=REALTIME_NATIVE_HISTORY_PATH):
-    path = Path(path)
-    lock_path = path.with_suffix(".lock")
-    tmp_path = path.with_suffix(".tmp")
-    try:
-        with FileLock(lock_path, timeout=10):
-            history = _load_history(path)
-            updated = pd.concat([history, pd.DataFrame([row])], ignore_index=True)
-            updated.tail(2000).to_csv(tmp_path, index=False)
-            os.replace(tmp_path, path)
-    except FileLockTimeout:
-        logger.warning(
-            "feature_builder._append_history: lock timeout after 10s — write skipped"
-        )
 
 
 def _append_history(row, path=REALTIME_NATIVE_HISTORY_PATH):

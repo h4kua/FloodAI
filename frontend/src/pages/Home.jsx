@@ -9,12 +9,14 @@ import { useT } from "../lib/appContext";
 /* ── Constants ─────────────────────────────────────────── */
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
+// Bias values derived from BPBD flood event frequency 2024-2026 (scripts/process_bpbd.py)
+// Higher bias = more flood-prone based on actual kejadian data
 const BASE_ZONES = [
-  { zone: "Penjaringan", district: "Jakarta Utara", bias: +15, tma_base: 900, is_ood: false },
-  { zone: "Cengkareng",  district: "Jakarta Barat",  bias: +8,  tma_base: 820, is_ood: false },
-  { zone: "Jatinegara",  district: "Jakarta Timur",  bias: +2,  tma_base: 750, is_ood: true  },
-  { zone: "Kalideres",   district: "Jakarta Barat",  bias: -8,  tma_base: 640, is_ood: false },
-  { zone: "Kebayoran",   district: "Jakarta Selatan", bias: -22, tma_base: 340, is_ood: false },
+  { zone: "Kebayoran",   district: "Jakarta Selatan", bias: +20, tma_base: 340, is_ood: false },
+  { zone: "Penjaringan", district: "Jakarta Utara",   bias:  +6, tma_base: 900, is_ood: false },
+  { zone: "Jatinegara",  district: "Jakarta Timur",   bias:  +6, tma_base: 750, is_ood: true  },
+  { zone: "Kalideres",   district: "Jakarta Barat",   bias:  +4, tma_base: 640, is_ood: false },
+  { zone: "Cengkareng",  district: "Jakarta Barat",   bias:  -1, tma_base: 820, is_ood: false },
 ];
 
 function getAgentStatuses(level, t) {
@@ -47,7 +49,7 @@ function getAgentStatuses(level, t) {
   return (map[level] ?? map.waspada).map(a => ({ ...a, action: t(a.actionKey) }));
 }
 
-function deriveZones(riskScore) {
+function deriveZones(riskScore, realRainfall = 0) {
   return BASE_ZONES.map((z) => {
     const prob = Math.max(0.04, Math.min(0.97, (riskScore + z.bias) / 100));
     let risk_level;
@@ -59,7 +61,7 @@ function deriveZones(riskScore) {
       ...z,
       probability: prob,
       tma: Math.round(z.tma_base * (0.7 + prob * 0.5)),
-      rainfall: Math.round(prob * 85 + 5),
+      rainfall: realRainfall,
       risk_level,
     };
   });
@@ -268,6 +270,15 @@ function RecommendationsPanel({ alertZones }) {
   );
 }
 
+const ZONE_COLS = [
+  { key: "zone.zone" },
+  { key: "zone.area" },
+  { key: "zone.tma",  note: "est" },
+  { key: "zone.rain", note: "real" },
+  { key: "zone.prob" },
+  { key: "zone.status" },
+];
+
 function ZoneTable({ zones }) {
   const t = useT();
   return (
@@ -277,8 +288,15 @@ function ZoneTable({ zones }) {
         <table className="zone-table">
           <thead>
             <tr>
-              {[t("zone.zone"), t("zone.area"), t("zone.tma"), t("zone.rain"), t("zone.prob"), t("zone.status")].map((h) => (
-                <th key={h}>{h}</th>
+              {ZONE_COLS.map(({ key, note }) => (
+                <th key={key}>
+                  {t(key)}
+                  {note && (
+                    <span style={{ fontSize: "0.56rem", marginLeft: 3, color: note === "real" ? "var(--safe)" : "var(--muted-2)", letterSpacing: "0.04em" }}>
+                      {note === "real" ? "●" : "○"}
+                    </span>
+                  )}
+                </th>
               ))}
             </tr>
           </thead>
@@ -291,7 +309,7 @@ function ZoneTable({ zones }) {
                 </td>
                 <td><span className="zone-district">{z.district}</span></td>
                 <td style={{ fontVariantNumeric: "tabular-nums", color: "var(--text)", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem" }}>{z.tma}</td>
-                <td style={{ fontVariantNumeric: "tabular-nums", color: "var(--muted)", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem" }}>{z.rainfall}</td>
+                <td style={{ fontVariantNumeric: "tabular-nums", color: "var(--safe)", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem" }}>{z.rainfall}</td>
                 <td><ProbBar value={z.probability} /></td>
                 <td><RiskBadge level={z.risk_level} /></td>
               </tr>
@@ -299,11 +317,19 @@ function ZoneTable({ zones }) {
           </tbody>
         </table>
       </div>
-      <div style={{ marginTop: "0.875rem", padding: "0.625rem 0.75rem", background: "rgba(245,166,35,0.06)", border: "1px solid rgba(245,166,35,0.15)", borderRadius: "10px", display: "flex", alignItems: "center", gap: "0.625rem" }}>
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--wsp)", flexShrink: 0 }} />
-        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.68rem", color: "var(--muted-2)" }}>
-          {t("zone.ood")}
-        </span>
+      <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <div style={{ padding: "0.5rem 0.75rem", background: "rgba(0,229,160,0.05)", border: "1px solid rgba(0,229,160,0.12)", borderRadius: "8px", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--safe)", flexShrink: 0 }} />
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)" }}>
+            {t("zone.dataNote")}
+          </span>
+        </div>
+        <div style={{ padding: "0.5rem 0.75rem", background: "rgba(245,166,35,0.06)", border: "1px solid rgba(245,166,35,0.15)", borderRadius: "8px", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--wsp)", flexShrink: 0 }} />
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)" }}>
+            {t("zone.ood")}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -322,7 +348,7 @@ export default function Home({ setRiskContext, riskLevel }) {
     }
   }, [riskData, setRiskContext]);
 
-  const zones       = useMemo(() => deriveZones(score), [score]);
+  const zones       = useMemo(() => deriveZones(score, riskData?.rainfall ?? 0), [score, riskData?.rainfall]);
   const siaga1Count = zones.filter((z) => z.risk_level === "SIAGA_1").length;
   const siaga2Count = zones.filter((z) => z.risk_level === "SIAGA_2").length;
   const alertZones  = zones.filter((z) => ["SIAGA_1", "SIAGA_2"].includes(z.risk_level));

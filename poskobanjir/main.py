@@ -65,30 +65,46 @@ def run_pipeline():
     print("=" * 50)
 
     print("\n[STEP 1] Fetch data Posko Banjir...")
-    poskobanjir_xml = fetch_poskobanjir_xml()
-    poskobanjir_records = parse_poskobanjir_xml(poskobanjir_xml)
-    print(f"Total records Posko Banjir: {len(poskobanjir_records)}")
+    poskobanjir_records = []
+    try:
+        poskobanjir_xml = fetch_poskobanjir_xml()
+        poskobanjir_records = parse_poskobanjir_xml(poskobanjir_xml)
+        print(f"Total records Posko Banjir: {len(poskobanjir_records)}")
+    except Exception as exc:
+        print(f"[WARN] Gagal fetch Posko Banjir: {exc} — melanjutkan tanpa data TMA")
 
-    if not poskobanjir_records:
-        print("Tidak ada data hasil parsing Posko Banjir. Stop.")
-        return
-
-    print("\n[STEP 2] Clean dan simpan data Posko Banjir...")
-    df = clean_data(poskobanjir_records)
-    save_csv(df, CLEAN_DATA_DIR / "poskobanjir_latest.csv")
+    if poskobanjir_records:
+        print("\n[STEP 2] Clean dan simpan data Posko Banjir...")
+        df = clean_data(poskobanjir_records)
+        save_csv(df, CLEAN_DATA_DIR / "poskobanjir_latest.csv")
+    else:
+        print("[WARN] Melewati step 2 — tidak ada data TMA.")
 
     print("\n[STEP 3] Fetch data OpenWeather Jakarta...")
-    weather = fetch_openweather({"lat": JAKARTA_LAT, "lon": JAKARTA_LON})
-    save_json(weather, RAW_DATA_DIR / "openweather_current.json")
-    print(f"OpenWeather lokasi: {weather.get('name', 'unknown')}")
+    weather = {}
+    try:
+        weather = fetch_openweather({"lat": JAKARTA_LAT, "lon": JAKARTA_LON})
+        save_json(weather, RAW_DATA_DIR / "openweather_current.json")
+        print(f"OpenWeather lokasi: {weather.get('name', 'unknown')}")
+    except Exception as exc:
+        print(f"[WARN] Gagal fetch OpenWeather: {exc}")
 
     print("\n[STEP 4] Fetch RSS dan detail alert BMKG...")
-    bmkg_feed_xml = fetch_bmkg_feed()
-    bmkg_feed = parse_bmkg_feed(bmkg_feed_xml)
-    bmkg_alerts = _fetch_bmkg_alerts(bmkg_feed)
-    save_json(bmkg_feed, RAW_DATA_DIR / "bmkg_nowcast_feed.json")
-    save_json(bmkg_alerts, RAW_DATA_DIR / "bmkg_nowcast_alerts.json")
-    print(f"Total alert BMKG aktif: {len(bmkg_alerts)}")
+    bmkg_feed = []
+    bmkg_alerts = []
+    try:
+        bmkg_feed_xml = fetch_bmkg_feed()
+        bmkg_feed = parse_bmkg_feed(bmkg_feed_xml)
+        bmkg_alerts = _fetch_bmkg_alerts(bmkg_feed)
+        save_json(bmkg_feed, RAW_DATA_DIR / "bmkg_nowcast_feed.json")
+        save_json(bmkg_alerts, RAW_DATA_DIR / "bmkg_nowcast_alerts.json")
+        print(f"Total alert BMKG aktif: {len(bmkg_alerts)}")
+    except Exception as exc:
+        print(f"[WARN] Gagal fetch BMKG: {exc} — tidak ada alert")
+
+    if not any([poskobanjir_records, weather, bmkg_feed]):
+        print("[ERROR] Semua sumber data gagal. Pipeline berhenti.")
+        return
 
     print("\n[STEP 5] Bangun snapshot realtime gabungan...")
     snapshot = build_realtime_snapshot(

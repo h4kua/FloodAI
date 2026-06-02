@@ -110,10 +110,10 @@ export default function About({ riskContext = {} }) {
             desc={isId
               ? "Curah hujan (jam ini, 6j, 12j, 24j), tinggi muka air sungai, temperatur, kelembapan, dan indikator musiman."
               : "Rainfall (current, 6h, 12h, 24h), river water level, temperature, humidity, and seasonal indicators."} />
-          <Row tag="ECE" title={isId ? "Kalibrasi (ECE 0.38)" : "Calibration (ECE 0.38)"}
+          <Row tag="ECE" title={isId ? "Kalibrasi (ECE 0.20)" : "Calibration (ECE 0.20)"}
             desc={isId
-              ? "Expected Calibration Error sebesar 0.38 menunjukkan confidence model belum sepenuhnya dapat dipercaya. Prediksi perlu diverifikasi dengan data lapangan."
-              : "ECE of 0.38 indicates model confidence is not fully reliable. Predictions should be verified with field data."} />
+              ? "Expected Calibration Error 0.20 (n=1.391) — dikalibrasi ulang menggunakan data kejadian BPBD 2024–2026 sebagai ground truth. Meningkat dari ECE 0.38 (n=7). Model cenderung overconfident; prediksi tetap perlu verifikasi lapangan."
+              : "ECE 0.20 (n=1,391) — recalibrated using BPBD flood event data 2024–2026 as ground truth. Improved from ECE 0.38 (n=7). Model tends to be overconfident; predictions still require field verification."} />
           <Row tag="RT" title={isId ? "Update Realtime" : "Realtime Update"}
             desc={isId
               ? "Model berjalan pada setiap permintaan dengan data sensor terkini. Frontend polling setiap 15 menit."

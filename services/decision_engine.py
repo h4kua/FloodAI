@@ -113,7 +113,7 @@ def _canonical_default_thresholds() -> tuple[float, float, float]:
 _CALIBRATION_CACHE = os.path.normpath(
     os.path.join(
         os.path.dirname(__file__),
-        "..", "..", "artifacts", "configurations", "calibration_cache.json",
+        "..", "artifacts", "configurations", "calibration_cache.json",
     )
 )
 _CALIBRATION_CACHE_MAX_AGE_DAYS = 30

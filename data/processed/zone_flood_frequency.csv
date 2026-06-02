@@ -1,0 +1,6 @@
+zone,total_events,kelurahan_records,normalised_score,suggested_bias
+Kebayoran,239,160,1.0,20
+Penjaringan,158,36,0.6611,6
+Jatinegara,157,75,0.6569,6
+Kalideres,144,92,0.6025,4
+Cengkareng,114,79,0.477,-1
