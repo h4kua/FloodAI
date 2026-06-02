@@ -89,13 +89,13 @@ export default function EvacuationMap({ origin = null, dest = null }) {
   const center = [-6.2, 106.83];
 
   return (
-    <div style={{ position: "relative", height: "520px" }}>
+    <div style={{ position: "relative", flex: 1, minHeight: "420px" }}>
       <MapContainer
         center={center}
         zoom={11}
         zoomControl={true}
         scrollWheelZoom={true}
-        style={{ height: "520px", width: "100%" }}
+        style={{ height: "100%", width: "100%", minHeight: "420px" }}
       >
         <TileLayer url={TILE_URL} attribution={TILE_ATTR} />
 

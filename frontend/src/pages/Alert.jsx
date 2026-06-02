@@ -130,8 +130,8 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
       </div>
 
       <div className="evac-grid fade-in">
-        {/* Left: search + map */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        {/* Left: search + map — evac-col-left stretches to match right column height */}
+        <div className="evac-col-left">
 
           {/* Search panel — above the map, NOT overlaid */}
           <div className="panel route-controls">

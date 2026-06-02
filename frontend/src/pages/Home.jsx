@@ -369,15 +369,9 @@ export default function Home({ setRiskContext, riskLevel }) {
             </div>
             <FloodMap riskScore={score} level={level} />
             <div className="map-footer">
-              {[
-                ["Siaga 1", "#ff3d5a"], ["Siaga 2", "#f97316"],
-                ["Waspada", "#f5a623"], ["Normal",  "#00e5a0"],
-              ].map(([label, color]) => (
-                <div className="map-legend-item" key={label}>
-                  <span className="legend-swatch" style={{ background: color }} />
-                  <span className="map-legend-label">{label}</span>
-                </div>
-              ))}
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.63rem", color: "var(--muted-2)" }}>
+                ○ est. · skor per wilayah diturunkan dari model ML + bias historis
+              </span>
               <span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.63rem", color: "var(--muted-2)" }}>
                 Klik wilayah untuk detail
               </span>
