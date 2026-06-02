@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { humanizeRiskLevel } from "../lib/humanize";
 import EvacuationMap, { DESTINATIONS, findNearestShelter } from "../components/EvacuationMap";
 import EmergencyContacts from "../components/EmergencyContacts";
@@ -21,29 +21,83 @@ async function geocodeAddress(address) {
   if (!res.ok) throw new Error("Geocoding gagal");
   const data = await res.json();
   if (!data.length) throw new Error("Alamat tidak ditemukan");
-  return {
-    lat: parseFloat(data[0].lat),
-    lng: parseFloat(data[0].lon),
-    displayName: data[0].display_name,
-  };
+  return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+}
+
+function formatSuggestion(s) {
+  const addr = s.address ?? {};
+  const main =
+    addr.road || addr.pedestrian || addr.path ||
+    addr.neighbourhood || addr.name ||
+    s.display_name.split(",")[0].trim();
+  const sub = [addr.suburb || addr.neighbourhood, addr.city_district, addr.city || addr.town]
+    .filter(Boolean)
+    .filter((v, i, arr) => arr.indexOf(v) === i)
+    .slice(0, 2)
+    .join(", ");
+  return { main, sub };
 }
 
 export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const [addressInput, setAddressInput] = useState("");
-  const [userLocation, setUserLocation]  = useState(null);
-  const [destId, setDestId]              = useState(null);
-  const [geocoding, setGeocoding]        = useState(false);
-  const [geoError, setGeoError]          = useState("");
+  const [userLocation, setUserLocation] = useState(null);
+  const [destId, setDestId]             = useState(null);
+  const [geocoding, setGeocoding]       = useState(false);
+  const [geoError, setGeoError]         = useState("");
+  const [suggestions, setSuggestions]   = useState([]);
+  const [showSugg, setShowSugg]         = useState(false);
+  const debounceRef = useRef(null);
 
-  const config = humanizeRiskLevel(riskLevel);
+  const config      = humanizeRiskLevel(riskLevel);
+  const selectedDest = destId ? DESTINATIONS.find((d) => d.id === destId) ?? null : null;
 
-  const selectedDest = destId
-    ? DESTINATIONS.find((d) => d.id === destId) ?? null
-    : null;
+  const fetchSuggestions = async (query) => {
+    const q = encodeURIComponent(query + " Jakarta");
+    const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=6&countrycodes=id&addressdetails=1`;
+    try {
+      const res = await fetch(url, {
+        headers: { "Accept-Language": "id", "User-Agent": "deFlood.ai/1.0" },
+      });
+      const data = await res.json();
+      setSuggestions(data.slice(0, 6));
+      setShowSugg(data.length > 0);
+    } catch {
+      setSuggestions([]);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setAddressInput(val);
+    clearTimeout(debounceRef.current);
+    if (val.trim().length >= 3) {
+      debounceRef.current = setTimeout(() => fetchSuggestions(val), 400);
+    } else {
+      setSuggestions([]);
+      setShowSugg(false);
+    }
+  };
+
+  const handleSelectSuggestion = (s) => {
+    const { main, sub } = formatSuggestion(s);
+    const label = sub ? `${main}, ${sub}` : main;
+    setAddressInput(label);
+    setSuggestions([]);
+    setShowSugg(false);
+    setGeoError("");
+
+    const lat = parseFloat(s.lat);
+    const lng = parseFloat(s.lon);
+    const nearest = findNearestShelter(lat, lng);
+    setUserLocation({ lat, lng, name: label });
+    setDestId(nearest.id);
+  };
 
   const handleGeocode = async () => {
     const addr = addressInput.trim();
     if (!addr) return;
+    setSuggestions([]);
+    setShowSugg(false);
     setGeocoding(true);
     setGeoError("");
     setUserLocation(null);
@@ -80,7 +134,8 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
         {/* Left: map */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
           <div className="panel evac-map-panel" style={{ position: "relative" }}>
-            {/* Address input + geocode */}
+
+            {/* Address input + autocomplete */}
             <div className="route-controls">
               <span className="route-label from">DARI</span>
               <input
@@ -88,19 +143,24 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
                 type="text"
                 placeholder="Ketik alamat Anda di Jakarta..."
                 value={addressInput}
-                onChange={(e) => setAddressInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && !geocoding && handleGeocode()}
+                onChange={handleInputChange}
+                onFocus={() => suggestions.length > 0 && setShowSugg(true)}
+                onBlur={() => setTimeout(() => setShowSugg(false), 180)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !geocoding) { setShowSugg(false); handleGeocode(); }
+                  if (e.key === "Escape") setShowSugg(false);
+                }}
                 disabled={geocoding}
               />
               <button
                 className="route-search-btn"
-                onClick={handleGeocode}
+                onClick={() => { setShowSugg(false); handleGeocode(); }}
                 disabled={geocoding || !addressInput.trim()}
               >
                 {geocoding ? "..." : "Cari"}
               </button>
 
-              {/* Shelter result */}
+              {/* Shelter dropdown — muncul setelah lokasi ditemukan */}
               {userLocation && selectedDest && (
                 <>
                   <span style={{ color: "var(--muted)", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.75rem" }}>→</span>
@@ -115,6 +175,25 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
                     ))}
                   </select>
                 </>
+              )}
+
+              {/* Autocomplete suggestions */}
+              {showSugg && suggestions.length > 0 && (
+                <div className="suggestions-dropdown">
+                  {suggestions.map((s, i) => {
+                    const { main, sub } = formatSuggestion(s);
+                    return (
+                      <div
+                        key={i}
+                        className="suggestion-item"
+                        onMouseDown={() => handleSelectSuggestion(s)}
+                      >
+                        <span className="suggestion-main">{main}</span>
+                        {sub && <span className="suggestion-sub">{sub}</span>}
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
 
