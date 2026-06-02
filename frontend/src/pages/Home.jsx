@@ -343,7 +343,6 @@ export default function Home({ setRiskContext, riskLevel }) {
       {/* Page header */}
       <div className="page-header fade-in">
         <div>
-          <p className="page-eyebrow">// Hydra · Command Center · Operator BPBD</p>
           <h1 className="page-title">Jakarta Flood Intelligence</h1>
         </div>
         <div className="header-actions">
@@ -361,29 +360,20 @@ export default function Home({ setRiskContext, riskLevel }) {
 
       {/* Map + Sidebar */}
       <div className="cmd-main fade-in">
-        {/* Left: Map + interpretation */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-          <div className="panel map-panel">
-            <div className="panel-body" style={{ paddingBottom: "0.75rem" }}>
-              <p className="panel-title" style={{ marginBottom: 0 }}>Peta Risiko Banjir — DKI Jakarta · Real-time</p>
-            </div>
-            <FloodMap riskScore={score} level={level} />
-            <div className="map-footer">
-              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.63rem", color: "var(--muted-2)" }}>
-                ○ est. · skor per wilayah diturunkan dari model ML + bias historis
-              </span>
-              <span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.63rem", color: "var(--muted-2)" }}>
-                Klik wilayah untuk detail
-              </span>
-            </div>
+        {/* Left: Map */}
+        <div className="panel map-panel">
+          <div className="panel-body" style={{ paddingBottom: "0.75rem" }}>
+            <p className="panel-title" style={{ marginBottom: 0 }}>Peta Risiko Banjir — DKI Jakarta · Real-time</p>
           </div>
-
-          {riskData?.interpretation && (
-            <div style={{ background: "rgba(0,207,255,0.05)", border: "1px solid rgba(0,207,255,0.15)", borderLeft: "2px solid var(--cyan)", borderRadius: "12px", padding: "0.875rem 1.125rem", fontSize: "0.82rem", color: "var(--muted)", lineHeight: 1.65 }}>
-              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--cyan)", letterSpacing: "0.1em", textTransform: "uppercase", marginRight: 8 }}>Model Output</span>
-              {riskData.interpretation}
-            </div>
-          )}
+          <FloodMap riskScore={score} level={level} />
+          <div className="map-footer">
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.63rem", color: "var(--muted-2)" }}>
+              ○ est. · skor per wilayah diturunkan dari model ML + bias historis
+            </span>
+            <span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.63rem", color: "var(--muted-2)" }}>
+              Klik wilayah untuk detail
+            </span>
+          </div>
         </div>
 
         {/* Right: Sidebar */}
@@ -393,6 +383,14 @@ export default function Home({ setRiskContext, riskLevel }) {
           <RecommendationsPanel alertZones={alertZones} />
         </div>
       </div>
+
+      {/* Model interpretation — full width, no gap */}
+      {riskData?.interpretation && (
+        <div className="fade-in" style={{ background: "rgba(0,207,255,0.05)", border: "1px solid rgba(0,207,255,0.15)", borderLeft: "3px solid var(--cyan)", borderRadius: "12px", padding: "0.875rem 1.25rem", fontSize: "0.82rem", color: "var(--muted)", lineHeight: 1.7 }}>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--cyan)", letterSpacing: "0.1em", textTransform: "uppercase", marginRight: 10 }}>Model Output</span>
+          {riskData.interpretation}
+        </div>
+      )}
 
       {/* Zone table */}
       <ZoneTable zones={zones} />

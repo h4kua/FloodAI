@@ -118,7 +118,6 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
       {/* Page header */}
       <div className="page-header fade-in">
         <div>
-          <p className="page-eyebrow">// Evacuation · Route Planner · Warga Jakarta</p>
           <h1 className="page-title">Rute Evakuasi</h1>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 0.875rem", borderRadius: "999px", border: `1px solid ${config.color}33`, background: `${config.color}0d` }}>
