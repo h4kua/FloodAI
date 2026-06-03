@@ -76,8 +76,8 @@ export default function About({ riskContext = {} }) {
             </p>
             <p style={{ fontSize: "0.88rem", color: "var(--text)", lineHeight: 1.7, maxWidth: 480 }}>
               {id
-                ? "Sistem kecerdasan banjir berbasis AI untuk Jakarta. Menggabungkan data sensor realtime dari 37 stasiun TMA, model machine learning XGBoost, prakiraan BMKG, dan AI generatif untuk membantu operator dan warga memantau serta merespons risiko banjir."
-                : "An AI-powered flood intelligence system for Jakarta. Combines realtime sensor data from 37 TMA stations, XGBoost machine learning, BMKG forecasts, and generative AI to help operators and residents monitor and respond to flood risks."}
+                ? "Sistem kecerdasan banjir berbasis AI untuk Jakarta. Menggabungkan data sensor realtime dari 38 stasiun TMA, model machine learning XGBoost, prakiraan BMKG, dan AI generatif untuk membantu operator dan warga memantau serta merespons risiko banjir."
+                : "An AI-powered flood intelligence system for Jakarta. Combines realtime sensor data from 38 TMA stations, XGBoost machine learning, BMKG forecasts, and generative AI to help operators and residents monitor and respond to flood risks."}
             </p>
           </div>
           <div className="stat-grid" style={{ minWidth: 200 }}>
