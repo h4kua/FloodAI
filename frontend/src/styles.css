@@ -1085,3 +1085,102 @@ body {
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
 }
+
+/* ── Onboarding Tour ───────────────────────────────────── */
+.tour-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,0.72);
+  animation: fade-in 0.25s ease;
+  pointer-events: none;
+}
+.tour-spotlight {
+  position: fixed; z-index: 9001;
+  border-radius: 12px;
+  box-shadow: 0 0 0 4px var(--cyan), 0 0 0 8px rgba(56,189,248,0.25), 0 0 32px rgba(56,189,248,0.3);
+  pointer-events: none;
+  animation: tour-pulse 2s ease-in-out infinite;
+  transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
+}
+@keyframes tour-pulse {
+  0%,100% { box-shadow: 0 0 0 4px var(--cyan), 0 0 0 8px rgba(56,189,248,0.25), 0 0 32px rgba(56,189,248,0.3); }
+  50%      { box-shadow: 0 0 0 4px var(--cyan), 0 0 0 14px rgba(56,189,248,0.18), 0 0 48px rgba(56,189,248,0.4); }
+}
+.tour-card {
+  position: fixed; z-index: 9002;
+  background: var(--panel);
+  border: 1px solid var(--cyan-border);
+  border-radius: var(--r-lg);
+  padding: 1.375rem 1.5rem;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px var(--cyan-border);
+  animation: pop-up 0.22s cubic-bezier(0.16,1,0.3,1);
+  max-width: 340px;
+}
+.tour-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.tour-icon { font-size: 1.5rem; line-height: 1; }
+.tour-step-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted-2);
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 999px; padding: 0.2rem 0.6rem;
+}
+.tour-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.05rem; font-weight: 700;
+  color: var(--text); letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+.tour-desc {
+  font-size: 0.82rem; color: var(--muted);
+  line-height: 1.6; margin-bottom: 1.125rem;
+}
+.tour-actions {
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.tour-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.06em; border-radius: 8px;
+  padding: 0.45rem 0.875rem; border: none; cursor: pointer;
+  transition: opacity 0.15s, transform 0.12s;
+}
+.tour-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.tour-btn-next {
+  background: var(--cyan); color: #fff;
+  margin-left: auto;
+}
+[data-theme="light"] .tour-btn-next { color: #fff; }
+.tour-btn-ghost {
+  background: var(--panel-2); color: var(--muted);
+  border: 1px solid var(--line);
+}
+.tour-btn-skip {
+  background: none; color: var(--muted-2);
+  border: 1px solid transparent;
+  font-size: 0.68rem;
+}
+.tour-btn-skip:hover { color: var(--muted); transform: none; }
+
+/* Reopen button — bottom left, above chatbot */
+.tour-reopen-btn {
+  position: fixed; bottom: 1.5rem; left: 1.75rem; z-index: 500;
+  width: 36px; height: 36px; border-radius: 50%; border: none;
+  background: var(--panel-2); border: 1px solid var(--line-2);
+  color: var(--muted); font-family: 'Space Grotesk', sans-serif;
+  font-size: 1rem; font-weight: 800; cursor: pointer;
+  display: grid; place-items: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+.tour-reopen-btn:hover {
+  background: var(--cyan-soft); border-color: var(--cyan-border);
+  color: var(--cyan);
+}
+@media (max-width: 640px) {
+  .tour-reopen-btn { bottom: 1rem; left: 1rem; }
+  .tour-card { max-width: calc(100vw - 2rem) !important; }
+}

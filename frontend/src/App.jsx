@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import Home from "./pages/Home";
 import Alert from "./pages/Alert";
 import About from "./pages/About";
+import OnboardingTour from "./components/OnboardingTour";
 import { AppContext, useT } from "./lib/appContext";
 
 function AppShell() {
@@ -58,8 +59,10 @@ function AppShell() {
 
       <footer className="footer">
         <span>deFlood.ai — Jakarta Flood Intelligence System · Operator BPBD</span>
-        <span>XGBoost · 16 features · AUC-ROC 0.945 · ECE 0.196 · &lt;1s latency</span>
+        <span>XGBoost · 16 features · AUC-ROC 0.863 · ECE 0.004 · &lt;1s latency</span>
       </footer>
+
+      <OnboardingTour />
     </div>
   );
 }
