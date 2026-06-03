@@ -216,7 +216,7 @@ export default function About({ riskContext = {} }) {
             <TeamCard
               role={id ? "Anggota Tim" : "Team Member"}
               roleType="member"
-              name="Christopher Patrick Gunawan"
+              name="Christopher Patrick"
               linkedin="https://www.linkedin.com/in/christopherpatrick-gunawan"
             />
             <TeamCard
