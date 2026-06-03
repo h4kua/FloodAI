@@ -584,7 +584,7 @@ function StatusHero({ riskData }) {
           </div>
         )}
         {probs.length >= 2 && (
-          <div className="hero-stat">
+          <div className="hero-stat secondary">
             <svg width={sparkW} height={sparkH} style={{ display: "block" }}>
               {probs.map((p, i, arr) => i === 0 ? null : (
                 <line key={i}
