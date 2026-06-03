@@ -1,13 +1,13 @@
-import { useMemo } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import { useMemo, useEffect } from "react";
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
 import { useApp, useT } from "../lib/appContext";
 
 const TILE_DARK  = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 const TILE_LIGHT = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 const TILE_ATTR  = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
-const JAKARTA_CENTER = [-6.2088, 106.8456];
-// Lock map to DKI Jakarta administrative boundary only
-const JAKARTA_BOUNDS = [[-6.40, 106.68], [-6.05, 107.02]];
+
+// DKI Jakarta administrative boundary — used for both fitBounds and panning lock
+const JAKARTA_BOUNDS = [[-6.385, 106.685], [-6.085, 107.025]];
 
 // Bias derived from BPBD flood event frequency 2024-2026 (aggregated per kotamadya)
 // Aligns with BASE_ZONES in Home.jsx to ensure map and zone table are consistent
@@ -33,6 +33,15 @@ function scoreToLabelKey(score) {
   return "risk.AMAN";
 }
 
+// Fits the map to DKI Jakarta bounds on first render, regardless of container size
+function FitJakarta() {
+  const map = useMap();
+  useEffect(() => {
+    map.fitBounds(JAKARTA_BOUNDS, { padding: [8, 8], animate: false });
+  }, [map]);
+  return null;
+}
+
 export default function FloodMap({ riskScore = 45 }) {
   const t = useT();
   const { theme } = useApp();
@@ -48,9 +57,10 @@ export default function FloodMap({ riskScore = 45 }) {
   return (
     <div style={{ position: "relative", flex: 1, minHeight: "320px" }}>
       <MapContainer
-        center={JAKARTA_CENTER}
-        zoom={12}
-        minZoom={10}
+        bounds={JAKARTA_BOUNDS}
+        boundsOptions={{ padding: [8, 8] }}
+        minZoom={11}
+        maxZoom={14}
         maxBounds={JAKARTA_BOUNDS}
         maxBoundsViscosity={1.0}
         zoomControl={true}
@@ -58,6 +68,7 @@ export default function FloodMap({ riskScore = 45 }) {
         style={{ height: "100%", width: "100%", minHeight: "320px" }}
       >
         <TileLayer url={tileUrl} attribution={TILE_ATTR} />
+        <FitJakarta />
 
         {districts.map((d) => {
           const color = scoreToColor(d.score);

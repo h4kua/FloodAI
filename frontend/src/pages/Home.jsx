@@ -299,7 +299,7 @@ function SensorStrip({ riskData }) {
           <span className="sensor-chip-value" style={{ color: trendColor }}>{trendLabel}</span>
         </div>
       )}
-      {riskData.isOutlier && (
+      {riskData.isOutlier && (riskData.waterLevelRatio ?? 0) < 0.75 && (
         <div className="sensor-chip sensor-chip-warn">
           <span className="sensor-chip-label">OOD</span>
           <span className="sensor-chip-value" style={{ color: "var(--wsp)" }}>
