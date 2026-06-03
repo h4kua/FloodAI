@@ -140,6 +140,13 @@ def predict_realtime_native(
     water_level_ratio = float(features.iloc[0].get("water_level_ratio", 0.0))
     risk_level, probability = _apply_hydro_override(risk_level, probability, water_level_ratio)
 
+    # Suppress false-positive OOD when water level explains the anomaly.
+    # Model was trained before real TMA data existed (ratio mostly 0.0);
+    # ratios >= 0.75 fall outside training distribution but are not true
+    # operational outliers — the hydro override already accounts for them.
+    if ood_label and water_level_ratio >= 0.75:
+        ood_label = 0
+
     result = {
         "model_variant": "realtime_native",
         "probability": probability,

@@ -6,8 +6,8 @@ const TILE_DARK  = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.pn
 const TILE_LIGHT = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 const TILE_ATTR  = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
 const JAKARTA_CENTER = [-6.2088, 106.8456];
-// Lock map to Greater Jakarta area
-const JAKARTA_BOUNDS = [[-6.45, 106.65], [-6.05, 107.05]];
+// Lock map to DKI Jakarta administrative boundary only
+const JAKARTA_BOUNDS = [[-6.40, 106.68], [-6.05, 107.02]];
 
 // Bias derived from BPBD flood event frequency 2024-2026 (aggregated per kotamadya)
 // Aligns with BASE_ZONES in Home.jsx to ensure map and zone table are consistent
@@ -49,7 +49,7 @@ export default function FloodMap({ riskScore = 45 }) {
     <div style={{ position: "relative", flex: 1, minHeight: "320px" }}>
       <MapContainer
         center={JAKARTA_CENTER}
-        zoom={11}
+        zoom={12}
         minZoom={10}
         maxBounds={JAKARTA_BOUNDS}
         maxBoundsViscosity={1.0}
