@@ -5,7 +5,9 @@ import { useApp, useT } from "../lib/appContext";
 const TILE_DARK  = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 const TILE_LIGHT = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 const TILE_ATTR  = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
-const JAKARTA_BOUNDS = [[-6.55, 106.55], [-5.95, 107.15]];
+// DKI Jakarta boundary for panning lock (slightly wider than risk map to allow
+// route planning near borders without fighting the maxBounds constraint).
+const JAKARTA_BOUNDS = [[-6.42, 106.66], [-6.06, 107.06]];
 
 export const DESTINATIONS = [
   { id: "kemayoran", name: "Kemayoran (Shelter)",   lat: -6.1528, lng: 106.8559 },
@@ -40,6 +42,18 @@ function maneuverArrow(maneuver) {
   if (mod.includes("left")  || mod.includes("uturn left"))  return "←";
   if (mod.includes("right") || mod.includes("uturn right")) return "→";
   return "↑";
+}
+
+// Fits to DKI Jakarta on first mount only — does not override route FitBounds.
+function FitJakartaDefault() {
+  const map = useMap();
+  const fitted = useRef(false);
+  useEffect(() => {
+    if (fitted.current) return;
+    fitted.current = true;
+    map.fitBounds(JAKARTA_BOUNDS, { padding: [12, 12], animate: false });
+  }, [map]);
+  return null;
 }
 
 function FitBounds({ positions }) {
@@ -117,16 +131,18 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
   return (
     <div style={{ position: "relative", flex: 1, minHeight: "420px", display: "flex", flexDirection: "column" }}>
       <MapContainer
-        center={[-6.2, 106.83]}
-        zoom={11}
-        minZoom={10}
+        center={[-6.23, 106.85]}
+        zoom={12}
+        minZoom={11}
+        maxZoom={17}
         maxBounds={JAKARTA_BOUNDS}
-        maxBoundsViscosity={1.0}
+        maxBoundsViscosity={0.9}
         zoomControl={true}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%", minHeight: "420px", flex: 1 }}
       >
         <TileLayer url={tileUrl} attribution={TILE_ATTR} />
+        <FitJakartaDefault />
         {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
         {flyTarget && <FlyTo lat={flyTarget.lat} lng={flyTarget.lng} />}
 

@@ -6,11 +6,11 @@ const TILE_DARK  = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.pn
 const TILE_LIGHT = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 const TILE_ATTR  = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
 
-// DKI Jakarta administrative boundary — used for both fitBounds and panning lock
-const JAKARTA_BOUNDS = [[-6.385, 106.685], [-6.085, 107.025]];
+// Tight DKI Jakarta administrative boundary.
+// West 106.695 = Tangerang border, East 107.005 = Bekasi border,
+// North -6.095 = coastline, South -6.375 = Depok border.
+const JAKARTA_BOUNDS = [[-6.375, 106.695], [-6.095, 107.005]];
 
-// Bias derived from BPBD flood event frequency 2024-2026 (aggregated per kotamadya)
-// Aligns with BASE_ZONES in Home.jsx to ensure map and zone table are consistent
 const DISTRICT_OFFSETS = [
   { id: "selatan", name: "Jakarta Selatan", lat: -6.261, lng: 106.810, bias: +18 },
   { id: "utara",   name: "Jakarta Utara",   lat: -6.121, lng: 106.900, bias: +6  },
@@ -33,11 +33,12 @@ function scoreToLabelKey(score) {
   return "risk.AMAN";
 }
 
-// Fits the map to DKI Jakarta bounds on first render, regardless of container size
+// Fits the map to DKI Jakarta on mount. Using an inner component (not the
+// MapContainer bounds prop) so it always wins regardless of container width.
 function FitJakarta() {
   const map = useMap();
   useEffect(() => {
-    map.fitBounds(JAKARTA_BOUNDS, { padding: [8, 8], animate: false });
+    map.fitBounds(JAKARTA_BOUNDS, { padding: [2, 2], animate: false });
   }, [map]);
   return null;
 }
@@ -57,10 +58,10 @@ export default function FloodMap({ riskScore = 45 }) {
   return (
     <div style={{ position: "relative", flex: 1, minHeight: "320px" }}>
       <MapContainer
-        bounds={JAKARTA_BOUNDS}
-        boundsOptions={{ padding: [8, 8] }}
-        minZoom={11}
-        maxZoom={14}
+        center={[-6.23, 106.85]}
+        zoom={12}
+        minZoom={12}
+        maxZoom={15}
         maxBounds={JAKARTA_BOUNDS}
         maxBoundsViscosity={1.0}
         zoomControl={true}
