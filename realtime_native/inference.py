@@ -171,6 +171,9 @@ def predict_realtime_native(
         "features": features.iloc[0].to_dict(),
         "diagnostics": engineered.diagnostics,
         "model_name": model_card.get("model_name"),
+        # Real DSDADKI station readings — sourced directly from sensor snapshot,
+        # NOT derived from ML model output. Empty list when no stations are active.
+        "stations": engineered.diagnostics.get("stations_summary", []),
     }
 
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)

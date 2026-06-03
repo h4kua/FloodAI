@@ -62,6 +62,9 @@ export function useFloodRisk() {
         monsoonSeason: json.features?.monsoon_season ?? null,
         // Temporal feature reliability (false = not enough history yet)
         temporalFeaturesReady: json.diagnostics?.temporal_features_ready ?? false,
+        // Real DSDADKI station readings sorted by siaga ratio desc.
+        // Each entry: { nama, tinggi_air, siaga1, ratio, status_siaga }
+        stations: json.stations ?? [],
       });
       setLastUpdated(new Date());
     } catch (err) {

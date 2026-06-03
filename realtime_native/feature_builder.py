@@ -606,6 +606,32 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
         "rainfall_acc_6h": round(current_row["rainfall_mm"] + _rf_lag1 + _rf_lag2, 4),
         "water_level_trend": round(current_row.get("water_level_delta", 0.0), 4),
         "trend_source": "realtime_feature_history",
+        # Real per-station DSDADKI readings — sorted by siaga ratio descending.
+        # Includes all calibrated, non-pump stations with positive siaga1 threshold.
+        # status_siaga is the raw string from DSDADKI ("Siaga 3", "Normal", etc.).
+        "stations_summary": sorted(
+            [
+                {
+                    "nama": str(r.get("nama_pintu_air") or r.get("wilayah") or ""),
+                    "lokasi": str(r.get("lokasi") or ""),
+                    "tinggi_air": _safe_float(r.get("tinggi_air")),
+                    "siaga1": _safe_float(r.get("siaga1")),
+                    "siaga2": _safe_float(r.get("siaga2")),
+                    "siaga3": _safe_float(r.get("siaga3")),
+                    "ratio": round(
+                        _safe_float(r.get("tinggi_air")) / max(_safe_float(r.get("siaga1")), 1),
+                        3,
+                    ),
+                    "status_siaga": str(r.get("status_siaga") or "Normal"),
+                }
+                for r in valid_records
+                if _is_calibrated_station(r)
+                and not _is_pump_station(r)
+                and _safe_float(r.get("siaga1")) > 0
+            ],
+            key=lambda x: x["ratio"],
+            reverse=True,
+        )[:20],
         "trend_state": {
             **trend_state,
             "rainfall_acc_3h": round(current_row.get("rainfall_3h_proxy_mm", 0.0), 4),

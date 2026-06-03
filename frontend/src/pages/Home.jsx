@@ -108,7 +108,24 @@ function ProbBar({ value }) {
   );
 }
 
+/* ── Station helpers ───────────────────────────────────── */
+// Classify a station by its ratio (tinggi_air / siaga1).
+function stationRiskLevel(ratio) {
+  if (ratio >= 1.0)  return "SIAGA_1";
+  if (ratio >= 0.75) return "SIAGA_2";
+  if (ratio >= 0.50) return "WASPADA";
+  return "NORMAL";
+}
+function stationClass(ratio) {
+  if (ratio >= 1.0)  return "s1";
+  if (ratio >= 0.75) return "s2";
+  if (ratio >= 0.50) return "wsp";
+  return "ok";
+}
+
 /* ── Sub-components ────────────────────────────────────── */
+
+// AlertRibbon uses REAL station counts from DSDADKI sensors.
 function AlertRibbon({ siaga1Count, siaga2Count, lastSync }) {
   const t = useT();
   const ts = lastSync?.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
@@ -129,41 +146,41 @@ function AlertRibbon({ siaga1Count, siaga2Count, lastSync }) {
   return null;
 }
 
-function MetricsRow({ siaga1, siaga2, zones, score, rainfall }) {
+// MetricsRow: cards 1 & 2 are now 100% real sensor data (no fake formulas).
+function MetricsRow({ siaga1, siaga2, totalStations, score, rainfall }) {
   const t = useT();
   const { lang } = useApp();
-  const waspada = zones.filter((z) => z.risk_level === "WASPADA").length;
-  const wargaEst = (siaga1 * 4800 + siaga2 * 3200 + waspada * 800).toLocaleString("id-ID");
   const rainMm = rainfall ?? 0;
 
   const cards = [
     {
+      // Card 1: count of REAL stations in siaga state (DSDADKI sensor data)
       label: t("metric.alertZones"),
       value: siaga1 + siaga2,
       sub: t("metric.alertSub", { s1: siaga1, s2: siaga2 }),
-      note: t("metric.est"),
+      note: "real",
       color: siaga1 > 0 ? "red" : siaga2 > 0 ? "orange" : "green",
     },
     {
-      label: t("metric.affected"),
-      value: (siaga1 + siaga2 + waspada) > 0 ? `~${wargaEst}` : "0",
-      sub: t("metric.affectedSub", { n: waspada }),
-      note: t("metric.est"),
-      color: siaga1 > 0 ? "red" : siaga2 > 0 ? "orange" : "green",
+      // Card 2: total active TMA stations from backend (replaces fake wargaEst)
+      label: t("metric.activeStations"),
+      value: totalStations ?? "—",
+      sub: t("metric.activeStationsSub"),
+      note: "real",
+      color: "green",
     },
     {
       label: t("metric.riskScore"),
       value: score,
       sub: t("metric.riskSub"),
-      note: t("metric.real"),
+      note: "real",
       color: score >= 70 ? "red" : score >= 45 ? "orange" : "green",
     },
     {
       label: t("metric.rainfall"),
-      // Use humanizeRainfall so 0 shows "Tidak ada hujan" instead of plain "0"
       value: humanizeRainfall(rainMm, lang),
       sub: rainMm > 0 ? `${Math.round(rainMm)} mm/jam` : t("metric.rainSub"),
-      note: t("metric.real"),
+      note: "real",
       color: rainMm >= 50 ? "red" : rainMm >= 20 ? "orange" : "green",
     },
   ];
@@ -174,15 +191,10 @@ function MetricsRow({ siaga1, siaga2, zones, score, rainfall }) {
         <div key={c.label} className={`metric-card ${c.color}`}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span className="metric-label">{c.label}</span>
-            {c.note && (
-              <span style={{
-                fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem",
-                color: c.note === "data real" ? "var(--safe)" : "var(--muted-2)",
-                letterSpacing: "0.06em", opacity: 0.8,
-              }}>
-                {c.note === "data real" ? "● real" : "○ est."}
-              </span>
-            )}
+            <span style={{
+              fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem",
+              color: "var(--safe)", letterSpacing: "0.06em", opacity: 0.85,
+            }}>● real</span>
           </div>
           <div>
             <div className={`metric-value ${c.color}`}>{c.value}</div>
@@ -194,9 +206,13 @@ function MetricsRow({ siaga1, siaga2, zones, score, rainfall }) {
   );
 }
 
-function AlertPanel({ alertZones }) {
+// AlertPanel: shows REAL DSDADKI stations in alert state (ratio >= 0.75).
+// Previously showed fake zone derivations — now 100% from sensor readings.
+function AlertPanel({ stations }) {
   const t = useT();
-  if (alertZones.length === 0) return (
+  const alertStations = (stations || []).filter(s => s.ratio >= 0.75).slice(0, 5);
+
+  if (alertStations.length === 0) return (
     <div className="panel panel-body">
       <p className="panel-title">{t("alert.title")}</p>
       <p style={{ fontSize: "0.8rem", color: "var(--muted)", fontFamily: "'JetBrains Mono',monospace" }}>
@@ -208,17 +224,73 @@ function AlertPanel({ alertZones }) {
     <div className="panel panel-body">
       <p className="panel-title">{t("alert.title")}</p>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        {alertZones.map((z, i) => (
-          <div key={i} className={`alert-item ${riskClass(z.risk_level)}`}>
+        {alertStations.map((s, i) => (
+          <div key={i} className={`alert-item ${stationClass(s.ratio)}`}>
             <span className="alert-dot" />
-            <div>
-              <p className="alert-zone-name">{z.zone}</p>
-              <p className="alert-zone-sub">TMA {z.tma} cm · {Math.round(z.probability * 100)}%</p>
+            <div style={{ minWidth: 0 }}>
+              <p className="alert-zone-name" style={{ fontSize: "0.78rem" }}>{s.nama}</p>
+              <p className="alert-zone-sub">TMA {s.tinggi_air} cm · {Math.round(s.ratio * 100)}% siaga</p>
             </div>
-            <RiskBadge level={z.risk_level} />
+            <RiskBadge level={stationRiskLevel(s.ratio)} />
           </div>
         ))}
       </div>
+      <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)" }}>
+        ● Sensor DSDADKI realtime
+      </p>
+    </div>
+  );
+}
+
+// StationPanel: full table of ALL real DSDADKI stations with live readings.
+// This replaces the fake zone table as the primary real-data source.
+function StationPanel({ stations }) {
+  const { lang } = useApp();
+  const isId = lang === "id";
+  if (!stations || stations.length === 0) return null;
+  return (
+    <div className="panel panel-body fade-in">
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+        <p className="panel-title" style={{ marginBottom: 0 }}>
+          {isId ? "Stasiun TMA Realtime — DSDADKI" : "TMA Stations Realtime — DSDADKI"}
+        </p>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em" }}>● real</span>
+      </div>
+      <div className="zone-table-wrap">
+        <table className="zone-table">
+          <thead>
+            <tr>
+              <th>{isId ? "Stasiun" : "Station"}</th>
+              <th>TMA (cm)</th>
+              <th>{isId ? "Siaga 1" : "Threshold"}</th>
+              <th>{isId ? "Rasio" : "Ratio"}</th>
+              <th>{isId ? "Status" : "Status"}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {stations.map((s, i) => (
+              <tr key={i}>
+                <td>
+                  <span className="zone-name" style={{ fontSize: "0.72rem" }}>{s.nama}</span>
+                </td>
+                <td style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem", color: s.ratio >= 0.75 ? "var(--wsp)" : "var(--text)" }}>
+                  {s.tinggi_air}
+                </td>
+                <td style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem", color: "var(--muted)" }}>
+                  {s.siaga1}
+                </td>
+                <td><ProbBar value={Math.min(s.ratio, 1.0)} /></td>
+                <td><RiskBadge level={stationRiskLevel(s.ratio)} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem", color: "var(--muted-2)" }}>
+        {isId
+          ? "● Data sensor pintu air & pos pantau DSDADKI · Rasio = TMA / ambang siaga-1 · Diperbarui tiap 15 menit"
+          : "● DSDADKI water gate & monitoring station data · Ratio = TMA / siaga-1 threshold · Updated every 15 min"}
+      </p>
     </div>
   );
 }
@@ -561,10 +633,19 @@ export default function Home({ setRiskContext, riskLevel }) {
     }
   }, [riskData, setRiskContext]);
 
-  const zones       = useMemo(() => deriveZones(score, riskData?.rainfall ?? 0, riskData?.waterLevelRatio ?? 0.5), [score, riskData?.rainfall, riskData?.waterLevelRatio]);
-  const siaga1Count = zones.filter((z) => z.risk_level === "SIAGA_1").length;
-  const siaga2Count = zones.filter((z) => z.risk_level === "SIAGA_2").length;
-  const alertZones  = zones.filter((z) => ["SIAGA_1", "SIAGA_2"].includes(z.risk_level));
+  // ── Real station counts from DSDADKI sensors (NOT derived from ML zones) ──
+  const stations    = riskData?.stations ?? [];
+  const realSiaga1  = useMemo(() => stations.filter(s => s.ratio >= 1.0).length,  [stations]);
+  const realSiaga2  = useMemo(() => stations.filter(s => s.ratio >= 0.75 && s.ratio < 1.0).length, [stations]);
+  const totalStations = riskData?.tmaStationsActive ?? stations.length || null;
+
+  // ── ML-derived geographic zones — used for map & zone table only ──────────
+  const zones = useMemo(
+    () => deriveZones(score, riskData?.rainfall ?? 0, riskData?.waterLevelRatio ?? 0.5),
+    [score, riskData?.rainfall, riskData?.waterLevelRatio],
+  );
+  // alertZones still used for RecommendationsPanel context (ML estimate)
+  const alertZones = zones.filter(z => ["SIAGA_1", "SIAGA_2"].includes(z.risk_level));
 
   if (loading) return <LoadingSpinner message="Mengambil data realtime..." />;
 
@@ -578,8 +659,8 @@ export default function Home({ setRiskContext, riskLevel }) {
 
   return (
     <>
-      {/* Alert ribbon */}
-      <AlertRibbon siaga1Count={siaga1Count} siaga2Count={siaga2Count} lastSync={lastUpdated} />
+      {/* Alert ribbon — real station counts */}
+      <AlertRibbon siaga1Count={realSiaga1} siaga2Count={realSiaga2} lastSync={lastUpdated} />
 
       {/* Page header */}
       <div className="page-header fade-in">
@@ -617,8 +698,8 @@ export default function Home({ setRiskContext, riskLevel }) {
         </div>
       </div>
 
-      {/* 4 Metric cards */}
-      <MetricsRow siaga1={siaga1Count} siaga2={siaga2Count} zones={zones} score={score} rainfall={riskData?.rainfall} />
+      {/* 4 Metric cards — all real data */}
+      <MetricsRow siaga1={realSiaga1} siaga2={realSiaga2} totalStations={totalStations} score={score} rainfall={riskData?.rainfall} />
 
       {/* Sensor detail strip */}
       <SensorStrip riskData={riskData} />
@@ -645,7 +726,7 @@ export default function Home({ setRiskContext, riskLevel }) {
 
         {/* Right: Sidebar */}
         <div className="cmd-sidebar">
-          <AlertPanel alertZones={alertZones} />
+          <AlertPanel stations={stations} />
           <AgentPanel level={level} />
           <RecommendationsPanel alertZones={alertZones} recommendedActions={riskData?.recommendedActions} />
         </div>
@@ -659,7 +740,10 @@ export default function Home({ setRiskContext, riskLevel }) {
         </div>
       )}
 
-      {/* Zone table */}
+      {/* Real DSDADKI station table — all live sensor readings */}
+      <StationPanel stations={stations} />
+
+      {/* Zone table — ML geographic estimate (not per-sensor) */}
       <ZoneTable zones={zones} />
 
       {/* BMKG weather forecast */}
