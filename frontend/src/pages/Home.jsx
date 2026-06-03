@@ -242,7 +242,76 @@ function AgentPanel({ level }) {
   );
 }
 
-function RecommendationsPanel({ alertZones }) {
+function SensorStrip({ riskData }) {
+  const { lang } = useApp();
+  const isId = lang === "id";
+  if (!riskData) return null;
+
+  const wlr = riskData.waterLevelRatio;
+  const wlColor = wlr >= 0.90 ? "var(--s1)" : wlr >= 0.75 ? "var(--wsp)" : "var(--safe)";
+  const riskTrend = riskData.trendState?.risk_trend;
+  const trendLabel = riskTrend === "increasing"
+    ? (isId ? "↑ Naik" : "↑ Rising")
+    : riskTrend === "decreasing"
+    ? (isId ? "↓ Turun" : "↓ Falling")
+    : (isId ? "→ Stabil" : "→ Stable");
+  const trendColor = riskTrend === "increasing" ? "var(--wsp)" : riskTrend === "decreasing" ? "var(--safe)" : "var(--muted)";
+
+  return (
+    <div className="sensor-strip fade-in">
+      {wlr !== null && (
+        <div className="sensor-chip">
+          <span className="sensor-chip-label">{isId ? "Muka Air" : "Water Level"}</span>
+          <span className="sensor-chip-value" style={{ color: wlColor }}>{Math.round(wlr * 100)}%</span>
+        </div>
+      )}
+      {riskData.temperature !== null && (
+        <div className="sensor-chip">
+          <span className="sensor-chip-label">{isId ? "Suhu" : "Temp"}</span>
+          <span className="sensor-chip-value">{riskData.temperature?.toFixed(1)}°C</span>
+        </div>
+      )}
+      {riskData.humidity !== null && (
+        <div className="sensor-chip">
+          <span className="sensor-chip-label">{isId ? "Kelembapan" : "Humidity"}</span>
+          <span className="sensor-chip-value">{Math.round(riskData.humidity)}%</span>
+        </div>
+      )}
+      {riskData.rainfallAcc6h !== null && (
+        <div className="sensor-chip">
+          <span className="sensor-chip-label">{isId ? "Akum. 6j" : "6h Accum"}</span>
+          <span className="sensor-chip-value" style={{ color: riskData.rainfallAcc6h >= 20 ? "var(--wsp)" : undefined }}>
+            {riskData.rainfallAcc6h} mm
+          </span>
+        </div>
+      )}
+      {riskData.bmkgAlerts > 0 && (
+        <div className="sensor-chip sensor-chip-warn">
+          <span className="sensor-chip-label">BMKG</span>
+          <span className="sensor-chip-value" style={{ color: "var(--wsp)" }}>
+            {riskData.bmkgAlerts} {isId ? "alert" : "alert"}
+          </span>
+        </div>
+      )}
+      {riskTrend && (
+        <div className="sensor-chip">
+          <span className="sensor-chip-label">{isId ? "Tren Risiko" : "Risk Trend"}</span>
+          <span className="sensor-chip-value" style={{ color: trendColor }}>{trendLabel}</span>
+        </div>
+      )}
+      {riskData.isOutlier && (
+        <div className="sensor-chip sensor-chip-warn">
+          <span className="sensor-chip-label">OOD</span>
+          <span className="sensor-chip-value" style={{ color: "var(--wsp)" }}>
+            {isId ? "Anomali" : "Anomaly"}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RecommendationsPanel({ alertZones, recommendedActions = [] }) {
   const t = useT();
   const zone1 = alertZones.find((z) => z.risk_level === "SIAGA_1");
   const zone2 = alertZones.find((z) => z.risk_level === "SIAGA_2");
@@ -260,6 +329,16 @@ function RecommendationsPanel({ alertZones }) {
   return (
     <div className="panel panel-body">
       <p className="panel-title">{t("rec.title")}</p>
+      {recommendedActions.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "0.75rem" }}>
+          {recommendedActions.map((action, i) => (
+            <div key={i} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--cyan)", flexShrink: 0, marginTop: "0.15rem" }}>›</span>
+              <p style={{ fontSize: "0.75rem", color: "var(--muted)", lineHeight: 1.55, margin: 0 }}>{action}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         {actions.map((a, i) => (
           <button key={i} className={`action-btn${a.primary ? " primary" : ""}`}>
@@ -393,6 +472,9 @@ export default function Home({ setRiskContext, riskLevel }) {
       {/* 4 Metric cards */}
       <MetricsRow siaga1={siaga1Count} siaga2={siaga2Count} zones={zones} score={score} rainfall={riskData?.rainfall} />
 
+      {/* Sensor detail strip */}
+      <SensorStrip riskData={riskData} />
+
       {/* Map + Sidebar */}
       <div className="cmd-main fade-in">
         {/* Left: Map — cmd-left stretches to match sidebar */}
@@ -417,7 +499,7 @@ export default function Home({ setRiskContext, riskLevel }) {
         <div className="cmd-sidebar">
           <AlertPanel alertZones={alertZones} />
           <AgentPanel level={level} />
-          <RecommendationsPanel alertZones={alertZones} />
+          <RecommendationsPanel alertZones={alertZones} recommendedActions={riskData?.recommendedActions} />
         </div>
       </div>
 

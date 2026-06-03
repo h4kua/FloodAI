@@ -134,12 +134,16 @@ export default function About({ riskContext = {} }) {
               : "Model runs on each request with the latest sensor data. Frontend polls every 15 minutes."} />
         </Section>
 
-        {/* AI Chat */}
-        <Section title={isId ? "AI Chat" : "AI Chat"}>
+        {/* AI Chat & Agents */}
+        <Section title={isId ? "AI Chat & Analisis" : "AI Chat & Analysis"}>
           <Row tag="LLM" accent title="Groq — Llama 3.3 70B Versatile"
             desc={isId
-              ? "Model bahasa besar dari Meta via Groq API untuk latensi rendah. Merespons pertanyaan seputar banjir, evakuasi, dan keselamatan."
-              : "Meta's large language model via Groq API for low latency. Answers questions about flooding, evacuation, and safety."} />
+              ? "Model bahasa besar dari Meta via Groq API untuk latensi rendah. Merespons pertanyaan seputar banjir, evakuasi, dan keselamatan dalam Bahasa Indonesia maupun Inggris."
+              : "Meta's large language model via Groq API for low latency. Answers questions about flooding, evacuation, and safety in Indonesian and English."} />
+          <Row tag="CREW" title="CrewAI — 3-Agent Crew"
+            desc={isId
+              ? "3 agen AI berjalan sekuensial: AhliCuaca (analisis BMKG), AhliHidrologi (analisis TMA), dan KoordinatorRisiko (sintesis keputusan akhir). Tersedia via endpoint /predict/crew-analysis."
+              : "3 AI agents run sequentially: WeatherExpert (BMKG analysis), HydrologyExpert (water level analysis), and RiskCoordinator (final decision synthesis). Available via /predict/crew-analysis endpoint."} />
           <Row tag="LANG" title={isId ? "Deteksi Bahasa Otomatis" : "Automatic Language Detection"}
             desc={isId
               ? "Chatbot mendeteksi bahasa dari pesan user dan merespons dalam bahasa yang sama — Indonesia atau Inggris."
@@ -154,13 +158,14 @@ export default function About({ riskContext = {} }) {
         <Section title={isId ? "Teknologi" : "Tech Stack"}>
           <p style={{ fontSize: "0.8rem", color: "var(--muted)", marginBottom: "0.875rem", lineHeight: 1.6 }}>
             {isId
-              ? "Dibangun dengan stack modern yang ringan dan dapat di-deploy dengan cepat di Railway dan Vercel."
-              : "Built with a lightweight modern stack, deployed quickly on Railway and Vercel."}
+              ? "Dibangun dengan stack modern yang di-deploy di Fly.io (backend) dan Vercel (frontend)."
+              : "Built with a lightweight modern stack, deployed on Fly.io (backend) and Vercel (frontend)."}
           </p>
           <div style={{ display: "flex", flexWrap: "wrap" }}>
-            {["FastAPI", "Uvicorn", "Python 3.11", "XGBoost", "scikit-learn 1.5.2", "Groq SDK",
+            {["FastAPI", "Uvicorn", "Python 3.12", "XGBoost 3.2.0", "scikit-learn 1.8.0",
+              "CrewAI 1.14.0", "LiteLLM 1.87.0", "Groq SDK", "Anthropic SDK",
               "React 18", "Vite 5", "React-Leaflet", "OSRM Routing", "Nominatim / OSM",
-              "Supabase / PostgreSQL", "Railway", "Vercel"].map(tag => (
+              "Supabase / PostgreSQL", "Fly.io", "Vercel"].map(tag => (
               <span key={tag} className="tech-tag">{tag}</span>
             ))}
           </div>

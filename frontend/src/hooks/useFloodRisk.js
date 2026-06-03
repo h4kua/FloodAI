@@ -35,6 +35,18 @@ export function useFloodRisk() {
           return v > 0 && v < 1 ? 1 : Math.round(v);
         })(),
         interpretation: json.risk_interpretation ?? "",
+        // Sensor readings from feature vector
+        humidity: json.features?.humidity_pct ?? null,
+        temperature: json.features?.temperature_c ?? null,
+        waterLevelRatio: json.features?.water_level_ratio ?? null,
+        waterLevelDelta: json.features?.water_level_delta ?? null,
+        // Diagnostic context
+        rainfallAcc6h: json.diagnostics?.rainfall_acc_6h ?? null,
+        bmkgAlerts: json.diagnostics?.bmkg_alerts_total ?? 0,
+        trendState: json.diagnostics?.trend_state ?? null,
+        // Model output
+        recommendedActions: json.recommended_action ?? [],
+        isOutlier: json.ood_detection?.is_outlier ?? false,
       });
       setLastUpdated(new Date());
     } catch (err) {
