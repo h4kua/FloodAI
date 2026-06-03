@@ -1,3 +1,4 @@
+import sys
 from config import CLEAN_DATA_DIR, JAKARTA_LAT, JAKARTA_LON, RAW_DATA_DIR
 from processing.cleaner import clean_data
 from services.fetcher import (
@@ -132,9 +133,18 @@ def run_pipeline():
     except Exception as exc:
         print(f"[WARN] Gagal fetch cuaca BMKG: {exc}")
 
-    if not any([poskobanjir_records, weather, bmkg_feed]):
-        print("[ERROR] Semua sumber data gagal. Pipeline berhenti.")
-        return
+    failed_sources = sum([
+        len(poskobanjir_records) == 0,
+        not weather,
+        not bmkg_feed,
+    ])
+
+    if failed_sources == 3:
+        print("[ERROR] Semua sumber data gagal (TMA + cuaca + BMKG). Pipeline berhenti.")
+        return False
+
+    if failed_sources > 0:
+        print(f"[WARN] {failed_sources}/3 sumber data gagal — melanjutkan dengan data parsial.")
 
     print("\n[STEP 6] Bangun snapshot realtime gabungan...")
     snapshot = build_realtime_snapshot(
@@ -146,8 +156,10 @@ def run_pipeline():
     )
     save_json(snapshot, CLEAN_DATA_DIR / "realtime_snapshot.json")
 
-    print("\nPIPELINE SELESAI!")
+    print(f"\nPIPELINE SELESAI! ({3 - failed_sources}/3 sumber berhasil)")
+    return True
 
 
 if __name__ == "__main__":
-    run_pipeline()
+    ok = run_pipeline()
+    sys.exit(0 if ok else 1)

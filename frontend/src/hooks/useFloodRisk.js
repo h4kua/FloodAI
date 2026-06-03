@@ -6,6 +6,8 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 // can always see exactly how old the underlying sensor data is.
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
+const RETRY_DELAY_MS = 30_000;
+
 export function useFloodRisk() {
   const [riskData, setRiskData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,9 +15,14 @@ export function useFloodRisk() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
   const isInitialLoad = useRef(true);
+  const retryTimer = useRef(null);
 
   const fetchRisk = useCallback(async (manual = false) => {
     setError(null);
+    if (retryTimer.current) {
+      clearTimeout(retryTimer.current);
+      retryTimer.current = null;
+    }
     if (manual) setRefreshing(true);
     try {
       const url = `${API_BASE}/predict/realtime-native`;
@@ -70,10 +77,12 @@ export function useFloodRisk() {
     } catch (err) {
       const msg = err?.message ?? "";
       if (msg.includes("fetch") || msg.includes("NetworkError") || msg.includes("Failed")) {
-        setError("Backend tidak terjangkau. Pastikan server berjalan di port 8080.");
+        setError("Backend tidak terjangkau. Mencoba lagi dalam 30 detik...");
       } else {
         setError(`Gagal memuat data: ${msg}`);
       }
+      // Auto-retry after 30s so user doesn't need to manually refresh
+      retryTimer.current = setTimeout(() => fetchRisk(false), RETRY_DELAY_MS);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -86,7 +95,10 @@ export function useFloodRisk() {
   useEffect(() => {
     fetchRisk();
     const interval = setInterval(() => fetchRisk(false), POLL_INTERVAL_MS);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (retryTimer.current) clearTimeout(retryTimer.current);
+    };
   }, [fetchRisk]);
 
   return { riskData, loading, refreshing, lastUpdated, error, refresh };

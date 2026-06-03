@@ -998,6 +998,39 @@ body {
   margin-bottom: 0.875rem;
 }
 
+/* ── Zone cards (replaces zone table) ─────────────────────── */
+.zone-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 0.75rem;
+}
+.zone-card {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 0.875rem 1rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
+  transition: border-color 0.15s;
+}
+.zone-card:hover { border-color: var(--line-2); }
+.zone-card-top {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem;
+}
+.zone-card-name {
+  font-size: 0.88rem; font-weight: 700; color: var(--text); line-height: 1.2;
+}
+.zone-card-area {
+  font-size: 0.65rem; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace; margin-top: 2px;
+}
+.zone-card-bar {
+  height: 3px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden;
+}
+.zone-card-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+.zone-card-pct {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700; margin: 0;
+}
+
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
 }

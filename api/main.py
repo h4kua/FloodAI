@@ -46,6 +46,7 @@ from realtime_native.inference import predict_realtime_native
 from services.decision_engine import _canonical_default_thresholds
 from services.prediction_service import predict_realtime
 from db.psycopg2_connection import close_pool, pooled_connection
+from utils.paths import DEFAULT_REALTIME_SNAPSHOT
 
 _log = get_logger("flood.api")
 
@@ -561,11 +562,28 @@ app.include_router(crew_analysis_router)
 
 @app.get("/healthz")
 @app.get("/health")
-async def liveness() -> dict[str, str]:
-    return {
+async def liveness() -> dict:
+    result: dict = {
         "status": "ok",
         "scheduler": "running" if scheduler.running else "stopped",
     }
+    try:
+        with open(DEFAULT_REALTIME_SNAPSHOT, encoding="utf-8") as f:
+            snap = json.load(f)
+        fetched_at_str = snap.get("fetched_at_utc", "")
+        if fetched_at_str:
+            fetched_dt = datetime.fromisoformat(fetched_at_str.replace("Z", "+00:00"))
+            age_min = (datetime.now(timezone.utc) - fetched_dt).total_seconds() / 60
+            result["snapshot_age_minutes"] = round(age_min, 1)
+            result["snapshot_stale"] = age_min > 30
+        else:
+            result["snapshot_age_minutes"] = None
+            result["snapshot_stale"] = True
+    except Exception as exc:
+        result["snapshot_age_minutes"] = None
+        result["snapshot_stale"] = True
+        result["snapshot_error"] = type(exc).__name__
+    return result
 
 
 @app.get("/readyz")

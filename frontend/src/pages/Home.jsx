@@ -18,35 +18,6 @@ const BASE_ZONES = [
   { zone: "Cengkareng",  district: "Jakarta Barat",   bias:  -1, tma_base: 820, is_ood: false },
 ];
 
-function getAgentStatuses(level, t) {
-  const map = {
-    aman: [
-      { name: "Prediction Agent",   status: "idle",     actionKey: "agent.idle1" },
-      { name: "Decision Agent",     status: "idle",     actionKey: "agent.idle2" },
-      { name: "Coordination Agent", status: "idle",     actionKey: "agent.idle3" },
-      { name: "Execution Agent",    status: "idle",     actionKey: "agent.idle4" },
-    ],
-    waspada: [
-      { name: "Prediction Agent",   status: "running",   actionKey: "agent.w1" },
-      { name: "Decision Agent",     status: "analyzing", actionKey: "agent.w2" },
-      { name: "Coordination Agent", status: "idle",      actionKey: "agent.w3" },
-      { name: "Execution Agent",    status: "idle",      actionKey: "agent.idle4" },
-    ],
-    siaga: [
-      { name: "Prediction Agent",   status: "running",    actionKey: "agent.s1" },
-      { name: "Decision Agent",     status: "analyzing",  actionKey: "agent.s2" },
-      { name: "Coordination Agent", status: "escalating", actionKey: "agent.s3" },
-      { name: "Execution Agent",    status: "active",     actionKey: "agent.s4" },
-    ],
-    bahaya: [
-      { name: "Prediction Agent",   status: "running",    actionKey: "agent.d1" },
-      { name: "Decision Agent",     status: "analyzing",  actionKey: "agent.d2" },
-      { name: "Coordination Agent", status: "escalating", actionKey: "agent.d3" },
-      { name: "Execution Agent",    status: "active",     actionKey: "agent.d4" },
-    ],
-  };
-  return (map[level] ?? map.waspada).map(a => ({ ...a, action: t(a.actionKey) }));
-}
 
 // waterLevelRatio: real sensor reading from DSDADKI (0–1.5 scale).
 // TMA now tracks real sensor data — when WLR rises, all zone TMA values rise.
@@ -313,33 +284,6 @@ function StationPanel({ stations }) {
   );
 }
 
-function AgentPanel({ level }) {
-  const t = useT();
-  const agents = useMemo(() => getAgentStatuses(level, t), [level, t]);
-
-  return (
-    <div className="panel panel-body">
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-        <p className="panel-title" style={{ marginBottom: 0 }}>{t("agent.title")}</p>
-        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)", letterSpacing: "0.06em" }}>
-          {t("agent.sim")}
-        </span>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-        {agents.map((a, i) => (
-          <div key={i} className="agent-row">
-            <span className={`agent-dot ${a.status}`} />
-            <div>
-              <p className="agent-name">{a.name}</p>
-              <p className="agent-action">{a.action}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function SensorStrip({ riskData }) {
   const { lang } = useApp();
   const isId = lang === "id";
@@ -514,6 +458,30 @@ function RecommendationsPanel({ alertZones, recommendedActions = [] }) {
   );
 }
 
+/* ── Stale data warning — tampil kalau snapshot > 30 menit ─────────────── */
+function StaleDataBanner({ snapshotFetchedAt }) {
+  const { lang } = useApp();
+  const isId = lang === "id";
+  if (!snapshotFetchedAt) return null;
+  const ageMin = Math.round((Date.now() - new Date(snapshotFetchedAt).getTime()) / 60000);
+  if (ageMin < 30) return null;
+  return (
+    <div style={{
+      background: "rgba(245,166,35,0.08)", border: "1px solid rgba(245,166,35,0.25)",
+      borderRadius: "10px", padding: "0.625rem 1rem",
+      display: "flex", alignItems: "center", gap: "0.75rem",
+      fontSize: "0.78rem", color: "var(--wsp)",
+    }}>
+      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", fontWeight: 700, flexShrink: 0 }}>⚠</span>
+      <span>
+        {isId
+          ? `Data sensor terakhir diperbarui ${ageMin} menit lalu — scraper mungkin mengalami gangguan. Refresh manual atau hubungi admin.`
+          : `Sensor data was last updated ${ageMin} minutes ago — scraper may be experiencing issues. Try manual refresh or contact admin.`}
+      </span>
+    </div>
+  );
+}
+
 /* ── Status Hero — the FIRST thing user sees: "apakah ada risiko banjir?" ── */
 function StatusHero({ riskData }) {
   const { lang } = useApp();
@@ -571,6 +539,12 @@ function StatusHero({ riskData }) {
     : (isId ? "→ Stabil" : "→ Stable");
   const trendColor = riskTrend === "increasing" ? "var(--wsp)" : riskTrend === "decreasing" ? "var(--safe)" : "var(--muted)";
 
+  // Mini sparkline dari recent_probabilities (3–5 data points dari trend history)
+  const probs = riskData?.trendState?.recent_probabilities ?? [];
+  const sparkW = Math.max(probs.length, 2) * 22;
+  const sparkH = 32;
+  const sparkY = (p) => sparkH - 4 - Math.round(Math.min(p, 1) * (sparkH - 8));
+
   return (
     <div className="status-hero fade-in" style={{
       background: cfg.bg,
@@ -609,6 +583,27 @@ function StatusHero({ riskData }) {
             <div className="hero-stat-label">mm/jam</div>
           </div>
         )}
+        {probs.length >= 2 && (
+          <div className="hero-stat">
+            <svg width={sparkW} height={sparkH} style={{ display: "block" }}>
+              {probs.map((p, i, arr) => i === 0 ? null : (
+                <line key={i}
+                  x1={(i - 1) * 22 + 11} y1={sparkY(arr[i - 1])}
+                  x2={i * 22 + 11}       y2={sparkY(p)}
+                  stroke={cfg.color} strokeWidth="1.5" strokeLinecap="round"
+                />
+              ))}
+              {probs.map((p, i) => (
+                <circle key={i}
+                  cx={i * 22 + 11} cy={sparkY(p)}
+                  r={i === probs.length - 1 ? 3 : 2}
+                  fill={cfg.color}
+                />
+              ))}
+            </svg>
+            <div className="hero-stat-label">{isId ? "Tren 3 titik" : "3-pt trend"}</div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -639,7 +634,7 @@ function ForecastPanel({ forecast }) {
             <div key={i} style={{
               flex: "1 1 120px",
               background: isRain ? "rgba(0,120,255,0.06)" : "rgba(0,229,160,0.04)",
-              border: `1px solid ${isRain ? "rgba(0,120,255,0.15)" : "var(--border)"}`,
+              border: `1px solid ${isRain ? "rgba(0,120,255,0.15)" : "var(--line)"}`,
               borderRadius: "10px",
               padding: "0.625rem 0.75rem",
               display: "flex",
@@ -668,72 +663,52 @@ function ForecastPanel({ forecast }) {
   );
 }
 
-const ZONE_COLS = [
-  { key: "zone.zone" },
-  { key: "zone.area" },
-  { key: "zone.tma",  note: "est" },
-  { key: "zone.rain", note: "real" },
-  { key: "zone.prob" },
-  { key: "zone.status" },
-];
+function ZoneCards({ zones }) {
+  const { lang } = useApp();
+  const isId = lang === "id";
+  const colorMap = { s1: "var(--s1)", s2: "var(--s2)", wsp: "var(--wsp)", ok: "var(--safe)" };
 
-function ZoneTable({ zones }) {
-  const t = useT();
   return (
     <div className="panel panel-body fade-in">
-      <p className="panel-title">{t("zone.title")}</p>
-      <div className="zone-table-wrap">
-        <table className="zone-table">
-          <thead>
-            <tr>
-              {ZONE_COLS.map(({ key, note }) => (
-                <th key={key}>
-                  {t(key)}
-                  {note && (
-                    <span style={{ fontSize: "0.56rem", marginLeft: 3, color: note === "real" ? "var(--safe)" : "var(--muted-2)", letterSpacing: "0.04em" }}>
-                      {note === "real" ? "●" : "○"}
-                    </span>
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {zones.map((z, i) => (
-              <tr key={i}>
-                <td>
-                  <span className="zone-name">{z.zone}</span>
-                  {z.is_ood && <span className="ood-tag">OOD</span>}
-                </td>
-                <td><span className="zone-district">{z.district}</span></td>
-                <td style={{ fontVariantNumeric: "tabular-nums", color: "var(--text)", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem" }}>{z.tma}</td>
-                <td style={{
-                  fontVariantNumeric: "tabular-nums",
-                  color: z.rainfall >= 50 ? "var(--s1)" : z.rainfall >= 20 ? "var(--wsp)" : "var(--safe)",
-                  fontFamily: "'JetBrains Mono',monospace",
-                  fontSize: "0.82rem",
-                }}>{z.rainfall > 0 ? `${z.rainfall} mm` : "–"}</td>
-                <td><ProbBar value={z.probability} /></td>
-                <td><RiskBadge level={z.risk_level} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.875rem" }}>
+        <p className="panel-title" style={{ marginBottom: 0 }}>
+          {isId ? "Estimasi Risiko per Wilayah" : "Risk Estimate by Area"}
+        </p>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)", letterSpacing: "0.06em" }}>
+          {isId ? "○ estimasi ML" : "○ ML estimate"}
+        </span>
       </div>
-      <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <div style={{ padding: "0.5rem 0.75rem", background: "rgba(0,229,160,0.05)", border: "1px solid rgba(0,229,160,0.12)", borderRadius: "8px", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--safe)", flexShrink: 0 }} />
-          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)" }}>
-            {t("zone.dataNote")}
-          </span>
-        </div>
-        <div style={{ padding: "0.5rem 0.75rem", background: "rgba(245,166,35,0.06)", border: "1px solid rgba(245,166,35,0.15)", borderRadius: "8px", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--wsp)", flexShrink: 0 }} />
-          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)" }}>
-            {t("zone.ood")}
-          </span>
-        </div>
+      <div className="zone-cards">
+        {zones.map((z, i) => {
+          const cls = riskClass(z.risk_level);
+          const color = colorMap[cls] ?? "var(--safe)";
+          return (
+            <div key={i} className="zone-card">
+              <div className="zone-card-top">
+                <div>
+                  <p className="zone-card-name">{z.zone}</p>
+                  <p className="zone-card-area">{z.district}</p>
+                </div>
+                <RiskBadge level={z.risk_level} />
+              </div>
+              <div className="zone-card-bar">
+                <div className="zone-card-fill" style={{ width: `${Math.min(z.probability, 1) * 100}%`, background: color }} />
+              </div>
+              <p className="zone-card-pct" style={{ color }}>
+                {Math.round(z.probability * 100)}%
+                <span style={{ color: "var(--muted-2)", fontWeight: 400, marginLeft: 4 }}>
+                  {isId ? "kemungkinan banjir" : "flood chance"}
+                </span>
+              </p>
+            </div>
+          );
+        })}
       </div>
+      <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem", color: "var(--muted-2)" }}>
+        {isId
+          ? "○ Estimasi dari XGBoost + bias historis BPBD per zona. Bukan data sensor per-kecamatan."
+          : "○ Estimate from XGBoost + historical BPBD bias per zone. Not per-district sensor data."}
+      </p>
     </div>
   );
 }
@@ -816,6 +791,9 @@ export default function Home({ setRiskContext, riskLevel }) {
         </div>
       </div>
 
+      {/* Stale data warning — tampil kalau snapshot lebih dari 30 menit */}
+      <StaleDataBanner snapshotFetchedAt={riskData?.snapshotFetchedAt} />
+
       {/* Status Hero — plain-language summary visible immediately */}
       <StatusHero riskData={riskData} />
 
@@ -848,7 +826,6 @@ export default function Home({ setRiskContext, riskLevel }) {
         {/* Right: Sidebar */}
         <div className="cmd-sidebar">
           <AlertPanel stations={stations} />
-          <AgentPanel level={level} />
           <RecommendationsPanel alertZones={alertZones} recommendedActions={riskData?.recommendedActions} />
         </div>
       </div>
@@ -864,8 +841,8 @@ export default function Home({ setRiskContext, riskLevel }) {
       {/* Real DSDADKI station table — all live sensor readings */}
       <StationPanel stations={stations} />
 
-      {/* Zone table — ML geographic estimate (not per-sensor) */}
-      <ZoneTable zones={zones} />
+      {/* Zone cards — ML geographic estimate (not per-sensor) */}
+      <ZoneCards zones={zones} />
 
       {/* BMKG weather forecast */}
       <ForecastPanel forecast={riskData?.bmkgForecast} />
