@@ -82,14 +82,14 @@ export default function About({ riskContext = {} }) {
             </p>
             <p style={{ fontSize: "0.88rem", color: "var(--text)", lineHeight: 1.7, maxWidth: 480 }}>
               {isId
-                ? "Sistem kecerdasan banjir berbasis AI untuk Jakarta. Menggabungkan data sensor realtime, model machine learning, dan AI generatif untuk membantu operator BPBD dan warga Jakarta memantau serta merespons risiko banjir."
-                : "An AI-powered flood intelligence system for Jakarta. Combines realtime sensor data, machine learning, and generative AI to help BPBD operators and Jakarta residents monitor and respond to flood risks."}
+                ? "Sistem kecerdasan banjir berbasis AI untuk Jakarta. Menggabungkan data sensor realtime dari 37 stasiun TMA, model machine learning XGBoost, prakiraan BMKG, dan AI generatif untuk membantu operator dan warga memantau serta merespons risiko banjir."
+                : "An AI-powered flood intelligence system for Jakarta. Combines realtime sensor data from 37 TMA stations, XGBoost machine learning, BMKG forecasts, and generative AI to help operators and residents monitor and respond to flood risks."}
             </p>
           </div>
           <div className="stat-grid" style={{ minWidth: 200 }}>
             <Stat value="0.945" label="AUC-ROC" />
             <Stat value="16" label={isId ? "Fitur ML" : "ML Features"} />
-            <Stat value="< 1s" label="Latency" />
+            <Stat value="37" label={isId ? "Stasiun TMA" : "TMA Stations"} />
             <Stat value="4" label={isId ? "Level Risiko" : "Risk Levels"} />
           </div>
         </div>
@@ -98,60 +98,56 @@ export default function About({ riskContext = {} }) {
         <Section title={isId ? "Sumber Data" : "Data Sources"}>
           <Row tag="BMKG" accent title="Badan Meteorologi, Klimatologi & Geofisika"
             desc={isId
-              ? "Data curah hujan realtime dan prakiraan cuaca dari lembaga meteorologi nasional Indonesia."
-              : "Realtime rainfall data and weather forecasts from Indonesia's national meteorology agency."} />
-          <Row tag="BNPB" title="Badan Nasional Penanggulangan Bencana"
+              ? "Dua feed data BMKG: nowcast alerts (peringatan ekstrem realtime) dan cuaca.json (prakiraan 10 hari untuk DKI Jakarta). Tersedia via poskobanjir.dsdadki.web.id."
+              : "Two BMKG data feeds: nowcast alerts (realtime extreme weather warnings) and cuaca.json (10-day forecast for DKI Jakarta). Available via poskobanjir.dsdadki.web.id."} />
+          <Row tag="DSDADKI" accent title={isId ? "Posko Banjir — DSDADKI" : "Flood Post — DSDADKI"}
             desc={isId
-              ? "Alert resmi kebencanaan, data historis banjir, dan protokol evakuasi."
-              : "Official disaster alerts, historical flood data, and evacuation protocols."} />
-          <Row tag="TMA" title={isId ? "Sensor Tinggi Muka Air" : "Water Level Sensors"}
+              ? "37 stasiun pemantauan tinggi muka air (TMA) sungai Jakarta via datatmalaststatus.json dari Dinas Sumber Daya Air DKI. Data realtime setiap 15 menit dengan threshold Siaga 1–4 per stasiun."
+              : "37 Jakarta river water-level monitoring stations via datatmalaststatus.json from Jakarta Water Resources Agency. Realtime data every 15 minutes with Siaga 1–4 thresholds per station."} />
+          <Row tag="OWM" title="OpenWeatherMap"
             desc={isId
-              ? "Stasiun pemantauan sungai Jakarta. Catatan: TMA scraper saat ini offline — data estimasi digunakan sebagai fallback."
-              : "Jakarta river monitoring stations. Note: TMA scraper is currently offline — estimated data is used as fallback."} />
-          <Row tag="HST" title={isId ? "Data Historis Banjir" : "Historical Flood Data"}
+              ? "Data cuaca realtime (suhu, kelembapan, curah hujan 1j/3j) dari stasiun terdekat Jakarta. Digunakan sebagai input utama fitur meteorologi model ML."
+              : "Realtime weather data (temperature, humidity, 1h/3h rainfall) from the nearest Jakarta station. Used as primary meteorological feature input for the ML model."} />
+          <Row tag="HST" title={isId ? "Data Historis Banjir (BPBD)" : "Historical Flood Data (BPBD)"}
             desc={isId
-              ? "Dataset banjir Jakarta sejak 2010 untuk pelatihan model dengan 16 fitur meteorologi dan hidrologi."
-              : "Jakarta flood dataset since 2010 for training the model with 16 meteorological and hydrological features."} />
+              ? "Dataset kejadian banjir Jakarta sejak 2010 dari BPBD untuk pelatihan model. 16 fitur meteorologi dan hidrologi. Bootstrap awal sebelum data TMA realtime tersedia."
+              : "Jakarta flood event dataset since 2010 from BPBD for model training. 16 meteorological and hydrological features. Initial bootstrap before realtime TMA data was available."} />
         </Section>
 
         {/* ML Model */}
         <Section title={isId ? "Model Machine Learning" : "Machine Learning Model"}>
-          <Row tag="XGB" accent title="XGBoost Classifier"
+          <Row tag="XGB" accent title="XGBoost 3.2.0 Classifier"
             desc={isId
-              ? "Model gradient boosting yang mengklasifikasikan risiko ke 4 level: AMAN, WASPADA, SIAGA, BAHAYA berdasarkan kondisi cuaca dan hidrologi terkini."
-              : "Gradient boosting model classifying risk into 4 levels: SAFE, WARNING, ALERT, DANGER based on current weather and hydrological conditions."} />
+              ? "Model gradient boosting yang mengklasifikasikan risiko ke 4 level: AMAN, WASPADA, SIAGA, BAHAYA berdasarkan kondisi cuaca dan hidrologi terkini. Dilatih di scikit-learn 1.8.0."
+              : "Gradient boosting model classifying risk into 4 levels: SAFE, WARNING, ALERT, DANGER based on current weather and hydrological conditions. Trained with scikit-learn 1.8.0."} />
           <Row tag="16F" title={isId ? "16 Fitur Input" : "16 Input Features"}
             desc={isId
-              ? "Curah hujan (jam ini, 6j, 12j, 24j), tinggi muka air sungai, temperatur, kelembapan, dan indikator musiman."
-              : "Rainfall (current, 6h, 12h, 24h), river water level, temperature, humidity, and seasonal indicators."} />
+              ? "Curah hujan (realtime, lag, roll-3), tinggi muka air (ratio & delta), suhu, kelembapan, skor BMKG (severity/certainty/urgency), indeks hidro-meteorologi, dan flag musim."
+              : "Rainfall (realtime, lag, roll-3), water level ratio & delta, temperature, humidity, BMKG scores (severity/certainty/urgency), hydro-meteorological index, and monsoon flag."} />
+          <Row tag="OOD" title={isId ? "IsolationForest — Deteksi Out-of-Distribution" : "IsolationForest — Out-of-Distribution Detection"}
+            desc={isId
+              ? "Model sekunder IsolationForest mendeteksi kondisi di luar distribusi data training. OOD flag hanya tampil ketika muka air rendah (<75%) karena tinggi muka air ≥75% sudah ditangani hydro override secara eksplisit."
+              : "Secondary IsolationForest model detects conditions outside the training distribution. OOD flag only appears at low water levels (<75%) since levels ≥75% are handled explicitly by the hydro override."} />
           <Row tag="ECE" title={isId ? "Kalibrasi (ECE 0.20)" : "Calibration (ECE 0.20)"}
             desc={isId
-              ? "Expected Calibration Error 0.20 (n=1.391) — dikalibrasi ulang menggunakan data kejadian BPBD 2024–2026 sebagai ground truth. Meningkat dari ECE 0.38 (n=7). Model cenderung overconfident; prediksi tetap perlu verifikasi lapangan."
-              : "ECE 0.20 (n=1,391) — recalibrated using BPBD flood event data 2024–2026 as ground truth. Improved from ECE 0.38 (n=7). Model tends to be overconfident; predictions still require field verification."} />
-          <Row tag="RT" title={isId ? "Update Realtime" : "Realtime Update"}
-            desc={isId
-              ? "Model berjalan pada setiap permintaan dengan data sensor terkini. Frontend polling setiap 15 menit."
-              : "Model runs on each request with the latest sensor data. Frontend polls every 15 minutes."} />
+              ? "Expected Calibration Error 0.20 (n=1.391) — dikalibrasi ulang menggunakan data kejadian BPBD 2024–2026. Meningkat dari ECE 0.38. Model cenderung overconfident di probabilitas tinggi; prediksi tetap perlu verifikasi lapangan."
+              : "ECE 0.20 (n=1,391) — recalibrated using BPBD flood event data 2024–2026. Improved from ECE 0.38. Model tends to be overconfident at high probabilities; field verification is still required."} />
         </Section>
 
         {/* AI Chat & Agents */}
         <Section title={isId ? "AI Chat & Analisis" : "AI Chat & Analysis"}>
-          <Row tag="LLM" accent title="Groq — Llama 3.3 70B Versatile"
+          <Row tag="LLM" accent title="Groq SDK 1.4.0 — Llama 3.3 70B"
             desc={isId
               ? "Model bahasa besar dari Meta via Groq API untuk latensi rendah. Merespons pertanyaan seputar banjir, evakuasi, dan keselamatan dalam Bahasa Indonesia maupun Inggris."
               : "Meta's large language model via Groq API for low latency. Answers questions about flooding, evacuation, and safety in Indonesian and English."} />
-          <Row tag="CREW" title="CrewAI — 3-Agent Crew"
+          <Row tag="CREW" title="CrewAI 1.14.0 — 3-Agent Crew"
             desc={isId
-              ? "3 agen AI berjalan sekuensial: AhliCuaca (analisis BMKG), AhliHidrologi (analisis TMA), dan KoordinatorRisiko (sintesis keputusan akhir). Tersedia via endpoint /predict/crew-analysis."
-              : "3 AI agents run sequentially: WeatherExpert (BMKG analysis), HydrologyExpert (water level analysis), and RiskCoordinator (final decision synthesis). Available via /predict/crew-analysis endpoint."} />
-          <Row tag="LANG" title={isId ? "Deteksi Bahasa Otomatis" : "Automatic Language Detection"}
+              ? "3 agen AI berjalan sekuensial: AhliCuaca (analisis BMKG & OpenWeather), AhliHidrologi (analisis TMA 37 stasiun), dan KoordinatorRisiko (sintesis keputusan akhir). Tersedia via endpoint /predict/crew-analysis."
+              : "3 AI agents run sequentially: WeatherExpert (BMKG & OpenWeather analysis), HydrologyExpert (37-station TMA analysis), and RiskCoordinator (final decision synthesis). Available via /predict/crew-analysis endpoint."} />
+          <Row tag="CTX" title={isId ? "Konteks Risiko Realtime" : "Realtime Risk Context"}
             desc={isId
-              ? "Chatbot mendeteksi bahasa dari pesan user dan merespons dalam bahasa yang sama — Indonesia atau Inggris."
-              : "The chatbot detects the language from the user's message and responds in the same language — Indonesian or English."} />
-          <Row tag="CTX" title={isId ? "Konteks Risiko" : "Risk Context"}
-            desc={isId
-              ? "Setiap percakapan menyertakan level risiko dan curah hujan terkini sehingga AI memberikan jawaban yang relevan dengan kondisi aktual."
-              : "Each conversation includes the current risk level and rainfall so the AI gives answers relevant to actual conditions."} />
+              ? "Setiap percakapan menyertakan level risiko, muka air, curah hujan, dan prakiraan BMKG terkini sehingga AI memberikan jawaban yang relevan dengan kondisi aktual Jakarta."
+              : "Each conversation includes current risk level, water level, rainfall, and BMKG forecast so the AI gives answers relevant to Jakarta's actual conditions."} />
         </Section>
 
         {/* Tech Stack */}
@@ -162,10 +158,14 @@ export default function About({ riskContext = {} }) {
               : "Built with a lightweight modern stack, deployed on Fly.io (backend) and Vercel (frontend)."}
           </p>
           <div style={{ display: "flex", flexWrap: "wrap" }}>
-            {["FastAPI", "Uvicorn", "Python 3.12", "XGBoost 3.2.0", "scikit-learn 1.8.0",
-              "CrewAI 1.14.0", "LiteLLM 1.87.0", "Groq SDK", "Anthropic SDK",
-              "React 18", "Vite 5", "React-Leaflet", "OSRM Routing", "Nominatim / OSM",
-              "Supabase / PostgreSQL", "Fly.io", "Vercel"].map(tag => (
+            {[
+              "Python 3.12", "FastAPI 0.136", "Uvicorn 0.31+",
+              "XGBoost 3.2.0", "scikit-learn 1.8.0",
+              "CrewAI 1.14.0", "LiteLLM 1.87.0", "Groq SDK 1.4.0", "Anthropic SDK 0.102",
+              "React 18", "Vite 5", "React-Leaflet 4",
+              "Supabase / PostgreSQL", "psycopg2 2.9",
+              "Fly.io", "Vercel",
+            ].map(tag => (
               <span key={tag} className="tech-tag">{tag}</span>
             ))}
           </div>
@@ -176,12 +176,12 @@ export default function About({ riskContext = {} }) {
           <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
             {(isId ? [
               "Data zona per wilayah adalah estimasi dari skor risiko keseluruhan dengan bias historis — bukan sensor individual per kecamatan.",
-              "TMA scraper saat ini offline. Tinggi muka air yang ditampilkan adalah estimasi berbasis probabilitas model.",
+              "Model ML dilatih sebelum data TMA realtime tersedia sehingga probabilitas bisa underestimate saat muka air tinggi. Hydro override menangani kondisi ini secara rule-based.",
               "Aplikasi ini adalah alat bantu keputusan, bukan pengganti informasi resmi dari BPBD, BMKG, atau BNPB.",
               "Dalam kondisi darurat, selalu ikuti instruksi petugas BPBD dan Basarnas.",
             ] : [
               "Per-district zone data is estimated from the overall risk score with historical bias — not individual sub-district sensor data.",
-              "The TMA scraper is currently offline. Water level data is probability-based estimation from the model.",
+              "The ML model was trained before realtime TMA data was available, so it may underestimate probability at high water levels. The hydro override handles this rule-based.",
               "This app is a decision support tool, not a replacement for official information from BPBD, BMKG, or BNPB.",
               "In emergencies, always follow instructions from BPBD and Basarnas officers.",
             ]).map((text, i) => (
