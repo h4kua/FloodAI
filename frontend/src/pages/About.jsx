@@ -81,9 +81,9 @@ export default function About({ riskContext = {} }) {
             </p>
           </div>
           <div className="stat-grid" style={{ minWidth: 200 }}>
-            <Stat value="0.945" label="AUC-ROC" />
+            <Stat value="0.863" label="AUC-ROC" />
             <Stat value="16" label={id ? "Fitur ML" : "ML Features"} />
-            <Stat value="37" label={id ? "Stasiun TMA" : "TMA Stations"} />
+            <Stat value="38" label={id ? "Stasiun TMA" : "TMA Stations"} />
             <Stat value="4" label={id ? "Level Risiko" : "Risk Levels"} />
           </div>
         </div>
@@ -96,8 +96,8 @@ export default function About({ riskContext = {} }) {
               : "Two BMKG data feeds: nowcast alerts (realtime extreme weather warnings) and cuaca.json (10-day forecast for DKI Jakarta). Available via poskobanjir.dsdadki.web.id."} />
           <Row tag="DSDADKI" accent title={id ? "Posko Banjir — DSDADKI" : "Flood Post — DSDADKI"}
             desc={id
-              ? "37 stasiun pemantauan tinggi muka air (TMA) sungai Jakarta via datatmalaststatus.json dari Dinas Sumber Daya Air DKI. Data realtime setiap 15 menit dengan threshold Siaga 1–4 per stasiun."
-              : "37 Jakarta river water-level monitoring stations via datatmalaststatus.json from Jakarta Water Resources Agency. Realtime data every 15 minutes with Siaga 1–4 thresholds per station."} />
+              ? "38 stasiun pemantauan tinggi muka air (TMA) sungai Jakarta via datatmalaststatus.json dari Dinas Sumber Daya Air DKI. Data realtime setiap 15 menit dengan threshold Siaga 1–4 per stasiun."
+              : "38 Jakarta river water-level monitoring stations via datatmalaststatus.json from Jakarta Water Resources Agency. Realtime data every 15 minutes with Siaga 1–4 thresholds per station."} />
           <Row tag="OWM" title="OpenWeatherMap"
             desc={id
               ? "Data cuaca realtime (suhu, kelembapan, curah hujan 1j/3j) dari stasiun terdekat Jakarta. Digunakan sebagai input utama fitur meteorologi model ML."
@@ -122,10 +122,10 @@ export default function About({ riskContext = {} }) {
             desc={id
               ? "Model sekunder IsolationForest mendeteksi kondisi di luar distribusi data training. Flag OOD hanya tampil ketika muka air rendah (<75%) karena muka air ≥75% sudah ditangani hydro override secara eksplisit."
               : "Secondary IsolationForest model detects conditions outside the training distribution. OOD flag only appears at low water levels (<75%) since levels ≥75% are handled explicitly by the hydro override."} />
-          <Row tag="ECE" title={id ? "Kalibrasi (ECE 0.196)" : "Calibration (ECE 0.196)"}
+          <Row tag="ECE" title={id ? "Kalibrasi (ECE 0.004)" : "Calibration (ECE 0.004)"}
             desc={id
-              ? "Expected Calibration Error 0.196 (n=1.391) — dikalibrasi ulang menggunakan data kejadian BPBD 2024–2026. Meningkat dari ECE 0.38. Model cenderung overconfident di probabilitas tinggi; prediksi tetap perlu verifikasi lapangan."
-              : "ECE 0.196 (n=1,391) — recalibrated using BPBD flood event data 2024–2026. Improved from ECE 0.38. Model tends to be overconfident at high probabilities; field verification is still required."} />
+              ? "Expected Calibration Error 0.004 (n=586 test rows, 1.990 training rows) — dikalibrasi dengan isotonic regression. Brier score 0.066. Model dilatih dengan chronological 80/15/5 split dan scale_pos_weight untuk menangani class imbalance banjir."
+              : "ECE 0.004 (n=586 test rows, 1,990 training rows) — calibrated with isotonic regression. Brier score 0.066. Trained with chronological 80/15/5 split and scale_pos_weight to handle flood class imbalance."} />
         </Section>
 
         {/* AI Chat & Agents */}
