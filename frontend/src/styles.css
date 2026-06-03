@@ -50,65 +50,91 @@
 
 /* ── Light theme ────────────────────────────────────────── */
 /*
- * Light: tone-down silau — background warm grey-blue, panel off-white.
- * Tidak lagi pure white agar tidak menyilaukan.
+ * Light: warm cream/white — jelas berbeda dari dark (cool navy).
+ * Tidak pakai blue-grey agar kontras hue-nya nyata.
+ * Background krem hangat, panel putih, teks gelap.
  */
 [data-theme="light"] {
-  --bg:      #e8edf5;   /* warm grey-blue — lebih redup dari sebelumnya */
-  --panel:   #f2f5fb;   /* off-white dengan hint biru — bukan pure white */
-  --panel-2: #e4eaf5;   /* panel elevated, sedikit lebih gelap */
-  --panel-3: #d8e2f2;   /* deepest elevation */
-  --line:    rgba(30,60,120,0.10);
-  --line-2:  rgba(30,60,120,0.18);
-  --text:    #1e2d47;   /* dark navy */
-  --muted:   #526890;
-  --muted-2: #8ca6ce;
-  --cyan:        #0369a1;   /* sky-700 — sedikit lebih gelap agar tidak terlalu terang */
+  --bg:      #f0ede8;   /* warm cream — bukan biru, beda total dari dark */
+  --panel:   #faf9f7;   /* off-white hangat */
+  --panel-2: #edeae4;   /* warm light beige */
+  --panel-3: #e3dfd8;   /* deeper beige */
+  --line:    rgba(60,45,20,0.10);
+  --line-2:  rgba(60,45,20,0.18);
+  --text:    #1c1a18;   /* near-black warm — kontras jelas di atas krem */
+  --muted:   #5c5448;   /* warm brown-grey */
+  --muted-2: #9c9080;   /* lighter warm muted */
+
+  --cyan:        #0369a1;   /* sky-700 */
   --cyan-soft:   rgba(3,105,161,0.09);
   --cyan-border: rgba(3,105,161,0.22);
   --cyan-glow:   0 0 20px rgba(3,105,161,0.16);
+
   --s1:       #be123c;   /* rose-700 */
   --s1-soft:  rgba(190,18,60,0.08);
   --s1-border:rgba(190,18,60,0.22);
   --s1-glow:  0 0 20px rgba(190,18,60,0.15);
+
   --s2:       #c2410c;   /* orange-700 */
-  --s2-soft:  rgba(194,65,12,0.08);
-  --s2-border:rgba(194,65,12,0.20);
-  --wsp:       #b45309;   /* amber-700 */
-  --wsp-soft:  rgba(180,83,9,0.08);
-  --wsp-border:rgba(180,83,9,0.20);
-  --safe:       #047857;   /* emerald-700 */
-  --safe-soft:  rgba(4,120,87,0.08);
-  --safe-border:rgba(4,120,87,0.20);
-  --safe-glow:  0 0 16px rgba(4,120,87,0.18);
-  --shadow:    0 2px 12px rgba(20,40,100,0.08);
-  --shadow-sm: 0 1px 6px rgba(20,40,100,0.06);
+  --s2-soft:  rgba(194,65,12,0.09);
+  --s2-border:rgba(194,65,12,0.22);
+
+  --wsp:       #92400e;   /* amber-800 */
+  --wsp-soft:  rgba(146,64,14,0.09);
+  --wsp-border:rgba(146,64,14,0.22);
+
+  --safe:       #065f46;   /* emerald-800 */
+  --safe-soft:  rgba(6,95,70,0.09);
+  --safe-border:rgba(6,95,70,0.22);
+  --safe-glow:  0 0 16px rgba(6,95,70,0.18);
+
+  --shadow:    0 2px 14px rgba(40,30,10,0.10);
+  --shadow-sm: 0 1px 6px rgba(40,30,10,0.07);
 }
 [data-theme="light"] body { background: var(--bg); }
 [data-theme="light"] #root {
   background:
-    radial-gradient(circle at 0% 0%,   rgba(190,18,60,0.025)  0%, transparent 35%),
-    radial-gradient(circle at 100% 0%, rgba(3,105,161,0.025)  0%, transparent 35%),
+    radial-gradient(circle at 0% 0%,   rgba(190,18,60,0.03)  0%, transparent 40%),
+    radial-gradient(circle at 100% 0%, rgba(3,105,161,0.03)  0%, transparent 40%),
     var(--bg);
 }
 [data-theme="light"] .topbar {
-  background: rgba(232,237,245,0.96);
-  border-bottom-color: rgba(30,60,120,0.11);
+  background: rgba(240,237,232,0.96);
+  border-bottom-color: rgba(60,45,20,0.12);
 }
 [data-theme="light"] .panel {
-  box-shadow: 0 1px 4px rgba(20,40,100,0.06);
+  box-shadow: 0 1px 5px rgba(40,30,10,0.07);
 }
-/* Reduce metric-card gradient brightness in light mode */
 [data-theme="light"] .metric-card {
   background: linear-gradient(160deg, var(--panel) 0%, var(--panel-2) 100%);
 }
-/* Tone down suggestions dropdown */
+/* Zone table border */
+[data-theme="light"] .zone-table td {
+  border-bottom-color: rgba(60,45,20,0.06);
+}
+/* Dropdown */
 [data-theme="light"] .suggestions-dropdown {
-  background: rgba(232,237,245,0.98);
-  border-color: rgba(30,60,120,0.12);
-  box-shadow: 0 8px 32px rgba(20,40,100,0.12);
+  background: rgba(240,237,232,0.99);
+  border-color: rgba(60,45,20,0.14);
+  box-shadow: 0 8px 32px rgba(40,30,10,0.12);
 }
 [data-theme="light"] .suggestion-item:hover { background: rgba(3,105,161,0.06); }
+/* Chatbot — warm white */
+[data-theme="light"] .chatbot-panel {
+  background: #faf9f7;
+  border-color: rgba(60,45,20,0.10);
+  box-shadow: 0 8px 40px rgba(40,30,10,0.13);
+}
+[data-theme="light"] .chatbot-input {
+  background: #edeae4; border-color: rgba(60,45,20,0.12); color: #1c1a18;
+}
+[data-theme="light"] .chatbot-input::placeholder { color: #9c9080; }
+[data-theme="light"] .msg.user .msg-bubble {
+  background: rgba(3,105,161,0.10); color: #0c3a5c; border-color: rgba(3,105,161,0.18);
+}
+[data-theme="light"] .msg.assistant .msg-bubble {
+  background: #edeae4; color: #1c1a18; border-color: rgba(60,45,20,0.10);
+}
 
 /* ── Reset ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
