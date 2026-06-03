@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useFloodRisk } from "../hooks/useFloodRisk";
 import { humanizeRainfall } from "../lib/humanize";
 import FloodMap from "../components/FloodMap";
@@ -243,16 +243,23 @@ function AlertPanel({ stations }) {
 }
 
 // StationPanel: full table of ALL real DSDADKI stations with live readings.
-// This replaces the fake zone table as the primary real-data source.
+// Shows top 6 by default; user can expand to see all.
 function StationPanel({ stations }) {
   const { lang } = useApp();
   const isId = lang === "id";
+  const [showAll, setShowAll] = useState(false);
+
   if (!stations || stations.length === 0) return null;
+
+  const PREVIEW = 6;
+  const displayed = showAll ? stations : stations.slice(0, PREVIEW);
+  const hasMore = stations.length > PREVIEW;
+
   return (
     <div className="panel panel-body fade-in">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
         <p className="panel-title" style={{ marginBottom: 0 }}>
-          {isId ? "Stasiun TMA Realtime — DSDADKI" : "TMA Stations Realtime — DSDADKI"}
+          {isId ? "Sensor Ketinggian Air — DSDADKI" : "Water Level Sensors — DSDADKI"}
         </p>
         <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em" }}>● real</span>
       </div>
@@ -260,24 +267,24 @@ function StationPanel({ stations }) {
         <table className="zone-table">
           <thead>
             <tr>
-              <th>{isId ? "Stasiun" : "Station"}</th>
-              <th>TMA (cm)</th>
-              <th>{isId ? "Siaga 1" : "Threshold"}</th>
-              <th>{isId ? "Rasio" : "Ratio"}</th>
+              <th>{isId ? "Pos Pantau" : "Station"}</th>
+              <th>{isId ? "Tinggi Air" : "Water Level"}</th>
+              <th>{isId ? "Ambang" : "Threshold"}</th>
+              <th>{isId ? "Persentase" : "Percent"}</th>
               <th>{isId ? "Status" : "Status"}</th>
             </tr>
           </thead>
           <tbody>
-            {stations.map((s, i) => (
+            {displayed.map((s, i) => (
               <tr key={i}>
                 <td>
                   <span className="zone-name" style={{ fontSize: "0.72rem" }}>{s.nama}</span>
                 </td>
                 <td style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem", color: s.ratio >= 0.75 ? "var(--wsp)" : "var(--text)" }}>
-                  {s.tinggi_air}
+                  {s.tinggi_air} cm
                 </td>
                 <td style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem", color: "var(--muted)" }}>
-                  {s.siaga1}
+                  {s.siaga1} cm
                 </td>
                 <td><ProbBar value={Math.min(s.ratio, 1.0)} /></td>
                 <td><RiskBadge level={stationRiskLevel(s.ratio)} /></td>
@@ -286,10 +293,21 @@ function StationPanel({ stations }) {
           </tbody>
         </table>
       </div>
+      {hasMore && (
+        <button
+          className="btn btn-ghost"
+          onClick={() => setShowAll(v => !v)}
+          style={{ marginTop: "0.75rem", width: "100%", justifyContent: "center" }}
+        >
+          {showAll
+            ? (isId ? "Tampilkan lebih sedikit ↑" : "Show less ↑")
+            : (isId ? `Lihat semua ${stations.length} pos pantau ↓` : `Show all ${stations.length} stations ↓`)}
+        </button>
+      )}
       <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem", color: "var(--muted-2)" }}>
         {isId
-          ? "● Data sensor pintu air & pos pantau DSDADKI · Rasio = TMA / ambang siaga-1 · Diperbarui tiap 15 menit"
-          : "● DSDADKI water gate & monitoring station data · Ratio = TMA / siaga-1 threshold · Updated every 15 min"}
+          ? "● Sensor pintu air & pos pantau DSDADKI · Persentase = Tinggi Air ÷ Ambang Siaga 1 · Update tiap 15 menit"
+          : "● DSDADKI water gate & monitoring station sensors · Percent = Water Level ÷ Siaga-1 Threshold · Updates every 15 min"}
       </p>
     </div>
   );
@@ -365,21 +383,21 @@ function SensorStrip({ riskData }) {
       )}
 
       {riskData.temperature !== null && (
-        <div className="sensor-chip">
+        <div className="sensor-chip secondary">
           <span className="sensor-chip-label">{isId ? "Suhu" : "Temp"}</span>
           <span className="sensor-chip-value">{riskData.temperature?.toFixed(1)}°C</span>
         </div>
       )}
       {riskData.humidity !== null && (
-        <div className="sensor-chip">
+        <div className="sensor-chip secondary">
           <span className="sensor-chip-label">{isId ? "Kelembapan" : "Humidity"}</span>
           <span className="sensor-chip-value">{Math.round(riskData.humidity)}%</span>
         </div>
       )}
 
-      {/* 3h accumulation — more immediate than 6h for sudden rain events */}
+      {/* 3h accumulation */}
       {acc3h != null && acc3h > 0 && (
-        <div className="sensor-chip">
+        <div className="sensor-chip secondary">
           <span className="sensor-chip-label">{isId ? "Akum. 3j" : "3h Accum"}</span>
           <span className="sensor-chip-value" style={{ color: acc3h >= 15 ? "var(--wsp)" : undefined }}>
             {acc3h.toFixed(1)} mm
@@ -387,7 +405,7 @@ function SensorStrip({ riskData }) {
         </div>
       )}
       {riskData.rainfallAcc6h != null && riskData.rainfallAcc6h > 0 && (
-        <div className="sensor-chip">
+        <div className="sensor-chip secondary">
           <span className="sensor-chip-label">{isId ? "Akum. 6j" : "6h Accum"}</span>
           <span className="sensor-chip-value" style={{ color: riskData.rainfallAcc6h >= 20 ? "var(--wsp)" : undefined }}>
             {riskData.rainfallAcc6h} mm
@@ -395,9 +413,9 @@ function SensorStrip({ riskData }) {
         </div>
       )}
 
-      {/* Rainfall trend: positive = rain intensifying */}
+      {/* Rainfall trend */}
       {rfTrend != null && Math.abs(rfTrend) >= 1 && (
-        <div className="sensor-chip">
+        <div className="sensor-chip secondary">
           <span className="sensor-chip-label">{isId ? "Tren Hujan" : "Rain Trend"}</span>
           <span className="sensor-chip-value" style={{ color: rfTrend > 0 ? "var(--wsp)" : "var(--safe)" }}>
             {rfTrend > 0 ? `↑ +${rfTrend.toFixed(1)}` : `↓ ${rfTrend.toFixed(1)}`} mm/j
@@ -423,7 +441,7 @@ function SensorStrip({ riskData }) {
 
       {/* Monsoon season context */}
       {riskData.monsoonSeason === 1 && (
-        <div className="sensor-chip">
+        <div className="sensor-chip secondary">
           <span className="sensor-chip-label">{isId ? "Musim" : "Season"}</span>
           <span className="sensor-chip-value" style={{ color: "var(--wsp)" }}>
             {isId ? "Hujan" : "Wet"}
@@ -445,7 +463,7 @@ function SensorStrip({ riskData }) {
 
       {/* OOD badge — only when WLR < 0.75 (high WLR suppressed at backend) */}
       {riskData.isOutlier && (riskData.waterLevelRatio ?? 0) < 0.75 && (
-        <div className="sensor-chip sensor-chip-warn">
+        <div className="sensor-chip sensor-chip-warn secondary">
           <span className="sensor-chip-label">OOD</span>
           <span className="sensor-chip-value" style={{ color: "var(--wsp)" }}>
             {isId ? "Anomali" : "Anomaly"}
@@ -491,6 +509,106 @@ function RecommendationsPanel({ alertZones, recommendedActions = [] }) {
             {a.label}
           </button>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Status Hero — the FIRST thing user sees: "apakah ada risiko banjir?" ── */
+function StatusHero({ riskData }) {
+  const { lang } = useApp();
+  const isId = lang === "id";
+
+  const level    = riskData?.level ?? "waspada";
+  const score    = riskData?.riskScore ?? 0;
+  const wlr      = riskData?.waterLevelRatio;
+  const rainfall = riskData?.rainfall ?? 0;
+  const riskTrend = riskData?.trendState?.risk_trend;
+  const snapshotFetchedAt = riskData?.snapshotFetchedAt;
+
+  const cfgMap = {
+    aman: {
+      label: isId ? "Aman" : "Safe",
+      color: "var(--safe)", bg: "var(--safe-soft)", border: "var(--safe-border)",
+      desc: isId
+        ? "Jakarta saat ini aman dari risiko banjir. Tidak ada tanda-tanda mengkhawatirkan."
+        : "Jakarta is currently safe from flood risk. No concerning signs.",
+    },
+    waspada: {
+      label: isId ? "Waspada" : "Watch",
+      color: "var(--wsp)", bg: "var(--wsp-soft)", border: "var(--wsp-border)",
+      desc: isId
+        ? "Ada tanda awal yang perlu diperhatikan. Pantau ketinggian air secara berkala."
+        : "Early signs worth monitoring. Check water levels periodically.",
+    },
+    siaga: {
+      label: isId ? "Siaga" : "Alert",
+      color: "var(--s2)", bg: "var(--s2-soft)", border: "var(--s2-border)",
+      desc: isId
+        ? "Ketinggian air cukup tinggi dan perlu diwaspadai. Siapkan tas darurat dan terus pantau perkembangan."
+        : "Water levels are elevated. Prepare an emergency bag and keep monitoring.",
+    },
+    bahaya: {
+      label: isId ? "Bahaya!" : "Danger!",
+      color: "var(--s1)", bg: "var(--s1-soft)", border: "var(--s1-border)",
+      desc: isId
+        ? "KONDISI KRITIS! Ikuti instruksi BPBD segera. Bersiap untuk evakuasi sekarang."
+        : "CRITICAL CONDITIONS! Follow BPBD instructions immediately. Prepare to evacuate now.",
+    },
+  };
+  const cfg = cfgMap[level] ?? cfgMap.waspada;
+
+  let snapTimeStr = null;
+  if (snapshotFetchedAt) {
+    const wib = new Date(new Date(snapshotFetchedAt).getTime() + 7 * 60 * 60 * 1000);
+    snapTimeStr = `${String(wib.getUTCHours()).padStart(2,"0")}:${String(wib.getUTCMinutes()).padStart(2,"0")}`;
+  }
+
+  const trendLabel = riskTrend === "increasing"
+    ? (isId ? "↑ Naik" : "↑ Rising")
+    : riskTrend === "decreasing"
+    ? (isId ? "↓ Turun" : "↓ Falling")
+    : (isId ? "→ Stabil" : "→ Stable");
+  const trendColor = riskTrend === "increasing" ? "var(--wsp)" : riskTrend === "decreasing" ? "var(--safe)" : "var(--muted)";
+
+  return (
+    <div className="status-hero fade-in" style={{
+      background: cfg.bg,
+      border: `1px solid ${cfg.border}`,
+      borderLeft: `4px solid ${cfg.color}`,
+    }}>
+      <div className="status-hero-main">
+        <div style={{
+          fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem",
+          color: cfg.color, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.25rem",
+        }}>
+          {isId ? "STATUS JAKARTA" : "JAKARTA STATUS"}
+          {snapTimeStr && <span style={{ opacity: 0.65, marginLeft: "0.5rem" }}>· {snapTimeStr} WIB</span>}
+        </div>
+        <div className="status-hero-level" style={{ color: cfg.color }}>{cfg.label}</div>
+        <p className="status-hero-desc">{cfg.desc}</p>
+      </div>
+      <div className="status-hero-stats">
+        {wlr != null && (
+          <div className="hero-stat">
+            <div className="hero-stat-value" style={{ color: cfg.color }}>{Math.round(wlr * 100)}%</div>
+            <div className="hero-stat-label">{isId ? "Ketinggian Air" : "Water Level"}</div>
+          </div>
+        )}
+        <div className="hero-stat">
+          <div className="hero-stat-value" style={{ color: cfg.color }}>{score}</div>
+          <div className="hero-stat-label">{isId ? "Skor Risiko" : "Risk Score"}</div>
+        </div>
+        <div className="hero-stat">
+          <div className="hero-stat-value" style={{ color: trendColor, fontSize: "1.1rem" }}>{trendLabel}</div>
+          <div className="hero-stat-label">{isId ? "Tren Risiko" : "Risk Trend"}</div>
+        </div>
+        {rainfall > 0 && (
+          <div className="hero-stat">
+            <div className="hero-stat-value" style={{ color: "var(--wsp)" }}>{Math.round(rainfall)}</div>
+            <div className="hero-stat-label">mm/jam</div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -697,6 +815,9 @@ export default function Home({ setRiskContext, riskLevel }) {
           </button>
         </div>
       </div>
+
+      {/* Status Hero — plain-language summary visible immediately */}
+      <StatusHero riskData={riskData} />
 
       {/* 4 Metric cards — all real data */}
       <MetricsRow siaga1={realSiaga1} siaga2={realSiaga2} totalStations={totalStations} score={score} rainfall={riskData?.rainfall} />

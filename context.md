@@ -14,7 +14,7 @@
 | ML | XGBoost 3.2.0 + scikit-learn 1.8.0 (AUC 0.945, ECE 0.196) |
 | LLM | Groq llama-3.3-70b-versatile (primary) · Anthropic Claude (explain endpoint) |
 | CrewAI | crewai 1.14.0 + litellm 1.87.0 |
-| Deploy | Railway (backend) · Vercel (frontend) |
+| Deploy | Fly.io (backend) · Vercel (frontend) |
 
 ---
 
@@ -218,7 +218,7 @@ L4 TREND       — tren naik sustained → WARNING→DANGER
 ## Backend bug fixes yang penting (session ini)
 
 ### `db/psycopg2_connection.py`
-- `override=True` → `override=False` di `load_dotenv` (Railway env vars tidak ditimpa .env lokal)
+- `override=True` → `override=False` di `load_dotenv` (Fly.io env vars tidak ditimpa .env lokal)
 - Password URL-encoded di DSN string (`urllib.parse.quote`) — password dengan karakter special (@#?) tidak lagi rusak koneksi
 - `pooled_connection()` sekarang rollback transaction pada exception sebelum return ke pool — mencegah open transaction bocor ke caller berikutnya
 
