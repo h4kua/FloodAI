@@ -23,6 +23,28 @@ def _classify(probability: float, thresholds: dict) -> str:
     return "DANGER"
 
 
+def _apply_hydro_override(risk_level: str, probability: float, water_level_ratio: float) -> tuple[str, float]:
+    """
+    Rule-based safety floor that mirrors the L1/L1.8 hierarchy in decision_engine.py.
+    The ML model was trained when TMA data was often unavailable, so it underestimates
+    risk when water levels are high. These overrides prevent the model from returning
+    SAFE when physical sensors indicate otherwise.
+    """
+    if water_level_ratio >= 1.0:
+        # Water above SIAGA-1 danger threshold → always DANGER
+        return "DANGER", max(probability, 0.92)
+    if water_level_ratio >= 0.90:
+        # L1 SIAGA: ratio ≥ 0.90 → at least WARNING
+        if risk_level == "SAFE":
+            return "WARNING", max(probability, 0.56)
+        return risk_level, max(probability, 0.56)
+    if water_level_ratio >= 0.75:
+        # L1.8 HYDRO_FLOOR: ratio ≥ 0.75 → at least WARNING (mirrors decision_engine.py)
+        if risk_level == "SAFE":
+            return "WARNING", max(probability, 0.35)
+    return risk_level, probability
+
+
 def _risk_interpretation(risk_level, diagnostics):
     bmkg_source = diagnostics.get("bmkg_source", "no_alert")
     temporal_ready = diagnostics.get("temporal_features_ready", False)
@@ -114,6 +136,9 @@ def predict_realtime_native(
     ood_score = float(ood_detector.decision_function(scaled)[0])
     ood_label = int(ood_detector.predict(scaled)[0] == -1)
     risk_level = _classify(probability, thresholds)
+
+    water_level_ratio = float(features.iloc[0].get("water_level_ratio", 0.0))
+    risk_level, probability = _apply_hydro_override(risk_level, probability, water_level_ratio)
 
     result = {
         "model_variant": "realtime_native",

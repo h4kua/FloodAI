@@ -340,7 +340,23 @@ def _add_temporal_columns(current_row, history):
     rainfall_roll3_mean = sum(rolling_values) / max(len(rolling_values), 1)
 
     water_level_lag_1 = water_history[-1] if len(water_history) >= 1 else current_row["water_level_ratio"]
-    water_level_delta = current_row["water_level_ratio"] - water_level_lag_1
+
+    # Guard: if the lag comes from a stale "broken-scraper" period (consecutive 0.0s)
+    # the computed delta would be artificially huge and trigger false OOD.
+    # Reset lag_1 to current so delta = 0 rather than poisoning the feature vector.
+    _MAX_REALISTIC_DELTA = 0.40
+    _STALE_LAG_THRESHOLD = 0.05
+    current_wlr = current_row["water_level_ratio"]
+    if (
+        water_level_lag_1 < _STALE_LAG_THRESHOLD
+        and current_wlr > _STALE_LAG_THRESHOLD
+        and abs(current_wlr - water_level_lag_1) > _MAX_REALISTIC_DELTA
+    ):
+        water_level_lag_1 = current_wlr
+
+    water_level_delta = current_wlr - water_level_lag_1
+    # Clamp delta to physically realistic range for 15-min interval
+    water_level_delta = max(-_MAX_REALISTIC_DELTA, min(_MAX_REALISTIC_DELTA, water_level_delta))
 
     current_row.update(
         {
