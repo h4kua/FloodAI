@@ -175,6 +175,24 @@ def _is_calibrated_station(record: dict) -> bool:
         return True
 
 
+def _valid_jakarta_lat(raw) -> "float | None":
+    """Return lat only if it falls within Jakarta admin bounds, else None."""
+    try:
+        v = float(raw or 0)
+        return v if -6.6 <= v <= -5.8 else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _valid_jakarta_lon(raw) -> "float | None":
+    """Return lon only if it falls within Jakarta admin bounds, else None."""
+    try:
+        v = float(raw or 0)
+        return v if 106.4 <= v <= 107.2 else None
+    except (TypeError, ValueError):
+        return None
+
+
 def _is_pump_station(record: dict) -> bool:
     """
     Return True for pumping-infrastructure stations (name starts with "Pompa").
@@ -623,6 +641,9 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
                         3,
                     ),
                     "status_siaga": str(r.get("status_siaga") or "Normal"),
+                    # Validated coordinates — None when outside Jakarta bounds or zero
+                    "lat": _valid_jakarta_lat(r.get("latitude")),
+                    "lon": _valid_jakarta_lon(r.get("longitude")),
                 }
                 for r in valid_records
                 if _is_calibrated_station(r)

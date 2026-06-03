@@ -712,7 +712,7 @@ export default function Home({ setRiskContext, riskLevel }) {
             <div className="panel-body" style={{ paddingBottom: "0.75rem" }}>
               <p className="panel-title" style={{ marginBottom: 0 }}>{t("map.title")}</p>
             </div>
-            <FloodMap riskScore={score} level={level} />
+            <FloodMap riskScore={score} stations={stations} />
             <div className="map-footer">
               <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.63rem", color: "var(--muted-2)" }}>
                 {t("map.estNote")}
