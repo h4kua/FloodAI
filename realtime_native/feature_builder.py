@@ -175,19 +175,36 @@ def _is_calibrated_station(record: dict) -> bool:
         return True
 
 
+def _is_pump_station(record: dict) -> bool:
+    """
+    Return True for pumping-infrastructure stations (name starts with "Pompa").
+    Their siaga thresholds are OPERATIONAL thresholds for the pump machinery,
+    not public flood-warning thresholds. Including them inflates water_level_ratio
+    because a pump running above capacity looks like 140%+ flood when it may just
+    be tidal backflow or normal pump activation. Canal/gate stations (P.A., P.S.)
+    use flood-warning thresholds and are the correct basis for this feature.
+    Pump station readings are still captured in diagnostics for visibility.
+    """
+    name = str(
+        record.get("nama_pintu_air") or record.get("wilayah") or ""
+    ).strip().upper()
+    return name.startswith("POMPA")
+
+
 def _water_level_ratio_from_records(records):
     best_ratio = 0.0
     for record in (records or []):
         current_level = _safe_float(record.get("tinggi_air"))
         # Skip stations with non-standard datum (negative water levels).
-        # Pump/bendung stations use relative datum that cannot be normalized to
-        # the standard Siaga threshold scale. Including them contaminates the
-        # feature vector and suppresses ML probability toward 0.00.
         if current_level < 0:
             continue
-        # Skip uncalibrated stations — placeholder thresholds produce near-zero
-        # ratios that bias ML toward SAFE regardless of actual water level.
+        # Skip uncalibrated stations — placeholder thresholds bias ML toward SAFE.
         if not _is_calibrated_station(record):
+            continue
+        # Skip pump stations — their thresholds are operational (pump capacity),
+        # not flood-warning thresholds. One overloaded coastal pump can otherwise
+        # push water_level_ratio to 140%+ while all canal stations read normal.
+        if _is_pump_station(record):
             continue
         thresholds = [
             _safe_float(record.get("siaga1")),
@@ -529,6 +546,15 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
     uncalibrated_count = sum(
         1 for r in valid_records if not _is_calibrated_station(r)
     )
+    # Pump stations excluded from ratio (operational thresholds, not flood thresholds)
+    pump_stations_excluded = [
+        {
+            "nama": str(r.get("nama_pintu_air") or r.get("wilayah") or "unknown"),
+            "tinggi_air": _safe_float(r.get("tinggi_air")),
+        }
+        for r in valid_records
+        if _is_pump_station(r) and _is_calibrated_station(r)
+    ]
     water_level_ratio = _water_level_ratio_from_records(poskobanjir_records)
     bmkg_scores = _bmkg_category_scores_from_alerts(alerts)
 
@@ -571,6 +597,8 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
             "spike_flagged_stations": spike_flagged,
             # Stations with placeholder thresholds excluded from water_level_ratio
             "uncalibrated_stations_excluded_from_ratio": uncalibrated_count,
+            # Pump stations excluded from ratio (operational, not flood-warning thresholds)
+            "pump_stations_excluded_from_ratio": pump_stations_excluded,
         },
         # Momentum scalars (top-level for direct diagnostics consumers).
         "rainfall_trend_mm_h": round(current_row["rainfall_mm"] - _rf_lag1, 4),
