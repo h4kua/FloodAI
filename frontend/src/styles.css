@@ -1205,7 +1205,20 @@ body {
 /* Description */
 .tour-desc {
   font-size: 0.84rem; color: var(--muted);
-  line-height: 1.7; margin: 0 0 1.25rem;
+  line-height: 1.8; margin: 0 0 1.25rem;
+}
+
+/* Highlighted keyword pill inside tour description */
+.tour-hl {
+  display: inline;
+  background: color-mix(in srgb, var(--hl, var(--cyan)) 16%, transparent);
+  color: var(--hl, var(--cyan));
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.83em;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 /* Footer buttons */
@@ -1259,7 +1272,18 @@ body {
 /* Mobile adjustments */
 @media (max-width: 640px) {
   .tour-reopen-btn { bottom: 1rem; left: 1rem; }
-  .tour-spotlight  { display: none; } /* too small to be useful on mobile */
+
+  /* Spotlight on mobile: simpler, bigger padding so small buttons still visible */
+  .tour-spotlight {
+    border-radius: 8px;
+    box-shadow:
+      0 0 0 9999px rgba(0,0,0,0.75),
+      0 0 0 3px rgba(255,255,255,0.6),
+      0 0 0 5px rgba(56,189,248,0.8),
+      0 0 24px rgba(56,189,248,0.5);
+  }
+
   .tour-card-body  { padding: 1.25rem 1.25rem 1.5rem; }
   .tour-title      { font-size: 1rem; }
+  .tour-hl         { white-space: normal; }
 }

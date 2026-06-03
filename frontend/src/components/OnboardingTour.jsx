@@ -50,17 +50,30 @@ const Icons = {
 };
 
 /* ── Rich text helper ───────────────────────────────────── */
-// Wrap **text** in bold, [text] in accent color
+// **bold** → bold white text
+// [text]   → highlighted pill (background + accent color)
 function RichText({ text, accent = "var(--cyan)" }) {
   const parts = text.split(/(\*\*[^*]+\*\*|\[[^\]]+\])/g);
   return (
     <>
       {parts.map((part, i) => {
         if (part.startsWith("**") && part.endsWith("**")) {
-          return <strong key={i} style={{ color: "var(--text)", fontWeight: 600 }}>{part.slice(2, -2)}</strong>;
+          return (
+            <strong key={i} style={{ color: "var(--text)", fontWeight: 700 }}>
+              {part.slice(2, -2)}
+            </strong>
+          );
         }
         if (part.startsWith("[") && part.endsWith("]")) {
-          return <span key={i} style={{ color: accent, fontWeight: 600 }}>{part.slice(1, -1)}</span>;
+          return (
+            <span
+              key={i}
+              className="tour-hl"
+              style={{ "--hl": accent }}
+            >
+              {part.slice(1, -1)}
+            </span>
+          );
         }
         return <span key={i}>{part}</span>;
       })}
@@ -338,18 +351,21 @@ export default function OnboardingTour() {
       {/* Overlay: shown for center steps; spotlight handles bg for targeted steps */}
       {!hasTarget && <div className="tour-overlay" />}
 
-      {/* Spotlight cutout — box-shadow darkens everything outside the rect */}
-      {hasTarget && rect && (
-        <div
-          className="tour-spotlight"
-          style={{
-            top:    rect.top    - 8,
-            left:   rect.left   - 8,
-            width:  rect.width  + 16,
-            height: rect.height + 16,
-          }}
-        />
-      )}
+      {/* Spotlight cutout — box-shadow darkens everything outside, target element visible */}
+      {hasTarget && rect && (() => {
+        const pad = isMobile ? 10 : 8;
+        return (
+          <div
+            className="tour-spotlight"
+            style={{
+              top:    rect.top    - pad,
+              left:   rect.left   - pad,
+              width:  rect.width  + pad * 2,
+              height: rect.height + pad * 2,
+            }}
+          />
+        );
+      })()}
 
       {/* Fallback dark bg when selector not found yet */}
       {hasTarget && !rect && <div className="tour-overlay" />}
