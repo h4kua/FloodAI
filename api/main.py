@@ -560,8 +560,8 @@ app.include_router(chat_router)
 app.include_router(crew_analysis_router)
 
 
-@app.get("/healthz")
-@app.get("/health")
+@app.api_route("/healthz", methods=["GET", "HEAD"])
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def liveness() -> dict:
     result: dict = {
         "status": "ok",
