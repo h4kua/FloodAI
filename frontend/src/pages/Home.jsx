@@ -48,7 +48,12 @@ function getAgentStatuses(level, t) {
   return (map[level] ?? map.waspada).map(a => ({ ...a, action: t(a.actionKey) }));
 }
 
-function deriveZones(riskScore, realRainfall = 0) {
+// waterLevelRatio: real sensor reading from DSDADKI (0–1.5 scale).
+// TMA now tracks real sensor data — when WLR rises, all zone TMA values rise.
+// Per-zone bias (z.bias / 200) preserves flood-frequency differentiation
+// (Kebayoran historically more flood-prone = higher TMA estimate than Cengkareng).
+function deriveZones(riskScore, realRainfall = 0, waterLevelRatio = 0.5) {
+  const wlr = Math.max(0.3, Math.min(1.5, waterLevelRatio));
   return BASE_ZONES.map((z) => {
     const prob = Math.max(0.04, Math.min(0.97, (riskScore + z.bias) / 100));
     let risk_level;
@@ -56,10 +61,13 @@ function deriveZones(riskScore, realRainfall = 0) {
     else if (prob >= 0.55) risk_level = "SIAGA_2";
     else if (prob >= 0.30) risk_level = "WASPADA";
     else risk_level = "NORMAL";
+    // TMA uses real WLR + per-zone historical bias so the value changes when
+    // sensors report rising water, not only when ML probability changes.
+    const wlrBiased = Math.min(1.5, Math.max(0.3, wlr + z.bias / 200));
     return {
       ...z,
       probability: prob,
-      tma: Math.round(z.tma_base * (0.7 + prob * 0.5)),
+      tma: Math.round(z.tma_base * wlrBiased),
       rainfall: realRainfall,
       risk_level,
     };
@@ -247,8 +255,9 @@ function SensorStrip({ riskData }) {
   const isId = lang === "id";
   if (!riskData) return null;
 
-  const wlr = riskData.waterLevelRatio;
-  const wlColor = wlr >= 0.90 ? "var(--s1)" : wlr >= 0.75 ? "var(--wsp)" : "var(--safe)";
+  const wlr   = riskData.waterLevelRatio;
+  const delta = riskData.waterLevelDelta;   // real per-15-min change in WLR
+  const wlColor  = wlr >= 0.90 ? "var(--s1)" : wlr >= 0.75 ? "var(--wsp)" : "var(--safe)";
   const riskTrend = riskData.trendState?.risk_trend;
   const trendLabel = riskTrend === "increasing"
     ? (isId ? "↑ Naik" : "↑ Rising")
@@ -257,14 +266,32 @@ function SensorStrip({ riskData }) {
     : (isId ? "→ Stabil" : "→ Stable");
   const trendColor = riskTrend === "increasing" ? "var(--wsp)" : riskTrend === "decreasing" ? "var(--safe)" : "var(--muted)";
 
+  // Water level delta direction (real 15-min sensor change, not ML trend)
+  const wldSign  = delta != null ? (delta > 0.015 ? "↑" : delta < -0.015 ? "↓" : "→") : null;
+  const wldColor = delta != null
+    ? (delta > 0.015 ? "var(--wsp)" : delta < -0.015 ? "var(--safe)" : "var(--muted)")
+    : "var(--muted)";
+
+  // 3h rainfall accumulation (complementary to 6h already shown)
+  const acc3h = riskData.rainfallAcc3h;
+  // Rainfall trend mm/h (positive = intensifying, negative = easing)
+  const rfTrend = riskData.rainfallTrendMmH;
+
   return (
     <div className="sensor-strip fade-in">
+      {/* Water level — real ratio + direction arrow from sensor delta */}
       {wlr !== null && (
         <div className="sensor-chip">
           <span className="sensor-chip-label">{isId ? "Muka Air" : "Water Level"}</span>
-          <span className="sensor-chip-value" style={{ color: wlColor }}>{Math.round(wlr * 100)}%</span>
+          <span className="sensor-chip-value" style={{ color: wlColor }}>
+            {Math.round(wlr * 100)}%
+            {wldSign && (
+              <span style={{ marginLeft: 3, fontSize: "0.7rem", color: wldColor }}>{wldSign}</span>
+            )}
+          </span>
         </div>
       )}
+
       {riskData.temperature !== null && (
         <div className="sensor-chip">
           <span className="sensor-chip-label">{isId ? "Suhu" : "Temp"}</span>
@@ -277,7 +304,17 @@ function SensorStrip({ riskData }) {
           <span className="sensor-chip-value">{Math.round(riskData.humidity)}%</span>
         </div>
       )}
-      {riskData.rainfallAcc6h !== null && (
+
+      {/* 3h accumulation — more immediate than 6h for sudden rain events */}
+      {acc3h != null && acc3h > 0 && (
+        <div className="sensor-chip">
+          <span className="sensor-chip-label">{isId ? "Akum. 3j" : "3h Accum"}</span>
+          <span className="sensor-chip-value" style={{ color: acc3h >= 15 ? "var(--wsp)" : undefined }}>
+            {acc3h.toFixed(1)} mm
+          </span>
+        </div>
+      )}
+      {riskData.rainfallAcc6h != null && riskData.rainfallAcc6h > 0 && (
         <div className="sensor-chip">
           <span className="sensor-chip-label">{isId ? "Akum. 6j" : "6h Accum"}</span>
           <span className="sensor-chip-value" style={{ color: riskData.rainfallAcc6h >= 20 ? "var(--wsp)" : undefined }}>
@@ -285,20 +322,56 @@ function SensorStrip({ riskData }) {
           </span>
         </div>
       )}
+
+      {/* Rainfall trend: positive = rain intensifying */}
+      {rfTrend != null && Math.abs(rfTrend) >= 1 && (
+        <div className="sensor-chip">
+          <span className="sensor-chip-label">{isId ? "Tren Hujan" : "Rain Trend"}</span>
+          <span className="sensor-chip-value" style={{ color: rfTrend > 0 ? "var(--wsp)" : "var(--safe)" }}>
+            {rfTrend > 0 ? `↑ +${rfTrend.toFixed(1)}` : `↓ ${rfTrend.toFixed(1)}`} mm/j
+          </span>
+        </div>
+      )}
+
       {riskData.bmkgAlerts > 0 && (
         <div className="sensor-chip sensor-chip-warn">
           <span className="sensor-chip-label">BMKG</span>
           <span className="sensor-chip-value" style={{ color: "var(--wsp)" }}>
-            {riskData.bmkgAlerts} {isId ? "alert" : "alert"}
+            {riskData.bmkgAlerts} alert
           </span>
         </div>
       )}
+
       {riskTrend && (
         <div className="sensor-chip">
           <span className="sensor-chip-label">{isId ? "Tren Risiko" : "Risk Trend"}</span>
           <span className="sensor-chip-value" style={{ color: trendColor }}>{trendLabel}</span>
         </div>
       )}
+
+      {/* Monsoon season context */}
+      {riskData.monsoonSeason === 1 && (
+        <div className="sensor-chip">
+          <span className="sensor-chip-label">{isId ? "Musim" : "Season"}</span>
+          <span className="sensor-chip-value" style={{ color: "var(--wsp)" }}>
+            {isId ? "Hujan" : "Wet"}
+          </span>
+        </div>
+      )}
+
+      {/* Anomaly spike — from sensor spike-detection, separate from OOD */}
+      {riskData.anomalyDetected && (
+        <div className="sensor-chip sensor-chip-warn">
+          <span className="sensor-chip-label">{isId ? "Anomali" : "Anomaly"}</span>
+          <span className="sensor-chip-value" style={{ color: "var(--wsp)" }}>
+            {riskData.anomalyType === "spike"
+              ? (isId ? "Spike" : "Spike")
+              : (isId ? "Akumulasi" : "Buildup")}
+          </span>
+        </div>
+      )}
+
+      {/* OOD badge — only when WLR < 0.75 (high WLR suppressed at backend) */}
       {riskData.isOutlier && (riskData.waterLevelRatio ?? 0) < 0.75 && (
         <div className="sensor-chip sensor-chip-warn">
           <span className="sensor-chip-label">OOD</span>
@@ -488,7 +561,7 @@ export default function Home({ setRiskContext, riskLevel }) {
     }
   }, [riskData, setRiskContext]);
 
-  const zones       = useMemo(() => deriveZones(score, riskData?.rainfall ?? 0), [score, riskData?.rainfall]);
+  const zones       = useMemo(() => deriveZones(score, riskData?.rainfall ?? 0, riskData?.waterLevelRatio ?? 0.5), [score, riskData?.rainfall, riskData?.waterLevelRatio]);
   const siaga1Count = zones.filter((z) => z.risk_level === "SIAGA_1").length;
   const siaga2Count = zones.filter((z) => z.risk_level === "SIAGA_2").length;
   const alertZones  = zones.filter((z) => ["SIAGA_1", "SIAGA_2"].includes(z.risk_level));

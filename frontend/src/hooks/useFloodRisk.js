@@ -47,11 +47,21 @@ export function useFloodRisk() {
         recommendedActions: json.recommended_action ?? [],
         isOutlier: json.ood_detection?.is_outlier ?? false,
         bmkgForecast: json.bmkg_forecast ?? [],
-        // ISO timestamp when the sensor snapshot was built (TMA, BMKG, OW).
-        // Distinct from lastUpdated (= when the frontend last called the API).
+        // Sensor snapshot freshness
         snapshotFetchedAt: json.snapshot_fetched_at || null,
-        // Number of active TMA stations feeding the ML model this cycle.
         tmaStationsActive: json.diagnostics?.water_level_records ?? null,
+        // Rainfall accumulation details
+        rainfallAcc3h: json.diagnostics?.rainfall_acc_3h ?? null,
+        rainfallTrendMmH: json.diagnostics?.rainfall_trend_mm_h ?? null,
+        // Trend detail
+        riskDelta1h: json.diagnostics?.trend_state?.risk_delta_1h ?? null,
+        // Anomaly detection from IsolationForest / spike detection
+        anomalyDetected: json.diagnostics?.trend_state?.anomaly_detected ?? false,
+        anomalyType: json.diagnostics?.trend_state?.anomaly_type ?? null,
+        // Seasonal context — 1 = Nov–Mar (wet season), 0 = Apr–Oct (dry)
+        monsoonSeason: json.features?.monsoon_season ?? null,
+        // Temporal feature reliability (false = not enough history yet)
+        temporalFeaturesReady: json.diagnostics?.temporal_features_ready ?? false,
       });
       setLastUpdated(new Date());
     } catch (err) {
