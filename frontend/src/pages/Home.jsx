@@ -478,7 +478,7 @@ function ZoneTable({ zones }) {
 /* ── Page ──────────────────────────────────────────────── */
 export default function Home({ setRiskContext, riskLevel }) {
   const t = useT();
-  const { riskData, loading, error, refresh, lastUpdated } = useFloodRisk();
+  const { riskData, loading, refreshing, error, refresh, lastUpdated } = useFloodRisk();
   const level = riskData?.level ?? riskLevel ?? "waspada";
   const score = riskData?.riskScore ?? 45;
 
@@ -519,7 +519,9 @@ export default function Home({ setRiskContext, riskLevel }) {
               ? t("home.sync", { time: lastUpdated.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) })
               : t("home.syncing")}
           </span>
-          <button className="btn btn-ghost" onClick={refresh}>{t("home.refresh")}</button>
+          <button className="btn btn-ghost" onClick={refresh} disabled={refreshing} style={refreshing ? { opacity: 0.55, cursor: "wait" } : {}}>
+            {refreshing ? "..." : t("home.refresh")}
+          </button>
         </div>
       </div>
 

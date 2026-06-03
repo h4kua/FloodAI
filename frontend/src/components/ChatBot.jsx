@@ -29,11 +29,13 @@ export default function ChatBot({ riskContext = {} }) {
     await sendMessage(text);
   };
 
-  // Status indicator: null = belum ada percobaan, true = AI, false = offline KB
-  const statusDot   = aiOnline === false ? "offline-dot" : "online-dot";
-  const statusLabel = aiOnline === false
-    ? (lang === "en" ? "Offline (KB)" : "Offline (KB)")
-    : (lang === "en" ? "AI Online" : "AI Online");
+  // null = probe in-flight, true = AI ready, false = offline KB
+  const statusDot   = aiOnline === true ? "online-dot" : "offline-dot";
+  const statusLabel = aiOnline === null
+    ? (lang === "en" ? "Connecting..." : "Menghubungkan...")
+    : aiOnline === false
+    ? "Offline (KB)"
+    : "AI Online";
 
   return (
     <div className="chatbot-fab">

@@ -72,6 +72,9 @@ export async function sendToFloodAgent(message, history = [], riskContext = {}, 
 
   // Always attempt the backend — works via Vite proxy in dev (no CORS)
   // and via VITE_API_BASE_URL in production.
+  // 25s timeout matches the backend's Groq timeout so the UI unblocks promptly.
+  const controller = new AbortController();
+  const chatTimer = setTimeout(() => controller.abort(), 25000);
   try {
     const res = await fetch(`${API_BASE}/api/chat`, {
       method: "POST",
@@ -81,6 +84,7 @@ export async function sendToFloodAgent(message, history = [], riskContext = {}, 
         history: history.map((m) => ({ role: m.role, content: m.content })),
         system: SYSTEM_PROMPT,
       }),
+      signal: controller.signal,
     });
 
     if (res.ok) {
@@ -91,8 +95,10 @@ export async function sendToFloodAgent(message, history = [], riskContext = {}, 
     // Non-ok HTTP response — fall through to offline KB
     console.warn("[deFlood] chat backend returned", res.status);
   } catch (err) {
-    // Network error (backend not running, CORS blocked, etc.)
+    // Network error, timeout (AbortError), CORS blocked, etc.
     console.warn("[deFlood] chat backend unreachable:", err?.message ?? err);
+  } finally {
+    clearTimeout(chatTimer);
   }
 
   // Offline fallback: keyword matching

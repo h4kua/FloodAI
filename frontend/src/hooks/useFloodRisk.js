@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 const POLL_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
@@ -6,17 +6,16 @@ const POLL_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 export function useFloodRisk() {
   const [riskData, setRiskData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
+  const isInitialLoad = useRef(true);
 
-  const fetchRisk = useCallback(async () => {
+  const fetchRisk = useCallback(async (manual = false) => {
     setError(null);
+    if (manual) setRefreshing(true);
     try {
-      // Use relative path when API_BASE is empty so the Vite dev proxy
-      // forwards the request to the backend (no CORS issues in dev).
-      // In production, VITE_API_BASE_URL is the full backend URL.
       const url = `${API_BASE}/predict/realtime-native`;
-
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Server membalas ${res.status}`);
       const json = await res.json();
@@ -35,19 +34,15 @@ export function useFloodRisk() {
           return v > 0 && v < 1 ? 1 : Math.round(v);
         })(),
         interpretation: json.risk_interpretation ?? "",
-        // Sensor readings from feature vector
         humidity: json.features?.humidity_pct ?? null,
         temperature: json.features?.temperature_c ?? null,
         waterLevelRatio: json.features?.water_level_ratio ?? null,
         waterLevelDelta: json.features?.water_level_delta ?? null,
-        // Diagnostic context
         rainfallAcc6h: json.diagnostics?.rainfall_acc_6h ?? null,
         bmkgAlerts: json.diagnostics?.bmkg_alerts_total ?? 0,
         trendState: json.diagnostics?.trend_state ?? null,
-        // Model output
         recommendedActions: json.recommended_action ?? [],
         isOutlier: json.ood_detection?.is_outlier ?? false,
-        // BMKG weather forecast (next 4 slots from cuaca.json)
         bmkgForecast: json.bmkg_forecast ?? [],
       });
       setLastUpdated(new Date());
@@ -60,14 +55,18 @@ export function useFloodRisk() {
       }
     } finally {
       setLoading(false);
+      setRefreshing(false);
+      isInitialLoad.current = false;
     }
   }, []);
 
+  const refresh = useCallback(() => fetchRisk(true), [fetchRisk]);
+
   useEffect(() => {
     fetchRisk();
-    const interval = setInterval(fetchRisk, POLL_INTERVAL_MS);
+    const interval = setInterval(() => fetchRisk(false), POLL_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [fetchRisk]);
 
-  return { riskData, loading, lastUpdated, error, refresh: fetchRisk };
+  return { riskData, loading, refreshing, lastUpdated, error, refresh };
 }

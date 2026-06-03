@@ -1,6 +1,9 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import re
 import xml.etree.ElementTree as ET
+
+# BMKG cuaca.json uses Jakarta local time (WIB = UTC+7). Store the offset once.
+_JAKARTA_TZ = timezone(timedelta(hours=7))
 
 from services.bmkg_filter import filter_jakarta_bmkg_alerts
 
@@ -49,8 +52,14 @@ def parse_poskobanjir_json(json_data: list) -> list:
 
 def parse_bmkg_cuaca(json_data: dict) -> list:
     """Extract upcoming forecast entries for DKI Jakarta (adm1=31) from cuaca.json.
-    Returns the next 4 forecast periods sorted by local_datetime."""
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    Returns the next 4 forecast periods sorted by local_datetime.
+
+    local_datetime from BMKG is Jakarta local time (WIB = UTC+7). We must convert
+    to UTC before comparing with now() to avoid showing past slots as upcoming.
+    Without this fix, a slot at 18:00 WIB (past) compares against 14:00 UTC and
+    appears future, leaking up to 7 stale hours of forecasts onto the dashboard.
+    """
+    now_utc = datetime.now(timezone.utc)
     entries = []
     for area in json_data.get("data", []):
         lokasi = area.get("lokasi", {})
@@ -59,10 +68,12 @@ def parse_bmkg_cuaca(json_data: dict) -> list:
         for item in area.get("cuaca", []):
             dt_str = item.get("local_datetime", "")
             try:
-                dt = datetime.fromisoformat(dt_str)
-            except ValueError:
+                local_dt = datetime.fromisoformat(dt_str)
+                # Attach Jakarta timezone so UTC comparison is correct
+                utc_dt = local_dt.replace(tzinfo=_JAKARTA_TZ)
+            except (ValueError, AttributeError):
                 continue
-            if dt >= now:
+            if utc_dt >= now_utc:
                 entries.append({
                     "local_datetime": dt_str,
                     "weather_desc": item.get("weather_desc", ""),

@@ -10,13 +10,23 @@ const STEP_KEYS = ["1","2","3","4","5"];
 async function geocodeAddress(address) {
   const q = encodeURIComponent(address + ", Jakarta, Indonesia");
   const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=id`;
-  const res = await fetch(url, {
-    headers: { "Accept-Language": "id", "User-Agent": "deFlood.ai/1.0" },
-  });
-  if (!res.ok) throw new Error("Geocoding gagal");
-  const data = await res.json();
-  if (!data.length) throw new Error("Alamat tidak ditemukan. Coba tambahkan kelurahan atau kecamatan.");
-  return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const res = await fetch(url, {
+      headers: { "Accept-Language": "id", "User-Agent": "deFlood.ai/1.0" },
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error("Geocoding gagal");
+    const data = await res.json();
+    if (!data.length) throw new Error("Alamat tidak ditemukan. Coba tambahkan kelurahan atau kecamatan.");
+    return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+  } catch (err) {
+    if (err.name === "AbortError") throw new Error("Pencarian alamat timeout. Coba lagi.");
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function formatSuggestion(s) {
@@ -53,15 +63,20 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const fetchSuggestions = async (query) => {
     const q = encodeURIComponent(query + " Jakarta");
     const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=6&countrycodes=id&addressdetails=1`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000);
     try {
       const res = await fetch(url, {
         headers: { "Accept-Language": "id", "User-Agent": "deFlood.ai/1.0" },
+        signal: controller.signal,
       });
       const data = await res.json();
       setSuggestions(data.slice(0, 6));
       setShowSugg(data.length > 0);
     } catch {
       setSuggestions([]);
+    } finally {
+      clearTimeout(timer);
     }
   };
 
