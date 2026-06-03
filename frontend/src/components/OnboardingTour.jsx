@@ -94,8 +94,8 @@ const STEPS = (id) => [
   },
   {
     key: "lang",
-    selector: ".topbar-toggle:first-of-type",
-    position: "bottom-left",
+    selector: "button[title='Switch language']",
+    position: "below-right",
     Icon: IconGlobe,
     accent: "muted",
     title: id ? "Ganti Bahasa" : "Language Toggle",
@@ -105,8 +105,8 @@ const STEPS = (id) => [
   },
   {
     key: "theme",
-    selector: ".topbar-toggle:last-of-type",
-    position: "bottom-left",
+    selector: "button[title='Toggle theme']",
+    position: "below-right",
     Icon: IconSun,
     accent: "muted",
     title: id ? "Mode Tampilan" : "Display Mode",
@@ -159,25 +159,28 @@ function useTargetRect(selector, active) {
 /* ── Card positioning ───────────────────────────────────── */
 function cardStyle(position, rect) {
   const GAP = 14;
-  const W = 360;
+  const W = 340;
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
   if (position === "center" || !rect) {
     return { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: W };
   }
+  // Below element, horizontally centred on element
   if (position === "bottom") {
     const left = Math.max(GAP, Math.min(rect.left + rect.width / 2 - W / 2, vw - W - GAP));
     return { position: "fixed", top: rect.top + rect.height + GAP, left, width: W };
   }
-  if (position === "bottom-left") {
-    const left = Math.max(GAP, Math.min(rect.right - W, vw - W - GAP));
-    return { position: "fixed", top: rect.top + rect.height + GAP, left, width: W };
+  // Below element, right-edge of card aligned to right-edge of element
+  if (position === "below-right") {
+    const right = Math.max(GAP, vw - rect.right);
+    return { position: "fixed", top: rect.top + rect.height + GAP, right, width: W };
   }
+  // Above element from bottom, right-aligned (chatbot)
   if (position === "top-left") {
     const bottom = vh - rect.top + GAP;
-    const right = vw - rect.right + rect.width / 2 - W / 2;
-    return { position: "fixed", bottom: Math.max(GAP, bottom), right: Math.max(GAP, right), width: W };
+    const right = Math.max(GAP, vw - rect.right - rect.width / 2 + W / 2);
+    return { position: "fixed", bottom: Math.max(GAP, bottom), right: Math.max(GAP, vw - rect.right), width: W };
   }
   return { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: W };
 }
@@ -286,12 +289,19 @@ export default function OnboardingTour() {
 
   return (
     <>
-      <div className="tour-overlay" />
+      {/* Overlay only for center steps — spotlight's box-shadow handles it otherwise */}
+      {!rect && <div className="tour-overlay" />}
 
+      {/* Spotlight creates the dark backdrop via box-shadow + exposes the target */}
       {rect && (
         <div
           className="tour-spotlight"
-          style={{ top: rect.top - 7, left: rect.left - 7, width: rect.width + 14, height: rect.height + 14 }}
+          style={{
+            top: rect.top - 8,
+            left: rect.left - 8,
+            width: rect.width + 16,
+            height: rect.height + 16,
+          }}
         />
       )}
 
