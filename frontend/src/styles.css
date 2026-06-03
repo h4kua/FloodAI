@@ -50,54 +50,65 @@
 
 /* ── Light theme ────────────────────────────────────────── */
 /*
- * Light: biru-putih bersih — tidak flat abu-abu, sedikit "airy".
- * Panel putih bersih, background off-white biru terang.
+ * Light: tone-down silau — background warm grey-blue, panel off-white.
+ * Tidak lagi pure white agar tidak menyilaukan.
  */
 [data-theme="light"] {
-  --bg:      #f0f6ff;   /* light blue-white — tidak flat */
-  --panel:   #ffffff;
-  --panel-2: #e8f0fc;
-  --panel-3: #dce8f8;
-  --line:    rgba(30,60,120,0.09);
-  --line-2:  rgba(30,60,120,0.16);
-  --text:    #1a2747;   /* dark navy — kontras lebih nyaman dari hitam penuh */
-  --muted:   #4d6490;
-  --muted-2: #8ba4cc;
-  --cyan:        #0284c7;   /* sky-600 */
-  --cyan-soft:   rgba(2,132,199,0.09);
-  --cyan-border: rgba(2,132,199,0.22);
-  --cyan-glow:   0 0 20px rgba(2,132,199,0.18);
-  --s1:       #e11d48;   /* rose-600 */
-  --s1-soft:  rgba(225,29,72,0.08);
-  --s1-border:rgba(225,29,72,0.24);
-  --s1-glow:  0 0 20px rgba(225,29,72,0.18);
-  --s2:       #ea580c;   /* orange-600 */
-  --s2-soft:  rgba(234,88,12,0.08);
-  --s2-border:rgba(234,88,12,0.22);
-  --wsp:       #d97706;   /* amber-600 */
-  --wsp-soft:  rgba(217,119,6,0.08);
-  --wsp-border:rgba(217,119,6,0.22);
-  --safe:       #059669;   /* emerald-600 */
-  --safe-soft:  rgba(5,150,105,0.08);
-  --safe-border:rgba(5,150,105,0.22);
-  --safe-glow:  0 0 16px rgba(5,150,105,0.22);
-  --shadow:    0 4px 20px rgba(20,40,100,0.1);
-  --shadow-sm: 0 2px 8px rgba(20,40,100,0.08);
+  --bg:      #e8edf5;   /* warm grey-blue — lebih redup dari sebelumnya */
+  --panel:   #f2f5fb;   /* off-white dengan hint biru — bukan pure white */
+  --panel-2: #e4eaf5;   /* panel elevated, sedikit lebih gelap */
+  --panel-3: #d8e2f2;   /* deepest elevation */
+  --line:    rgba(30,60,120,0.10);
+  --line-2:  rgba(30,60,120,0.18);
+  --text:    #1e2d47;   /* dark navy */
+  --muted:   #526890;
+  --muted-2: #8ca6ce;
+  --cyan:        #0369a1;   /* sky-700 — sedikit lebih gelap agar tidak terlalu terang */
+  --cyan-soft:   rgba(3,105,161,0.09);
+  --cyan-border: rgba(3,105,161,0.22);
+  --cyan-glow:   0 0 20px rgba(3,105,161,0.16);
+  --s1:       #be123c;   /* rose-700 */
+  --s1-soft:  rgba(190,18,60,0.08);
+  --s1-border:rgba(190,18,60,0.22);
+  --s1-glow:  0 0 20px rgba(190,18,60,0.15);
+  --s2:       #c2410c;   /* orange-700 */
+  --s2-soft:  rgba(194,65,12,0.08);
+  --s2-border:rgba(194,65,12,0.20);
+  --wsp:       #b45309;   /* amber-700 */
+  --wsp-soft:  rgba(180,83,9,0.08);
+  --wsp-border:rgba(180,83,9,0.20);
+  --safe:       #047857;   /* emerald-700 */
+  --safe-soft:  rgba(4,120,87,0.08);
+  --safe-border:rgba(4,120,87,0.20);
+  --safe-glow:  0 0 16px rgba(4,120,87,0.18);
+  --shadow:    0 2px 12px rgba(20,40,100,0.08);
+  --shadow-sm: 0 1px 6px rgba(20,40,100,0.06);
 }
 [data-theme="light"] body { background: var(--bg); }
 [data-theme="light"] #root {
   background:
-    radial-gradient(circle at 0% 0%,   rgba(225,29,72,0.04)  0%, transparent 30%),
-    radial-gradient(circle at 100% 0%, rgba(2,132,199,0.04)  0%, transparent 30%),
+    radial-gradient(circle at 0% 0%,   rgba(190,18,60,0.025)  0%, transparent 35%),
+    radial-gradient(circle at 100% 0%, rgba(3,105,161,0.025)  0%, transparent 35%),
     var(--bg);
 }
 [data-theme="light"] .topbar {
-  background: rgba(240,246,255,0.94);
-  border-bottom-color: rgba(30,60,120,0.12);
+  background: rgba(232,237,245,0.96);
+  border-bottom-color: rgba(30,60,120,0.11);
 }
 [data-theme="light"] .panel {
-  box-shadow: 0 1px 6px rgba(20,40,100,0.07);
+  box-shadow: 0 1px 4px rgba(20,40,100,0.06);
 }
+/* Reduce metric-card gradient brightness in light mode */
+[data-theme="light"] .metric-card {
+  background: linear-gradient(160deg, var(--panel) 0%, var(--panel-2) 100%);
+}
+/* Tone down suggestions dropdown */
+[data-theme="light"] .suggestions-dropdown {
+  background: rgba(232,237,245,0.98);
+  border-color: rgba(30,60,120,0.12);
+  box-shadow: 0 8px 32px rgba(20,40,100,0.12);
+}
+[data-theme="light"] .suggestion-item:hover { background: rgba(3,105,161,0.06); }
 
 /* ── Reset ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

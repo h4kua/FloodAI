@@ -643,9 +643,12 @@ class PerceptionAgent:
                 station_dt = datetime.fromisoformat(
                     str(tanggal).replace("Z", "+00:00")
                 )
+                if station_dt.tzinfo is None:
+                    station_dt = station_dt.replace(tzinfo=timezone.utc)
             except (ValueError, TypeError):
                 continue
-            age_hours = (reference_dt - station_dt).total_seconds() / 3600.0
+            ref = reference_dt if reference_dt.tzinfo else reference_dt.replace(tzinfo=timezone.utc)
+            age_hours = (ref - station_dt).total_seconds() / 3600.0
             if age_hours > _STATION_STALE_HOURS:
                 station_name = (
                     s.get("nama_pintu_air") or s.get("name") or

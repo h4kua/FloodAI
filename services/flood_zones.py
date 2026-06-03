@@ -27,14 +27,16 @@ _ALL_ZONES: list[dict] = [
     {
         "id": "ciliwung_bukit_duri",
         "lat": -6.2254, "lon": 106.8440,
-        "label": "Bukit Duri (Ciliwung bank)",
+        "label": "Bukit Duri (Ciliwung bank) [risk 0.92]",
         "categories": ["hydro"],
+        "risk_score": 0.92,
     },
     {
         "id": "ciliwung_kampung_melayu",
         "lat": -6.2416, "lon": 106.8676,
-        "label": "Kampung Melayu / Cawang",
+        "label": "Kampung Melayu / Cawang [risk 0.95]",
         "categories": ["hydro"],
+        "risk_score": 0.95,
     },
     {
         "id": "penjaringan",
@@ -45,8 +47,9 @@ _ALL_ZONES: list[dict] = [
     {
         "id": "pluit",
         "lat": -6.1195, "lon": 106.7945,
-        "label": "Pluit (coastal, North Jakarta)",
+        "label": "Pluit (coastal, North Jakarta) [risk 0.89]",
         "categories": ["hydro", "coastal"],
+        "risk_score": 0.89,
     },
     {
         "id": "grogol",
@@ -68,6 +71,13 @@ _ALL_ZONES: list[dict] = [
         "categories": ["rainfall"],
     },
     {
+        "id": "rawa_buaya",
+        "lat": -6.1350, "lon": 106.7250,
+        "label": "Rawa Buaya (West Jakarta) [risk 0.81]",
+        "categories": ["rainfall"],
+        "risk_score": 0.81,
+    },
+    {
         "id": "kapuk",
         "lat": -6.1261, "lon": 106.7372,
         "label": "Kapuk (West Jakarta)",
@@ -78,6 +88,13 @@ _ALL_ZONES: list[dict] = [
         "lat": -6.1949, "lon": 106.7649,
         "label": "Kebon Jeruk (West Jakarta)",
         "categories": ["rainfall"],
+    },
+    {
+        "id": "kebon_melati",
+        "lat": -6.1876, "lon": 106.8201,
+        "label": "Kebon Melati (Central Jakarta) [risk 0.72]",
+        "categories": ["rainfall"],
+        "risk_score": 0.72,
     },
     {
         "id": "cilincing",

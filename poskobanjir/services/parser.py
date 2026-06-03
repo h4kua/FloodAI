@@ -179,10 +179,30 @@ def _derive_location(weather: dict) -> str:
     return name or "Jakarta, Indonesia"
 
 
+def _get_bmkg_daily_rainfall_context() -> dict:
+    """Load recent BMKG daily rainfall context. Best-effort — returns empty dict on failure."""
+    try:
+        import sys
+        from pathlib import Path
+        _root = Path(__file__).resolve().parents[2]
+        if str(_root) not in sys.path:
+            sys.path.insert(0, str(_root))
+        from services.bmkg_rainfall_context import get_recent_daily_rainfall
+        return get_recent_daily_rainfall()
+    except Exception:
+        return {}
+
+
 def build_realtime_snapshot(
     poskobanjir_records, weather, bmkg_feed, bmkg_alerts, bmkg_forecast=None
 ):
     jakarta_alerts = filter_jakarta_bmkg_alerts(bmkg_alerts)
+    bmkg_daily = _get_bmkg_daily_rainfall_context()
+
+    rain_data = weather.get("rain") or {}
+    ow_rain_1h = rain_data.get("1h", 0.0) or 0.0
+    ow_rain_3h = rain_data.get("3h", 0.0) or 0.0
+
     return {
         "fetched_at_utc": datetime.now(timezone.utc).isoformat(),
         "location": _derive_location(weather),
@@ -195,10 +215,17 @@ def build_realtime_snapshot(
             "total_poskobanjir_records": len(poskobanjir_records),
             "total_bmkg_alerts": len(jakarta_alerts),
             "openweather_location": weather.get("name"),
+            "rain_1h_mm": ow_rain_1h,
+            "rain_3h_mm": ow_rain_3h,
+            "bmkg_daily_yesterday_mm": bmkg_daily.get("yesterday_mm"),
+            "bmkg_daily_7d_avg_mm": bmkg_daily.get("last_7d_avg_mm"),
+            "bmkg_daily_7d_max_mm": bmkg_daily.get("last_7d_max_mm"),
+            "bmkg_rainfall_last_date": bmkg_daily.get("last_available_date"),
         },
         "poskobanjir": poskobanjir_records,
         "openweather": weather,
         "bmkg_feed": bmkg_feed,
         "bmkg_alerts": jakarta_alerts,
         "bmkg_forecast": bmkg_forecast or [],
+        "bmkg_daily_rainfall": bmkg_daily,
     }

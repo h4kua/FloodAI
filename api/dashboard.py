@@ -541,6 +541,23 @@ def _render_dashboard(
     # M5: show 0.0 mm when OpenWeather omits the rain field (not raining)
     rain_1h = snapshot.get("openweather", {}).get("rain", {}).get("1h", 0.0)
     rain_3h = snapshot.get("openweather", {}).get("rain", {}).get("3h", 0.0)
+
+    # BMKG daily rainfall context (from laporan_iklim_harian station data)
+    bmkg_daily = snapshot.get("bmkg_daily_rainfall") or {}
+    _summary = snapshot.get("summary") or {}
+    bmkg_yesterday = _summary.get("bmkg_daily_yesterday_mm") or bmkg_daily.get("yesterday_mm")
+    bmkg_7d_avg = _summary.get("bmkg_daily_7d_avg_mm") or bmkg_daily.get("last_7d_avg_mm")
+    bmkg_7d_max = _summary.get("bmkg_daily_7d_max_mm") or bmkg_daily.get("last_7d_max_mm")
+    bmkg_last_date = _summary.get("bmkg_rainfall_last_date") or bmkg_daily.get("last_available_date")
+
+    rain_context_note = ""
+    if (not rain_1h or rain_1h == 0.0) and bmkg_7d_avg and float(bmkg_7d_avg) > 0:
+        rain_context_note = (
+            f" <span style='color:#d97706;font-size:.85rem;'>"
+            f"&#9888; BMKG 7-hari avg: {bmkg_7d_avg:.1f} mm/hari — "
+            f"hujan sebelumnya menjelaskan kenaikan TMA meski 0mm sekarang</span>"
+        )
+
     if lat_val is not None and lon_val is not None:
         coord_cell = (
             f'<a href="https://maps.google.com/?q={lat_val},{lon_val}" target="_blank">'
@@ -548,12 +565,23 @@ def _render_dashboard(
         )
     else:
         coord_cell = _safe_text(coord)
+
+    _bmkg_yesterday_cell = f"{bmkg_yesterday:.1f} mm" if bmkg_yesterday is not None else "—"
+    _bmkg_7d_cell = (
+        f"avg {bmkg_7d_avg:.1f} mm/hari, max {bmkg_7d_max:.1f} mm/hari"
+        if bmkg_7d_avg is not None else "—"
+    )
     snapshot_summary = (
         f"<table class=\"detail-table\">"
         f"<tr><th>Location</th><td>{location_cell}</td></tr>"
         f"<tr><th>OpenWeather coord</th><td>{coord_cell}</td></tr>"
-        f"<tr><th>Rain 1h (mm)</th><td>{html.escape(str(rain_1h))}</td></tr>"
+        f"<tr><th>Rain 1h (mm)</th><td>{html.escape(str(rain_1h))}{rain_context_note}</td></tr>"
         f"<tr><th>Rain 3h (mm)</th><td>{html.escape(str(rain_3h))}</td></tr>"
+        f"<tr><th>BMKG kemarin (daily)</th><td>{_bmkg_yesterday_cell}</td></tr>"
+        f"<tr><th>BMKG 7-hari terakhir</th>"
+        f"<td>{_bmkg_7d_cell}"
+        f"{(' <span style=\"color:#6b7280;font-size:.8rem;\">(data s.d. ' + html.escape(str(bmkg_last_date)) + ')</span>') if bmkg_last_date else ''}"
+        f"</td></tr>"
         f"<tr><th>Poskobanjir water level</th><td>{html.escape(poskobanjir_level)}</td></tr>"
         f"</table>"
     )

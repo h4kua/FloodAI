@@ -12,6 +12,7 @@ from psycopg2.extras import Json
 
 from api.observability import FEATURE_HISTORY_DB_FAILURE_TOTAL
 from services.bmkg_filter import filter_jakarta_bmkg_alerts
+from services.bmkg_rainfall_context import get_recent_daily_rainfall
 from services.constants import (
     BMKG_CERTAINTY_WEIGHTS,
     BMKG_SEVERITY_WEIGHTS,
@@ -512,6 +513,18 @@ def _snapshot_history_trend_state(history, current_row):
     }
 
 
+def _is_history_stale(history: "pd.DataFrame", now: datetime, stale_hours: float = 24.0) -> bool:
+    """Return True when the most recent history entry is older than stale_hours."""
+    if history.empty or "timestamp" not in history.columns:
+        return True
+    try:
+        last_ts = pd.to_datetime(history["timestamp"].iloc[-1], utc=True)
+        now_ts = pd.Timestamp(now).tz_convert("UTC") if now.tzinfo else pd.Timestamp(now, tz="UTC")
+        return (now_ts - last_ts).total_seconds() / 3600 > stale_hours
+    except Exception:
+        return True
+
+
 def build_realtime_native_features_from_snapshot(snapshot, persist_history=True, *, as_of=None):
     """
     Build the realtime-native feature frame from a snapshot dict.
@@ -589,6 +602,34 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
 
     history = _filter_history_as_of(_load_history(), as_of=as_of)
     current_row = _add_temporal_columns(current_row, history)
+
+    # ── BMKG daily rainfall context ─────────────────────────────────────────
+    # When OpenWeather reports 0mm and feature history is stale, seed lag
+    # features from BMKG daily totals so the model sees recent precipitation
+    # that explains rising TMA levels (time-lag between rain and river rise).
+    bmkg_daily_ctx: dict = {}
+    history_stale = _is_history_stale(history, timestamp)
+    try:
+        bmkg_daily_ctx = get_recent_daily_rainfall(reference_date=timestamp.date())
+        if rainfall_mm == 0.0 and history_stale and bmkg_daily_ctx.get("data_available"):
+            _bmkg_avg = bmkg_daily_ctx.get("last_7d_avg_mm") or 0.0
+            if _bmkg_avg > 0.0:
+                _hourly_seed = round(_bmkg_avg / 24.0, 3)
+                current_row["rainfall_lag_1"] = max(
+                    current_row.get("rainfall_lag_1", 0.0), _hourly_seed
+                )
+                current_row["rainfall_lag_2"] = max(
+                    current_row.get("rainfall_lag_2", 0.0), _hourly_seed
+                )
+                rolling = [
+                    current_row["rainfall_mm"],
+                    current_row["rainfall_lag_1"],
+                    current_row["rainfall_lag_2"],
+                ]
+                current_row["rainfall_roll3_mean"] = round(sum(rolling) / len(rolling), 3)
+    except Exception as _bmkg_exc:
+        logger.debug("bmkg_daily_context_failed (non-fatal): %s", _bmkg_exc)
+
     current_row["hydro_meteorological_index"] = (
         current_row["rainfall_roll3_mean"] * (humidity_pct / 100.0) * (1 + water_level_ratio)
     )
@@ -600,6 +641,8 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
     trend_state = _snapshot_history_trend_state(history, current_row)
     diagnostics = {
         "history_rows_used": int(len(history)),
+        "history_stale": history_stale,
+        "bmkg_daily_context": bmkg_daily_ctx,
         "temporal_features_ready": len(history) >= 2,
         "bmkg_source": "observed_alerts" if alerts else "no_alert",
         "bmkg_alerts_total": len(raw_alerts),

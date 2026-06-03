@@ -204,14 +204,26 @@ export default function About({ riskContext = {} }) {
             <TeamCard
               role={id ? "Anggota Tim" : "Team Member"}
               roleType="member"
-              name="Haikal Helmy"
-              linkedin="https://www.linkedin.com/in/haikal-helmy-875787305"
+              name="Jessen Wijaya Agussalim"
+              linkedin="https://www.linkedin.com/in/jessen-wijaya-agussalim"
             />
             <TeamCard
               role={id ? "Anggota Tim" : "Team Member"}
               roleType="member"
-              name="Jessen Wijaya Agussalim"
-              linkedin="https://www.linkedin.com/in/jessen-wijaya-agussalim"
+              name="Chahniyan Regina Kasih"
+              linkedin="https://www.linkedin.com/in/chahniyan-regina-kasih-227808280"
+            />
+            <TeamCard
+              role={id ? "Anggota Tim" : "Team Member"}
+              roleType="member"
+              name="Christopher Patrick Gunawan"
+              linkedin="https://www.linkedin.com/in/christopherpatrick-gunawan"
+            />
+            <TeamCard
+              role={id ? "Mentor" : "Mentor"}
+              roleType="mentor"
+              name="Haikal Helmy"
+              linkedin="https://www.linkedin.com/in/haikal-helmy-875787305"
             />
             <TeamCard
               role={id ? "Mentor" : "Mentor"}
