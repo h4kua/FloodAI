@@ -1,11 +1,13 @@
 import requests
 
 from config import (
+    BMKG_CUACA_URL,
     BMKG_NOWCAST_DETAIL_URL,
     BMKG_NOWCAST_FEED_URL,
     BMKG_NOWCAST_FEED_FALLBACK_URL,
     OPENWEATHER_API_KEY,
     OPENWEATHER_URL,
+    POSKOBANJIR_JSON_URL,
     POSKOBANJIR_URL,
     TIMEOUT,
 )
@@ -15,6 +17,20 @@ def fetch_text(url):
     response = requests.get(url, timeout=TIMEOUT)
     response.raise_for_status()
     return response.text
+
+
+def fetch_poskobanjir_json() -> list:
+    """Fetch TMA data from the JSON endpoint (primary, more reliable than XML)."""
+    response = requests.get(POSKOBANJIR_JSON_URL, timeout=TIMEOUT)
+    response.raise_for_status()
+    return response.json()
+
+
+def fetch_bmkg_cuaca() -> dict:
+    """Fetch BMKG 10-day weather forecast for DKI Jakarta."""
+    response = requests.get(BMKG_CUACA_URL, timeout=TIMEOUT)
+    response.raise_for_status()
+    return response.json()
 
 
 def fetch_poskobanjir_xml():

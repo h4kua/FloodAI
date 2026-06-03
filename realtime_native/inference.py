@@ -97,6 +97,14 @@ def predict_realtime_native(
     """
     model, scaler, ood_detector, model_card, thresholds = _load_assets()
 
+    # Load snapshot to extract forecast (not used for ML, passed through to response)
+    try:
+        with open(snapshot_path, "r", encoding="utf-8") as f:
+            snapshot_raw = json.load(f)
+        bmkg_forecast = snapshot_raw.get("bmkg_forecast") or []
+    except Exception:
+        bmkg_forecast = []
+
     engineered = build_realtime_native_features_from_file(
         snapshot_path=snapshot_path, persist_history=persist_history, as_of=as_of,
     )
@@ -114,6 +122,7 @@ def predict_realtime_native(
         "risk_interpretation": _risk_interpretation(risk_level, engineered.diagnostics),
         "recommended_action": _recommended_action(risk_level),
         "risk_thresholds": thresholds,
+        "bmkg_forecast": bmkg_forecast,
         "ood_detection": {
             "method": "IsolationForest",
             "score": ood_score,

@@ -351,6 +351,60 @@ function RecommendationsPanel({ alertZones, recommendedActions = [] }) {
   );
 }
 
+const WEATHER_ICON = {
+  "Cerah": "☀", "Cerah Berawan": "⛅", "Berawan": "☁", "Berawan Tebal": "☁",
+  "Udara Kabur": "🌫", "Asap": "🌫", "Hujan Ringan": "🌧", "Hujan Sedang": "🌧",
+  "Hujan Lebat": "⛈", "Hujan Petir": "⛈", "Hujan Es": "🌨",
+};
+
+function ForecastPanel({ forecast }) {
+  const { lang } = useApp();
+  const isId = lang === "id";
+  if (!forecast || forecast.length === 0) return null;
+
+  return (
+    <div className="panel panel-body fade-in">
+      <p className="panel-title">{isId ? "Prakiraan Cuaca BMKG" : "BMKG Weather Forecast"}</p>
+      <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
+        {forecast.map((slot, i) => {
+          const dt = new Date(slot.local_datetime);
+          const timeStr = dt.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+          const dateStr = dt.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+          const icon = WEATHER_ICON[slot.weather_desc] ?? "🌤";
+          const isRain = slot.weather_desc?.toLowerCase().includes("hujan");
+          return (
+            <div key={i} style={{
+              flex: "1 1 120px",
+              background: isRain ? "rgba(0,120,255,0.06)" : "rgba(0,229,160,0.04)",
+              border: `1px solid ${isRain ? "rgba(0,120,255,0.15)" : "var(--border)"}`,
+              borderRadius: "10px",
+              padding: "0.625rem 0.75rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.25rem",
+              minWidth: 0,
+            }}>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)", letterSpacing: "0.06em" }}>
+                {dateStr} · {timeStr}
+              </span>
+              <span style={{ fontSize: "1.25rem" }}>{icon}</span>
+              <span style={{ fontSize: "0.72rem", color: "var(--text)", lineHeight: 1.3, fontWeight: 500 }}>{slot.weather_desc}</span>
+              {slot.tmin != null && (
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted)" }}>
+                  {slot.tmin}–{slot.tmax}°C · {slot.humin}–{slot.humax}%
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)" }}>
+        {isId ? "Sumber: BMKG cuaca.json — DKI Jakarta" : "Source: BMKG cuaca.json — DKI Jakarta"}
+      </p>
+    </div>
+  );
+}
+
 const ZONE_COLS = [
   { key: "zone.zone" },
   { key: "zone.area" },
@@ -513,6 +567,9 @@ export default function Home({ setRiskContext, riskLevel }) {
 
       {/* Zone table */}
       <ZoneTable zones={zones} />
+
+      {/* BMKG weather forecast */}
+      <ForecastPanel forecast={riskData?.bmkgForecast} />
 
       {/* Floating chatbot */}
       <ChatBot riskContext={{ level, rainfall: riskData?.rainfall }} />

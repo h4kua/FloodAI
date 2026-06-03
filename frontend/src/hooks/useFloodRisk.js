@@ -47,6 +47,8 @@ export function useFloodRisk() {
         // Model output
         recommendedActions: json.recommended_action ?? [],
         isOutlier: json.ood_detection?.is_outlier ?? false,
+        // BMKG weather forecast (next 4 slots from cuaca.json)
+        bmkgForecast: json.bmkg_forecast ?? [],
       });
       setLastUpdated(new Date());
     } catch (err) {
