@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from threading import Lock
 from typing import Iterator, Optional
+from urllib.parse import quote as _url_quote
 
 from dotenv import load_dotenv
 import psycopg2
@@ -17,7 +18,9 @@ from psycopg2.pool import ThreadedConnectionPool
 
 if os.getenv("FLOOD_LOAD_DOTENV", "1") == "1":
     from pathlib import Path
-    load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=True)
+    # override=False: deployment env vars (Railway, Fly.io, Docker) take
+    # precedence over .env file. Matches api/main.py load_dotenv behaviour.
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=False)
 
 DB_HOST = os.getenv("DB_HOST")
 
@@ -90,10 +93,19 @@ def _init_pool(config: Psycopg2ConnectionConfig) -> ThreadedConnectionPool:
     if _POOL is None:
         with _POOL_LOCK:
             if _POOL is None:
+                # URL-encode user/password/application_name so special chars
+                # (@ # ? & + space etc.) don't break the DSN parser.
                 _POOL = ThreadedConnectionPool(
                     minconn=int(os.getenv("DB_POOL_MIN", "2")),
                     maxconn=int(os.getenv("DB_POOL_MAX", "20")),
-                    dsn=f"postgresql://{config.user}:{config.password}@{config.host}:{config.port}/{config.database}?sslmode=require&connect_timeout={config.connect_timeout}&application_name={config.application_name}"
+                    dsn=(
+                        f"postgresql://{_url_quote(config.user, safe='')}:"
+                        f"{_url_quote(config.password, safe='')}@"
+                        f"{config.host}:{config.port}/{config.database}"
+                        f"?sslmode=require"
+                        f"&connect_timeout={config.connect_timeout}"
+                        f"&application_name={_url_quote(config.application_name, safe='')}"
+                    ),
                 )
     return _POOL
 
@@ -114,6 +126,16 @@ def pooled_connection(
     try:
         connection.autocommit = False
         yield connection
+    except Exception:
+        # Roll back any uncommitted transaction before returning the connection
+        # to the pool. Without this, the next caller gets a connection with an
+        # open transaction and may accidentally commit the previous caller's
+        # partial work.
+        try:
+            connection.rollback()
+        except Exception:
+            pass
+        raise
     finally:
         pool.putconn(connection)
 
@@ -138,10 +160,12 @@ def get_psycopg2_connection(
     """
     active_config = config or Psycopg2ConnectionConfig()
     dsn = (
-        f"postgresql://{active_config.user}:{active_config.password}"
-        f"@{active_config.host}:{active_config.port}/{active_config.database}"
-        f"?sslmode=require&connect_timeout={active_config.connect_timeout}"
-        f"&application_name={active_config.application_name}"
+        f"postgresql://{_url_quote(active_config.user, safe='')}:"
+        f"{_url_quote(active_config.password, safe='')}@"
+        f"{active_config.host}:{active_config.port}/{active_config.database}"
+        f"?sslmode=require"
+        f"&connect_timeout={active_config.connect_timeout}"
+        f"&application_name={_url_quote(active_config.application_name, safe='')}"
     )
     connection = psycopg2.connect(dsn)
     connection.autocommit = False

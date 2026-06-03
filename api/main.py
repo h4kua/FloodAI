@@ -268,7 +268,7 @@ def _request_budget_s() -> float:
     try:
         return max(30.0, float(os.getenv("FLOOD_REQUEST_BUDGET_S", "60")))
     except ValueError:
-        return 15.0
+        return 60.0
 
 
 def _truthy_env(name: str, default: str = "0") -> bool:
@@ -376,46 +376,55 @@ def _response_hash(response: dict) -> str:
 def _get_idempotent_response(key: str | None) -> dict | None:
     if not key:
         return None
-    with pooled_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                DELETE FROM idempotency_keys
-                 WHERE created_at < NOW() - INTERVAL '1 hour'
-                """
-            )
-            cur.execute(
-                """
-                SELECT response_json
-                  FROM idempotency_keys
-                 WHERE idempotency_key = %s
-                   AND created_at >= NOW() - INTERVAL '1 hour'
-                """,
-                (key,),
-            )
-            row = cur.fetchone()
-        conn.commit()
-    return row[0] if row else None
+    try:
+        with pooled_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    DELETE FROM idempotency_keys
+                     WHERE created_at < NOW() - INTERVAL '1 hour'
+                    """
+                )
+                cur.execute(
+                    """
+                    SELECT response_json
+                      FROM idempotency_keys
+                     WHERE idempotency_key = %s
+                       AND created_at >= NOW() - INTERVAL '1 hour'
+                    """,
+                    (key,),
+                )
+                row = cur.fetchone()
+            conn.commit()
+        return row[0] if row else None
+    except Exception as exc:
+        # DB unavailable — skip idempotency check rather than blocking prediction.
+        _log.warning("idempotency_read_failed key=%s error=%s", key, exc)
+        return None
 
 
 def _store_idempotent_response(key: str | None, response: dict) -> None:
     if not key:
         return
-    with pooled_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO idempotency_keys
-                    (idempotency_key, response_hash, response_json, created_at)
-                VALUES (%s, %s, %s, NOW())
-                ON CONFLICT (idempotency_key) DO UPDATE
-                    SET response_hash = EXCLUDED.response_hash,
-                        response_json = EXCLUDED.response_json,
-                        created_at = EXCLUDED.created_at
-                """,
-                (key, _response_hash(response), Json(response)),
-            )
-        conn.commit()
+    try:
+        with pooled_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO idempotency_keys
+                        (idempotency_key, response_hash, response_json, created_at)
+                    VALUES (%s, %s, %s, NOW())
+                    ON CONFLICT (idempotency_key) DO UPDATE
+                        SET response_hash = EXCLUDED.response_hash,
+                            response_json = EXCLUDED.response_json,
+                            created_at = EXCLUDED.created_at
+                    """,
+                    (key, _response_hash(response), Json(response)),
+                )
+            conn.commit()
+    except Exception as exc:
+        # DB unavailable — best-effort; prediction already succeeded so don't raise.
+        _log.warning("idempotency_write_failed key=%s error=%s", key, exc)
 
 
 async def _bounded_threadpool(fn, *args, **kwargs):
