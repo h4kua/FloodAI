@@ -637,7 +637,7 @@ export default function Home({ setRiskContext, riskLevel }) {
   const stations    = riskData?.stations ?? [];
   const realSiaga1  = useMemo(() => stations.filter(s => s.ratio >= 1.0).length,  [stations]);
   const realSiaga2  = useMemo(() => stations.filter(s => s.ratio >= 0.75 && s.ratio < 1.0).length, [stations]);
-  const totalStations = riskData?.tmaStationsActive ?? stations.length || null;
+  const totalStations = riskData?.tmaStationsActive ?? (stations.length || null);
 
   // ── ML-derived geographic zones — used for map & zone table only ──────────
   const zones = useMemo(
