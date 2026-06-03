@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
-const POLL_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
+// Poll every 5 minutes. The backend snapshot refreshes every 15 min, but the
+// ML inference is cheap and the response includes snapshot_fetched_at so users
+// can always see exactly how old the underlying sensor data is.
+const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
 export function useFloodRisk() {
   const [riskData, setRiskData] = useState(null);
@@ -44,6 +47,11 @@ export function useFloodRisk() {
         recommendedActions: json.recommended_action ?? [],
         isOutlier: json.ood_detection?.is_outlier ?? false,
         bmkgForecast: json.bmkg_forecast ?? [],
+        // ISO timestamp when the sensor snapshot was built (TMA, BMKG, OW).
+        // Distinct from lastUpdated (= when the frontend last called the API).
+        snapshotFetchedAt: json.snapshot_fetched_at || null,
+        // Number of active TMA stations feeding the ML model this cycle.
+        tmaStationsActive: json.diagnostics?.water_level_records ?? null,
       });
       setLastUpdated(new Date());
     } catch (err) {

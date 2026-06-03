@@ -119,13 +119,17 @@ def predict_realtime_native(
     """
     model, scaler, ood_detector, model_card, thresholds = _load_assets()
 
-    # Load snapshot to extract forecast (not used for ML, passed through to response)
+    # Load snapshot to extract forecast and freshness timestamp.
+    # Neither is used for ML; both are passed through to the response so the
+    # frontend can show when sensor data was actually collected.
     try:
         with open(snapshot_path, "r", encoding="utf-8") as f:
             snapshot_raw = json.load(f)
         bmkg_forecast = snapshot_raw.get("bmkg_forecast") or []
+        snapshot_fetched_at = snapshot_raw.get("fetched_at_utc") or ""
     except Exception:
         bmkg_forecast = []
+        snapshot_fetched_at = ""
 
     engineered = build_realtime_native_features_from_file(
         snapshot_path=snapshot_path, persist_history=persist_history, as_of=as_of,
@@ -154,6 +158,10 @@ def predict_realtime_native(
         "risk_interpretation": _risk_interpretation(risk_level, engineered.diagnostics),
         "recommended_action": _recommended_action(risk_level),
         "risk_thresholds": thresholds,
+        # ISO-8601 UTC timestamp when the sensor snapshot was built.
+        # Lets the frontend show "Data sensor dari XX:XX WIB" so users know
+        # how fresh the underlying TMA/BMKG/OpenWeather data actually is.
+        "snapshot_fetched_at": snapshot_fetched_at,
         "bmkg_forecast": bmkg_forecast,
         "ood_detection": {
             "method": "IsolationForest",
