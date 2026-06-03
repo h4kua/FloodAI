@@ -191,22 +191,35 @@ function useTargetRect(selector, active, animKey) {
 
 /* ── Smart card position ────────────────────────────────── */
 function getCardStyle(rect, isMobile) {
+  const vh = window.innerHeight;
+  const vw = window.innerWidth;
+
   if (isMobile) {
-    return { position: "fixed", bottom: 0, left: 0, right: 0, width: "100%", borderRadius: "20px 20px 0 0" };
+    // If target is in the BOTTOM half of screen → card slides down from TOP
+    // so spotlight stays fully visible below
+    if (rect && rect.top > vh * 0.45) {
+      return {
+        position: "fixed", top: 0, left: 0, right: 0, width: "100%",
+        borderRadius: "0 0 20px 20px",
+      };
+    }
+    // Target in top half (or no target) → card from BOTTOM as usual
+    return {
+      position: "fixed", bottom: 0, left: 0, right: 0, width: "100%",
+      borderRadius: "20px 20px 0 0",
+    };
   }
+
+  // Desktop: no target → center
   if (!rect) {
     return { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: CARD_W };
   }
 
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
   const spaceBelow = vh - rect.bottom;
   const spaceAbove = rect.top;
-  const spaceRight = vw - rect.left;
-  const spaceLeft = rect.left;
 
-  // Prefer below if enough space
-  if (spaceBelow > 200) {
+  // Prefer below
+  if (spaceBelow > 190) {
     const left = Math.max(PAD, Math.min(
       rect.left + rect.width / 2 - CARD_W / 2,
       vw - CARD_W - PAD
@@ -214,14 +227,14 @@ function getCardStyle(rect, isMobile) {
     return { position: "fixed", top: rect.bottom + 12, left, width: CARD_W };
   }
   // Try above
-  if (spaceAbove > 200) {
+  if (spaceAbove > 190) {
     const left = Math.max(PAD, Math.min(
       rect.left + rect.width / 2 - CARD_W / 2,
       vw - CARD_W - PAD
     ));
     return { position: "fixed", bottom: vh - rect.top + 12, left, width: CARD_W };
   }
-  // Fallback: right-align below
+  // Fallback: right-side aligned below
   const right = Math.max(PAD, vw - rect.right);
   return { position: "fixed", top: rect.bottom + 12, right: Math.min(right, vw - CARD_W - PAD), width: CARD_W };
 }
@@ -248,8 +261,16 @@ function TourCard({ step, idx, total, rect, isMobile, onNext, onPrev, onSkip }) 
   const isFirst = idx === 0;
   const isLast = idx === total - 1;
 
+  // On mobile: if target is in bottom half, card slides from top
+  const isTopSheet = isMobile && rect && rect.top > window.innerHeight * 0.45;
+  const cardClass = [
+    "tour-card",
+    isMobile ? "tour-card--mobile" : "",
+    isTopSheet ? "tour-card--top" : "",
+  ].filter(Boolean).join(" ");
+
   return (
-    <div className={`tour-card${isMobile ? " tour-card--mobile" : ""}`} style={getCardStyle(rect, isMobile)}>
+    <div className={cardClass} style={getCardStyle(rect, isMobile)}>
       <div className="tour-card-body">
         {/* Top row: icon + pips */}
         <div className="tour-top-row">

@@ -136,6 +136,16 @@
   background: #edeae4; color: #1c1a18; border-color: rgba(60,45,20,0.10);
 }
 
+/* ── Text selection color ───────────────────────────────── */
+::selection {
+  background: rgba(56,189,248,0.22);
+  color: var(--cyan);
+}
+[data-theme="light"] ::selection {
+  background: rgba(3,105,161,0.16);
+  color: #0369a1;
+}
+
 /* ── Reset ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; overflow-x: hidden; }
@@ -1119,10 +1129,11 @@ body {
 }
 
 /* ── Onboarding Tour ───────────────────────────────────── */
-@keyframes tour-fade-in   { from{opacity:0}               to{opacity:1} }
-@keyframes tour-scale-in  { from{opacity:0;transform:scale(0.96) translateY(6px)} to{opacity:1;transform:scale(1) translateY(0)} }
-@keyframes tour-slide-up  { from{opacity:0;transform:translateY(100%)} to{opacity:1;transform:translateY(0)} }
-@keyframes tour-spot-in   { from{opacity:0;box-shadow:0 0 0 0 rgba(0,0,0,0)} to{opacity:1} }
+@keyframes tour-fade-in    { from{opacity:0}               to{opacity:1} }
+@keyframes tour-scale-in   { from{opacity:0;transform:scale(0.96) translateY(6px)} to{opacity:1;transform:scale(1) translateY(0)} }
+@keyframes tour-slide-up   { from{opacity:0;transform:translateY(100%)} to{opacity:1;transform:translateY(0)} }
+@keyframes tour-slide-down { from{opacity:0;transform:translateY(-100%)} to{opacity:1;transform:translateY(0)} }
+@keyframes tour-spot-in    { from{opacity:0;box-shadow:0 0 0 0 rgba(0,0,0,0)} to{opacity:1} }
 
 /* Overlay — full-dark for center steps */
 .tour-overlay {
@@ -1170,6 +1181,12 @@ body {
   border-radius: 20px 20px 0 0 !important;
   animation: tour-slide-up 0.32s cubic-bezier(0.16,1,0.3,1) !important;
   border-bottom: none;
+}
+/* Mobile top-sheet (target in bottom half — card slides from top) */
+.tour-card--top {
+  border-radius: 0 0 20px 20px !important;
+  animation: tour-slide-down 0.32s cubic-bezier(0.16,1,0.3,1) !important;
+  border-top: none;
 }
 
 .tour-card-body { padding: 1.5rem 1.5rem 1.375rem; }
