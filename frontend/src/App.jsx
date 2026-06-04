@@ -6,28 +6,38 @@ import OnboardingTour from "./components/OnboardingTour";
 import { AppContext, useT } from "./lib/appContext";
 
 /* ── deFlood.ai logo mark ───────────────────────────────── */
-function DeFloodLogo() {
+/*
+ * Icon concept: TMA gauge (tongkat pengukur Tinggi Muka Air) — the exact
+ * instrument Jakarta flood monitoring uses at pintu air stations.
+ * Left: gauge post with 3 siaga-level tick marks.
+ * Right: rising water fill with wave, level at middle tick (Siaga 3 zone).
+ * Specific to Jakarta flood infrastructure. Readable at 20–32px.
+ */
+function DeFloodLogo({ size = 22 }) {
   return (
     <svg
-      width="28" height="28" viewBox="0 0 24 24"
-      fill="none" aria-hidden="true" style={{ flexShrink: 0 }}
+      width={size} height={size} viewBox="0 0 24 24"
+      fill="none" aria-hidden="true"
+      style={{ flexShrink: 0, display: "block" }}
     >
-      {/* Water drop */}
+      {/* Water fill — rising level */}
       <path
-        d="M12 2.8 C9.2 6.4 4.8 11.2 4.8 15.8 C4.8 20.3 8.0 23.2 12 23.2 C16.0 23.2 19.2 20.3 19.2 15.8 C19.2 11.2 14.8 6.4 12 2.8Z"
+        d="M8 13 C9.5 11.5 11 14 12.5 12.5 C14 11 15.5 13.5 17 12 C18 11.2 19 11.5 20 11.5 L20 20 L8 20 Z"
         fill="var(--cyan-soft)"
-        stroke="var(--cyan)"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
       />
-      {/* AI pulse line inside drop */}
+      {/* Wave at water surface */}
       <path
-        d="M8 16 L9.4 13.4 L10.8 18.2 L12.4 10.8 L13.8 16 L15.2 13.4"
-        stroke="var(--cyan)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M8 13 C9.5 11.5 11 14 12.5 12.5 C14 11 15.5 13.5 17 12 C18 11.2 19 11.5 20 11.5"
+        stroke="var(--cyan)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"
       />
+      {/* Gauge post — TMA stick */}
+      <line x1="6" y1="4" x2="6" y2="20" stroke="var(--cyan)" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* Siaga tick marks on gauge */}
+      <line x1="6" y1="8"  x2="9.5" y2="8"  stroke="var(--cyan)" strokeWidth="1.4" strokeLinecap="round" opacity="0.45"/>
+      <line x1="6" y1="12" x2="10"  y2="12" stroke="var(--cyan)" strokeWidth="1.6" strokeLinecap="round"/>
+      <line x1="6" y1="16" x2="9.5" y2="16" stroke="var(--cyan)" strokeWidth="1.4" strokeLinecap="round" opacity="0.45"/>
+      {/* Active level indicator dot on gauge */}
+      <circle cx="6" cy="12" r="2.2" fill="var(--cyan)"/>
     </svg>
   );
 }
@@ -42,7 +52,7 @@ function AppShell() {
     <div className="shell">
       <header className="topbar">
         <span className="logo">
-          <DeFloodLogo />
+          <DeFloodLogo size={22} />
           <span className="logo-text">
             <span className="logo-de">de</span><span className="logo-flood">Flood</span><span className="logo-ai">.ai</span>
           </span>
