@@ -1078,10 +1078,49 @@ function ForecastPanel({ forecast }) {
   );
 }
 
-/* ── KecamatanZones — replaces ZoneCards; uses real DSDADKI station data ── */
+/* ── Flood probability helpers ─────────────────────────────────── */
+
+function probColor(pct) {
+  if (pct >= 75) return "var(--s1)";
+  if (pct >= 55) return "var(--wsp)";
+  if (pct >= 30) return "#f5a623";
+  return "var(--safe)";
+}
+
+// Derives per-wilayah flood probability from realtime TMA ratios +
+// XGBoost global probability + siaga station counts.
+// No historical DB needed — derived entirely from live sensor data.
+function computeWilayahFloodProb(w, stationsForWilayah, globalProb) {
+  const maxRatio = stationsForWilayah.reduce((m, s) => Math.max(m, s.ratio || 0), 0);
+
+  // TMA ratio → base probability (sigmoid-like curve)
+  let tmaProb;
+  if (maxRatio >= 1.0)       tmaProb = Math.min(0.97, 0.75 + maxRatio * 0.15);
+  else if (maxRatio >= 0.75) tmaProb = 0.45 + (maxRatio - 0.75) * 1.20;
+  else if (maxRatio >= 0.50) tmaProb = 0.20 + (maxRatio - 0.50) * 1.00;
+  else                       tmaProb = maxRatio * 0.40;
+
+  // Global ML probability scales the result (0.55–1.00)
+  const mlScale = 0.55 + (globalProb ?? 0.5) * 0.45;
+
+  // Bonus for multiple siaga sensors in the same wilayah (max +12%)
+  const alertBonus = Math.min(
+    (w?.siaga1_count ?? 0) * 0.06 + (w?.siaga2_count ?? 0) * 0.03 + (w?.siaga3_count ?? 0) * 0.015,
+    0.12
+  );
+
+  let prob = (tmaProb * 0.80 + alertBonus) * mlScale;
+
+  // Status-based floor: prevent obvious under-estimates
+  const floors = { 4: 0.78, 3: 0.52, 2: 0.30, 1: 0.15, 0: 0.04 };
+  prob = Math.max(prob, floors[w?.worst_rank ?? 0] ?? 0.04);
+
+  return Math.round(Math.min(prob, 0.99) * 100);
+}
+
+/* ── KecamatanZones ────────────────────────────────────────────── */
 
 // Infer Jakarta wilayah from lat/lon when backend wilayah field is absent.
-// Boundaries are intentionally simple — priority order handles overlaps.
 function inferWilayah(lat, lon) {
   if (!lat || !lon) return "";
   if (lat > -6.16 && lon > 106.75) return "Jakarta Utara";
@@ -1091,14 +1130,17 @@ function inferWilayah(lat, lon) {
   return "Jakarta Pusat";
 }
 
-function KecamatanZones({ stations }) {
+function KecamatanZones({ stations, wilayahSummary, globalProbability }) {
   const { lang } = useApp();
   const isId = lang === "id";
 
   const JAKARTA_ORDER = ["Jakarta Utara","Jakarta Barat","Jakarta Selatan","Jakarta Timur","Jakarta Pusat"];
   const OTHER_LABEL   = isId ? "Hulu / Luar Jakarta" : "Upstream / Outside Jakarta";
 
-  // Group by wilayah field or geo-inferred fallback
+  // wilayah summary lookup by name
+  const wMap = Object.fromEntries((wilayahSummary ?? []).map(w => [w.wilayah, w]));
+
+  // Group stations by wilayah
   const byWilayah = {};
   for (const s of (stations || [])) {
     const raw = s.wilayah || inferWilayah(s.lat, s.lon);
@@ -1107,31 +1149,32 @@ function KecamatanZones({ stations }) {
   }
   Object.values(byWilayah).forEach(g => g.sort((a, b) => b.ratio - a.ratio));
 
+  const gp = (globalProbability ?? 50) / 100;
+
   const jakartaGroups = JAKARTA_ORDER
     .filter(w => byWilayah[w]?.length)
-    .map(w => ({ wilayah: w, stations: byWilayah[w] }))
-    .sort((a, b) => b.stations[0].ratio - a.stations[0].ratio);
+    .map(w => {
+      const stns = byWilayah[w];
+      const floodProb = computeWilayahFloodProb(wMap[w], stns, gp);
+      return { wilayah: w, stations: stns, floodProb };
+    })
+    .sort((a, b) => b.floodProb - a.floodProb);
 
   const allGroups = [
     ...jakartaGroups,
     ...(byWilayah[OTHER_LABEL]?.length
-      ? [{ wilayah: OTHER_LABEL, stations: byWilayah[OTHER_LABEL] }]
+      ? [{ wilayah: OTHER_LABEL, stations: byWilayah[OTHER_LABEL], floodProb: null }]
       : []),
   ];
 
   if (allGroups.length === 0) return null;
 
-  // Default: first 2 groups (highest risk) open, rest collapsed
   const [openSet, setOpenSet] = useState(
     () => new Set(allGroups.slice(0, 2).map(g => g.wilayah))
   );
-
   const toggle = (w) => setOpenSet(prev => {
-    const next = new Set(prev);
-    next.has(w) ? next.delete(w) : next.add(w);
-    return next;
+    const next = new Set(prev); next.has(w) ? next.delete(w) : next.add(w); return next;
   });
-
   const allOpen = openSet.size >= allGroups.length;
   const toggleAll = () =>
     setOpenSet(allOpen ? new Set() : new Set(allGroups.map(g => g.wilayah)));
@@ -1142,44 +1185,53 @@ function KecamatanZones({ stations }) {
     <div className="panel panel-body fade-in">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
         <p className="panel-title" style={{ marginBottom: 0 }}>
-          {isId ? "Estimasi Risiko per Kecamatan / Area" : "Risk by Sub-District / Area"}
+          {isId ? "Kemungkinan Banjir per Wilayah" : "Flood Probability by District"}
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
           <button onClick={toggleAll} className="kec-toggle-all-btn">
             {allOpen ? (isId ? "Tutup Semua ↑" : "Collapse All ↑") : (isId ? "Buka Semua ↓" : "Expand All ↓")}
           </button>
-          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em" }}>
-            ● realtime
-          </span>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em" }}>● realtime</span>
         </div>
       </div>
 
       <div className="kec-zones-list">
-        {allGroups.map(({ wilayah, stations: grpStns }) => {
-          const maxRatio   = grpStns[0]?.ratio ?? 0;
-          const worstLevel = stationRiskLevel(maxRatio);
+        {allGroups.map(({ wilayah, stations: grpStns, floodProb }) => {
           const isUpstream = wilayah === OTHER_LABEL;
           const isOpen     = openSet.has(wilayah);
+          const pColor     = floodProb != null ? probColor(floodProb) : "var(--muted)";
 
           return (
             <div key={wilayah} className={`kec-group${isUpstream ? " kec-group-upstream" : ""}`}>
-              {/* Clickable accordion header */}
               <button
                 className="kec-group-header kec-group-btn"
                 onClick={() => toggle(wilayah)}
                 aria-expanded={isOpen}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <span className="kec-chevron" style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}>
-                    ▶
-                  </span>
-                  <span className="kec-group-title">{wilayah}</span>
-                  <span className="kec-group-count">{grpStns.length} pos</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flex: 1, minWidth: 0 }}>
+                  <span className="kec-chevron" style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}>▶</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <span className="kec-group-title">{wilayah}</span>
+                      <span className="kec-group-count">{grpStns.length} pos</span>
+                    </div>
+                    {floodProb != null && (
+                      <div className="kec-prob-track">
+                        <div className="kec-prob-fill" style={{ width: `${floodProb}%`, background: pColor }} />
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <RiskBadge level={worstLevel} />
+                {floodProb != null ? (
+                  <div className="wilayah-flood-prob">
+                    <span className="wilayah-prob-pct" style={{ color: pColor }}>{floodProb}%</span>
+                    <span className="wilayah-prob-label">{isId ? "banjir" : "flood"}</span>
+                  </div>
+                ) : (
+                  <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem", color: "var(--muted)" }}>—</span>
+                )}
               </button>
 
-              {/* Collapsible body */}
               <div className={`kec-rows-wrapper${isOpen ? " open" : ""}`}>
                 <div className="kec-rows">
                   {grpStns.map((s, i) => {
@@ -1193,12 +1245,9 @@ function KecamatanZones({ stations }) {
                           {s.lokasi && <span className="kec-row-area">{s.lokasi}</span>}
                         </div>
                         <div className="kec-row-bar">
-                          <div className="kec-row-fill"
-                            style={{ width: `${Math.min(s.ratio, 1) * 100}%`, background: color }} />
+                          <div className="kec-row-fill" style={{ width: `${Math.min(s.ratio, 1) * 100}%`, background: color }} />
                         </div>
-                        <span className="kec-row-pct" style={{ color }}>
-                          {Math.round(s.ratio * 100)}%
-                        </span>
+                        <span className="kec-row-pct" style={{ color }}>{Math.round(s.ratio * 100)}%</span>
                         <RiskBadge level={stationRiskLevel(s.ratio)} />
                       </div>
                     );
@@ -1212,8 +1261,8 @@ function KecamatanZones({ stations }) {
 
       <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", lineHeight: 1.5 }}>
         {isId
-          ? "● Klik wilayah untuk expand/collapse · Sensor DSDADKI realtime · Diurutkan risiko tertinggi → terendah"
-          : "● Click district to expand/collapse · Realtime DSDADKI sensors · Sorted highest → lowest risk"}
+          ? "● Probabilitas = sensor TMA realtime + skala model XGBoost · Klik wilayah untuk detail sensor · Diurutkan probabilitas tertinggi → terendah"
+          : "● Probability = realtime TMA sensors + XGBoost model scale · Click district for sensor detail · Sorted highest → lowest probability"}
       </p>
     </div>
   );
@@ -1493,8 +1542,12 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
       <div id="station-panel-anchor" />
       <StationPanel stations={stations} />
 
-      {/* Kecamatan / area risk breakdown — real sensor data grouped by wilayah, sorted by ratio */}
-      <KecamatanZones stations={stations} />
+      {/* Kecamatan / area flood probability — sensor TMA + XGBoost context */}
+      <KecamatanZones
+        stations={stations}
+        wilayahSummary={riskData?.wilayahSummary}
+        globalProbability={score}
+      />
 
       {/* OpenWeather current conditions */}
       <WeatherCurrentCard riskData={riskData} />

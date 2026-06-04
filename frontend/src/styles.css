@@ -1227,6 +1227,13 @@ body {
 .kec-row-fill { height: 100%; border-radius: 99px; transition: width 0.45s var(--ease-out-quart); }
 .kec-row-pct  { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; text-align: right; white-space: nowrap; }
 
+/* ── Wilayah flood probability display ───────────────────────── */
+.wilayah-flood-prob { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; flex-shrink: 0; padding-left: 0.5rem; }
+.wilayah-prob-pct   { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.wilayah-prob-label { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; color: var(--muted-2); text-transform: uppercase; letter-spacing: 0.07em; }
+.kec-prob-track { height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; margin-top: 0.3rem; overflow: hidden; }
+.kec-prob-fill  { height: 100%; border-radius: 2px; transition: width 0.5s var(--ease-out-quart); }
+
 /* ── Onboarding Tour ─────────────────────────────────────────── */
 @keyframes tour-fade-in  { from{opacity:0}   to{opacity:1} }
 @keyframes tour-card-pop { from{opacity:0;transform:scale(0.95) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
