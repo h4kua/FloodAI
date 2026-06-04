@@ -5,6 +5,33 @@ import About from "./pages/About";
 import OnboardingTour from "./components/OnboardingTour";
 import { AppContext, useT } from "./lib/appContext";
 
+/* ── deFlood.ai logo mark ───────────────────────────────── */
+function DeFloodLogo() {
+  return (
+    <svg
+      width="28" height="28" viewBox="0 0 24 24"
+      fill="none" aria-hidden="true" style={{ flexShrink: 0 }}
+    >
+      {/* Water drop */}
+      <path
+        d="M12 2.8 C9.2 6.4 4.8 11.2 4.8 15.8 C4.8 20.3 8.0 23.2 12 23.2 C16.0 23.2 19.2 20.3 19.2 15.8 C19.2 11.2 14.8 6.4 12 2.8Z"
+        fill="var(--cyan-soft)"
+        stroke="var(--cyan)"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      {/* AI pulse line inside drop */}
+      <path
+        d="M8 16 L9.4 13.4 L10.8 18.2 L12.4 10.8 L13.8 16 L15.2 13.4"
+        stroke="var(--cyan)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function AppShell() {
   const t = useT();
   const { lang, setLang, theme, setTheme } = useContext(AppContext);
@@ -15,6 +42,7 @@ function AppShell() {
     <div className="shell">
       <header className="topbar">
         <span className="logo">
+          <DeFloodLogo />
           <span className="logo-de">de</span>
           <span className="logo-flood">Flood</span>
           <span className="logo-ai">.ai</span>

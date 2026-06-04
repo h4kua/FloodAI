@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useLayoutEffect } from "react";
 import { useApp } from "../lib/appContext";
 
-const TOUR_KEY = "deflood_tour_v4_done";
+const TOUR_KEY = "deflood_tour_v5_done";
 
 /* ── SVG icons ──────────────────────────────────────────── */
 const Icons = {
@@ -67,11 +67,11 @@ const STEPS = (id) => [
       : "The chat button at the bottom right. Ask anything about Jakarta flooding — evacuation, shelters, river status, or forecasts. Powered by Llama 3.3 70B.",
   },
   {
-    key: "done", selector: null, icon: Icons.check, accent: "var(--safe)",
+    key: "done", selector: ".tour-reopen-btn", icon: Icons.check, accent: "var(--safe)",
     title: id ? "Siap digunakan" : "You're all set",
     desc: id
-      ? "Semua fitur utama sudah dijelaskan. Buka panduan ini kembali kapan saja dengan tombol tanda tanya di pojok kiri bawah layar."
-      : "All key features have been covered. Reopen this guide anytime using the question mark button at the bottom-left corner.",
+      ? "Tombol ini selalu tersedia di pojok kiri bawah. Ketuk kapan saja untuk membuka kembali panduan ini."
+      : "This button is always available at the bottom-left corner. Tap it anytime to reopen this guide.",
   },
 ];
 
@@ -223,45 +223,57 @@ export default function OnboardingTour() {
   const hasTarget = Boolean(step.selector);
   const rect = useTargetRect(step.selector, visible, animKey);
 
-  if (!visible) {
-    return (
-      <button className="tour-reopen-btn" onClick={() => { setIdx(0); setVisible(true); }}
-        title={id ? "Buka panduan" : "Open guide"}>
+  const isLastStep = idx === allSteps.length - 1;
+  const spotPad = isMobile ? 10 : 7;
+
+  // Help button: always in DOM so spotlight can find it on last step.
+  // Hidden (invisible, non-interactive) during tour except on the final step.
+  const helpBtnStyle = visible && !isLastStep
+    ? { opacity: 0, pointerEvents: "none" }
+    : {};
+
+  return (
+    <>
+      {/* Help / reopen button — always rendered for spotlight targeting */}
+      <button
+        className="tour-reopen-btn"
+        style={helpBtnStyle}
+        onClick={!visible ? () => { setIdx(0); setVisible(true); } : undefined}
+        title={id ? "Buka panduan" : "Open guide"}
+        aria-hidden={visible && !isLastStep}
+      >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
         </svg>
       </button>
-    );
-  }
 
-  const spotPad = isMobile ? 10 : 7;
+      {visible && (
+        <>
+          {/* Dark backdrop — spotlight handles bg for targeted steps */}
+          {(!hasTarget || !rect) && <div className="tour-overlay" />}
 
-  return (
-    <>
-      {/* Dark backdrop — only for center steps; spotlight handles it for targeted */}
-      {!hasTarget && <div className="tour-overlay" />}
-      {hasTarget && !rect && <div className="tour-overlay" />}
+          {/* Spotlight cutout */}
+          {hasTarget && rect && (
+            <div className="tour-spotlight" style={{
+              top:    rect.top    - spotPad,
+              left:   rect.left   - spotPad,
+              width:  rect.width  + spotPad * 2,
+              height: rect.height + spotPad * 2,
+            }} />
+          )}
 
-      {/* Spotlight */}
-      {hasTarget && rect && (
-        <div className="tour-spotlight" style={{
-          top:    rect.top    - spotPad,
-          left:   rect.left   - spotPad,
-          width:  rect.width  + spotPad * 2,
-          height: rect.height + spotPad * 2,
-        }} />
+          {/* Card */}
+          <div key={animKey} className="tour-card-anim">
+            <TourCard
+              step={step} idx={idx} total={allSteps.length}
+              rect={rect} isMobile={isMobile}
+              onNext={() => idx < allSteps.length - 1 ? goTo(idx + 1) : finish()}
+              onPrev={() => goTo(Math.max(0, idx - 1))}
+              onSkip={finish}
+            />
+          </div>
+        </>
       )}
-
-      {/* Card */}
-      <div key={animKey} className="tour-card-anim">
-        <TourCard
-          step={step} idx={idx} total={allSteps.length}
-          rect={rect} isMobile={isMobile}
-          onNext={() => idx < allSteps.length - 1 ? goTo(idx + 1) : finish()}
-          onPrev={() => goTo(Math.max(0, idx - 1))}
-          onSkip={finish}
-        />
-      </div>
     </>
   );
 }
