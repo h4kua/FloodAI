@@ -10,8 +10,7 @@ export default function ChatBot({ riskContext = {} }) {
   const [hasUnread, setHasUnread] = useState(true);
   const { messages, loading, sendMessage, aiOnline } = useChat(riskContext, lang);
   const quickReplies = [
-    t("chat.q1"), t("chat.q2"), t("chat.q3"),
-    t("chat.q4"), t("chat.q5"), t("chat.q6"),
+    t("chat.q1"), t("chat.q2"), t("chat.q3"), t("chat.q4"),
   ];
   const bottomRef = useRef(null);
 

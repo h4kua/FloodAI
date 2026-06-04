@@ -53,8 +53,8 @@ async def chat_endpoint(req: ChatRequest) -> dict:
         response = client.chat.completions.create(
             model=model,
             messages=messages,
-            max_tokens=1200,
-            timeout=25.0,
+            max_tokens=2000,
+            timeout=28.0,
         )
         return {"reply": response.choices[0].message.content}
     except Exception as exc:

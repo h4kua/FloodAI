@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import { useFloodRisk } from "../hooks/useFloodRisk";
-import { humanizeRainfall } from "../lib/humanize";
 import FloodMap from "../components/FloodMap";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ChatBot from "../components/ChatBot";
@@ -123,28 +122,18 @@ const WEATHER_ICON = {
   "Hujan Lebat": "⛈", "Hujan Petir": "⛈", "Hujan Es": "🌨",
 };
 
-function MetricsRow({ siaga1, siaga2, totalStations, score, rainfall, wilayahSummary }) {
+function MetricsRow({ siaga1, siaga2, totalStations, score }) {
   const t = useT();
-  const { lang } = useApp();
-  const isId = lang === "id";
-  const rainMm = rainfall ?? 0;
-  const hasWilayah = (wilayahSummary?.length ?? 0) > 0;
-  const anyRain = hasWilayah && wilayahSummary.some(
-    w => w.forecast?.[0]?.weather_desc?.toLowerCase().includes("hujan")
-  );
-
-  const firstThree = [
+  const noteStyle = { fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em", opacity: 0.85 };
+  const cards = [
     { label: t("metric.alertZones"), value: siaga1 + siaga2, sub: t("metric.alertSub", { s1: siaga1, s2: siaga2 }), color: siaga1 > 0 ? "red" : siaga2 > 0 ? "orange" : "green" },
     { label: t("metric.activeStations"), value: totalStations ?? "—", sub: t("metric.activeStationsSub"), color: "green" },
     { label: t("metric.riskScore"), value: score, sub: t("metric.riskSub"), color: score >= 70 ? "red" : score >= 45 ? "orange" : "green" },
   ];
 
-  const rainfallColor = hasWilayah ? (anyRain ? "orange" : "green") : (rainMm >= 50 ? "red" : rainMm >= 20 ? "orange" : "green");
-  const noteStyle = { fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em", opacity: 0.85 };
-
   return (
     <div className="cmd-metrics">
-      {firstThree.map((c) => (
+      {cards.map((c) => (
         <div key={c.label} className={`metric-card ${c.color}`}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span className="metric-label">{c.label}</span>
@@ -156,38 +145,86 @@ function MetricsRow({ siaga1, siaga2, totalStations, score, rainfall, wilayahSum
           </div>
         </div>
       ))}
+    </div>
+  );
+}
 
-      {/* Card 4: per-wilayah rainfall from BMKG — replaces single OpenWeather point */}
-      <div className={`metric-card ${rainfallColor}`}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
-          <span className="metric-label">{isId ? "Curah Hujan" : "Rainfall"}</span>
-          <span style={noteStyle}>● {hasWilayah ? "BMKG" : "real"}</span>
-        </div>
-        {hasWilayah ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
-            {wilayahSummary.map(w => {
-              const cf = w.forecast?.[0];
-              const isRain = cf?.weather_desc?.toLowerCase().includes("hujan");
-              const icon = WEATHER_ICON[cf?.weather_desc] ?? "☁";
-              return (
-                <div key={w.wilayah} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                  <span style={{ fontSize: "0.68rem", flexShrink: 0 }}>{icon}</span>
-                  <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.55rem", color: "var(--muted-2)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {w.wilayah.replace("Jakarta ", "")}
-                  </span>
-                  <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.54rem", color: isRain ? "var(--wsp)" : "var(--muted)", fontWeight: isRain ? 700 : 400, flexShrink: 0 }}>
-                    {cf?.weather_desc ?? "—"}
+/* ── Wilayah Rainfall Strip ────────────────────────────────
+   Dedicated full-width row showing per-wilayah weather from BMKG.
+   Placed immediately after the 3 metric cards so users see it
+   without scrolling. Falls back to OpenWeather overall rainfall
+   when BMKG per-wilayah data is unavailable.
+*/
+function WilayahRainfallStrip({ wilayahSummary, rainfall, lang }) {
+  const isId = lang === "id";
+  const hasWilayah = (wilayahSummary?.length ?? 0) > 0;
+  const rainMm = rainfall ?? 0;
+
+  const noteStyle = {
+    fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem",
+    color: "var(--safe)", letterSpacing: "0.06em", opacity: 0.85,
+  };
+
+  return (
+    <div className="rainfall-strip fade-in">
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem", color: "var(--muted)", letterSpacing: "0.07em", textTransform: "uppercase" }}>
+          {isId ? "Curah Hujan per Wilayah Jakarta" : "Rainfall per Jakarta District"}
+        </span>
+        <span style={noteStyle}>● {hasWilayah ? "BMKG" : "OpenWeather"}</span>
+      </div>
+
+      {hasWilayah ? (
+        <div className="rainfall-wilayah-cards">
+          {wilayahSummary.map((w) => {
+            const cf = w.forecast?.[0];
+            const isRain = cf?.weather_desc?.toLowerCase().includes("hujan");
+            const icon = WEATHER_ICON[cf?.weather_desc] ?? "☁";
+            const shortName = w.wilayah.replace("Jakarta ", "Jkt ");
+            const statusStyle = WILAYAH_STATUS_STYLE[w.worst_status] ?? WILAYAH_STATUS_STYLE["Normal"];
+            return (
+              <div key={w.wilayah} className={`rain-card ${isRain ? "raining" : "clear"}`}>
+                <div className="rain-card-top">
+                  <span className="rain-card-name">{shortName}</span>
+                  <span className="rain-card-badge"
+                    style={{ background: statusStyle.bg, color: statusStyle.color, borderColor: statusStyle.border }}>
+                    {w.worst_status}
                   </span>
                 </div>
-              );
-            })}
-          </div>
-        ) : (
+                <div className="rain-card-icon">{icon}</div>
+                <div className={`rain-card-desc${isRain ? " raining" : ""}`}>
+                  {cf?.weather_desc ?? (isId ? "Tidak ada data" : "No data")}
+                </div>
+                {cf?.tmin != null && (
+                  <div className="rain-card-temp">{cf.tmin}–{cf.tmax}°C · {cf.humin}–{cf.humax}%</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        /* Fallback: no BMKG per-wilayah — show single OpenWeather reading */
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <span style={{ fontSize: "2rem" }}>{rainMm > 20 ? "🌧" : rainMm > 0 ? "🌦" : "☁"}</span>
           <div>
-            <div className={`metric-value ${rainfallColor}`}>{humanizeRainfall(rainMm, lang)}</div>
-            <div className="metric-sub">{rainMm > 0 ? `${Math.round(rainMm)} mm/jam` : t("metric.rainSub")}</div>
+            <div style={{ fontSize: "1.1rem", fontWeight: 700, color: rainMm > 0 ? "var(--cyan)" : "var(--text)" }}>
+              {rainMm > 0 ? `${Math.round(rainMm)} mm/jam` : (isId ? "Tidak Hujan" : "No Rain")}
+            </div>
+            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted)", marginTop: "2px" }}>
+              {isId ? "Data OpenWeather — titik pusat Jakarta" : "OpenWeather — Jakarta center point"}
+            </div>
           </div>
-        )}
+        </div>
+      )}
+
+      <div style={{ marginTop: "0.625rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.57rem", color: "var(--muted-2)", lineHeight: 1.5 }}>
+        {hasWilayah
+          ? (isId
+            ? "● Prakiraan BMKG per kota administrasi · Status TMA dari sensor DSDADKI realtime · Update tiap 15 menit"
+            : "● BMKG forecast per administrative city · TMA status from DSDADKI realtime sensors · Updates every 15 min")
+          : (isId
+            ? "● Data OpenWeather — satu titik pengukuran untuk seluruh Jakarta. Curah hujan bisa berbeda tiap wilayah."
+            : "● OpenWeather — single measurement point for all Jakarta. Rainfall varies by district.")}
       </div>
     </div>
   );
@@ -842,6 +879,7 @@ function ZoneCards({ zones }) {
 /* ── Page ──────────────────────────────────────────────── */
 export default function Home({ setRiskContext, riskLevel }) {
   const t = useT();
+  const { lang } = useApp();
   const { riskData, loading, refreshing, error, refresh, lastUpdated } = useFloodRisk();
   const level = riskData?.level ?? riskLevel ?? "waspada";
   const score = riskData?.riskScore ?? 45;
@@ -923,8 +961,15 @@ export default function Home({ setRiskContext, riskLevel }) {
       {/* Status Hero — plain-language summary visible immediately */}
       <StatusHero riskData={riskData} />
 
-      {/* 4 Metric cards — all real data */}
-      <MetricsRow siaga1={realSiaga1} siaga2={realSiaga2} totalStations={totalStations} score={score} rainfall={riskData?.rainfall} wilayahSummary={riskData?.wilayahSummary} />
+      {/* 3 core metric cards — all real sensor data */}
+      <MetricsRow siaga1={realSiaga1} siaga2={realSiaga2} totalStations={totalStations} score={score} />
+
+      {/* Per-wilayah rainfall — full-width, clearly readable */}
+      <WilayahRainfallStrip
+        wilayahSummary={riskData?.wilayahSummary}
+        rainfall={riskData?.rainfall}
+        lang={lang ?? "id"}
+      />
 
       {/* Sensor detail strip */}
       <SensorStrip riskData={riskData} />
