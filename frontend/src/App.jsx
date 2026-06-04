@@ -14,7 +14,8 @@ import { AppContext, useT } from "./lib/appContext";
  */
 function DeFloodLogo({ size = 22 }) {
   const id = `df${size}`;
-  /* Each arm: starts near outer edge, sweeps elegantly toward center */
+  /* Three-arm triskelion — no background box, pure abstract floating mark.
+     gradientUnits="userSpaceOnUse" so all three arms share one gradient space. */
   const arm = "M 16 5.5 C 24 5.5 27.5 13 23 19 C 21.5 21.5 19 23 16 23";
   return (
     <svg
@@ -23,21 +24,14 @@ function DeFloodLogo({ size = 22 }) {
       style={{ flexShrink: 0, display: "block" }}
     >
       <defs>
-        <linearGradient id={`${id}g`} x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={`${id}g`} x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
           <stop offset="0%"   stopColor="#22d3ee" />
           <stop offset="55%"  stopColor="#3b82f6" />
-          <stop offset="100%" stopColor="#0c4a6e" />
+          <stop offset="100%" stopColor="#818cf8" />
         </linearGradient>
-        <clipPath id={`${id}c`}>
-          <rect x="1" y="1" width="30" height="30" rx="7.5" />
-        </clipPath>
       </defs>
-
-      {/* Squircle badge background */}
-      <rect x="1" y="1" width="30" height="30" rx="7.5" fill={`url(#${id}g)`} />
-
-      {/* Three-arm vortex mark */}
-      <g clipPath={`url(#${id}c)`} stroke="white" strokeLinecap="round" fill="none" strokeWidth="2.8">
+      {/* No background rect — pure abstract mark like Claude/ChatGPT logos */}
+      <g stroke={`url(#${id}g)`} strokeLinecap="round" fill="none" strokeWidth="3.5">
         <path d={arm} />
         <path d={arm} transform="rotate(120 16 16)" />
         <path d={arm} transform="rotate(240 16 16)" />

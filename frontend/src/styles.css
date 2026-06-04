@@ -205,9 +205,9 @@ body {
   display: inline-flex; align-items: center; gap: 0.45rem;
   line-height: 1; margin-right: 1.5rem;
 }
-/* Squircle — match rx="7.5" from SVG rect */
-.logo svg { display: block; border-radius: 25%; }
-[data-theme="light"] .logo svg { filter: saturate(0.88) brightness(0.93); }
+/* No background box — pure abstract mark */
+.logo svg { display: block; }
+[data-theme="light"] .logo svg { filter: saturate(0.9) brightness(0.85); }
 .logo-text {
   letter-spacing: -0.04em;
   display: inline-flex; align-items: baseline; gap: 0;

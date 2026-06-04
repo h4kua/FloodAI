@@ -117,55 +117,38 @@ function AlertRibbon({ siaga1Count, siaga2Count, lastSync }) {
   return null;
 }
 
-// MetricsRow: cards 1 & 2 are now 100% real sensor data (no fake formulas).
-function MetricsRow({ siaga1, siaga2, totalStations, score, rainfall }) {
+const WEATHER_ICON = {
+  "Cerah": "☀", "Cerah Berawan": "⛅", "Berawan": "☁", "Berawan Tebal": "☁",
+  "Udara Kabur": "🌫", "Asap": "🌫", "Hujan Ringan": "🌧", "Hujan Sedang": "🌧",
+  "Hujan Lebat": "⛈", "Hujan Petir": "⛈", "Hujan Es": "🌨",
+};
+
+function MetricsRow({ siaga1, siaga2, totalStations, score, rainfall, wilayahSummary }) {
   const t = useT();
   const { lang } = useApp();
+  const isId = lang === "id";
   const rainMm = rainfall ?? 0;
+  const hasWilayah = (wilayahSummary?.length ?? 0) > 0;
+  const anyRain = hasWilayah && wilayahSummary.some(
+    w => w.forecast?.[0]?.weather_desc?.toLowerCase().includes("hujan")
+  );
 
-  const cards = [
-    {
-      // Card 1: count of REAL stations in siaga state (DSDADKI sensor data)
-      label: t("metric.alertZones"),
-      value: siaga1 + siaga2,
-      sub: t("metric.alertSub", { s1: siaga1, s2: siaga2 }),
-      note: "real",
-      color: siaga1 > 0 ? "red" : siaga2 > 0 ? "orange" : "green",
-    },
-    {
-      // Card 2: total active TMA stations from backend (replaces fake wargaEst)
-      label: t("metric.activeStations"),
-      value: totalStations ?? "—",
-      sub: t("metric.activeStationsSub"),
-      note: "real",
-      color: "green",
-    },
-    {
-      label: t("metric.riskScore"),
-      value: score,
-      sub: t("metric.riskSub"),
-      note: "real",
-      color: score >= 70 ? "red" : score >= 45 ? "orange" : "green",
-    },
-    {
-      label: t("metric.rainfall"),
-      value: humanizeRainfall(rainMm, lang),
-      sub: rainMm > 0 ? `${Math.round(rainMm)} mm/jam` : t("metric.rainSub"),
-      note: "real",
-      color: rainMm >= 50 ? "red" : rainMm >= 20 ? "orange" : "green",
-    },
+  const firstThree = [
+    { label: t("metric.alertZones"), value: siaga1 + siaga2, sub: t("metric.alertSub", { s1: siaga1, s2: siaga2 }), color: siaga1 > 0 ? "red" : siaga2 > 0 ? "orange" : "green" },
+    { label: t("metric.activeStations"), value: totalStations ?? "—", sub: t("metric.activeStationsSub"), color: "green" },
+    { label: t("metric.riskScore"), value: score, sub: t("metric.riskSub"), color: score >= 70 ? "red" : score >= 45 ? "orange" : "green" },
   ];
+
+  const rainfallColor = hasWilayah ? (anyRain ? "orange" : "green") : (rainMm >= 50 ? "red" : rainMm >= 20 ? "orange" : "green");
+  const noteStyle = { fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em", opacity: 0.85 };
 
   return (
     <div className="cmd-metrics">
-      {cards.map((c) => (
+      {firstThree.map((c) => (
         <div key={c.label} className={`metric-card ${c.color}`}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span className="metric-label">{c.label}</span>
-            <span style={{
-              fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem",
-              color: "var(--safe)", letterSpacing: "0.06em", opacity: 0.85,
-            }}>● real</span>
+            <span style={noteStyle}>● real</span>
           </div>
           <div>
             <div className={`metric-value ${c.color}`}>{c.value}</div>
@@ -173,6 +156,39 @@ function MetricsRow({ siaga1, siaga2, totalStations, score, rainfall }) {
           </div>
         </div>
       ))}
+
+      {/* Card 4: per-wilayah rainfall from BMKG — replaces single OpenWeather point */}
+      <div className={`metric-card ${rainfallColor}`}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
+          <span className="metric-label">{isId ? "Curah Hujan" : "Rainfall"}</span>
+          <span style={noteStyle}>● {hasWilayah ? "BMKG" : "real"}</span>
+        </div>
+        {hasWilayah ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+            {wilayahSummary.map(w => {
+              const cf = w.forecast?.[0];
+              const isRain = cf?.weather_desc?.toLowerCase().includes("hujan");
+              const icon = WEATHER_ICON[cf?.weather_desc] ?? "☁";
+              return (
+                <div key={w.wilayah} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                  <span style={{ fontSize: "0.68rem", flexShrink: 0 }}>{icon}</span>
+                  <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.55rem", color: "var(--muted-2)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {w.wilayah.replace("Jakarta ", "")}
+                  </span>
+                  <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.54rem", color: isRain ? "var(--wsp)" : "var(--muted)", fontWeight: isRain ? 700 : 400, flexShrink: 0 }}>
+                    {cf?.weather_desc ?? "—"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div>
+            <div className={`metric-value ${rainfallColor}`}>{humanizeRainfall(rainMm, lang)}</div>
+            <div className="metric-sub">{rainMm > 0 ? `${Math.round(rainMm)} mm/jam` : t("metric.rainSub")}</div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -609,12 +625,6 @@ function StatusHero({ riskData }) {
   );
 }
 
-const WEATHER_ICON = {
-  "Cerah": "☀", "Cerah Berawan": "⛅", "Berawan": "☁", "Berawan Tebal": "☁",
-  "Udara Kabur": "🌫", "Asap": "🌫", "Hujan Ringan": "🌧", "Hujan Sedang": "🌧",
-  "Hujan Lebat": "⛈", "Hujan Petir": "⛈", "Hujan Es": "🌨",
-};
-
 /* ── Wilayah helpers ───────────────────────────────────── */
 const WILAYAH_STATUS_STYLE = {
   "Siaga 1": { color: "var(--s1)", bg: "var(--s1-soft)", border: "var(--s1-border)" },
@@ -697,21 +707,24 @@ function WilayahGrid({ wilayahSummary }) {
                 )}
               </div>
 
-              {/* Next 2 forecast slots (mini pills) */}
+              {/* Next forecast slots — show time + weather desc */}
               {w.forecast?.length > 1 && (
-                <div style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
                   {w.forecast.slice(1, 3).map((slot, i) => {
                     const slotIcon = WEATHER_ICON[slot.weather_desc] ?? "🌤";
                     const dt = new Date(slot.local_datetime);
                     const timeStr = dt.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+                    const isRainSlot = slot.weather_desc?.toLowerCase().includes("hujan");
                     return (
                       <div key={i} style={{
-                        display: "flex", alignItems: "center", gap: "3px",
-                        background: "var(--panel-3)", borderRadius: "4px",
-                        padding: "2px 5px",
+                        display: "flex", alignItems: "center", gap: "4px",
+                        background: "var(--panel-3)", borderRadius: "5px", padding: "3px 6px",
                       }}>
-                        <span style={{ fontSize: "0.65rem" }}>{slotIcon}</span>
-                        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.55rem", color: "var(--muted)" }}>{timeStr}</span>
+                        <span style={{ fontSize: "0.78rem", flexShrink: 0 }}>{slotIcon}</span>
+                        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.53rem", color: "var(--muted-2)", flexShrink: 0 }}>{timeStr}</span>
+                        <span style={{ fontSize: "0.58rem", color: isRainSlot ? "var(--cyan)" : "var(--muted)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {slot.weather_desc}
+                        </span>
                       </div>
                     );
                   })}
@@ -911,7 +924,7 @@ export default function Home({ setRiskContext, riskLevel }) {
       <StatusHero riskData={riskData} />
 
       {/* 4 Metric cards — all real data */}
-      <MetricsRow siaga1={realSiaga1} siaga2={realSiaga2} totalStations={totalStations} score={score} rainfall={riskData?.rainfall} />
+      <MetricsRow siaga1={realSiaga1} siaga2={realSiaga2} totalStations={totalStations} score={score} rainfall={riskData?.rainfall} wilayahSummary={riskData?.wilayahSummary} />
 
       {/* Sensor detail strip */}
       <SensorStrip riskData={riskData} />
