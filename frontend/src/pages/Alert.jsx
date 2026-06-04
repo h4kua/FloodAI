@@ -313,8 +313,9 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           </div>
         </div>
 
-        {/* Right: status + steps + contacts */}
+        {/* Right: status + shelter detail + steps + contacts */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+          {/* Status card */}
           <div className="panel panel-body" style={{ background: `linear-gradient(160deg,${config.color}0d,${config.color}06)`, border: `1px solid ${config.color}22`, textAlign: "center" }}>
             <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.66rem", color: config.color, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.5rem" }}>{t("evac.status")}</p>
             <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "2.25rem", fontWeight: 800, letterSpacing: "-0.03em", color: config.color, lineHeight: 1, marginBottom: "0.5rem" }}>
@@ -323,6 +324,54 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
             <p style={{ fontSize: "0.83rem", color: "var(--muted)", lineHeight: 1.5 }}>{config.desc}</p>
           </div>
 
+          {/* Shelter detail card — shown when a shelter is selected */}
+          {selectedDest && (
+            <div className="panel panel-body shelter-detail-card">
+              <p className="panel-title" style={{ marginBottom: "0.625rem" }}>
+                {lang === "en" ? "Selected Shelter" : "Shelter Dipilih"}
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "1rem", fontWeight: 700, color: "var(--text)" }}>
+                  {selectedDest.name}
+                </div>
+                {selectedDest.area && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                    <span style={{ fontSize: "0.7rem" }}>📍</span>
+                    <span style={{ fontSize: "0.78rem", color: "var(--muted)" }}>{selectedDest.area}</span>
+                  </div>
+                )}
+                {selectedDest.address && (
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "0.375rem" }}>
+                    <span style={{ fontSize: "0.7rem", marginTop: "0.1rem" }}>🏠</span>
+                    <span style={{ fontSize: "0.78rem", color: "var(--muted)", lineHeight: 1.4 }}>{selectedDest.address}</span>
+                  </div>
+                )}
+                <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.25rem", flexWrap: "wrap" }}>
+                  {selectedDest.capacity && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                      <span style={{ fontSize: "0.7rem" }}>👥</span>
+                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", color: "var(--safe)" }}>
+                        {selectedDest.capacity.toLocaleString()} {lang === "en" ? "cap." : "kapasitas"}
+                      </span>
+                    </div>
+                  )}
+                  {selectedDest.phone && (
+                    <a href={`tel:${selectedDest.phone}`} style={{ display: "flex", alignItems: "center", gap: "0.3rem", textDecoration: "none" }}>
+                      <span style={{ fontSize: "0.7rem" }}>📞</span>
+                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", color: "var(--cyan)" }}>
+                        {selectedDest.phone}
+                      </span>
+                    </a>
+                  )}
+                </div>
+              </div>
+              <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.57rem", color: "var(--muted-2)" }}>
+                ● {lang === "en" ? "Tap phone to call · Route shown on map" : "Tap telepon untuk hubungi · Rute ditampilkan di peta"}
+              </p>
+            </div>
+          )}
+
+          {/* Evacuation steps */}
           <div className="panel panel-body">
             <p className="panel-title">{t("evac.steps")}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -333,6 +382,27 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
                     <p className="step-title">{t(`step.${k}.t`)}</p>
                     <p className="step-desc">{t(`step.${k}.d`)}</p>
                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Emergency bag checklist */}
+          <div className="panel panel-body">
+            <p className="panel-title">{lang === "en" ? "Emergency Kit Checklist" : "Isi Tas Darurat"}</p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.35rem" }}>
+              {(lang === "en" ? [
+                "📄 ID & documents", "💊 Medicines (3+ days)", "👗 Clothes (3 days)", "🔦 Flashlight + batteries",
+                "🔋 Power bank", "💧 Drinking water", "🍫 Non-perishable food", "📱 Phone + charger",
+                "💰 Cash", "🏥 First aid kit",
+              ] : [
+                "📄 KTP & dokumen penting", "💊 Obat-obatan (3+ hari)", "👗 Pakaian (3 hari)", "🔦 Senter + baterai",
+                "🔋 Power bank", "💧 Air minum", "🍫 Makanan tahan lama", "📱 HP + charger",
+                "💰 Uang tunai", "🏥 P3K",
+              ]).map((item, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.75rem", color: "var(--muted)", lineHeight: 1.4 }}>
+                  <span style={{ flexShrink: 0 }}>›</span>
+                  <span>{item}</span>
                 </div>
               ))}
             </div>

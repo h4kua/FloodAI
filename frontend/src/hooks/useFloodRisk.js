@@ -74,6 +74,8 @@ export function useFloodRisk() {
         stations: json.stations ?? [],
         // Per-wilayah TMA + BMKG forecast summary
         wilayahSummary: json.wilayah_summary ?? [],
+        // OpenWeather current conditions (richer than features subset)
+        openweather: json.openweather_current ?? null,
       });
       setLastUpdated(new Date());
     } catch (err) {

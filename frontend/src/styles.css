@@ -479,17 +479,39 @@ body {
   font-size: 0.82rem; font-weight: 600;
   cursor: pointer;
   display: flex; align-items: center; gap: 0.75rem;
-  transition: background 0.15s, border-color 0.15s, transform 0.12s;
+  transition: background 0.15s, border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+  position: relative; overflow: hidden;
 }
-.action-btn:hover { background: rgba(255,255,255,0.06); border-color: var(--line-2); transform: translateX(2px); }
-.action-btn.primary { background: var(--s1-soft); border-color: var(--s1-border); color: #ff9dac; }
-.action-btn.primary:hover { background: rgba(255,61,90,0.18); }
+.action-btn:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: var(--line-2);
+  transform: translateX(3px);
+  box-shadow: -3px 0 0 var(--cyan);
+}
+.action-btn:active { transform: translateX(1px) scale(0.99); }
+.action-btn.primary {
+  background: var(--s1-soft); border-color: var(--s1-border); color: #ff9dac;
+}
+.action-btn.primary:hover {
+  background: rgba(255,61,90,0.18);
+  box-shadow: -3px 0 0 var(--s1);
+}
+.action-btn.action-btn-call {
+  background: rgba(52,211,153,0.07);
+  border-color: var(--safe-border);
+  color: var(--safe);
+}
+.action-btn.action-btn-call:hover {
+  background: rgba(52,211,153,0.15);
+  box-shadow: -3px 0 0 var(--safe);
+}
 .action-icon {
   width: 28px; height: 28px; border-radius: 8px;
-  display: grid; place-items: center; font-size: 0.75rem; flex-shrink: 0;
+  display: grid; place-items: center; font-size: 0.82rem; flex-shrink: 0;
   background: rgba(255,255,255,0.06);
 }
 .action-btn.primary .action-icon { background: rgba(255,61,90,0.2); }
+.action-btn.action-btn-call .action-icon { background: var(--safe-soft); }
 
 /* ── Buttons ───────────────────────────────────────────── */
 .btn {
@@ -1525,4 +1547,222 @@ body {
   .tour-card-inner { padding: 1.125rem 1.25rem 1.125rem; }
   .tour-title { font-size: 0.95rem; }
   .tour-desc  { font-size: 0.79rem; margin-bottom: 0.875rem; }
+}
+
+/* ── KecamatanZones ─────────────────────────────────────── */
+.kec-zones-list {
+  display: flex; flex-direction: column; gap: 0;
+}
+.kec-group {
+  border-top: 1px solid var(--line);
+  padding: 0.75rem 0;
+}
+.kec-group:first-child { border-top: none; padding-top: 0; }
+.kec-group-upstream { opacity: 0.75; }
+.kec-group-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+/* Accordion button variant */
+.kec-group-btn {
+  width: 100%; background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.45rem 0.5rem; margin: 0 -0.5rem;
+  border-radius: 8px; transition: background 0.15s;
+  text-align: left; margin-bottom: 0;
+}
+.kec-group-btn:hover { background: var(--panel-2); }
+.kec-group-btn:focus-visible {
+  outline: 2px solid var(--cyan); outline-offset: 2px;
+}
+.kec-chevron {
+  font-size: 0.52rem; color: var(--muted-2); flex-shrink: 0;
+  transition: transform 0.22s ease; display: inline-block;
+}
+.kec-group-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem; color: var(--muted-2);
+  background: rgba(255,255,255,0.05); border: 1px solid var(--line);
+  border-radius: 4px; padding: 1px 5px;
+}
+.kec-group-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.88rem; font-weight: 700;
+  color: var(--text); letter-spacing: -0.01em;
+}
+/* Collapsible rows wrapper */
+.kec-rows-wrapper {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.28s ease;
+}
+.kec-rows-wrapper.open {
+  max-height: 1200px; /* enough for ~20 rows */
+}
+.kec-rows { display: flex; flex-direction: column; gap: 0.375rem; padding-top: 0.375rem; }
+/* Toggle-all button */
+.kec-toggle-all-btn {
+  background: none; border: 1px solid var(--line); border-radius: 6px;
+  padding: 0.22rem 0.6rem; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
+  color: var(--muted); letter-spacing: 0.03em;
+  transition: background 0.15s, color 0.15s;
+}
+.kec-toggle-all-btn:hover { background: var(--panel-2); color: var(--text); }
+.kec-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(80px, 140px) 42px auto;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.kec-row:hover { background: var(--panel-2); }
+.kec-row-identity { min-width: 0; }
+.kec-row-name {
+  font-size: 0.78rem; font-weight: 500; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: block;
+}
+.kec-row-area {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.57rem; color: var(--muted-2);
+  display: block; margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kec-row-bar {
+  height: 4px; background: rgba(255,255,255,0.07);
+  border-radius: 99px; overflow: hidden;
+}
+.kec-row-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+.kec-row-pct {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  font-weight: 700; text-align: right; white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .kec-row { grid-template-columns: minmax(0, 1fr) 36px auto; gap: 0.5rem; }
+  .kec-row-bar { display: none; }
+}
+
+/* ── WeatherCurrentCard ─────────────────────────────────── */
+.weather-current-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--cyan);
+  border-radius: var(--r);
+  padding: 1.125rem 1.375rem;
+  display: flex; flex-direction: column; gap: 0.875rem;
+}
+.weather-current-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+.weather-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.5rem;
+}
+.weather-chip {
+  display: flex; align-items: flex-start; gap: 0.5rem;
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 0.5rem 0.625rem;
+}
+.weather-chip-icon { font-size: 1rem; line-height: 1.2; flex-shrink: 0; }
+.weather-chip-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem; color: var(--muted-2);
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.weather-chip-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem; font-weight: 700; color: var(--text);
+  line-height: 1.2;
+}
+.weather-chip-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.56rem; color: var(--muted-2); margin-top: 1px;
+}
+@media (max-width: 640px) {
+  .weather-chips-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 400px) {
+  .weather-chips-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── Forecast Table (replaces forecast-compact-grid) ────── */
+.forecast-table {
+  display: flex; flex-direction: column; gap: 0; overflow-x: auto;
+  -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+  min-width: 0;
+}
+.forecast-table-header,
+.forecast-table-row {
+  display: grid;
+  grid-template-columns: 120px repeat(4, 1fr);
+  gap: 0; align-items: stretch;
+}
+.forecast-table-header {
+  border-bottom: 1px solid var(--line-2);
+  margin-bottom: 0.25rem;
+}
+.forecast-table-row {
+  border-top: 1px solid var(--line);
+}
+.forecast-table-row:first-of-type { border-top: none; }
+.fct-time-header {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem; font-weight: 700; color: var(--muted-2);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  text-align: center; padding: 0.3rem 0.25rem 0.5rem;
+}
+.fct-label-cell {
+  padding: 0.625rem 0.375rem 0.625rem 0;
+  display: flex; flex-direction: column; justify-content: center;
+  min-width: 0;
+  border-right: 1px solid var(--line);
+  margin-right: 0.25rem;
+  padding-right: 0.625rem;
+}
+.fct-cell {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center;
+  gap: 0.2rem; padding: 0.625rem 0.25rem;
+  background: transparent;
+  border-radius: 0; transition: background 0.15s;
+}
+.fct-cell:hover { background: var(--panel-2); }
+.fct-cell.rain { background: rgba(56,189,248,0.04); }
+.fct-cell.rain:hover { background: rgba(56,189,248,0.08); }
+.fct-cell-empty { opacity: 0.35; }
+.fct-icon { font-size: 1.35rem; line-height: 1; }
+.fct-desc {
+  font-size: 0.65rem; color: var(--muted); font-weight: 500;
+  line-height: 1.2; max-width: 72px;
+}
+.fct-desc.rain { color: var(--cyan); }
+.fct-temp {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem; color: var(--text); font-weight: 600;
+}
+.fct-hum {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem; color: var(--muted-2);
+}
+@media (max-width: 640px) {
+  .forecast-table-header,
+  .forecast-table-row { grid-template-columns: 90px repeat(4, 1fr); }
+  .fct-label-cell { padding-right: 0.375rem; margin-right: 0.125rem; }
+  .fct-icon { font-size: 1.1rem; }
+  .fct-desc { font-size: 0.58rem; }
+}
+
+/* ── Shelter detail card (Evacuation page) ──────────────── */
+.shelter-detail-card {
+  border-left: 3px solid var(--safe);
+  background: linear-gradient(135deg, var(--safe-soft), transparent);
+}
+
+/* ── About page: MetricBar & PipelineStep ───────────────── */
+.about-pipeline-step {
+  display: flex; gap: 0.75rem; align-items: flex-start;
 }

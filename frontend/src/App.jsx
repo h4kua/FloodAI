@@ -88,7 +88,7 @@ function AppShell() {
       </header>
 
       <main className="main">
-        {page === "home"  && <Home setRiskContext={setRiskContext} riskLevel={riskContext.level} />}
+        {page === "home"  && <Home setRiskContext={setRiskContext} riskLevel={riskContext.level} onNavigate={setPage} />}
         {page === "alert" && <Alert riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
         {page === "about" && <About riskContext={riskContext} />}
       </main>

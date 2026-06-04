@@ -54,6 +54,45 @@ function TeamCard({ role, roleType, name, linkedin }) {
   );
 }
 
+// lowerIsBetter: bar shows inverted fill so a LOW score = LONG bar (green = good)
+function MetricBar({ label, value, max = 1, color = "var(--cyan)", format, hint, lowerIsBetter = false }) {
+  const rawPct = Math.min(value / max, 1) * 100;
+  const barPct = lowerIsBetter ? (1 - Math.min(value / max, 1)) * 100 : rawPct;
+  const display = format ? format(value) : value;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", minWidth: 0 }}>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem", color: "var(--muted)", letterSpacing: "0.04em" }}>{label}</span>
+          {hint && (
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.54rem", color: "var(--muted-2)", letterSpacing: "0.02em" }}>
+              {hint}
+            </span>
+          )}
+        </div>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.78rem", fontWeight: 700, color, flexShrink: 0 }}>{display}</span>
+      </div>
+      <div style={{ height: "4px", background: "rgba(255,255,255,0.07)", borderRadius: "99px", overflow: "hidden" }}>
+        <div style={{ width: `${barPct}%`, height: "100%", background: color, borderRadius: "99px", transition: "width 0.6s ease" }} />
+      </div>
+    </div>
+  );
+}
+
+function PipelineStep({ num, label, desc, color = "var(--cyan)" }) {
+  return (
+    <div style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
+      <div style={{ flexShrink: 0, width: 28, height: 28, borderRadius: "50%", background: `${color}22`, border: `1.5px solid ${color}44`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", fontWeight: 700, color }}>
+        {num}
+      </div>
+      <div>
+        <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text)", lineHeight: 1.3 }}>{label}</div>
+        <div style={{ fontSize: "0.74rem", color: "var(--muted)", lineHeight: 1.5, marginTop: "0.1rem" }}>{desc}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function About({ riskContext = {} }) {
   const { lang } = useApp();
   const id = isId(lang);
@@ -87,6 +126,56 @@ export default function About({ riskContext = {} }) {
             <Stat value="4" label={id ? "Level Risiko" : "Risk Levels"} />
           </div>
         </div>
+
+        {/* Model Performance Visual */}
+        <Section title={id ? "Performa Model" : "Model Performance"}>
+          <p style={{ fontSize: "0.78rem", color: "var(--muted)", marginBottom: "1rem", lineHeight: 1.6 }}>
+            {id
+              ? "Model dilatih dengan 1,990 baris data historis (chronological 80/15/5 split). Dikalibrasi dengan isotonic regression."
+              : "Model trained on 1,990 historical rows (chronological 80/15/5 split). Calibrated with isotonic regression."}
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+            <MetricBar label="AUC-ROC"
+              hint={id ? "(↑ lebih baik)" : "(↑ higher is better)"}
+              value={0.863} max={1} color="var(--safe)"
+              format={v => v.toFixed(3)} />
+            <MetricBar label={id ? "Recall @ Siaga" : "Recall @ Alert"}
+              hint={id ? "(↑ lebih baik)" : "(↑ higher is better)"}
+              value={0.588} max={1} color="var(--s2)"
+              format={v => (v * 100).toFixed(0) + "%"} />
+            <MetricBar label="Brier Score"
+              hint={id ? "(↓ lebih baik)" : "(↓ lower is better)"}
+              value={0.066} max={0.25} color="var(--cyan)"
+              lowerIsBetter format={() => "0.066"} />
+            <MetricBar label={id ? "ECE (Kalibrasi)" : "ECE (Calibration)"}
+              hint={id ? "(↓ lebih baik)" : "(↓ lower is better)"}
+              value={0.004} max={0.25} color="var(--wsp)"
+              lowerIsBetter format={() => "0.004"} />
+          </div>
+          <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", lineHeight: 1.5 }}>
+            {id
+              ? "● AUC mendekati 1 = klasifikasi lebih baik · ECE mendekati 0 = probabilitas lebih terkalibrasi · Brier Score mendekati 0 = prediksi lebih akurat"
+              : "● AUC → 1 = better discrimination · ECE → 0 = better calibration · Brier Score → 0 = more accurate probability"}
+          </p>
+        </Section>
+
+        {/* System Pipeline */}
+        <Section title={id ? "Cara Kerja Sistem" : "How It Works"}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+            <PipelineStep num="1" color="var(--cyan)"
+              label={id ? "Pengumpulan Data Realtime" : "Realtime Data Collection"}
+              desc={id ? "Scraper otomatis tiap 15 menit mengambil data TMA dari 38 pos DSDADKI, cuaca OpenWeather, dan peringatan BMKG." : "Automated scraper every 15 min fetches TMA data from 38 DSDADKI posts, OpenWeather conditions, and BMKG alerts."} />
+            <PipelineStep num="2" color="var(--wsp)"
+              label={id ? "Feature Engineering (16 Fitur)" : "Feature Engineering (16 Features)"}
+              desc={id ? "Membangun fitur: rasio muka air, akumulasi hujan, lag temporal, indeks hidro-meteorologi, skor BMKG, dan flag musim." : "Builds: water level ratio, rainfall accumulation, temporal lags, hydro-met index, BMKG scores, monsoon flag."} />
+            <PipelineStep num="3" color="var(--s2)"
+              label={id ? "Inferensi ML (XGBoost)" : "ML Inference (XGBoost)"}
+              desc={id ? "Model menghasilkan probabilitas banjir 0–1. Hydro override rule-based menaikkan level jika TMA ≥75% threshold." : "Model outputs flood probability 0–1. Rule-based hydro override elevates level if TMA ≥ 75% threshold."} />
+            <PipelineStep num="4" color="var(--safe)"
+              label={id ? "AI Explanation & Chatbot" : "AI Explanation & Chatbot"}
+              desc={id ? "Groq Llama-3.3-70B menghasilkan narasi risiko dan merespons pertanyaan warga dalam Bahasa Indonesia dan Inggris." : "Groq Llama-3.3-70B generates risk narrative and answers resident questions in Indonesian and English."} />
+          </div>
+        </Section>
 
         {/* Data Sources */}
         <Section title={id ? "Sumber Data" : "Data Sources"}>

@@ -10,11 +10,22 @@ const TILE_ATTR  = '&copy; <a href="https://www.openstreetmap.org/copyright">Ope
 const JAKARTA_BOUNDS = [[-6.42, 106.66], [-6.06, 107.06]];
 
 export const DESTINATIONS = [
-  { id: "kemayoran", name: "Kemayoran (Shelter)",   lat: -6.1528, lng: 106.8559 },
-  { id: "ancol",     name: "Ancol (Pos Evakuasi)",  lat: -6.1246, lng: 106.8350 },
-  { id: "tmii",      name: "TMII (Pos Darurat)",    lat: -6.2726, lng: 106.9020 },
-  { id: "gbk",       name: "GBK Senayan (Shelter)", lat: -6.2181, lng: 106.8022 },
-  { id: "cipete",    name: "Cipete (Pos Aman)",     lat: -6.2824, lng: 106.8043 },
+  // Jakarta Utara
+  { id: "kemayoran",  name: "GOR Kemayoran",            area: "Jakarta Utara",   address: "Jl. Benyamin Sueb, Kemayoran",          phone: "021-4207177", capacity: 2000, lat: -6.1528, lng: 106.8559 },
+  { id: "ancol",      name: "Taman Impian Ancol",       area: "Jakarta Utara",   address: "Jl. Lodan Timur No.7, Ancol",           phone: "021-64710618", capacity: 1500, lat: -6.1246, lng: 106.8350 },
+  // Jakarta Timur
+  { id: "tmii",       name: "TMII (Pos Darurat)",       area: "Jakarta Timur",   address: "Jl. Raya Taman Mini, Cipayung",         phone: "021-8409215", capacity: 3000, lat: -6.2726, lng: 106.9020 },
+  { id: "velodrome",  name: "Velodrome Rawamangun",     area: "Jakarta Timur",   address: "Jl. Pemuda, Rawamangun",               phone: "021-4758881", capacity: 1200, lat: -6.1943, lng: 106.8912 },
+  // Jakarta Selatan
+  { id: "gbk",        name: "GBK Senayan",              area: "Jakarta Selatan", address: "Jl. Pintu Satu Senayan, Gelora",        phone: "021-5703755", capacity: 5000, lat: -6.2181, lng: 106.8022 },
+  { id: "cipete",     name: "Puskesmas Cipete Utara",   area: "Jakarta Selatan", address: "Jl. Cipete Raya No.12, Cipete",        phone: "021-7690521", capacity: 400,  lat: -6.2824, lng: 106.8043 },
+  { id: "ragunan",    name: "Kebun Binatang Ragunan",   area: "Jakarta Selatan", address: "Jl. Harsono RM No.1, Pasar Minggu",    phone: "021-7884053", capacity: 2000, lat: -6.3126, lng: 106.8205 },
+  // Jakarta Barat
+  { id: "istiqlal",  name: "GOR Cengkareng",            area: "Jakarta Barat",   address: "Jl. Kamal Raya No.1, Cengkareng",      phone: "021-5406630", capacity: 1500, lat: -6.1450, lng: 106.7420 },
+  { id: "jiexpo",    name: "JIExpo Kemayoran",           area: "Jakarta Utara",   address: "Jl. Benyamin Sueb, Kemayoran",         phone: "021-6541435", capacity: 4000, lat: -6.1598, lng: 106.8499 },
+  // Jakarta Pusat
+  { id: "monas",     name: "Lapangan Monas",             area: "Jakarta Pusat",   address: "Jl. Medan Merdeka Utara, Gambir",      phone: "021-3457603", capacity: 5000, lat: -6.1751, lng: 106.8272 },
+  { id: "gelora",    name: "Gelanggang Olahraga Ragunan",area: "Jakarta Selatan", address: "Jl. Ragunan No.1, Pasar Minggu",       phone: "021-7800062", capacity: 800,  lat: -6.2940, lng: 106.8227 },
 ];
 
 function haversineKm(lat1, lng1, lat2, lng2) {
