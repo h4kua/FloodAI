@@ -1,6 +1,6 @@
 # deFlood.ai — Project Context
 
-> Last updated: 2026-06-03. Update this file whenever architecture, known issues, or deployment state changes.
+> Last updated: 2026-06-04. Update this file whenever architecture, known issues, or deployment state changes.
 
 ---
 
@@ -9,12 +9,11 @@
 | Layer | Tech |
 |---|---|
 | Backend | FastAPI + uvicorn, port 8080 |
-| Frontend | React 18 + Vite, port 3000 |
+| Frontend | React 18 + Vite, port 5173 (dev) |
 | Database | Supabase / PostgreSQL (psycopg2) |
-| ML | XGBoost 3.2.0 + scikit-learn 1.8.0 (AUC 0.945, ECE 0.196) |
-| LLM | Groq llama-3.3-70b-versatile (primary) · Anthropic Claude (explain endpoint) |
-| CrewAI | crewai 1.14.0 + litellm 1.87.0 |
-| Deploy | Fly.io (backend) · Vercel (frontend) |
+| ML | XGBoost + scikit-learn 1.5.2 (AUC ~0.94, ECE 0.196) |
+| LLM | Groq llama-3.3-70b-versatile (chatbot + explain) |
+| Deploy | Railway (backend) · Vercel (frontend) |
 
 ---
 
@@ -24,10 +23,10 @@
 # Backend
 uvicorn api.main:app --host 0.0.0.0 --port 8080 --reload
 
-# Frontend — dev mode, Vite proxy (VITE_API_BASE_URL tidak perlu diset)
+# Frontend (dev, Vite proxies /predict/* and /api/* to port 8080)
 cd frontend && npm run dev
 
-# Refresh snapshot manual (scheduler otomatis tiap 15 menit)
+# Manual snapshot refresh
 cd poskobanjir && python main.py
 ```
 
@@ -37,25 +36,23 @@ cd poskobanjir && python main.py
 
 | Path | Fungsi |
 |---|---|
-| `api/main.py` | FastAPI app, CORS middleware, scheduler, semua endpoints |
-| `api/routes/chat.py` | `POST /api/chat` (Groq chatbot, tanpa auth) |
+| `api/main.py` | FastAPI app, CORS, scheduler, semua endpoints |
+| `api/routes/chat.py` | `POST /api/chat` — Groq chatbot, module-level client, max_tokens 2000, timeout 28s |
 | `api/routes/agentic_llm.py` | `POST /predict/agentic/explain` |
-| `api/routes/crew_analysis.py` | `POST /predict/crew-analysis` (CrewAI) |
-| `api/security.py` | `require_api_key` dependency + deque-backed rate limiting |
-| `pipeline/flood_pipeline.py` | Orchestrator 5-stage pipeline |
-| `services/decision_engine.py` | Canonical decision authority (L0–L4 hierarchy) |
-| `services/snapshot_refresh.py` | Build snapshot baru via subprocess poskobanjir |
-| `realtime_native/feature_builder.py` | Build 16 fitur dari snapshot + `stations_summary` (real DSDADKI readings) |
-| `realtime_native/inference.py` | `GET /predict/realtime-native` — exposes `stations[]` dan `snapshot_fetched_at` |
-| `db/psycopg2_connection.py` | Connection pool + `pooled_connection()` context manager |
-| `poskobanjir/main.py` | Pipeline scraper: TMA JSON → OpenWeather → BMKG → snapshot JSON |
-| `poskobanjir/services/parser.py` | Parse TMA JSON/XML, BMKG CAP, cuaca.json (timezone-aware) |
-| `poskobanjir/data/clean/realtime_snapshot.json` | Snapshot aktif (diupdate tiap 15 menit) |
-| `frontend/src/pages/Home.jsx` | Command center — metrics, peta, stasiun TMA, zona risiko |
-| `frontend/src/components/FloodMap.jsx` | Peta Leaflet — real DSDADKI sensor markers + district reference |
-| `frontend/src/hooks/useFloodRisk.js` | Poll `GET /predict/realtime-native` tiap **5 menit** |
+| `api/security.py` | `require_api_key` + deque-based rate limiting |
+| `realtime_native/inference.py` | `GET /predict/realtime-native` — main ML endpoint, builds `wilayah_summary` |
+| `realtime_native/feature_builder.py` | 16 fitur dari snapshot + `stations_summary` (DSDADKI readings) |
+| `poskobanjir/main.py` | Scraper: TMA JSON → OpenWeather → BMKG → snapshot JSON |
+| `poskobanjir/services/parser.py` | Parse TMA JSON/XML, BMKG CAP, cuaca.json |
+| `poskobanjir/data/clean/realtime_snapshot.json` | Snapshot aktif (update tiap 15 mnt) |
+| `poskobanjir/data/clean/bmkg_cuaca.json` | BMKG per-wilayah forecast cache |
+| `frontend/src/pages/Home.jsx` | Command center — semua komponen utama dashboard |
+| `frontend/src/components/FloodMap.jsx` | Peta Leaflet — real DSDADKI sensor markers |
+| `frontend/src/components/ChatBot.jsx` | Floating chatbot FAB + panel |
+| `frontend/src/hooks/useFloodRisk.js` | Poll `GET /predict/realtime-native` tiap 5 menit |
+| `frontend/src/lib/floodAgent.js` | Groq API call + offline KB fallback + `_matchOffline()` |
 | `frontend/src/lib/translations.js` | Semua teks ID + EN |
-| `frontend/src/lib/floodAgent.js` | Chat backend call + offline KB fallback |
+| `frontend/src/styles.css` | Single CSS file — semua styles, dark + light theme |
 | `frontend/vite.config.js` | Dev proxy `/predict/*` dan `/api/*` → port 8080 |
 
 ---
@@ -64,196 +61,249 @@ cd poskobanjir && python main.py
 
 | Endpoint | Auth | Deskripsi |
 |---|---|---|
-| `GET /predict/realtime-native` | — | XGBoost inference dari snapshot; returns `stations[]`, `snapshot_fetched_at` |
-| `POST /predict/agentic` | X-Api-Key | Full 5-stage agentic pipeline |
-| `POST /predict/agentic/explain` | X-Api-Key | Pipeline + LLM explanation (Bahasa Indonesia) |
-| `POST /predict/crew-analysis` | X-Api-Key | Pipeline + CrewAI 3-agent analysis |
-| `POST /api/chat` | — | Groq chatbot bilingual (ID/EN), cache client module-level |
-| `GET /api/chat/health` | — | Cek apakah GROQ_API_KEY terkonfigurasi |
-| `GET /healthz` | — | Liveness check + scheduler status |
+| `GET /predict/realtime-native` | — | XGBoost inference; returns `stations[]`, `wilayah_summary`, `snapshot_fetched_at` |
+| `POST /predict/agentic/explain` | X-Api-Key | Pipeline + LLM explanation |
+| `POST /api/chat` | — | Groq chatbot bilingual (ID/EN) |
+| `GET /api/chat/health` | — | Cek GROQ_API_KEY configured |
+| `GET /healthz` | — | Liveness check + scheduler |
 | `GET /readyz` | — | Readiness check (DB + thresholds) |
-| `GET /metrics` | — | Prometheus metrics |
-| `POST /internal/refresh-snapshot` | X-Internal-Secret | Rate-limited manual snapshot refresh (min 5 menit antar request) |
+| `POST /internal/refresh-snapshot` | X-Internal-Secret | Manual snapshot refresh (rate-limited, min 5 mnt) |
 
 ---
 
-## `/predict/realtime-native` response shape
-
-Field penting yang digunakan frontend:
+## `/predict/realtime-native` — response shape (fields used by frontend)
 
 ```jsonc
 {
-  "risk_level": "WARNING",           // SAFE | WARNING | DANGER
-  "probability": 0.35,
-  "risk_interpretation": "...",
-  "recommended_action": ["...", "..."],
-  "snapshot_fetched_at": "2026-06-03T05:45:00+00:00",  // kapan data sensor diambil
-  "bmkg_forecast": [...],
-  "ood_detection": { "is_outlier": false, "score": 0.12 },
+  "risk_level": "WARNING",             // SAFE | WARNING | DANGER
+  "probability": 0.47,
+  "risk_interpretation": "...",        // shown in ModelOutputCard
+  "recommended_action": ["...", "..."],// shown in RecommendationsPanel fallback
+  "snapshot_fetched_at": "2026-06-04T...",
   "features": {
-    "rainfall_mm": 0.0,
-    "water_level_ratio": 0.82,       // real dari sensor DSDADKI
-    "water_level_delta": 0.02,       // perubahan 15-menit terakhir
+    "rainfall_mm": 9.0,
+    "water_level_ratio": 0.82,         // real DSDADKI average
+    "water_level_delta": 0.02,
     "humidity_pct": 57.0,
     "temperature_c": 34.0,
-    "monsoon_season": 0              // 1 = Nov–Mar
+    "monsoon_season": 0
   },
   "diagnostics": {
-    "water_level_records": 37,       // jumlah stasiun aktif
+    "water_level_records": 17,         // active TMA stations (tmaStationsActive)
     "rainfall_acc_3h": 0.0,
     "rainfall_acc_6h": 0.0,
     "rainfall_trend_mm_h": 0.0,
+    "bmkg_alerts_total": 0,
     "trend_state": {
-      "risk_trend": "stable",        // increasing | decreasing | stable
+      "risk_trend": "stable",          // increasing | decreasing | stable
       "anomaly_detected": false,
-      "anomaly_type": null           // spike | slow_accumulation | null
+      "anomaly_type": null,            // spike | slow_accumulation | null
+      "recent_probabilities": [0.44, 0.46, 0.47]  // sparkline data
     },
-    "stations_summary": [...]        // lihat bagian Data: stations_summary
+    "stations_summary": [...]
   },
-  "stations": [...]                  // alias dari stations_summary, untuk frontend
+  "stations": [...],                   // alias of stations_summary
+  "wilayah_summary": [                 // NEW — built by _build_wilayah_summary()
+    {
+      "wilayah": "Jakarta Utara",
+      "worst_status": "Siaga 2",       // Normal | Siaga 3 | Siaga 2 | Siaga 1
+      "siaga1_count": 0,
+      "siaga2_count": 1,
+      "siaga3_count": 11,
+      "tma_count": 12,
+      "forecast": [                    // from bmkg_cuaca.json, up to 4 slots
+        { "local_datetime": "...", "weather_desc": "Berawan",
+          "tmin": 27, "tmax": 30, "humin": 71, "humax": 87 }
+      ]
+    }
+    // × 5 (Pusat, Utara, Barat, Selatan, Timur)
+  ],
+  "bmkg_forecast": [...]               // DKI aggregate fallback
 }
 ```
 
+`useFloodRisk.js` maps this response to `riskData`:
+- `riskData.wilayahSummary` ← `json.wilayah_summary`
+- `riskData.stations` ← `json.stations`
+- `riskData.waterLevelRatio` ← `json.features.water_level_ratio`
+- `riskData.riskScore` ← `Math.round(json.probability * 100)`
+- `riskData.level` ← probability → "aman" | "waspada" | "siaga" | "bahaya"
+- `riskData.tmaStationsActive` ← `json.diagnostics.water_level_records`
+- `riskData.snapshotFetchedAt` ← `json.snapshot_fetched_at`
+- `riskData.trendState` ← `json.diagnostics.trend_state`
+
 ---
 
-## Data: `stations_summary` / `stations[]`
-
-Dibangun di `realtime_native/feature_builder.py`, dikirim di `inference.py` sebagai `stations`.
-
-Berisi **semua stasiun DSDADKI yang valid** (kalibrated, bukan pompa, siaga1 > 0), diurutkan ratio tertinggi dulu, max 20 entri.
+## `stations[]` shape
 
 ```jsonc
 {
   "nama": "P.A. Karet 1",
-  "lokasi": "Kebayoran Lama",
-  "tinggi_air": 332.0,          // cm, dari sensor real
-  "siaga1": 400.0,              // ambang siaga-1
-  "siaga2": 350.0,
-  "siaga3": 320.0,
-  "ratio": 0.830,               // tinggi_air / siaga1
-  "status_siaga": "Siaga 3",    // string asli dari DSDADKI
-  "lat": -6.2234,               // null jika tidak ada/invalid
-  "lon": 106.8015               // null jika tidak ada/invalid
+  "tinggi_air": 5036.0,    // cm
+  "siaga1": 6000.0,
+  "ratio": 0.839,           // tinggi_air / siaga1
+  "lat": -6.2234,           // null if unavailable/outside Jakarta bounds
+  "lon": 106.8015
 }
 ```
 
-**Stasiun yang TIDAK masuk:**
-- Stasiun pompa (nama mulai "POMPA") — threshold-nya operasional bukan banjir
-- Stasiun tidak terkalibrasi (siaga1 = siaga2 = siaga3)
-- Koordinat di luar Jakarta bounds (-6.6…-5.8 lat, 106.4…107.2 lon) → lat/lon = null
+Excluded: stations with nama starting "POMPA" (operational threshold, not flood threshold), uncalibrated (siaga1=siaga2=siaga3), coords outside DKI bounds.
+
+---
+
+## Frontend: Home.jsx — Architecture
+
+### Component tree
+
+```
+Home()
+├── AlertRibbon           — real s1/s2 counts from stations[]
+├── StatusHero            — level badge + buildStatusDesc() + trend pill badge + sparkline
+├── MetricsRow            — 3 metric cards (all real data)
+├── WilayahRainfallStrip  — current BMKG weather per 5 wilayah (dari wilayahSummary)
+├── SensorStrip           — WLR, temp, humidity, acc3h/6h, trend chips
+├── cmd-main grid
+│   ├── FloodMap          — Leaflet with real DSDADKI sensor markers
+│   └── cmd-sidebar
+│       ├── AlertPanel    — stations with ratio ≥ 0.75
+│       └── RecommendationsPanel  — REALTIME: sensor names, TMA readings, wilayah status
+├── ModelOutputCard       — ML interpretation + signal chips (NEW)
+├── StationPanel          — full DSDADKI station table (expandable)
+├── ZoneCards             — 5 kota administrasi, sorted highest risk first (NEW)
+└── WilayahForecastGrid   — compact 12h BMKG timeline per wilayah (NEW)
+```
+
+### Key functions in Home.jsx
+
+| Function | What it does |
+|---|---|
+| `deriveWilayahZones()` | Computes flood probability for ALL 5 kota administrasi, sorted descending. Replaces old `BASE_ZONES` hardcoded sub-zones. Uses `wilayahSummary` realtime data. |
+| `buildStatusDesc()` | Generates StatusHero description from realtime sensors (station names, counts, WLR%). No static strings. |
+| `WILAYAH_BIAS` | Historical flood frequency bias per kota: Utara +18, Timur +10, Selatan +8, Barat +5, Pusat -5 |
+| `STATUS_RISK_BONUS` | Bonus added when wilayah has active Siaga: S1 +35, S2 +22, S3 +12 |
+
+### What's 100% realtime (real sensor data)
+
+| UI | Source |
+|---|---|
+| Siaga station count | `stations.filter(ratio ≥ 1.0/0.75).length` |
+| Active TMA stations | `diagnostics.water_level_records` |
+| Risk score | `probability × 100` XGBoost |
+| Water level % + direction | `water_level_ratio` + `water_level_delta` DSDADKI |
+| Rainfall | `rainfall_mm` OpenWeather |
+| Alert Panel station names + TMA | `stations[]` DSDADKI |
+| StationPanel full table | `stations[]` DSDADKI |
+| RecommendationsPanel text | Generated from `stations[]` + `wilayahSummary` realtime |
+| StatusHero description | `buildStatusDesc()` uses station names, counts, WLR, trend |
+| WilayahRainfallStrip | `wilayahSummary[].forecast[0]` (BMKG) |
+| WilayahForecastGrid | `wilayahSummary[].forecast[]` (BMKG, up to 4 slots) |
+| ZoneCards badge + TMA pips | `wilayahSummary[].worst_status + siaga*_count` |
+| ModelOutputCard chips | `riskScore`, `waterLevelRatio`, `rainfall`, `riskTrend` |
+| Sensor chips (SensorStrip) | acc3h, acc6h, trend, anomaly, OOD |
+
+### What's estimated/ML (not direct sensor)
+
+| UI | Note |
+|---|---|
+| Zone flood probability % | `40% ML score + status bonus + siaga bonus + BMKG rain + historical bias` |
+| Map district circles | Reference only, very faint |
+
+---
+
+## Frontend: Chatbot (`floodAgent.js`)
+
+### Architecture
+- **Primary**: POST `/api/chat` → Groq llama-3.3-70b-versatile
+- **Fallback**: `_matchOffline(text, lang)` → `OFFLINE_KB[lang][key]`
+- **Timeout**: 28s AbortController + 28s Groq SDK timeout
+- **System prompt**: `SYSTEM_PROMPT` — language rules, typo tolerance, response length, all KB data
+
+### SYSTEM_PROMPT knowledge sections
+1. Typo/informal text handling (kemaa→kemana, bnjir→banjir, etc.)
+2. Response length by question type (status 2-3 kalimat; wilayah 200 kata; darurat 60 kata)
+3. Jakarta flood geography by kecamatan (RT/RW numbered ranges)
+4. **Nama jalan per wilayah** (50+ street names: Jl. Pluit Raya, Jl. Daan Mogot, Jl. Kampung Melayu Besar, dll.) — added 2026-06-04
+5. **Kali/sungai** utama (Ciliwung, Angke, Pesanggrahan, Sunter, Cakung, Sekretaris)
+6. **Infrastruktur** (SODETAN Ciliwung, BKB, BKT, 600+ pompa, waduk Pluit/Sunter/Ria Rio)
+7. **5 kota administrasi** clarification (Jakarta bukan kabupaten biasa, hanya Kep. Seribu yg kabupaten)
+8. Flood duration table (kilat 2-6h; Katulampa Siaga 1/2/3 → hours)
+9. Shelter addresses with jalan names per wilayah
+10. Landmark flood status (malls, RS, sekolah as posko)
+11. Distance estimates shelter (km + minutes)
+12. Website feature explanation
+
+### OFFLINE_KB keys
+`evakuasi` | `status` | `wilayah` | `tanda` | `shelter` | `kontak` | `durasi` | `dokumen` | `cuaca` | `pasca` | `prediksi` | `pompa` | `web` | `rtrw` | `landmark` | `jarak` | **`jalan`** (added 2026-06-04)
+
+### `_matchOffline()` routing order
+```
+jalan     → jl./jalan/kali/sungai/kawasan/komplek
+website   → ini apa/cara pakai/fitur/explain
+durasi    → berapa lama/kapan surut/katulampa
+jarak     → berapa jauh/km dari/menit dari
+landmark  → mall/rs/rumah sakit/sekolah/sdn
+rtrw      → \brt\b/\brw\b/rt 0/rw 0
+wilayah   → kecamatan/kelurahan/daerah
+evakuasi  → kemana/harus kemana/tas darurat/langkah
+status    → kondisi/sekarang/aman
+...
+```
+
+---
+
+## Frontend: CSS (`styles.css`)
+
+### Design system
+- Dark theme: `--bg: #111827` (slate), `--panel: #1a2338`, `--panel-2: #1e2d47`
+- Light theme: `--bg: #f0ede8` (warm cream), `--panel: #faf9f7`
+- Elevation: panel < panel-2 < panel-3
+- Type: Inter (body), Space Grotesk (display), JetBrains Mono (data/code)
+
+### Key CSS blocks added in this session
+| Class | Purpose |
+|---|---|
+| `.rainfall-strip` | Full-width per-wilayah BMKG cards (desktop: min-height 148px, 2.25rem icon) |
+| `.rain-card` | Individual wilayah weather card |
+| `.forecast-compact-grid/row/slot` | 12h BMKG forecast timeline (compact 82px slots) |
+| `.fcs-*` | Forecast compact slot sub-elements |
+| `.model-output-card` | ML analysis card with cyan border-left and signal chips |
+| `.model-signal-chip` | Individual signal chip (Skor, Status, Muka Air, Hujan, Tren) |
+| `.forecast-rain-alert` | 🌧 pill showing when rain arrives |
+| `.wilayah-status-badge` | Status pill for each kota administrasi |
+| `.wilayah-siaga-pip` | Small S1/S2/S3 count badge |
+
+### Mobile chatbot fix
+```css
+/* @media max-width: 640px */
+.chatbot-panel {
+  position: fixed;          /* was: position: absolute with broken max-width:100% */
+  bottom: 76px;
+  left: 0.625rem;
+  right: 0.625rem;          /* spans full viewport width properly */
+  width: auto;
+  max-width: none;
+  height: 78vh;
+  max-height: 520px;
+}
+```
+
+The old `position: absolute; right: 0; width: calc(100vw - 1rem); max-width: 100%` was broken because `max-width: 100%` resolved to the FAB button width (~52px), collapsing the panel.
 
 ---
 
 ## Decision hierarchy (`services/decision_engine.py`)
 
 ```
-L0 PHYSICAL    — input tidak valid → UNKNOWN
-L1 SIAGA       — water_level_ratio ≥ 0.90 → DANGER (override ML)
-L1.5 MULTI     — ≥2 sinyal kuat (rainfall≥60mm, WLR≥0.85, bmkg≥0.80) → DANGER
-L1.7 BMKG      — BMKG certainty "Observed" + severity "Extreme" → WARNING floor
-L1.8 HYDRO     — post-ML: WLR ≥ 0.75 → minimum WARNING
-L1.9 OOD       — IsolationForest outlier → WARNING floor (tapi disupress jika WLR≥0.75)
+L0 PHYSICAL    — invalid input → UNKNOWN
+L1 SIAGA       — WLR ≥ 0.90 → DANGER (override ML)
+L1.5 MULTI     — ≥2 strong signals → DANGER
+L1.7 BMKG      — Observed+Extreme → WARNING floor
+L1.8 HYDRO     — WLR ≥ 0.75 → minimum WARNING
+L1.9 OOD       — IsolationForest outlier → WARNING floor (suppressed if WLR ≥ 0.75)
 L2 INTEGRITY   — failure severe → escalate 1 level
-L3 ML          — XGBoost probability vs adaptive threshold
-L4 TREND       — tren naik sustained → WARNING→DANGER
+L3 ML          — XGBoost vs adaptive threshold
+L4 TREND       — sustained rising trend → WARNING → DANGER
 ```
-
-**OOD suppression:** `is_outlier` di-suppress di backend ketika `water_level_ratio >= 0.75` (model dilatih saat TMA data rusak → WLR tinggi bukan anomali nyata). Frontend juga cek `waterLevelRatio < 0.75` sebelum tampil badge OOD.
-
-**Pump station exclusion:** Stasiun "POMPA*" dikecualikan dari `water_level_ratio` karena threshold-nya adalah kapasitas operasional pompa, bukan threshold banjir publik.
-
----
-
-## Frontend: Command Center (`Home.jsx`)
-
-### Data yang 100% real dari API
-
-| UI Element | Data source |
-|---|---|
-| **STASIUN SIAGA count** | `stations.filter(s => s.ratio >= 1.0/0.75).length` |
-| **STASIUN TMA AKTIF count** | `diagnostics.water_level_records` |
-| **SKOR RISIKO** | `probability × 100` dari XGBoost |
-| **CURAH HUJAN** | `features.rainfall_mm` dari OpenWeather |
-| **MUKA AIR %** + arrow ↑/↓ | `features.water_level_ratio` + `water_level_delta` |
-| **Alert Panel** | `stations[]` dengan ratio ≥ 0.75 (nama & TMA nyata) |
-| **StationPanel** | Full tabel semua `stations[]` dari DSDADKI |
-| **Peta — titik sensor** | `stations[]` dengan lat/lon valid |
-| **Akum. 3j/6j** | `diagnostics.rainfall_acc_3h/acc_6h` |
-| **Tren Hujan** | `diagnostics.rainfall_trend_mm_h` |
-| **Anomali** badge | `trend_state.anomaly_detected/type` |
-| **Musim Hujan** chip | `features.monsoon_season` |
-| **BMKG alert** count | `diagnostics.bmkg_alerts_total` |
-| **BMKG forecast** panel | `bmkg_forecast[]` dari cuaca.json |
-| **"Data sensor HH:MM WIB"** | `snapshot_fetched_at` (UTC→WIB +7) |
-
-### Data estimasi / ML (bukan sensor langsung)
-
-| UI Element | Keterangan |
-|---|---|
-| **Peta — district circles** | Referensi geografis saja (sangat samar, dashed) — bukan data |
-| **Zone table (5 baris)** | Estimasi per-zona: `tma_base × (real_WLR + bias/200)` — TMA pakai WLR real tapi tma_base hardcoded |
-| **Probabilitas zona** | `(riskScore + zone_bias) / 100` — satu ML score + bias historis |
-| **Agent Panel** | Simulasi (label "simulasi") |
-
-### Polling interval
-- Auto-refresh: **5 menit** (`POLL_INTERVAL_MS = 5 * 60 * 1000`)
-- Manual: tombol REFRESH
-- Backend scheduler: tiap 15 menit (env `SNAPSHOT_REFRESH_INTERVAL_MINUTES`)
-
----
-
-## Frontend: Peta (`FloodMap.jsx`)
-
-**Layer 1 — Real sensor markers (foreground):**
-- Sumber: `stations[]` dari API, hanya yang `lat != null && lon != null`
-- Warna: `stationColor(ratio)` → merah ≥1.0, oranye ≥0.75, kuning ≥0.50, hijau
-- Popup: nama stasiun, TMA cm, threshold siaga-1, ratio%
-
-**Layer 2 — District reference (background, sangat samar):**
-- `fillOpacity: 0.04` saat ada sensor, `0.14` jika tidak ada sensor
-- Popup menjelaskan ini bukan data sensor
-
----
-
-## Backend bug fixes yang penting (session ini)
-
-### `db/psycopg2_connection.py`
-- `override=True` → `override=False` di `load_dotenv` (Fly.io env vars tidak ditimpa .env lokal)
-- Password URL-encoded di DSN string (`urllib.parse.quote`) — password dengan karakter special (@#?) tidak lagi rusak koneksi
-- `pooled_connection()` sekarang rollback transaction pada exception sebelum return ke pool — mencegah open transaction bocor ke caller berikutnya
-
-### `api/main.py`
-- `_get_idempotent_response` / `_store_idempotent_response` sekarang catch DB errors (DB down tidak lagi crash seluruh `/predict/agentic`)
-- `_request_budget_s()` ValueError fallback `15.0` → `60.0` (konsisten dengan minimum `30.0`)
-
-### `api/security.py`
-- Hapus duplicate import
-- `_buckets` dict prune entri kosong (mencegah memory leak untuk key tidak aktif)
-
----
-
-## CrewAI (`agents/crew/flood_crew.py`)
-
-3 agen sekuensial setelah ML pipeline:
-
-```
-AhliCuaca → AhliHidrologi → KoordinatorRisiko
-```
-
-- Model: `groq/llama-3.3-70b-versatile` via litellm
-- Timeout: 45s total (`CREW_TIMEOUT_S`), 20s per HTTP call
-- Fallback deterministik jika crew gagal
-- Output: `status_banjir`, `penjelasan`, `tindakan`, `populasi_terdampak`, `tingkat_kepercayaan`, `pesan_petugas`, `analisis_cuaca`, `analisis_hidrologi`
-
----
-
-## Chat (`api/routes/chat.py`)
-
-- Groq client: **module-level singleton** — tidak buat HTTP pool baru per request
-- Timeout: 25s (Groq SDK `timeout=25.0`)
-- Frontend timeout: 25s AbortController di `floodAgent.js`
-- Fallback offline: keyword matching ke `OFFLINE_KB` dict (tanpa network)
-- Status indicator: `aiOnline=null` → "Menghubungkan...", `true` → "AI Online", `false` → "Offline (KB)"
 
 ---
 
@@ -261,36 +311,33 @@ AhliCuaca → AhliHidrologi → KoordinatorRisiko
 
 | Issue | Status | Dampak |
 |---|---|---|
-| Stasiun DSDADKI tanpa GPS | Aktif | Beberapa stasiun `lat/lon = null` → tidak muncul di peta, tapi tetap masuk StationPanel dan alert |
-| Calibration ECE 0.196 | Aktif | Confidence score masih kurang akurat (target < 0.10) |
-| BNPB district mapping gap | Aktif | Beberapa kecamatan tidak ter-map ke kabkot |
-| Zone table tma_base hardcoded | By design | TMA pakai real WLR tapi tma_base per-zona masih konstanta; tidak ada per-zona sensor breakdown dari DSDADKI API |
+| DSDADKI stations without GPS | Active | Some stations lat/lon=null; appear in StationPanel/Alert but not map |
+| Calibration ECE 0.196 | Active | Confidence score less accurate (target <0.10); calibration step deactivated |
+| BNPB district mapping gap | Active | Some kecamatan not mapped to kabkot |
+| TMA scraper sometimes broken | Active | Snapshot may be stale; StaleDataBanner shows if >30 min old |
+| wilayah_summary only has BMKG forecast slots every ~6h | By design | WilayahForecastGrid time labels rounded to nearest 3/6h |
 
 ---
 
 ## Environment variables
 
 ```bash
-# .env (project root — wajib)
-FLOOD_API_KEYS=demo123              # comma-separated; random string di production
+# .env (project root)
+FLOOD_API_KEYS=demo123
 GROQ_API_KEY=gsk_...
 GROQ_MODEL=llama-3.3-70b-versatile
-LLM_PROVIDER=groq                   # groq | anthropic
 OPENWEATHER_API_KEY=...
 SUPABASE_URL=...
 SUPABASE_KEY=...
 DB_HOST=...
-DB_PASSWORD=...                     # URL-encoded otomatis, aman dengan karakter spesial
+DB_PASSWORD=...
 DB_NAME=flood_ai
 DB_USER=postgres
+SNAPSHOT_REFRESH_INTERVAL_MINUTES=15
+INTERNAL_SECRET=...
 
-SNAPSHOT_REFRESH_INTERVAL_MINUTES=15   # default 15, range 1–60
-CREW_TIMEOUT_S=45
-INTERNAL_SECRET=...                    # untuk /internal/refresh-snapshot
-
-# frontend/.env.local (jangan dicommit)
-VITE_API_BASE_URL=                  # kosong = Vite proxy (dev)
-                                    # https://your-backend.railway.app (production)
+# frontend/.env.local
+VITE_API_BASE_URL=   # empty = Vite proxy (dev); https://... in production
 ```
 
 ---
@@ -298,13 +345,36 @@ VITE_API_BASE_URL=                  # kosong = Vite proxy (dev)
 ## Recent commits
 
 ```
-aad22c9 feat: replace fake map circles with real DSDADKI sensor markers
-d18e2c9 fix: add parentheses around ?? and || to satisfy esbuild precedence rule
-3a0fe4b feat: replace all fake/derived data with real DSDADKI sensor readings
-a331613 feat: wire all real-time sensor data into frontend UI
-fb90090 fix: real-time data freshness — 5-min polling, sensor timestamp, fix misleading TMA note
-1979b2e fix: backend bug fixes — DB pool safety, DSN encoding, security, idempotency
-8d0351d fix: focus both maps strictly on DKI Jakarta
-7b4fed0 fix: 6 bugs — timezone, chatbot state, timeouts, Groq client, refresh UX
-cdc8d8f fix: exclude pump stations from water_level_ratio calculation
+ec92004 feat: model output card, compact forecast grid, sorted wilayah zones, trend badge
+4944d28 feat: realtime risk zones, 12h forecast grid, dynamic hero text, chatbot streets
+dd56ffe feat: per-wilayah rainfall strip + deep chatbot KB upgrade
+fd568db fix: logo + rainfall per-wilayah + forecast readable + chatbot short
+b11a6e1 feat: per-wilayah Jakarta conditions + abstract logo + chatbot
+bf50558 feat: AI-style logo
+3d4c933 feat: new TMA gauge logo + navbar
+3235847 fix: tour cleanup + mobile floating card + responsiveness
 ```
+
+---
+
+## Session summary — what changed 2026-06-04
+
+### Architecture changes
+- **`deriveWilayahZones()`** replaces `BASE_ZONES` sub-zones: all 5 kota administrasi, sorted by risk
+- **`buildStatusDesc()`**: StatusHero description generated from live sensors (no static strings)
+- **`ModelOutputCard`**: proper ML analysis card with signal chips (replaces text strip)
+- **`WilayahForecastGrid`**: compact 12h BMKG timeline (replaces WilayahGrid with sparse cards)
+- **`RecommendationsPanel`**: fully realtime — station names, TMA values, wilayah status in text
+
+### Bug fixes
+- Mobile chatbot `position: fixed` fix — panel was collapsing to 52px due to broken `max-width: 100%` on absolute child of fixed parent
+- Rainfall strip cards too small on desktop — increased to `min-height: 148px`, `2.25rem` icon, `0.82rem` desc
+- Trend indicator "Tren 3 titik" → "Skor ~45 mnt" + pill badge with hint text
+- Zone cards showed only Kebayoran/Penjaringan/Jatinegara/Kalideres/Cengkareng (Jakarta Pusat missing) → fixed
+
+### Chatbot enrichment
+- 50+ nama jalan (Jl. Pluit Raya, Jl. Daan Mogot, Jl. Kampung Melayu Besar, Jl. Dr. Saharjo, etc.)
+- Kali/sungai names (Ciliwung, Angke, Pesanggrahan, Sunter, Cakung, Sekretaris)
+- Infrastruktur (SODETAN, BKB/BKT, waduk, 600+ pompa)
+- Offline KB entry `jalan` + `_matchOffline` routing for street/road queries
+- Klarifikasi: Jakarta = 5 kota administrasi + Kep. Seribu (bukan kabupaten biasa)
