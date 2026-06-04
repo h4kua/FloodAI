@@ -43,9 +43,9 @@ function AppShell() {
       <header className="topbar">
         <span className="logo">
           <DeFloodLogo />
-          <span className="logo-de">de</span>
-          <span className="logo-flood">Flood</span>
-          <span className="logo-ai">.ai</span>
+          <span className="logo-text">
+            <span className="logo-de">de</span><span className="logo-flood">Flood</span><span className="logo-ai">.ai</span>
+          </span>
         </span>
 
         <nav className="nav">
