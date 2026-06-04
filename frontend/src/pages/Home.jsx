@@ -830,11 +830,7 @@ function StatusHero({ riskData }) {
   const sparkY = (p) => sparkH - 4 - Math.round(Math.min(p, 1) * (sparkH - 8));
 
   return (
-    <div className="status-hero fade-in" style={{
-      background: cfg.bg,
-      border: `1px solid ${cfg.border}`,
-      borderLeft: `4px solid ${cfg.color}`,
-    }}>
+    <div className={`status-hero fade-in level-${level}`}>
       <div className="status-hero-main">
         <div style={{
           fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem",
