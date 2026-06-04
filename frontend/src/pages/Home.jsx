@@ -7,55 +7,53 @@ import { useT, useApp } from "../lib/appContext";
 
 /* ── Constants ─────────────────────────────────────────── */
 
-// Bias values derived from BPBD flood event frequency 2024-2026 (scripts/process_bpbd.py)
-// Higher bias = more flood-prone based on actual kejadian data
-const BASE_ZONES = [
-  { zone: "Kebayoran",   district: "Jakarta Selatan", bias: +20, tma_base: 340, is_ood: false },
-  { zone: "Penjaringan", district: "Jakarta Utara",   bias:  +6, tma_base: 900, is_ood: false },
-  { zone: "Jatinegara",  district: "Jakarta Timur",   bias:  +6, tma_base: 750, is_ood: true  },
-  { zone: "Kalideres",   district: "Jakarta Barat",   bias:  +4, tma_base: 640, is_ood: false },
-  { zone: "Cengkareng",  district: "Jakarta Barat",   bias:  -1, tma_base: 820, is_ood: false },
-];
-
-
-// Maps each zone to its Jakarta kota administrasi (administrative city).
-// Used to pull realtime TMA + BMKG data per zone from wilayahSummary.
-const ZONE_WILAYAH_MAP = {
-  "Kebayoran":   "Jakarta Selatan",
-  "Penjaringan": "Jakarta Utara",
-  "Jatinegara":  "Jakarta Timur",
-  "Kalideres":   "Jakarta Barat",
-  "Cengkareng":  "Jakarta Barat",
+// Historical flood frequency bias per kota administrasi (BPBD 2024-2026)
+// Utara = highest risk (rob + banjir kiriman), Pusat = lowest
+const WILAYAH_BIAS = {
+  "Jakarta Utara":   +18,
+  "Jakarta Timur":   +10,
+  "Jakarta Selatan": +8,
+  "Jakarta Barat":   +5,
+  "Jakarta Pusat":   -5,
+};
+const WILAYAH_TMA_BASE = {
+  "Jakarta Utara":   900,
+  "Jakarta Timur":   750,
+  "Jakarta Selatan": 650,
+  "Jakarta Barat":   730,
+  "Jakarta Pusat":   580,
 };
 
-// Bonus added to risk probability based on DSDADKI worst-status per wilayah.
+// Status bonus from realtime DSDADKI worst-status per wilayah
 const STATUS_RISK_BONUS = { "Siaga 1": 35, "Siaga 2": 22, "Siaga 3": 12, "Normal": 0 };
 
-// deriveRealtimeZones: blends global ML score with per-wilayah DSDADKI sensor counts
-// and BMKG forecast. Falls back to pure ML when wilayahSummary is empty.
-function deriveRealtimeZones(riskScore, wilayahSummary = [], rainfall = 0, waterLevelRatio = 0.5) {
+// deriveWilayahZones: computes flood probability for ALL 5 kota administrasi Jakarta.
+// Returns them SORTED highest → lowest probability, so the dashboard always shows
+// the most dangerous district first. Uses realtime DSDADKI sensor counts + BMKG
+// forecast when available; falls back to pure ML bias derivation.
+function deriveWilayahZones(riskScore, wilayahSummary = [], rainfall = 0, waterLevelRatio = 0.5) {
   const wlr = Math.max(0.3, Math.min(1.5, waterLevelRatio));
   const summaryMap = {};
   (wilayahSummary || []).forEach(w => { summaryMap[w.wilayah] = w; });
   const hasRealtime = Object.keys(summaryMap).length > 0;
 
-  return BASE_ZONES.map((z) => {
-    const wilayahName = ZONE_WILAYAH_MAP[z.zone];
-    const ws = summaryMap[wilayahName];
+  const ALL_WILAYAH = ["Jakarta Utara","Jakarta Timur","Jakarta Selatan","Jakarta Barat","Jakarta Pusat"];
+
+  const zones = ALL_WILAYAH.map(wilayahName => {
+    const ws      = summaryMap[wilayahName];
+    const bias    = WILAYAH_BIAS[wilayahName] ?? 0;
+    const tmaBase = WILAYAH_TMA_BASE[wilayahName] ?? 700;
 
     let prob;
     if (hasRealtime && ws) {
-      // Realtime path: TMA status + siaga sensor counts + BMKG forecast + bias
       const statusBonus = STATUS_RISK_BONUS[ws.worst_status] ?? 0;
       const siagaBonus  = (ws.siaga1_count ?? 0) * 8 + (ws.siaga2_count ?? 0) * 4 + (ws.siaga3_count ?? 0) * 2;
       const isRaining   = ws.forecast?.[0]?.weather_desc?.toLowerCase().includes("hujan");
       const rainBonus   = isRaining ? (rainfall > 20 ? 12 : 6) : 0;
-      // 40% global ML + realtime sensor signals + historical bias
-      const blended = riskScore * 0.4 + statusBonus + siagaBonus + rainBonus + z.bias;
+      const blended = riskScore * 0.4 + statusBonus + siagaBonus + rainBonus + bias;
       prob = Math.max(0.04, Math.min(0.97, blended / 100));
     } else {
-      // Fallback: original ML derivation
-      prob = Math.max(0.04, Math.min(0.97, (riskScore + z.bias) / 100));
+      prob = Math.max(0.04, Math.min(0.97, (riskScore + bias) / 100));
     }
 
     let risk_level;
@@ -64,14 +62,14 @@ function deriveRealtimeZones(riskScore, wilayahSummary = [], rainfall = 0, water
     else if (prob >= 0.30) risk_level = "WASPADA";
     else risk_level = "NORMAL";
 
-    const wlrBiased = Math.min(1.5, Math.max(0.3, wlr + z.bias / 200));
+    const wlrBiased = Math.min(1.5, Math.max(0.3, wlr + bias / 200));
     return {
-      ...z,
-      probability: prob,
-      tma: Math.round(z.tma_base * wlrBiased),
-      rainfall,
+      zone:         wilayahName.replace("Jakarta ", "Jkt "),
+      district:     wilayahName,
+      probability:  prob,
       risk_level,
-      // realtime extras — shown in ZoneCards when available
+      tma:          Math.round(tmaBase * wlrBiased),
+      rainfall,
       worstStatus:  ws?.worst_status ?? null,
       siaga1Count:  ws?.siaga1_count ?? 0,
       siaga2Count:  ws?.siaga2_count ?? 0,
@@ -80,6 +78,9 @@ function deriveRealtimeZones(riskScore, wilayahSummary = [], rainfall = 0, water
       isRealtime:   hasRealtime && !!ws,
     };
   });
+
+  // Sort highest flood probability first — so most dangerous district appears first
+  return zones.sort((a, b) => b.probability - a.probability);
 }
 
 /* ── Risk helpers ──────────────────────────────────────── */
@@ -628,6 +629,96 @@ function RecommendationsPanel({ riskData, stations = [] }) {
   );
 }
 
+/* ── Model Output Card — realtime ML analysis with signal chips ─────────── */
+function ModelOutputCard({ riskData, score }) {
+  const { lang } = useApp();
+  const isId = lang === "id";
+  if (!riskData?.interpretation) return null;
+
+  const rainfall   = riskData.rainfall ?? 0;
+  const wlr        = riskData.waterLevelRatio ?? 0;
+  const riskTrend  = riskData.trendState?.risk_trend;
+  const level      = riskData.level ?? "waspada";
+
+  let snapTimeStr = null;
+  if (riskData.snapshotFetchedAt) {
+    const wib = new Date(new Date(riskData.snapshotFetchedAt).getTime() + 7 * 3_600_000);
+    snapTimeStr = `${String(wib.getUTCHours()).padStart(2,"0")}:${String(wib.getUTCMinutes()).padStart(2,"0")}`;
+  }
+
+  const trendText = riskTrend === "increasing"
+    ? (isId ? "↑ Naik" : "↑ Rising")
+    : riskTrend === "decreasing"
+    ? (isId ? "↓ Turun" : "↓ Falling")
+    : (isId ? "→ Stabil" : "→ Stable");
+  const trendColor = riskTrend === "increasing" ? "var(--wsp)" : riskTrend === "decreasing" ? "var(--safe)" : "var(--muted)";
+
+  const scoreColor = score >= 70 ? "var(--s1)" : score >= 45 ? "var(--wsp)" : "var(--safe)";
+  const levelColor = { aman: "var(--safe)", waspada: "var(--wsp)", siaga: "var(--s2)", bahaya: "var(--s1)" }[level] ?? "var(--wsp)";
+  const levelLabel = { aman: isId ? "Aman" : "Safe", waspada: isId ? "Waspada" : "Watch",
+    siaga: isId ? "Siaga" : "Alert", bahaya: isId ? "Bahaya" : "Danger" }[level] ?? "—";
+
+  return (
+    <div className="model-output-card fade-in">
+      {/* Header row */}
+      <div className="model-output-header">
+        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+          <div className="model-output-icon">⬡</div>
+          <div>
+            <div className="model-output-title">
+              {isId ? "ANALISIS MODEL" : "MODEL ANALYSIS"}
+            </div>
+            <div className="model-output-sub">
+              XGBoost · {isId ? "14 fitur · update 15 mnt" : "14 features · 15 min update"}
+            </div>
+          </div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
+          {snapTimeStr && (
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)" }}>
+              {snapTimeStr} WIB
+            </span>
+          )}
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em" }}>● real</span>
+        </div>
+      </div>
+
+      {/* Interpretation text */}
+      <p className="model-output-text">{riskData.interpretation}</p>
+
+      {/* Signal chips — key inputs the model is reading */}
+      <div className="model-signal-chips">
+        <div className="model-signal-chip">
+          <span>{isId ? "Skor" : "Score"}</span>
+          <strong style={{ color: scoreColor }}>{score}</strong>
+        </div>
+        <div className="model-signal-chip">
+          <span>{isId ? "Status" : "Status"}</span>
+          <strong style={{ color: levelColor }}>{levelLabel}</strong>
+        </div>
+        {wlr > 0 && (
+          <div className="model-signal-chip">
+            <span>{isId ? "Muka Air" : "Water Lvl"}</span>
+            <strong style={{ color: wlr >= 0.75 ? "var(--wsp)" : "var(--text)" }}>{Math.round(wlr * 100)}%</strong>
+          </div>
+        )}
+        {rainfall > 0 && (
+          <div className="model-signal-chip">
+            <span>{isId ? "Hujan" : "Rain"}</span>
+            <strong style={{ color: "var(--cyan)" }}>{Math.round(rainfall)} mm/j</strong>
+          </div>
+        )}
+        {riskTrend && (
+          <div className="model-signal-chip">
+            <span>{isId ? "Tren" : "Trend"}</span>
+            <strong style={{ color: trendColor }}>{trendText}</strong>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── Stale data warning — tampil kalau snapshot > 30 menit ─────────────── */
 function StaleDataBanner({ snapshotFetchedAt }) {
   const { lang } = useApp();
@@ -750,14 +841,17 @@ function StatusHero({ riskData }) {
     snapTimeStr = `${String(wib.getUTCHours()).padStart(2,"0")}:${String(wib.getUTCMinutes()).padStart(2,"0")}`;
   }
 
-  const trendLabel = riskTrend === "increasing"
-    ? (isId ? "↑ Naik" : "↑ Rising")
+  // Trend badge — displayed as a pill so users immediately understand direction
+  const trendCfg = riskTrend === "increasing"
+    ? { text: isId ? "↑ Risiko Naik" : "↑ Risk Rising", color: "var(--wsp)", bg: "var(--wsp-soft)", border: "var(--wsp-border)",
+        hint: isId ? "Sensor menunjukkan kondisi memburuk" : "Sensors show deteriorating conditions" }
     : riskTrend === "decreasing"
-    ? (isId ? "↓ Turun" : "↓ Falling")
-    : (isId ? "→ Stabil" : "→ Stable");
-  const trendColor = riskTrend === "increasing" ? "var(--wsp)" : riskTrend === "decreasing" ? "var(--safe)" : "var(--muted)";
+    ? { text: isId ? "↓ Risiko Turun" : "↓ Risk Falling", color: "var(--safe)", bg: "var(--safe-soft)", border: "var(--safe-border)",
+        hint: isId ? "Kondisi mulai membaik" : "Conditions improving" }
+    : { text: isId ? "→ Stabil" : "→ Stable", color: "var(--muted)", bg: "rgba(255,255,255,0.04)", border: "var(--line)",
+        hint: isId ? "Tidak ada perubahan signifikan" : "No significant change" };
 
-  // Mini sparkline dari recent_probabilities (3–5 data points dari trend history)
+  // Mini sparkline from recent_probabilities — shows risk score over last ~45 min
   const probs = riskData?.trendState?.recent_probabilities ?? [];
   const sparkW = Math.max(probs.length, 2) * 22;
   const sparkH = 32;
@@ -791,14 +885,24 @@ function StatusHero({ riskData }) {
           <div className="hero-stat-value" style={{ color: cfg.color }}>{score}</div>
           <div className="hero-stat-label">{isId ? "Skor Risiko" : "Risk Score"}</div>
         </div>
+        {/* Trend pill badge — more user-friendly than raw arrow text */}
         <div className="hero-stat">
-          <div className="hero-stat-value" style={{ color: trendColor, fontSize: "1.1rem" }}>{trendLabel}</div>
-          <div className="hero-stat-label">{isId ? "Tren Risiko" : "Risk Trend"}</div>
+          <div style={{
+            display: "inline-flex", alignItems: "center",
+            background: trendCfg.bg, border: `1px solid ${trendCfg.border}`,
+            borderRadius: "999px", padding: "0.3rem 0.75rem",
+            fontFamily: "'JetBrains Mono',monospace",
+            fontSize: "0.72rem", fontWeight: 700, color: trendCfg.color,
+            letterSpacing: "0.03em", whiteSpace: "nowrap",
+          }}>
+            {trendCfg.text}
+          </div>
+          <div className="hero-stat-label" style={{ marginTop: "0.3rem" }}>{trendCfg.hint}</div>
         </div>
         {rainfall > 0 && (
           <div className="hero-stat">
-            <div className="hero-stat-value" style={{ color: "var(--wsp)" }}>{Math.round(rainfall)}</div>
-            <div className="hero-stat-label">mm/jam</div>
+            <div className="hero-stat-value" style={{ color: "var(--wsp)" }}>{Math.round(rainfall)} mm/j</div>
+            <div className="hero-stat-label">{isId ? "Curah Hujan" : "Rainfall"}</div>
           </div>
         )}
         {probs.length >= 2 && (
@@ -819,7 +923,7 @@ function StatusHero({ riskData }) {
                 />
               ))}
             </svg>
-            <div className="hero-stat-label">{isId ? "Tren 3 titik" : "3-pt trend"}</div>
+            <div className="hero-stat-label">{isId ? "Skor ~45 mnt" : "Score ~45 min"}</div>
           </div>
         )}
       </div>
@@ -835,9 +939,10 @@ const WILAYAH_STATUS_STYLE = {
   "Normal":  { color: "var(--safe)", bg: "var(--safe-soft)", border: "var(--safe-border)" },
 };
 
-/* ── Wilayah Forecast Grid — 12-hour BMKG timeline per district ──
-   Differentiated from WilayahRainfallStrip (which shows current BMKG snapshot).
-   This shows WHERE and WHEN rain will arrive in the next 1-12 hours.
+/* ── Wilayah Forecast Grid — compact 12-hour BMKG timeline ──
+   Differentiated from WilayahRainfallStrip (current snapshot).
+   Shows WHERE and WHEN rain arrives over the next 1-12 hours.
+   Design: compact rows, fixed-width slot cards, rain incoming pills.
 */
 function WilayahForecastGrid({ wilayahSummary }) {
   const { lang } = useApp();
@@ -846,17 +951,19 @@ function WilayahForecastGrid({ wilayahSummary }) {
 
   const now = new Date();
 
+  // Round diffH to nearest 3 or 6 for cleaner time labels
   const getTimeLabel = (slot, i) => {
-    if (!slot?.local_datetime) return i === 0 ? (isId ? "Skrg" : "Now") : `+${i * 3}j`;
+    if (!slot?.local_datetime) return i === 0 ? (isId ? "Skrg" : "Now") : `+${i * 6}j`;
     const dt = new Date(slot.local_datetime);
     const diffH = Math.round((dt - now) / 3_600_000);
-    if (i === 0 || diffH <= 0) return isId ? "Skrg" : "Now";
-    return isId ? `+${diffH}j` : `+${diffH}h`;
+    if (diffH <= 1) return isId ? "Skrg" : "Now";
+    const rounded = diffH <= 4 ? diffH : Math.round(diffH / 3) * 3;
+    return isId ? `+${rounded}j` : `+${rounded}h`;
   };
 
   return (
     <div className="panel panel-body fade-in">
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.875rem" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
         <p className="panel-title" style={{ marginBottom: 0 }}>
           {isId ? "Prakiraan Cuaca 1–12 Jam ke Depan" : "1–12 Hour Weather Forecast"}
         </p>
@@ -865,68 +972,68 @@ function WilayahForecastGrid({ wilayahSummary }) {
         </span>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column" }}>
+      <div className="forecast-compact-grid">
         {wilayahSummary.map((w) => {
-          const style  = WILAYAH_STATUS_STYLE[w.worst_status] ?? WILAYAH_STATUS_STYLE["Normal"];
-          const shortName = w.wilayah.replace("Jakarta ", "Jkt ");
-          const slots  = (w.forecast || []).slice(0, 4);
-          // Detect first upcoming rain slot (excluding slot 0 = "now")
-          const firstRainIdx = slots.findIndex((s, i) => i > 0 && s.weather_desc?.toLowerCase().includes("hujan"));
-          const firstRainSlot = firstRainIdx > 0 ? slots[firstRainIdx] : null;
+          const wstyle     = WILAYAH_STATUS_STYLE[w.worst_status] ?? WILAYAH_STATUS_STYLE["Normal"];
+          const shortName  = w.wilayah.replace("Jakarta ", "Jkt ");
+          const slots      = (w.forecast || []).slice(0, 4);
+          const firstRainI = slots.findIndex((s, i) => i > 0 && s.weather_desc?.toLowerCase().includes("hujan"));
 
           return (
-            <div key={w.wilayah} className="forecast-row">
-              {/* Left label: wilayah name + TMA status */}
-              <div className="forecast-row-label">
-                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", fontWeight: 700,
-                  color: "var(--muted)", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "0.25rem" }}>
+            <div key={w.wilayah} className="forecast-compact-row">
+              {/* Left: identity + TMA status */}
+              <div className="forecast-compact-label">
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem", fontWeight: 700,
+                  color: "var(--muted)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
                   {shortName}
-                </div>
+                </span>
                 <span className="wilayah-status-badge"
-                  style={{ background: style.bg, color: style.color, borderColor: style.border }}>
+                  style={{ background: wstyle.bg, color: wstyle.color, borderColor: wstyle.border, marginTop: "0.2rem", display: "block", width: "fit-content" }}>
                   {w.worst_status}
                 </span>
-                {/* TMA sensor count */}
-                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.52rem", color: "var(--muted-2)", marginTop: "0.25rem" }}>
-                  {w.tma_count > 0 && `${w.tma_count} TMA`}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "2px", marginTop: "0.25rem" }}>
+                  {w.tma_count > 0 && (
+                    <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.52rem", color: "var(--muted-2)" }}>
+                      {w.tma_count} TMA
+                    </span>
+                  )}
                   {w.siaga1_count > 0 && (
-                    <span className="wilayah-siaga-pip" style={{ background: "var(--s1-soft)", color: "var(--s1)", borderColor: "var(--s1-border)", marginLeft: 3 }}>
+                    <span className="wilayah-siaga-pip" style={{ background: "var(--s1-soft)", color: "var(--s1)", borderColor: "var(--s1-border)" }}>
                       {w.siaga1_count}×S1
                     </span>
                   )}
                   {w.siaga2_count > 0 && (
-                    <span className="wilayah-siaga-pip" style={{ background: "var(--s2-soft)", color: "var(--s2)", borderColor: "var(--s2-border)", marginLeft: 3 }}>
+                    <span className="wilayah-siaga-pip" style={{ background: "var(--s2-soft)", color: "var(--s2)", borderColor: "var(--s2-border)" }}>
                       {w.siaga2_count}×S2
                     </span>
                   )}
                 </div>
-                {/* Rain-incoming alert */}
-                {firstRainSlot && (
-                  <div className="forecast-rain-alert" style={{ marginTop: "0.25rem" }}>
-                    🌧 {getTimeLabel(firstRainSlot, firstRainIdx)}
+                {firstRainI > 0 && (
+                  <div className="forecast-rain-alert" style={{ marginTop: "0.3rem" }}>
+                    🌧 {getTimeLabel(slots[firstRainI], firstRainI)}
                   </div>
                 )}
               </div>
 
-              {/* Forecast timeline slots */}
-              <div className="forecast-slots">
+              {/* Right: compact slot cards */}
+              <div className="forecast-compact-slots">
                 {slots.length > 0 ? slots.map((slot, i) => {
                   const isRain = slot.weather_desc?.toLowerCase().includes("hujan");
-                  const icon = WEATHER_ICON[slot.weather_desc] ?? "🌤";
+                  const icon   = WEATHER_ICON[slot.weather_desc] ?? "🌤";
                   return (
-                    <div key={i} className={`forecast-slot${isRain ? " rain" : ""}`}>
-                      <span className="forecast-slot-time">{getTimeLabel(slot, i)}</span>
-                      <span className="forecast-slot-icon">{icon}</span>
-                      <span className="forecast-slot-desc">{slot.weather_desc ?? "—"}</span>
+                    <div key={i} className={`forecast-compact-slot${isRain ? " rain" : ""}`}>
+                      <span className="fcs-time">{getTimeLabel(slot, i)}</span>
+                      <span className="fcs-icon">{icon}</span>
+                      <span className={`fcs-desc${isRain ? " rain" : ""}`}>{slot.weather_desc ?? "—"}</span>
                       {slot.tmin != null && (
-                        <span className="forecast-slot-temp">{slot.tmin}–{slot.tmax}°</span>
+                        <span className="fcs-temp">{slot.tmin}–{slot.tmax}°</span>
                       )}
                     </div>
                   );
                 }) : (
-                  <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)", padding: "0.5rem" }}>
-                    {isId ? "Tidak ada data prakiraan" : "No forecast data"}
-                  </div>
+                  <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)" }}>
+                    {isId ? "Belum ada data" : "No data"}
+                  </span>
                 )}
               </div>
             </div>
@@ -936,8 +1043,8 @@ function WilayahForecastGrid({ wilayahSummary }) {
 
       <p style={{ marginTop: "0.875rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", lineHeight: 1.6 }}>
         {isId
-          ? "● Prakiraan BMKG per kota administrasi · Slot tiap ~3 jam · 🌧 menandakan hujan akan masuk · TMA bisa naik karena kiriman dari Bogor/Depok meski tidak hujan di Jakarta"
-          : "● BMKG forecast per administrative city · Slots every ~3 hrs · 🌧 = rain incoming · TMA may rise from upstream Bogor/Depok flow even without local rain"}
+          ? "● Prakiraan BMKG per kota administrasi · 🌧 = hujan akan masuk · Slot interval ~6 jam · TMA bisa naik meski tidak hujan di Jakarta (kiriman Bogor/Depok)"
+          : "● BMKG per administrative city · 🌧 = rain incoming · ~6h slot interval · TMA may rise without local rain (upstream Bogor/Depok)"}
       </p>
     </div>
   );
@@ -1088,9 +1195,9 @@ export default function Home({ setRiskContext, riskLevel }) {
   const realSiaga2  = useMemo(() => stations.filter(s => s.ratio >= 0.75 && s.ratio < 1.0).length, [stations]);
   const totalStations = riskData?.tmaStationsActive ?? (stations.length || null);
 
-  // ── Realtime zone derivation — blends ML with DSDADKI sensor counts + BMKG ──
+  // ── All-5-wilayah zone derivation, sorted highest risk first ──────────────
   const zones = useMemo(
-    () => deriveRealtimeZones(
+    () => deriveWilayahZones(
       score,
       riskData?.wilayahSummary ?? [],
       riskData?.rainfall ?? 0,
@@ -1196,13 +1303,8 @@ export default function Home({ setRiskContext, riskLevel }) {
         </div>
       </div>
 
-      {/* Model interpretation — full width, no gap */}
-      {riskData?.interpretation && (
-        <div className="fade-in" style={{ background: "rgba(0,207,255,0.05)", border: "1px solid rgba(0,207,255,0.15)", borderLeft: "3px solid var(--cyan)", borderRadius: "12px", padding: "0.875rem 1.25rem", fontSize: "0.82rem", color: "var(--muted)", lineHeight: 1.7 }}>
-          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--cyan)", letterSpacing: "0.1em", textTransform: "uppercase", marginRight: 10 }}>{t("home.modelOut")}</span>
-          {riskData.interpretation}
-        </div>
-      )}
+      {/* Model analysis card — realtime ML output with signal chips */}
+      <ModelOutputCard riskData={riskData} score={score} />
 
       {/* Real DSDADKI station table — all live sensor readings */}
       <StationPanel stations={stations} />
