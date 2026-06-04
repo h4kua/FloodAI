@@ -1497,10 +1497,16 @@ body {
   .route-input, .route-select { font-size: 0.75rem; padding: 0.375rem 0.625rem; }
   .route-search-btn { padding: 0.375rem 0.75rem; font-size: 0.68rem; }
 
-  /* Chatbot — fixed full-width on mobile */
-  .chatbot-fab   { bottom: 1rem; right: 1rem; }
+  /* Page header — stack vertically so sync info doesn't cramp */
+  .page-header    { flex-direction: column; align-items: stretch; gap: 0.375rem; }
+  .header-actions { justify-content: space-between; align-items: center; }
+  .header-info-col { align-items: flex-start !important; }
+  .header-sensor-time { display: none; }
+
+  /* Chatbot — fixed full-width on mobile, above system home indicator */
+  .chatbot-fab   { bottom: 2.5rem; right: 1rem; }
   .chatbot-panel {
-    position: fixed; bottom: 74px; left: 0.625rem; right: 0.625rem;
+    position: fixed; bottom: 100px; left: 0.625rem; right: 0.625rem;
     width: auto; max-width: none;
     height: 78vh; max-height: 520px; border-radius: 16px;
   }
@@ -1518,6 +1524,7 @@ body {
   /* Weather */
   .weather-chips-grid { grid-template-columns: repeat(3, 1fr); }
   .ow-wilayah-grid    { grid-template-columns: repeat(3, 1fr); }
+  .weather-current-header { flex-wrap: nowrap; align-items: center; }
 }
 
 /* ── 420px: small mobile ─────────────────────────────────────── */
@@ -1531,7 +1538,7 @@ body {
   .metric-card  { height: 84px; }
   .metric-value { font-size: 1.4rem; }
   .team-grid  { grid-template-columns: 1fr; }
-  .chatbot-panel { bottom: 68px; left: 0.375rem; right: 0.375rem; height: 72vh; max-height: 480px; }
+  .chatbot-panel { bottom: 100px; left: 0.375rem; right: 0.375rem; height: 72vh; max-height: 480px; }
   .weather-chips-grid { grid-template-columns: repeat(2, 1fr); }
   .ow-wilayah-grid    { grid-template-columns: repeat(2, 1fr); }
   .status-hero-level  { font-size: 1.625rem; }
@@ -1539,7 +1546,7 @@ body {
 
 /* ── Tour mobile adjustments ─────────────────────────────────── */
 @media (max-width: 640px) {
-  .tour-reopen-btn { bottom: 1rem; left: 1rem; }
+  .tour-reopen-btn { bottom: 2.5rem; left: 1rem; }
   .tour-spotlight {
     border-radius: 8px;
     box-shadow:

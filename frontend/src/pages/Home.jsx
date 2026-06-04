@@ -1408,16 +1408,14 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
           <h1 className="page-title">{t("home.title")}</h1>
         </div>
         <div className="header-actions">
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.15rem" }}>
+          <div className="header-info-col" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.15rem" }}>
             <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.68rem", color: "var(--muted-2)" }}>
               {lastUpdated
                 ? t("home.sync", { time: lastUpdated.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) })
                 : t("home.syncing")}
             </span>
-            {/* Show when sensor snapshot was built — different from lastUpdated (=last API call) */}
             {riskData?.snapshotFetchedAt && (() => {
               const snapTime = new Date(riskData.snapshotFetchedAt);
-              // Convert UTC → WIB (+7)
               const wibMs = snapTime.getTime() + 7 * 60 * 60 * 1000;
               const wibDate = new Date(wibMs);
               const hh = String(wibDate.getUTCHours()).padStart(2, "0");
@@ -1426,7 +1424,7 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
                 ? ` · ${riskData.tmaStationsActive} stasiun TMA`
                 : "";
               return (
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", opacity: 0.7 }}>
+                <span className="header-sensor-time" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", opacity: 0.7 }}>
                   Data sensor {hh}:{mm} WIB{stationsLabel}
                 </span>
               );
