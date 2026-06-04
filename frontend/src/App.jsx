@@ -7,37 +7,44 @@ import { AppContext, useT } from "./lib/appContext";
 
 /* ── deFlood.ai logo mark ───────────────────────────────── */
 /*
- * Icon concept: TMA gauge (tongkat pengukur Tinggi Muka Air) — the exact
- * instrument Jakarta flood monitoring uses at pintu air stations.
- * Left: gauge post with 3 siaga-level tick marks.
- * Right: rising water fill with wave, level at middle tick (Siaga 3 zone).
- * Specific to Jakarta flood infrastructure. Readable at 20–32px.
+ * Design language: abstract geometric like modern AI logos (ChatGPT, Claude,
+ * Gemini). A smooth filled circle with three flowing wave arcs inside —
+ * each arc subtly references data streams + water. No literal imagery.
+ * Gradient from cyan-300 → sky-600. Clean, bold, scalable.
  */
 function DeFloodLogo({ size = 22 }) {
+  const id = `df${size}`;
   return (
     <svg
-      width={size} height={size} viewBox="0 0 24 24"
+      width={size} height={size} viewBox="0 0 32 32"
       fill="none" aria-hidden="true"
       style={{ flexShrink: 0, display: "block" }}
     >
-      {/* Water fill — rising level */}
-      <path
-        d="M8 13 C9.5 11.5 11 14 12.5 12.5 C14 11 15.5 13.5 17 12 C18 11.2 19 11.5 20 11.5 L20 20 L8 20 Z"
-        fill="var(--cyan-soft)"
-      />
-      {/* Wave at water surface */}
-      <path
-        d="M8 13 C9.5 11.5 11 14 12.5 12.5 C14 11 15.5 13.5 17 12 C18 11.2 19 11.5 20 11.5"
-        stroke="var(--cyan)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"
-      />
-      {/* Gauge post — TMA stick */}
-      <line x1="6" y1="4" x2="6" y2="20" stroke="var(--cyan)" strokeWidth="2.5" strokeLinecap="round"/>
-      {/* Siaga tick marks on gauge */}
-      <line x1="6" y1="8"  x2="9.5" y2="8"  stroke="var(--cyan)" strokeWidth="1.4" strokeLinecap="round" opacity="0.45"/>
-      <line x1="6" y1="12" x2="10"  y2="12" stroke="var(--cyan)" strokeWidth="1.6" strokeLinecap="round"/>
-      <line x1="6" y1="16" x2="9.5" y2="16" stroke="var(--cyan)" strokeWidth="1.4" strokeLinecap="round" opacity="0.45"/>
-      {/* Active level indicator dot on gauge */}
-      <circle cx="6" cy="12" r="2.2" fill="var(--cyan)"/>
+      <defs>
+        <linearGradient id={`${id}g`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"   stopColor="#67e8f9" />
+          <stop offset="100%" stopColor="#0369a1" />
+        </linearGradient>
+        <clipPath id={`${id}c`}>
+          <circle cx="16" cy="16" r="13.5" />
+        </clipPath>
+      </defs>
+
+      {/* Filled circle base — the "AI badge" */}
+      <circle cx="16" cy="16" r="13.5" fill={`url(#${id}g)`} />
+
+      {/* Three abstract wave arcs — water + data streams */}
+      <g clipPath={`url(#${id}c)`} stroke="white" strokeLinecap="round" strokeLinejoin="round" fill="none">
+        {/* Top arc — lightest, suggests distant data */}
+        <path d="M5 13 C7.5 10.5 10 14.5 12.5 12 C15 9.5 17.5 13 20 10.5 C21.5 9 23 10 27 9"
+          strokeWidth="1.6" opacity="0.45" />
+        {/* Middle arc — main wave */}
+        <path d="M5 17 C7.5 14.5 10 18.5 12.5 16 C15 13.5 17.5 17 20 14.5 C21.5 13 23 14 27 13"
+          strokeWidth="2.2" opacity="0.85" />
+        {/* Bottom arc — subtle, suggests depth */}
+        <path d="M5 21 C7.5 18.5 10 22.5 12.5 20 C15 17.5 17.5 21 20 18.5 C21.5 17 23 18 27 17"
+          strokeWidth="1.6" opacity="0.45" />
+      </g>
     </svg>
   );
 }

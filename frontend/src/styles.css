@@ -205,8 +205,10 @@ body {
   display: inline-flex; align-items: center; gap: 0.4rem;
   line-height: 1;
 }
-/* Icon perfectly aligned to cap-height of text */
-.logo svg { display: block; margin-top: 0.5px; }
+/* Icon aligned to cap-height */
+.logo svg { display: block; margin-top: 1px; border-radius: 50%; }
+/* Light mode: adjust gradient stops via filter for warm-tinted bg */
+[data-theme="light"] .logo svg { filter: saturate(0.9) brightness(0.95); }
 .logo-text {
   letter-spacing: -0.03em;
   display: inline-flex; align-items: baseline; gap: 0;
