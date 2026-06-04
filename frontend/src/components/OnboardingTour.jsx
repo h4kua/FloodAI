@@ -106,13 +106,14 @@ function getCardPos(rect, isMobile) {
   }
 
   if (isMobile) {
-    // Target in bottom 45% → float card near top
+    // Target in bottom 45% → float card near top (below topbar)
     const fromTop = rect.top > vh * 0.45;
     const x = Math.max(16, Math.min(vw / 2 - W / 2, vw - W - 16));
     if (fromTop) {
-      return { style: { position: "fixed", top: 12, left: x, width: W }, fromTop: true };
+      return { style: { position: "fixed", top: 64, left: x, width: W }, fromTop: true };
     }
-    return { style: { position: "fixed", bottom: 16, left: x, width: W }, fromTop: false };
+    // bottom: 108 clears home indicator (34px) + chatbot FAB (54px+40px)
+    return { style: { position: "fixed", bottom: 108, left: x, width: W }, fromTop: false };
   }
 
   // Desktop: prefer below

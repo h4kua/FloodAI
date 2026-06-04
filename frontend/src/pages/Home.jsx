@@ -107,7 +107,7 @@ function MetricsRow({ siaga1, siaga2, totalStations, score }) {
         <div key={c.label} className={`metric-card ${c.color}`}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span className="metric-label">{c.label}</span>
-            <span style={noteStyle}>● real</span>
+            <span className="metric-real-badge" style={noteStyle}>● real</span>
           </div>
           <div>
             <div className={`metric-value ${c.color}`}>{c.value}</div>

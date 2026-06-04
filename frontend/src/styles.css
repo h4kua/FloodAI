@@ -1503,6 +1503,13 @@ body {
   .header-info-col { align-items: flex-start !important; }
   .header-sensor-time { display: none; }
 
+  /* Metric cards — hide "● real" badge so label doesn't wrap messily */
+  .metric-real-badge { display: none; }
+  .metric-card { height: auto; min-height: 86px; }
+
+  /* Tour reopen button — bigger tap target on mobile */
+  .tour-reopen-btn { width: 40px; height: 40px; }
+
   /* Chatbot — fixed full-width on mobile, above system home indicator */
   .chatbot-fab   { bottom: 2.5rem; right: 1rem; }
   .chatbot-panel {
