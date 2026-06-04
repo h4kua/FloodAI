@@ -74,8 +74,10 @@ export function useFloodRisk() {
         stations: json.stations ?? [],
         // Per-wilayah TMA + BMKG forecast summary
         wilayahSummary: json.wilayah_summary ?? [],
-        // OpenWeather current conditions (richer than features subset)
+        // OpenWeather current conditions — pusat Jakarta
         openweather: json.openweather_current ?? null,
+        // OpenWeather per kota administrasi Jakarta (5 wilayah)
+        openweatherWilayah: json.openweather_wilayah ?? {},
       });
       setLastUpdated(new Date());
     } catch (err) {

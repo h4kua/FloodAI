@@ -675,6 +675,7 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
                 {
                     "nama": str(r.get("nama_pintu_air") or r.get("wilayah") or ""),
                     "lokasi": str(r.get("lokasi") or ""),
+                    "wilayah": str(r.get("file_export") or ""),
                     "tinggi_air": _safe_float(r.get("tinggi_air")),
                     "siaga1": _safe_float(r.get("siaga1")),
                     "siaga2": _safe_float(r.get("siaga2")),

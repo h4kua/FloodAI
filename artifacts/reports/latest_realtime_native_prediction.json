@@ -1,11 +1,12 @@
 {
   "model_variant": "realtime_native",
-  "probability": 0.0032206118727723756,
-  "risk_level": "SAFE",
-  "risk_interpretation": "Belum ada indikasi kuat banjir dari kombinasi cuaca, alert resmi, dan kondisi air saat ini. Monitoring tetap diperlukan karena situasi dapat berubah cepat di wilayah urban padat seperti Jakarta.",
+  "probability": 0.92,
+  "risk_level": "DANGER",
+  "risk_interpretation": "Risiko tinggi terdeteksi dari kombinasi hujan intens, akumulasi temporal, dan sinyal hidrologi. Kondisi ini mengindikasikan potensi genangan atau banjir meningkat dalam waktu dekat.",
   "recommended_action": [
-    "Lanjutkan monitoring rutin dan simpan histori realtime untuk retraining agar model makin akurat dari waktu ke waktu.",
-    "Gunakan periode aman ini untuk validasi data, kalibrasi threshold, dan evaluasi kesiapan infrastruktur lokal."
+    "Aktifkan koordinasi lintas pihak: BPBD/posko lokal, operator pintu air, dan tim lapangan di titik rawan.",
+    "Keluarkan peringatan dini terarah untuk wilayah yang memiliki histori genangan atau elevasi rendah.",
+    "Prioritaskan pemeriksaan pintu air, saluran utama, dan titik yang menunjukkan kenaikan muka air tercepat."
   ],
   "risk_thresholds": {
     "pre_alert": 0.07,
@@ -17,56 +18,341 @@
     "validation_precision": 0.5128205128205128,
     "calibration_method": "isotonic"
   },
+  "snapshot_fetched_at": "2026-06-03T15:44:36.969865+00:00",
+  "bmkg_forecast": [
+    {
+      "local_datetime": "2026-06-03T23:00:00",
+      "weather_desc": "Cerah",
+      "tmin": 29,
+      "tmax": 29,
+      "humin": 74,
+      "humax": 74
+    },
+    {
+      "local_datetime": "2026-06-03T23:00:00",
+      "weather_desc": "Cerah Berawan",
+      "tmin": 27,
+      "tmax": 27,
+      "humin": 81,
+      "humax": 81
+    },
+    {
+      "local_datetime": "2026-06-03T23:00:00",
+      "weather_desc": "Cerah",
+      "tmin": 27,
+      "tmax": 27,
+      "humin": 80,
+      "humax": 80
+    },
+    {
+      "local_datetime": "2026-06-03T23:00:00",
+      "weather_desc": "Cerah",
+      "tmin": 27,
+      "tmax": 27,
+      "humin": 83,
+      "humax": 83
+    }
+  ],
   "ood_detection": {
     "method": "IsolationForest",
-    "score": -0.05830801403575636,
-    "is_outlier": true
+    "score": -0.04419994873653621,
+    "is_outlier": false
   },
   "features": {
     "rainfall_mm": 0.0,
     "rainfall_3h_proxy_mm": 0.0,
     "rainfall_lag_1": 5.0,
     "rainfall_lag_2": 5.0,
-    "rainfall_roll3_mean": 3.3333333333333335,
-    "humidity_pct": 91.0,
-    "temperature_c": 27.9,
+    "rainfall_roll3_mean": 3.333,
+    "humidity_pct": 74.0,
+    "temperature_c": 28.7,
     "bmkg_severity_score": 0.0,
     "bmkg_certainty_score": 0.0,
     "bmkg_urgency_score": 0.0,
     "bmkg_weighted_score": 0.0,
-    "water_level_ratio": 1.0,
+    "water_level_ratio": 1.144,
     "water_level_lag_1": 0.3157894736842105,
-    "water_level_delta": 0.6842105263157895,
-    "hydro_meteorological_index": 6.066666666666667,
+    "water_level_delta": 0.4,
+    "hydro_meteorological_index": 5.288004480000001,
     "monsoon_season": 0.0
   },
   "diagnostics": {
-    "history_rows_used": 1406,
+    "history_rows_used": 1192,
+    "history_stale": true,
+    "bmkg_daily_context": {
+      "yesterday_mm": 0.0,
+      "last_7d_avg_mm": 3.42,
+      "last_7d_max_mm": 13.7,
+      "last_available_date": "2026-05-30",
+      "data_available": true,
+      "lookback_days": 7
+    },
     "temporal_features_ready": true,
     "bmkg_source": "no_alert",
-    "bmkg_alerts_total": 19,
+    "bmkg_alerts_total": 0,
     "bmkg_alerts_used": 0,
-    "bmkg_alerts_filtered_out": 19,
+    "bmkg_alerts_filtered_out": 0,
     "water_level_records": 38,
     "data_quality_report": {
       "excluded_stations": [
         {
+          "nama": "Bendung. Cibalok - Gadog 1",
+          "tinggi_air": -29.0,
+          "exclusion_reason": "non_standard_datum — values outside model training range"
+        },
+        {
           "nama": "Rumah Pompa Pluit 1",
-          "tinggi_air": -1820.0,
+          "tinggi_air": -1874.0,
           "exclusion_reason": "non_standard_datum — values outside model training range"
         }
       ],
       "exclusion_reason": "Non-standard datum — values outside model training range",
-      "stations_used_in_model": 37,
+      "stations_used_in_model": 36,
       "stations_total": 38,
       "spike_flagged_stations": [],
-      "uncalibrated_stations_excluded_from_ratio": 12
+      "uncalibrated_stations_excluded_from_ratio": 12,
+      "pump_stations_excluded_from_ratio": [
+        {
+          "nama": "Pompa Pasar Ikan 1",
+          "tinggi_air": 2391.0
+        },
+        {
+          "nama": "Pompa Yos Sudarso 1",
+          "tinggi_air": 1760.0
+        },
+        {
+          "nama": "Pompa Cideng 1",
+          "tinggi_air": 448.0
+        },
+        {
+          "nama": "Pompa Kamal Muara (Bubble)",
+          "tinggi_air": 1252.0
+        },
+        {
+          "nama": "Pompa Kali Asin (Bubble)",
+          "tinggi_air": 1266.0
+        },
+        {
+          "nama": "Pompa Lagoa (Bubble)",
+          "tinggi_air": 1230.0
+        },
+        {
+          "nama": "Pompa Cilincing (Bubble)",
+          "tinggi_air": 1229.0
+        }
+      ]
     },
     "rainfall_trend_mm_h": -5.0,
     "rainfall_acc_3h": 0.0,
     "rainfall_acc_6h": 10.0,
-    "water_level_trend": 0.6842,
+    "water_level_trend": 0.4,
     "trend_source": "realtime_feature_history",
+    "stations_summary": [
+      {
+        "nama": "P.A. Marina Ancol (Laut)",
+        "lokasi": "Laut",
+        "tinggi_air": 2860.0,
+        "siaga1": 2500.0,
+        "siaga2": 2000.0,
+        "siaga3": 1700.0,
+        "ratio": 1.144,
+        "status_siaga": "Status : Siaga 1",
+        "lat": -6.125585,
+        "lon": 106.830154
+      },
+      {
+        "nama": "P.A. Cengkareng Drain",
+        "lokasi": "Cengkareng",
+        "tinggi_air": 2738.0,
+        "siaga1": 3100.0,
+        "siaga2": 2700.0,
+        "siaga3": 1900.0,
+        "ratio": 0.883,
+        "status_siaga": "Status : Siaga 2",
+        "lat": -6.165576979919189,
+        "lon": 106.74858453075363
+      },
+      {
+        "nama": "P.A. Karet 1",
+        "lokasi": "Banjir Kanal Barat",
+        "tinggi_air": 4949.0,
+        "siaga1": 6000.0,
+        "siaga2": 5500.0,
+        "siaga3": 4500.0,
+        "ratio": 0.825,
+        "status_siaga": "Status : Siaga 3",
+        "lat": -6.198023,
+        "lon": 106.810169
+      },
+      {
+        "nama": "P.A. Manggarai 2",
+        "lokasi": "Ciliwung",
+        "tinggi_air": 5443.0,
+        "siaga1": 9500.0,
+        "siaga2": 8500.0,
+        "siaga3": 7500.0,
+        "ratio": 0.573,
+        "status_siaga": "Status : Normal",
+        "lat": -6.207825,
+        "lon": 106.848458
+      },
+      {
+        "nama": "P.A. Kaliduri 1",
+        "lokasi": "Kali Duri",
+        "tinggi_air": 1832.0,
+        "siaga1": 3200.0,
+        "siaga2": 2700.0,
+        "siaga3": 2200.0,
+        "ratio": 0.573,
+        "status_siaga": "Status : Normal",
+        "lat": -6.142445,
+        "lon": 106.790185
+      },
+      {
+        "nama": "P.A. Ancol Flushing 1",
+        "lokasi": "Ciliwung",
+        "tinggi_air": 1215.0,
+        "siaga1": 2200.0,
+        "siaga2": 1900.0,
+        "siaga3": 1800.0,
+        "ratio": 0.552,
+        "status_siaga": "Status : Normal",
+        "lat": -6.130054,
+        "lon": 106.831272
+      },
+      {
+        "nama": "P.A. Marina Ancol (Kali)",
+        "lokasi": "Kali",
+        "tinggi_air": 1179.0,
+        "siaga1": 2500.0,
+        "siaga2": 2000.0,
+        "siaga3": 1700.0,
+        "ratio": 0.472,
+        "status_siaga": "Status : Normal",
+        "lat": -6.12648,
+        "lon": 106.830006
+      },
+      {
+        "nama": "P.A. Pulo Gadung 2",
+        "lokasi": "Sunter",
+        "tinggi_air": 2928.0,
+        "siaga1": 7700.0,
+        "siaga2": 7000.0,
+        "siaga3": 5500.0,
+        "ratio": 0.38,
+        "status_siaga": "Status : Normal",
+        "lat": -6.191,
+        "lon": 106.904194
+      },
+      {
+        "nama": "P.S. Sunter Hulu",
+        "lokasi": "Sunter",
+        "tinggi_air": 756.0,
+        "siaga1": 2500.0,
+        "siaga2": 2000.0,
+        "siaga3": 1400.0,
+        "ratio": 0.302,
+        "status_siaga": "Status : Normal",
+        "lat": -6.31792,
+        "lon": 106.920901
+      },
+      {
+        "nama": "P.S. Depok 2",
+        "lokasi": "Ciliwung",
+        "tinggi_air": 988.0,
+        "siaga1": 3500.0,
+        "siaga2": 2700.0,
+        "siaga3": 2000.0,
+        "ratio": 0.282,
+        "status_siaga": "Status : Normal",
+        "lat": -6.400514,
+        "lon": 106.832143
+      },
+      {
+        "nama": "P.S. Pesanggrahan 1",
+        "lokasi": "Pesanggrahan",
+        "tinggi_air": 651.0,
+        "siaga1": 3500.0,
+        "siaga2": 2500.0,
+        "siaga3": 1500.0,
+        "ratio": 0.186,
+        "status_siaga": "Status : Normal",
+        "lat": -6.397147,
+        "lon": 106.771833
+      },
+      {
+        "nama": "P.A. Jembatan Merah 1",
+        "lokasi": "Ciliwung",
+        "tinggi_air": 461.0,
+        "siaga1": 2500.0,
+        "siaga2": 2000.0,
+        "siaga3": 1500.0,
+        "ratio": 0.184,
+        "status_siaga": "Status : Normal",
+        "lat": -6.148949,
+        "lon": 106.834232
+      },
+      {
+        "nama": "P.A. Istiqlal 1",
+        "lokasi": "Ciliwung",
+        "tinggi_air": 628.0,
+        "siaga1": 3500.0,
+        "siaga2": 3000.0,
+        "siaga3": 2500.0,
+        "ratio": 0.179,
+        "status_siaga": "Status : Normal",
+        "lat": -6.168284,
+        "lon": 106.831393
+      },
+      {
+        "nama": "P.S. Krukut Hulu 2",
+        "lokasi": "Krukut",
+        "tinggi_air": 448.0,
+        "siaga1": 3000.0,
+        "siaga2": 2500.0,
+        "siaga3": 1500.0,
+        "ratio": 0.149,
+        "status_siaga": "Status : Normal",
+        "lat": -6.3439,
+        "lon": 106.798874
+      },
+      {
+        "nama": "Waduk Kampung Rambutan 1",
+        "lokasi": "Cipinang",
+        "tinggi_air": 421.0,
+        "siaga1": 3000.0,
+        "siaga2": 2500.0,
+        "siaga3": 2000.0,
+        "ratio": 0.14,
+        "status_siaga": "Status : Normal",
+        "lat": -6.308509,
+        "lon": 106.880899
+      },
+      {
+        "nama": "P.S. Angke Hulu 1",
+        "lokasi": "Angke",
+        "tinggi_air": 351.0,
+        "siaga1": 3000.0,
+        "siaga2": 2500.0,
+        "siaga3": 1500.0,
+        "ratio": 0.117,
+        "status_siaga": "Status : Normal",
+        "lat": -6.218026,
+        "lon": 106.694077
+      },
+      {
+        "nama": "Bendung. Katulampa 2",
+        "lokasi": "Ciliwung",
+        "tinggi_air": 153.0,
+        "siaga1": 2000.0,
+        "siaga2": 1500.0,
+        "siaga3": 800.0,
+        "ratio": 0.076,
+        "status_siaga": "Status : Normal",
+        "lat": null,
+        "lon": 106.836806
+      }
+    ],
     "trend_state": {
       "recent_probabilities": [
         0.2359,
@@ -76,7 +362,7 @@
       "risk_trend": "increasing",
       "water_level_trend": "rising",
       "rainfall_trend": "easing",
-      "data_points": 1406,
+      "data_points": 1192,
       "risk_delta_1h": 0.2141,
       "risk_rate_per_hour": 0.0,
       "trend_strength": 0.5353,
@@ -86,8 +372,391 @@
       "trend_basis": "composite_hydro_rainfall",
       "rainfall_acc_3h": 0.0,
       "rainfall_trend_mm_h": -5.0,
-      "water_level_delta_cur": 0.6842
+      "water_level_delta_cur": 0.4
     }
   },
-  "model_name": "XGBoost Flood Predictor - Realtime Native"
+  "model_name": "XGBoost Flood Predictor - Realtime Native",
+  "stations": [
+    {
+      "nama": "P.A. Marina Ancol (Laut)",
+      "lokasi": "Laut",
+      "tinggi_air": 2860.0,
+      "siaga1": 2500.0,
+      "siaga2": 2000.0,
+      "siaga3": 1700.0,
+      "ratio": 1.144,
+      "status_siaga": "Status : Siaga 1",
+      "lat": -6.125585,
+      "lon": 106.830154
+    },
+    {
+      "nama": "P.A. Cengkareng Drain",
+      "lokasi": "Cengkareng",
+      "tinggi_air": 2738.0,
+      "siaga1": 3100.0,
+      "siaga2": 2700.0,
+      "siaga3": 1900.0,
+      "ratio": 0.883,
+      "status_siaga": "Status : Siaga 2",
+      "lat": -6.165576979919189,
+      "lon": 106.74858453075363
+    },
+    {
+      "nama": "P.A. Karet 1",
+      "lokasi": "Banjir Kanal Barat",
+      "tinggi_air": 4949.0,
+      "siaga1": 6000.0,
+      "siaga2": 5500.0,
+      "siaga3": 4500.0,
+      "ratio": 0.825,
+      "status_siaga": "Status : Siaga 3",
+      "lat": -6.198023,
+      "lon": 106.810169
+    },
+    {
+      "nama": "P.A. Manggarai 2",
+      "lokasi": "Ciliwung",
+      "tinggi_air": 5443.0,
+      "siaga1": 9500.0,
+      "siaga2": 8500.0,
+      "siaga3": 7500.0,
+      "ratio": 0.573,
+      "status_siaga": "Status : Normal",
+      "lat": -6.207825,
+      "lon": 106.848458
+    },
+    {
+      "nama": "P.A. Kaliduri 1",
+      "lokasi": "Kali Duri",
+      "tinggi_air": 1832.0,
+      "siaga1": 3200.0,
+      "siaga2": 2700.0,
+      "siaga3": 2200.0,
+      "ratio": 0.573,
+      "status_siaga": "Status : Normal",
+      "lat": -6.142445,
+      "lon": 106.790185
+    },
+    {
+      "nama": "P.A. Ancol Flushing 1",
+      "lokasi": "Ciliwung",
+      "tinggi_air": 1215.0,
+      "siaga1": 2200.0,
+      "siaga2": 1900.0,
+      "siaga3": 1800.0,
+      "ratio": 0.552,
+      "status_siaga": "Status : Normal",
+      "lat": -6.130054,
+      "lon": 106.831272
+    },
+    {
+      "nama": "P.A. Marina Ancol (Kali)",
+      "lokasi": "Kali",
+      "tinggi_air": 1179.0,
+      "siaga1": 2500.0,
+      "siaga2": 2000.0,
+      "siaga3": 1700.0,
+      "ratio": 0.472,
+      "status_siaga": "Status : Normal",
+      "lat": -6.12648,
+      "lon": 106.830006
+    },
+    {
+      "nama": "P.A. Pulo Gadung 2",
+      "lokasi": "Sunter",
+      "tinggi_air": 2928.0,
+      "siaga1": 7700.0,
+      "siaga2": 7000.0,
+      "siaga3": 5500.0,
+      "ratio": 0.38,
+      "status_siaga": "Status : Normal",
+      "lat": -6.191,
+      "lon": 106.904194
+    },
+    {
+      "nama": "P.S. Sunter Hulu",
+      "lokasi": "Sunter",
+      "tinggi_air": 756.0,
+      "siaga1": 2500.0,
+      "siaga2": 2000.0,
+      "siaga3": 1400.0,
+      "ratio": 0.302,
+      "status_siaga": "Status : Normal",
+      "lat": -6.31792,
+      "lon": 106.920901
+    },
+    {
+      "nama": "P.S. Depok 2",
+      "lokasi": "Ciliwung",
+      "tinggi_air": 988.0,
+      "siaga1": 3500.0,
+      "siaga2": 2700.0,
+      "siaga3": 2000.0,
+      "ratio": 0.282,
+      "status_siaga": "Status : Normal",
+      "lat": -6.400514,
+      "lon": 106.832143
+    },
+    {
+      "nama": "P.S. Pesanggrahan 1",
+      "lokasi": "Pesanggrahan",
+      "tinggi_air": 651.0,
+      "siaga1": 3500.0,
+      "siaga2": 2500.0,
+      "siaga3": 1500.0,
+      "ratio": 0.186,
+      "status_siaga": "Status : Normal",
+      "lat": -6.397147,
+      "lon": 106.771833
+    },
+    {
+      "nama": "P.A. Jembatan Merah 1",
+      "lokasi": "Ciliwung",
+      "tinggi_air": 461.0,
+      "siaga1": 2500.0,
+      "siaga2": 2000.0,
+      "siaga3": 1500.0,
+      "ratio": 0.184,
+      "status_siaga": "Status : Normal",
+      "lat": -6.148949,
+      "lon": 106.834232
+    },
+    {
+      "nama": "P.A. Istiqlal 1",
+      "lokasi": "Ciliwung",
+      "tinggi_air": 628.0,
+      "siaga1": 3500.0,
+      "siaga2": 3000.0,
+      "siaga3": 2500.0,
+      "ratio": 0.179,
+      "status_siaga": "Status : Normal",
+      "lat": -6.168284,
+      "lon": 106.831393
+    },
+    {
+      "nama": "P.S. Krukut Hulu 2",
+      "lokasi": "Krukut",
+      "tinggi_air": 448.0,
+      "siaga1": 3000.0,
+      "siaga2": 2500.0,
+      "siaga3": 1500.0,
+      "ratio": 0.149,
+      "status_siaga": "Status : Normal",
+      "lat": -6.3439,
+      "lon": 106.798874
+    },
+    {
+      "nama": "Waduk Kampung Rambutan 1",
+      "lokasi": "Cipinang",
+      "tinggi_air": 421.0,
+      "siaga1": 3000.0,
+      "siaga2": 2500.0,
+      "siaga3": 2000.0,
+      "ratio": 0.14,
+      "status_siaga": "Status : Normal",
+      "lat": -6.308509,
+      "lon": 106.880899
+    },
+    {
+      "nama": "P.S. Angke Hulu 1",
+      "lokasi": "Angke",
+      "tinggi_air": 351.0,
+      "siaga1": 3000.0,
+      "siaga2": 2500.0,
+      "siaga3": 1500.0,
+      "ratio": 0.117,
+      "status_siaga": "Status : Normal",
+      "lat": -6.218026,
+      "lon": 106.694077
+    },
+    {
+      "nama": "Bendung. Katulampa 2",
+      "lokasi": "Ciliwung",
+      "tinggi_air": 153.0,
+      "siaga1": 2000.0,
+      "siaga2": 1500.0,
+      "siaga3": 800.0,
+      "ratio": 0.076,
+      "status_siaga": "Status : Normal",
+      "lat": null,
+      "lon": 106.836806
+    }
+  ],
+  "wilayah_summary": [
+    {
+      "wilayah": "Jakarta Pusat",
+      "tma_count": 3,
+      "siaga1_count": 0,
+      "siaga2_count": 0,
+      "siaga3_count": 0,
+      "worst_status": "Normal",
+      "worst_rank": 0,
+      "forecast": [
+        {
+          "local_datetime": "2026-06-05T01:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 26,
+          "tmax": 33,
+          "humin": 53,
+          "humax": 91
+        },
+        {
+          "local_datetime": "2026-06-06T13:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 27,
+          "tmax": 34,
+          "humin": 53,
+          "humax": 85
+        },
+        {
+          "local_datetime": "2026-06-07T07:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 27,
+          "tmax": 34,
+          "humin": 48,
+          "humax": 85
+        }
+      ]
+    },
+    {
+      "wilayah": "Jakarta Utara",
+      "tma_count": 11,
+      "siaga1_count": 1,
+      "siaga2_count": 1,
+      "siaga3_count": 1,
+      "worst_status": "Siaga 1",
+      "worst_rank": 4,
+      "forecast": [
+        {
+          "local_datetime": "2026-06-05T01:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 26,
+          "tmax": 33,
+          "humin": 58,
+          "humax": 89
+        },
+        {
+          "local_datetime": "2026-06-06T13:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 27,
+          "tmax": 32,
+          "humin": 59,
+          "humax": 87
+        },
+        {
+          "local_datetime": "2026-06-07T04:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 27,
+          "tmax": 32,
+          "humin": 53,
+          "humax": 85
+        }
+      ]
+    },
+    {
+      "wilayah": "Jakarta Barat",
+      "tma_count": 2,
+      "siaga1_count": 0,
+      "siaga2_count": 1,
+      "siaga3_count": 0,
+      "worst_status": "Siaga 2",
+      "worst_rank": 3,
+      "forecast": [
+        {
+          "local_datetime": "2026-06-05T01:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 26,
+          "tmax": 33,
+          "humin": 55,
+          "humax": 93
+        },
+        {
+          "local_datetime": "2026-06-06T13:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 26,
+          "tmax": 33,
+          "humin": 56,
+          "humax": 86
+        },
+        {
+          "local_datetime": "2026-06-07T07:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 26,
+          "tmax": 33,
+          "humin": 50,
+          "humax": 89
+        }
+      ]
+    },
+    {
+      "wilayah": "Jakarta Selatan",
+      "tma_count": 5,
+      "siaga1_count": 0,
+      "siaga2_count": 0,
+      "siaga3_count": 1,
+      "worst_status": "Siaga 3",
+      "worst_rank": 2,
+      "forecast": [
+        {
+          "local_datetime": "2026-06-05T01:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 25,
+          "tmax": 33,
+          "humin": 51,
+          "humax": 94
+        },
+        {
+          "local_datetime": "2026-06-06T13:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 47,
+          "humax": 89
+        },
+        {
+          "local_datetime": "2026-06-07T07:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 48,
+          "humax": 90
+        }
+      ]
+    },
+    {
+      "wilayah": "Jakarta Timur",
+      "tma_count": 8,
+      "siaga1_count": 0,
+      "siaga2_count": 0,
+      "siaga3_count": 0,
+      "worst_status": "Normal",
+      "worst_rank": 0,
+      "forecast": [
+        {
+          "local_datetime": "2026-06-05T01:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 25,
+          "tmax": 34,
+          "humin": 50,
+          "humax": 92
+        },
+        {
+          "local_datetime": "2026-06-06T13:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 26,
+          "tmax": 35,
+          "humin": 45,
+          "humax": 88
+        },
+        {
+          "local_datetime": "2026-06-07T04:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 46,
+          "humax": 88
+        }
+      ]
+    }
+  ]
 }

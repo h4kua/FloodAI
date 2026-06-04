@@ -1,11 +1,12 @@
 import sys
-from config import CLEAN_DATA_DIR, JAKARTA_LAT, JAKARTA_LON, RAW_DATA_DIR
+from config import CLEAN_DATA_DIR, JAKARTA_LAT, JAKARTA_LON, JAKARTA_WILAYAH_COORDS, RAW_DATA_DIR
 from processing.cleaner import clean_data
 from services.fetcher import (
     fetch_bmkg_alert_detail,
     fetch_bmkg_cuaca,
     fetch_bmkg_feed,
     fetch_openweather,
+    fetch_openweather_wilayah,
     fetch_poskobanjir_json,
     fetch_poskobanjir_xml,
 )
@@ -99,12 +100,21 @@ def run_pipeline():
     else:
         print("[WARN] Melewati step 2 — tidak ada data TMA.")
 
-    print("\n[STEP 3] Fetch data OpenWeather Jakarta...")
+    print("\n[STEP 3] Fetch data OpenWeather — pusat + per wilayah Jakarta...")
     weather = {}
+    openweather_wilayah = {}
     try:
+        # 1. Titik pusat (tetap dipakai ML feature builder)
         weather = fetch_openweather({"lat": JAKARTA_LAT, "lon": JAKARTA_LON})
         save_json(weather, RAW_DATA_DIR / "openweather_current.json")
-        print(f"OpenWeather lokasi: {weather.get('name', 'unknown')}")
+        print(f"  [OWM] Pusat Jakarta: {weather.get('name', 'unknown')} "
+              f"{weather.get('main', {}).get('temp', '?')}°C")
+
+        # 2. Per kota administrasi (untuk tampilan per wilayah di frontend)
+        print("  Fetching per wilayah...")
+        openweather_wilayah = fetch_openweather_wilayah(JAKARTA_WILAYAH_COORDS)
+        save_json(openweather_wilayah, RAW_DATA_DIR / "openweather_wilayah.json")
+        print(f"  Berhasil: {len(openweather_wilayah)}/{len(JAKARTA_WILAYAH_COORDS)} wilayah")
     except Exception as exc:
         print(f"[WARN] Gagal fetch OpenWeather: {exc}")
 

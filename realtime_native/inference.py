@@ -181,6 +181,25 @@ def _build_wilayah_summary(poskobanjir_records: list, bmkg_per_wilayah: dict) ->
     return summary
 
 
+def _parse_ow_entry(ow_raw: dict) -> dict:
+    """Extract relevant fields dari satu OWM current weather response."""
+    return {
+        "temp":         ow_raw.get("main", {}).get("temp"),
+        "feels_like":   ow_raw.get("main", {}).get("feels_like"),
+        "pressure":     ow_raw.get("main", {}).get("pressure"),
+        "humidity":     ow_raw.get("main", {}).get("humidity"),
+        "wind_speed":   ow_raw.get("wind", {}).get("speed"),
+        "wind_deg":     ow_raw.get("wind", {}).get("deg"),
+        "wind_gust":    ow_raw.get("wind", {}).get("gust"),
+        "clouds":       ow_raw.get("clouds", {}).get("all"),
+        "visibility":   ow_raw.get("visibility"),
+        "weather_main": (ow_raw.get("weather") or [{}])[0].get("main"),
+        "weather_desc": (ow_raw.get("weather") or [{}])[0].get("description"),
+        "weather_icon": (ow_raw.get("weather") or [{}])[0].get("icon"),
+        "rainfall_1h":  (ow_raw.get("rain") or {}).get("1h", 0.0),
+    }
+
+
 def _load_assets() -> tuple:
     bundle = load_runtime_bundle()
     return (
@@ -221,6 +240,27 @@ def predict_realtime_native(
     # Build per-wilayah summary: read bmkg_cuaca.json directly (freshest source)
     cuaca_path = Path(snapshot_path).parent.parent / "raw" / "bmkg_cuaca.json"
     bmkg_per_wilayah = _parse_bmkg_cuaca_per_wilayah(cuaca_path)
+
+    raw_dir = Path(snapshot_path).parent.parent / "raw"
+
+    # Read OpenWeather current data (pusat — untuk WeatherCurrentCard fallback)
+    openweather_current: dict = {}
+    try:
+        with open(raw_dir / "openweather_current.json", "r", encoding="utf-8") as f:
+            ow_raw = json.load(f)
+        openweather_current = _parse_ow_entry(ow_raw)
+    except Exception:
+        pass
+
+    # Read OpenWeather per-wilayah data (5 kota administrasi)
+    openweather_wilayah: dict = {}
+    try:
+        with open(raw_dir / "openweather_wilayah.json", "r", encoding="utf-8") as f:
+            ow_wilayah_raw = json.load(f)
+        for wilayah, ow in ow_wilayah_raw.items():
+            openweather_wilayah[wilayah] = _parse_ow_entry(ow)
+    except Exception:
+        pass
     wilayah_summary = _build_wilayah_summary(poskobanjir_records, bmkg_per_wilayah)
 
     engineered = build_realtime_native_features_from_file(
@@ -267,6 +307,8 @@ def predict_realtime_native(
         # NOT derived from ML model output. Empty list when no stations are active.
         "stations": engineered.diagnostics.get("stations_summary", []),
         "wilayah_summary": wilayah_summary,
+        "openweather_current": openweather_current,
+        "openweather_wilayah": openweather_wilayah,
     }
 
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)

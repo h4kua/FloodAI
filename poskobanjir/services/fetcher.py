@@ -66,3 +66,25 @@ def fetch_openweather(params):
     response = requests.get(OPENWEATHER_URL, params=query, timeout=TIMEOUT)
     response.raise_for_status()
     return response.json()
+
+
+def fetch_openweather_wilayah(wilayah_coords: dict) -> dict:
+    """Fetch OpenWeather current weather untuk setiap kota administrasi Jakarta.
+
+    Args:
+        wilayah_coords: dict mapping wilayah name → (lat, lon)
+
+    Returns:
+        dict mapping wilayah name → raw OWM response dict.
+        Wilayah yang gagal di-fetch tidak dimasukkan ke hasil.
+    """
+    results: dict = {}
+    for wilayah, (lat, lon) in wilayah_coords.items():
+        try:
+            data = fetch_openweather({"lat": lat, "lon": lon})
+            results[wilayah] = data
+            print(f"  [OWM] {wilayah}: {data.get('weather', [{}])[0].get('description', '?')} "
+                  f"{data.get('main', {}).get('temp', '?')}°C")
+        except Exception as exc:
+            print(f"  [WARN] OpenWeather gagal untuk {wilayah}: {exc}")
+    return results

@@ -25,5 +25,14 @@ OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY", "")
 JAKARTA_LAT = float(os.getenv("JAKARTA_LAT", "-6.2088"))
 JAKARTA_LON = float(os.getenv("JAKARTA_LON", "106.8456"))
 
+# Titik tengah representatif per kota administrasi Jakarta
+JAKARTA_WILAYAH_COORDS: dict[str, tuple[float, float]] = {
+    "Jakarta Pusat":   (-6.1751, 106.8272),  # Monas / Gambir
+    "Jakarta Utara":   (-6.1275, 106.8430),  # Ancol / Penjaringan
+    "Jakarta Barat":   (-6.1663, 106.7578),  # Cengkareng / Grogol
+    "Jakarta Selatan": (-6.2942, 106.8223),  # Pasar Minggu / Mampang
+    "Jakarta Timur":   (-6.2312, 106.9062),  # Jatinegara / Kramat Jati
+}
+
 RAW_DATA_DIR = ROOT_DIR / "data" / "raw"
 CLEAN_DATA_DIR = ROOT_DIR / "data" / "clean"
