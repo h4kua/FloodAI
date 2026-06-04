@@ -13,6 +13,7 @@ from services.parser import (
     build_realtime_snapshot,
     parse_bmkg_alert,
     parse_bmkg_cuaca,
+    parse_bmkg_cuaca_per_wilayah,
     parse_bmkg_feed,
     parse_poskobanjir_json,
     parse_poskobanjir_xml,
@@ -122,11 +123,14 @@ def run_pipeline():
 
     print("\n[STEP 5] Fetch prakiraan cuaca BMKG (cuaca.json)...")
     bmkg_forecast = []
+    bmkg_forecast_per_wilayah = {}
     try:
         cuaca_raw = fetch_bmkg_cuaca()
         bmkg_forecast = parse_bmkg_cuaca(cuaca_raw)
+        bmkg_forecast_per_wilayah = parse_bmkg_cuaca_per_wilayah(cuaca_raw)
         save_json(cuaca_raw, RAW_DATA_DIR / "bmkg_cuaca.json")
         print(f"Prakiraan cuaca: {len(bmkg_forecast)} slot ke depan")
+        print(f"Per wilayah: {list(bmkg_forecast_per_wilayah.keys())}")
         for slot in bmkg_forecast:
             print(f"  {slot['local_datetime']} — {slot['weather_desc']} "
                   f"({slot['tmin']}–{slot['tmax']}°C)")
@@ -153,6 +157,7 @@ def run_pipeline():
         bmkg_feed=bmkg_feed,
         bmkg_alerts=bmkg_alerts,
         bmkg_forecast=bmkg_forecast,
+        bmkg_forecast_per_wilayah=bmkg_forecast_per_wilayah,
     )
     save_json(snapshot, CLEAN_DATA_DIR / "realtime_snapshot.json")
 

@@ -1,5 +1,7 @@
 import json
 import os
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
 import numpy as np
 
@@ -9,6 +11,16 @@ from realtime_native.feature_builder import (
     build_realtime_native_features_from_file,
 )
 from utils.paths import DEFAULT_REALTIME_SNAPSHOT, REPORTS_DIR
+
+_JAKARTA_TZ = timezone(timedelta(hours=7))
+_JAKARTA_WILAYAH = ["Jakarta Pusat", "Jakarta Utara", "Jakarta Barat", "Jakarta Selatan", "Jakarta Timur"]
+_BMKG_WILAYAH_MAP = {
+    "Kota Adm. Jakarta Pusat":   "Jakarta Pusat",
+    "Kota Adm. Jakarta Utara":   "Jakarta Utara",
+    "Kota Adm. Jakarta Barat":   "Jakarta Barat",
+    "Kota Adm. Jakarta Selatan": "Jakarta Selatan",
+    "Kota Adm. Jakarta Timur":   "Jakarta Timur",
+}
 
 
 def _load_thresholds() -> dict:
@@ -96,6 +108,79 @@ def _recommended_action(risk_level):
     ]
 
 
+def _siaga_rank(status_str: str) -> int:
+    s = (status_str or "").lower()
+    if "siaga 1" in s: return 4
+    if "siaga 2" in s: return 3
+    if "siaga 3" in s: return 2
+    return 0
+
+
+def _parse_bmkg_cuaca_per_wilayah(cuaca_path: Path) -> dict:
+    """Read bmkg_cuaca.json and return upcoming forecasts keyed by wilayah name."""
+    now_utc = datetime.now(timezone.utc)
+    result: dict = {}
+    try:
+        with open(cuaca_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        return result
+    for area in data.get("data", []):
+        lokasi = area.get("lokasi", {})
+        if lokasi.get("adm1") != "31":
+            continue
+        wilayah = _BMKG_WILAYAH_MAP.get(lokasi.get("kotkab", ""))
+        if not wilayah:
+            continue
+        entries = []
+        for item in area.get("cuaca", []):
+            dt_str = item.get("local_datetime", "")
+            try:
+                utc_dt = datetime.fromisoformat(dt_str).replace(tzinfo=_JAKARTA_TZ)
+            except (ValueError, AttributeError):
+                continue
+            if utc_dt >= now_utc:
+                entries.append({
+                    "local_datetime": dt_str,
+                    "weather_desc": item.get("weather_desc", ""),
+                    "tmin": item.get("tmin"),
+                    "tmax": item.get("tmax"),
+                    "humin": item.get("humin"),
+                    "humax": item.get("humax"),
+                })
+        entries.sort(key=lambda x: x["local_datetime"])
+        result[wilayah] = entries[:4]
+    return result
+
+
+def _build_wilayah_summary(poskobanjir_records: list, bmkg_per_wilayah: dict) -> list:
+    """Aggregate TMA stations and BMKG forecast per Jakarta wilayah."""
+    tma_by_wilayah: dict = {w: [] for w in _JAKARTA_WILAYAH}
+    for rec in poskobanjir_records:
+        w = rec.get("file_export", "")
+        if w in tma_by_wilayah:
+            tma_by_wilayah[w].append(rec)
+
+    summary = []
+    for w in _JAKARTA_WILAYAH:
+        stations = tma_by_wilayah[w]
+        forecast = bmkg_per_wilayah.get(w, [])
+        ranks = [_siaga_rank(s.get("status_siaga", "")) for s in stations]
+        worst = max(ranks) if ranks else 0
+        worst_label = {4: "Siaga 1", 3: "Siaga 2", 2: "Siaga 3"}.get(worst, "Normal")
+        summary.append({
+            "wilayah": w,
+            "tma_count": len(stations),
+            "siaga1_count": sum(1 for r in ranks if r >= 4),
+            "siaga2_count": sum(1 for r in ranks if r == 3),
+            "siaga3_count": sum(1 for r in ranks if r == 2),
+            "worst_status": worst_label,
+            "worst_rank": worst,
+            "forecast": forecast[:3],
+        })
+    return summary
+
+
 def _load_assets() -> tuple:
     bundle = load_runtime_bundle()
     return (
@@ -127,9 +212,16 @@ def predict_realtime_native(
             snapshot_raw = json.load(f)
         bmkg_forecast = snapshot_raw.get("bmkg_forecast") or []
         snapshot_fetched_at = snapshot_raw.get("fetched_at_utc") or ""
+        poskobanjir_records = snapshot_raw.get("poskobanjir") or []
     except Exception:
         bmkg_forecast = []
         snapshot_fetched_at = ""
+        poskobanjir_records = []
+
+    # Build per-wilayah summary: read bmkg_cuaca.json directly (freshest source)
+    cuaca_path = Path(snapshot_path).parent.parent / "raw" / "bmkg_cuaca.json"
+    bmkg_per_wilayah = _parse_bmkg_cuaca_per_wilayah(cuaca_path)
+    wilayah_summary = _build_wilayah_summary(poskobanjir_records, bmkg_per_wilayah)
 
     engineered = build_realtime_native_features_from_file(
         snapshot_path=snapshot_path, persist_history=persist_history, as_of=as_of,
@@ -174,6 +266,7 @@ def predict_realtime_native(
         # Real DSDADKI station readings — sourced directly from sensor snapshot,
         # NOT derived from ML model output. Empty list when no stations are active.
         "stations": engineered.diagnostics.get("stations_summary", []),
+        "wilayah_summary": wilayah_summary,
     }
 
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)

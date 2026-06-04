@@ -615,6 +615,123 @@ const WEATHER_ICON = {
   "Hujan Lebat": "⛈", "Hujan Petir": "⛈", "Hujan Es": "🌨",
 };
 
+/* ── Wilayah helpers ───────────────────────────────────── */
+const WILAYAH_STATUS_STYLE = {
+  "Siaga 1": { color: "var(--s1)", bg: "var(--s1-soft)", border: "var(--s1-border)" },
+  "Siaga 2": { color: "var(--s2)", bg: "var(--s2-soft)", border: "var(--s2-border)" },
+  "Siaga 3": { color: "var(--wsp)", bg: "var(--wsp-soft)", border: "var(--wsp-border)" },
+  "Normal":  { color: "var(--safe)", bg: "var(--safe-soft)", border: "var(--safe-border)" },
+};
+
+function WilayahGrid({ wilayahSummary }) {
+  const { lang } = useApp();
+  const isId = lang === "id";
+  if (!wilayahSummary || wilayahSummary.length === 0) return null;
+
+  return (
+    <div className="panel panel-body fade-in">
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.875rem" }}>
+        <p className="panel-title" style={{ marginBottom: 0 }}>
+          {isId ? "Kondisi per Wilayah Jakarta" : "Jakarta District Conditions"}
+        </p>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)", letterSpacing: "0.06em" }}>
+          ● DSDADKI · BMKG
+        </span>
+      </div>
+
+      <div className="wilayah-grid">
+        {wilayahSummary.map((w) => {
+          const cf = w.forecast?.[0];
+          const icon = WEATHER_ICON[cf?.weather_desc] ?? "🌤";
+          const isRain = cf?.weather_desc?.toLowerCase().includes("hujan");
+          const style = WILAYAH_STATUS_STYLE[w.worst_status] ?? WILAYAH_STATUS_STYLE["Normal"];
+          const shortName = w.wilayah.replace("Jakarta ", "Jkt ");
+
+          return (
+            <div key={w.wilayah} className="wilayah-card"
+              style={{ borderTopColor: style.color, borderTopWidth: "2px" }}>
+
+              {/* Wilayah + status */}
+              <div style={{ marginBottom: "0.5rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", fontWeight: 700, color: "var(--muted)", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "0.3rem" }}>
+                  {shortName}
+                </div>
+                <span className="wilayah-status-badge"
+                  style={{ background: style.bg, color: style.color, borderColor: style.border }}>
+                  {w.worst_status}
+                </span>
+              </div>
+
+              {/* Weather icon + description */}
+              <div style={{ marginBottom: "0.5rem" }}>
+                <div style={{ fontSize: "1.4rem", lineHeight: 1, marginBottom: "0.2rem" }}>{icon}</div>
+                <div style={{ fontSize: "0.7rem", color: isRain ? "var(--cyan)" : "var(--text)", fontWeight: 500, lineHeight: 1.3 }}>
+                  {cf?.weather_desc ?? "—"}
+                </div>
+                {cf?.tmin != null && (
+                  <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted)", marginTop: "0.15rem" }}>
+                    {cf.tmin}–{cf.tmax}°C · {cf.humin}–{cf.humax}%
+                  </div>
+                )}
+              </div>
+
+              {/* TMA count + siaga badges */}
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.25rem", marginBottom: "0.5rem" }}>
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)" }}>
+                  {w.tma_count} TMA
+                </span>
+                {w.siaga1_count > 0 && (
+                  <span className="wilayah-siaga-pip" style={{ background: "var(--s1-soft)", color: "var(--s1)", borderColor: "var(--s1-border)" }}>
+                    {w.siaga1_count}×S1
+                  </span>
+                )}
+                {w.siaga2_count > 0 && (
+                  <span className="wilayah-siaga-pip" style={{ background: "var(--s2-soft)", color: "var(--s2)", borderColor: "var(--s2-border)" }}>
+                    {w.siaga2_count}×S2
+                  </span>
+                )}
+                {w.siaga3_count > 0 && (
+                  <span className="wilayah-siaga-pip" style={{ background: "var(--wsp-soft)", color: "var(--wsp)", borderColor: "var(--wsp-border)" }}>
+                    {w.siaga3_count}×S3
+                  </span>
+                )}
+              </div>
+
+              {/* Next 2 forecast slots (mini pills) */}
+              {w.forecast?.length > 1 && (
+                <div style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
+                  {w.forecast.slice(1, 3).map((slot, i) => {
+                    const slotIcon = WEATHER_ICON[slot.weather_desc] ?? "🌤";
+                    const dt = new Date(slot.local_datetime);
+                    const timeStr = dt.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+                    return (
+                      <div key={i} style={{
+                        display: "flex", alignItems: "center", gap: "3px",
+                        background: "var(--panel-3)", borderRadius: "4px",
+                        padding: "2px 5px",
+                      }}>
+                        <span style={{ fontSize: "0.65rem" }}>{slotIcon}</span>
+                        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.55rem", color: "var(--muted)" }}>{timeStr}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footnote explaining rainfall context */}
+      <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", lineHeight: 1.6 }}>
+        {isId
+          ? "● Status TMA dari sensor DSDADKI realtime · Prakiraan dari BMKG per wilayah · Curah hujan 0 mm = tidak hujan di titik sensor OpenWeather — TMA bisa naik karena hujan di hulu (Bogor/Depok)"
+          : "● TMA from DSDADKI realtime · Forecast from BMKG per district · 0 mm rainfall = no rain at OpenWeather sensor point — TMA may rise from upstream rain (Bogor/Depok)"}
+      </p>
+    </div>
+  );
+}
+
 function ForecastPanel({ forecast }) {
   const { lang } = useApp();
   const isId = lang === "id";
@@ -622,7 +739,7 @@ function ForecastPanel({ forecast }) {
 
   return (
     <div className="panel panel-body fade-in">
-      <p className="panel-title">{isId ? "Prakiraan Cuaca BMKG" : "BMKG Weather Forecast"}</p>
+      <p className="panel-title">{isId ? "Prakiraan Cuaca BMKG — DKI Jakarta" : "BMKG Weather Forecast — DKI Jakarta"}</p>
       <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
         {forecast.map((slot, i) => {
           const dt = new Date(slot.local_datetime);
@@ -635,12 +752,8 @@ function ForecastPanel({ forecast }) {
               flex: "1 1 120px",
               background: isRain ? "rgba(0,120,255,0.06)" : "rgba(0,229,160,0.04)",
               border: `1px solid ${isRain ? "rgba(0,120,255,0.15)" : "var(--line)"}`,
-              borderRadius: "10px",
-              padding: "0.625rem 0.75rem",
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.25rem",
-              minWidth: 0,
+              borderRadius: "10px", padding: "0.625rem 0.75rem",
+              display: "flex", flexDirection: "column", gap: "0.25rem", minWidth: 0,
             }}>
               <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)", letterSpacing: "0.06em" }}>
                 {dateStr} · {timeStr}
@@ -657,7 +770,7 @@ function ForecastPanel({ forecast }) {
         })}
       </div>
       <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)" }}>
-        {isId ? "Sumber: BMKG cuaca.json — DKI Jakarta" : "Source: BMKG cuaca.json — DKI Jakarta"}
+        {isId ? "Sumber: BMKG cuaca.json — rata-rata DKI Jakarta" : "Source: BMKG cuaca.json — DKI Jakarta average"}
       </p>
     </div>
   );
@@ -844,8 +957,11 @@ export default function Home({ setRiskContext, riskLevel }) {
       {/* Zone cards — ML geographic estimate (not per-sensor) */}
       <ZoneCards zones={zones} />
 
-      {/* BMKG weather forecast */}
-      <ForecastPanel forecast={riskData?.bmkgForecast} />
+      {/* Per-wilayah conditions: TMA status + BMKG forecast combined */}
+      <WilayahGrid wilayahSummary={riskData?.wilayahSummary} />
+
+      {/* BMKG weather forecast — DKI aggregate (shown when wilayah grid unavailable) */}
+      {(!riskData?.wilayahSummary?.length) && <ForecastPanel forecast={riskData?.bmkgForecast} />}
 
       {/* Floating chatbot */}
       <ChatBot riskContext={{ level, rainfall: riskData?.rainfall }} />

@@ -72,6 +72,8 @@ export function useFloodRisk() {
         // Real DSDADKI station readings sorted by siaga ratio desc.
         // Each entry: { nama, tinggi_air, siaga1, ratio, status_siaga }
         stations: json.stations ?? [],
+        // Per-wilayah TMA + BMKG forecast summary
+        wilayahSummary: json.wilayah_summary ?? [],
       });
       setLastUpdated(new Date());
     } catch (err) {

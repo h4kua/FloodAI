@@ -7,13 +7,15 @@ import { AppContext, useT } from "./lib/appContext";
 
 /* ── deFlood.ai logo mark ───────────────────────────────── */
 /*
- * Design language: abstract geometric like modern AI logos (ChatGPT, Claude,
- * Gemini). A smooth filled circle with three flowing wave arcs inside —
- * each arc subtly references data streams + water. No literal imagery.
- * Gradient from cyan-300 → sky-600. Clean, bold, scalable.
+ * Abstract triskelion vortex — three identical curved arms at 120° intervals.
+ * Squircle badge (rounded-rect) with cyan→blue gradient.
+ * Reads as: rotating flow (water) + dynamic intelligence (AI).
+ * No literal imagery — same design language as Claude, DeepSeek, ChatGPT.
  */
 function DeFloodLogo({ size = 22 }) {
   const id = `df${size}`;
+  /* Each arm: starts near outer edge, sweeps elegantly toward center */
+  const arm = "M 16 5.5 C 24 5.5 27.5 13 23 19 C 21.5 21.5 19 23 16 23";
   return (
     <svg
       width={size} height={size} viewBox="0 0 32 32"
@@ -22,28 +24,23 @@ function DeFloodLogo({ size = 22 }) {
     >
       <defs>
         <linearGradient id={`${id}g`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%"   stopColor="#67e8f9" />
-          <stop offset="100%" stopColor="#0369a1" />
+          <stop offset="0%"   stopColor="#22d3ee" />
+          <stop offset="55%"  stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#0c4a6e" />
         </linearGradient>
         <clipPath id={`${id}c`}>
-          <circle cx="16" cy="16" r="13.5" />
+          <rect x="1" y="1" width="30" height="30" rx="7.5" />
         </clipPath>
       </defs>
 
-      {/* Filled circle base — the "AI badge" */}
-      <circle cx="16" cy="16" r="13.5" fill={`url(#${id}g)`} />
+      {/* Squircle badge background */}
+      <rect x="1" y="1" width="30" height="30" rx="7.5" fill={`url(#${id}g)`} />
 
-      {/* Three abstract wave arcs — water + data streams */}
-      <g clipPath={`url(#${id}c)`} stroke="white" strokeLinecap="round" strokeLinejoin="round" fill="none">
-        {/* Top arc — lightest, suggests distant data */}
-        <path d="M5 13 C7.5 10.5 10 14.5 12.5 12 C15 9.5 17.5 13 20 10.5 C21.5 9 23 10 27 9"
-          strokeWidth="1.6" opacity="0.45" />
-        {/* Middle arc — main wave */}
-        <path d="M5 17 C7.5 14.5 10 18.5 12.5 16 C15 13.5 17.5 17 20 14.5 C21.5 13 23 14 27 13"
-          strokeWidth="2.2" opacity="0.85" />
-        {/* Bottom arc — subtle, suggests depth */}
-        <path d="M5 21 C7.5 18.5 10 22.5 12.5 20 C15 17.5 17.5 21 20 18.5 C21.5 17 23 18 27 17"
-          strokeWidth="1.6" opacity="0.45" />
+      {/* Three-arm vortex mark */}
+      <g clipPath={`url(#${id}c)`} stroke="white" strokeLinecap="round" fill="none" strokeWidth="2.8">
+        <path d={arm} />
+        <path d={arm} transform="rotate(120 16 16)" />
+        <path d={arm} transform="rotate(240 16 16)" />
       </g>
     </svg>
   );

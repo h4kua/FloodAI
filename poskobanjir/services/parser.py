@@ -50,6 +50,50 @@ def parse_poskobanjir_json(json_data: list) -> list:
     return records
 
 
+_BMKG_WILAYAH_MAP = {
+    "Kota Adm. Jakarta Pusat":   "Jakarta Pusat",
+    "Kota Adm. Jakarta Utara":   "Jakarta Utara",
+    "Kota Adm. Jakarta Barat":   "Jakarta Barat",
+    "Kota Adm. Jakarta Selatan": "Jakarta Selatan",
+    "Kota Adm. Jakarta Timur":   "Jakarta Timur",
+}
+
+
+def parse_bmkg_cuaca_per_wilayah(json_data: dict) -> dict:
+    """Extract upcoming BMKG forecasts per wilayah Jakarta.
+    Returns dict keyed by wilayah name, each value is list of up to 4 upcoming slots.
+    """
+    now_utc = datetime.now(timezone.utc)
+    result: dict = {}
+    for area in json_data.get("data", []):
+        lokasi = area.get("lokasi", {})
+        if lokasi.get("adm1") != "31":
+            continue
+        wilayah_name = _BMKG_WILAYAH_MAP.get(lokasi.get("kotkab", ""))
+        if not wilayah_name:
+            continue
+        entries = []
+        for item in area.get("cuaca", []):
+            dt_str = item.get("local_datetime", "")
+            try:
+                local_dt = datetime.fromisoformat(dt_str)
+                utc_dt = local_dt.replace(tzinfo=_JAKARTA_TZ)
+            except (ValueError, AttributeError):
+                continue
+            if utc_dt >= now_utc:
+                entries.append({
+                    "local_datetime": dt_str,
+                    "weather_desc": item.get("weather_desc", ""),
+                    "tmin": item.get("tmin"),
+                    "tmax": item.get("tmax"),
+                    "humin": item.get("humin"),
+                    "humax": item.get("humax"),
+                })
+        entries.sort(key=lambda x: x["local_datetime"])
+        result[wilayah_name] = entries[:4]
+    return result
+
+
 def parse_bmkg_cuaca(json_data: dict) -> list:
     """Extract upcoming forecast entries for DKI Jakarta (adm1=31) from cuaca.json.
     Returns the next 4 forecast periods sorted by local_datetime.
@@ -194,7 +238,8 @@ def _get_bmkg_daily_rainfall_context() -> dict:
 
 
 def build_realtime_snapshot(
-    poskobanjir_records, weather, bmkg_feed, bmkg_alerts, bmkg_forecast=None
+    poskobanjir_records, weather, bmkg_feed, bmkg_alerts,
+    bmkg_forecast=None, bmkg_forecast_per_wilayah=None
 ):
     jakarta_alerts = filter_jakarta_bmkg_alerts(bmkg_alerts)
     bmkg_daily = _get_bmkg_daily_rainfall_context()
@@ -227,5 +272,6 @@ def build_realtime_snapshot(
         "bmkg_feed": bmkg_feed,
         "bmkg_alerts": jakarta_alerts,
         "bmkg_forecast": bmkg_forecast or [],
+        "bmkg_forecast_per_wilayah": bmkg_forecast_per_wilayah or {},
         "bmkg_daily_rainfall": bmkg_daily,
     }

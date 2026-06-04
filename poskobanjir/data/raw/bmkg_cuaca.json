@@ -1,0 +1,706 @@
+{
+  "status": 200,
+  "lokasi": {
+    "adm1": "31",
+    "adm2": "",
+    "adm3": "",
+    "adm4": "",
+    "time_zone": "WIB",
+    "provinsi": "DKI Jakarta",
+    "kotkab": "",
+    "kecamatan": "",
+    "desa": ""
+  },
+  "data": [
+    {
+      "lokasi": {
+        "adm1": "31",
+        "adm2": "31.01",
+        "adm3": "",
+        "adm4": "",
+        "time_zone": "WIB",
+        "provinsi": "DKI Jakarta",
+        "kotkab": "Administrasi Kepulauan Seribu",
+        "kecamatan": "",
+        "desa": ""
+      },
+      "cuaca": [
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-03T23:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 29,
+          "tmax": 29,
+          "humin": 74,
+          "humax": 74
+        },
+        {
+          "weather_desc": "Hujan Ringan",
+          "local_datetime": "2026-06-04T07:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 29,
+          "humin": 73,
+          "humax": 82
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-05T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 28,
+          "tmax": 30,
+          "humin": 75,
+          "humax": 83
+        },
+        {
+          "weather_desc": "Hujan Ringan",
+          "local_datetime": "2026-06-06T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 28,
+          "tmax": 29,
+          "humin": 78,
+          "humax": 85
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-07T04:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 30,
+          "humin": 71,
+          "humax": 81
+        },
+        {
+          "weather_desc": "Cerah Berawan",
+          "local_datetime": "2026-06-08T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 28,
+          "tmax": 30,
+          "humin": 65,
+          "humax": 77
+        },
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-09T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 28,
+          "tmax": 29,
+          "humin": 68,
+          "humax": 76
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-10T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 28,
+          "tmax": 29,
+          "humin": 67,
+          "humax": 70
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-11T19:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 28,
+          "tmax": 29,
+          "humin": 71,
+          "humax": 80
+        },
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-12T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 28,
+          "tmax": 28,
+          "humin": 74,
+          "humax": 79
+        }
+      ]
+    },
+    {
+      "lokasi": {
+        "adm1": "31",
+        "adm2": "31.71",
+        "adm3": "",
+        "adm4": "",
+        "time_zone": "WIB",
+        "provinsi": "DKI Jakarta",
+        "kotkab": "Kota Adm. Jakarta Pusat",
+        "kecamatan": "",
+        "desa": ""
+      },
+      "cuaca": [
+        {
+          "weather_desc": "Cerah Berawan",
+          "local_datetime": "2026-06-03T23:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 27,
+          "humin": 81,
+          "humax": 81
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-04T10:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 31,
+          "humin": 65,
+          "humax": 90
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-05T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 33,
+          "humin": 53,
+          "humax": 91
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-06T13:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 34,
+          "humin": 53,
+          "humax": 85
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-07T07:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 34,
+          "humin": 48,
+          "humax": 85
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-08T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 34,
+          "humin": 44,
+          "humax": 74
+        },
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-09T07:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 46,
+          "humax": 79
+        },
+        {
+          "weather_desc": "Cerah Berawan",
+          "local_datetime": "2026-06-10T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 32,
+          "humin": 48,
+          "humax": 73
+        },
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-11T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 43,
+          "humax": 74
+        },
+        {
+          "weather_desc": "Cerah Berawan",
+          "local_datetime": "2026-06-12T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 27,
+          "humin": 79,
+          "humax": 79
+        }
+      ]
+    },
+    {
+      "lokasi": {
+        "adm1": "31",
+        "adm2": "31.72",
+        "adm3": "",
+        "adm4": "",
+        "time_zone": "WIB",
+        "provinsi": "DKI Jakarta",
+        "kotkab": "Kota Adm. Jakarta Utara",
+        "kecamatan": "",
+        "desa": ""
+      },
+      "cuaca": [
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-03T23:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 27,
+          "humin": 80,
+          "humax": 80
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-04T10:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 30,
+          "humin": 71,
+          "humax": 88
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-05T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 33,
+          "humin": 58,
+          "humax": 89
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-06T13:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 32,
+          "humin": 59,
+          "humax": 87
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-07T04:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 32,
+          "humin": 53,
+          "humax": 85
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-08T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 32,
+          "humin": 48,
+          "humax": 75
+        },
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-09T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 31,
+          "humin": 57,
+          "humax": 81
+        },
+        {
+          "weather_desc": "Cerah Berawan",
+          "local_datetime": "2026-06-10T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 30,
+          "humin": 60,
+          "humax": 77
+        },
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-11T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 32,
+          "humin": 52,
+          "humax": 78
+        },
+        {
+          "weather_desc": "Cerah Berawan",
+          "local_datetime": "2026-06-12T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 27,
+          "humin": 76,
+          "humax": 78
+        }
+      ]
+    },
+    {
+      "lokasi": {
+        "adm1": "31",
+        "adm2": "31.73",
+        "adm3": "",
+        "adm4": "",
+        "time_zone": "WIB",
+        "provinsi": "DKI Jakarta",
+        "kotkab": "Kota Adm. Jakarta Barat",
+        "kecamatan": "",
+        "desa": ""
+      },
+      "cuaca": [
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-03T23:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 27,
+          "humin": 83,
+          "humax": 83
+        },
+        {
+          "weather_desc": "Hujan Ringan",
+          "local_datetime": "2026-06-04T16:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 31,
+          "humin": 64,
+          "humax": 92
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-05T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 33,
+          "humin": 55,
+          "humax": 93
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-06T13:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 33,
+          "humin": 56,
+          "humax": 86
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-07T07:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 33,
+          "humin": 50,
+          "humax": 89
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-08T13:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 45,
+          "humax": 80
+        },
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-09T07:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 46,
+          "humax": 81
+        },
+        {
+          "weather_desc": "Cerah Berawan",
+          "local_datetime": "2026-06-10T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 33,
+          "humin": 46,
+          "humax": 74
+        },
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-11T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 43,
+          "humax": 76
+        },
+        {
+          "weather_desc": "Cerah Berawan",
+          "local_datetime": "2026-06-12T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 26,
+          "humin": 83,
+          "humax": 83
+        }
+      ]
+    },
+    {
+      "lokasi": {
+        "adm1": "31",
+        "adm2": "31.74",
+        "adm3": "",
+        "adm4": "",
+        "time_zone": "WIB",
+        "provinsi": "DKI Jakarta",
+        "kotkab": "Kota Adm. Jakarta Selatan",
+        "kecamatan": "",
+        "desa": ""
+      },
+      "cuaca": [
+        {
+          "weather_desc": "Cerah Berawan",
+          "local_datetime": "2026-06-03T23:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 27,
+          "humin": 88,
+          "humax": 88
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-04T13:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 25,
+          "tmax": 32,
+          "humin": 63,
+          "humax": 94
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-05T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 25,
+          "tmax": 33,
+          "humin": 51,
+          "humax": 94
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-06T13:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 47,
+          "humax": 89
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-07T07:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 48,
+          "humax": 90
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-08T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 43,
+          "humax": 82
+        },
+        {
+          "weather_desc": "Udara Kabur",
+          "local_datetime": "2026-06-09T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 35,
+          "humin": 39,
+          "humax": 81
+        },
+        {
+          "weather_desc": "Cerah Berawan",
+          "local_datetime": "2026-06-10T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 25,
+          "tmax": 34,
+          "humin": 38,
+          "humax": 77
+        },
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-11T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 35,
+          "humin": 36,
+          "humax": 76
+        },
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-12T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 27,
+          "humin": 81,
+          "humax": 83
+        }
+      ]
+    },
+    {
+      "lokasi": {
+        "adm1": "31",
+        "adm2": "31.75",
+        "adm3": "",
+        "adm4": "",
+        "time_zone": "WIB",
+        "provinsi": "DKI Jakarta",
+        "kotkab": "Kota Adm. Jakarta Timur",
+        "kecamatan": "",
+        "desa": ""
+      },
+      "cuaca": [
+        {
+          "weather_desc": "Cerah Berawan",
+          "local_datetime": "2026-06-03T23:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 27,
+          "tmax": 27,
+          "humin": 86,
+          "humax": 86
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-04T13:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 25,
+          "tmax": 32,
+          "humin": 61,
+          "humax": 93
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-05T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 25,
+          "tmax": 34,
+          "humin": 50,
+          "humax": 92
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-06T13:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 35,
+          "humin": 45,
+          "humax": 88
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-07T04:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 46,
+          "humax": 88
+        },
+        {
+          "weather_desc": "Berawan",
+          "local_datetime": "2026-06-08T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 42,
+          "humax": 78
+        },
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-09T13:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 35,
+          "humin": 39,
+          "humax": 80
+        },
+        {
+          "weather_desc": "Cerah Berawan",
+          "local_datetime": "2026-06-10T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 39,
+          "humax": 74
+        },
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-11T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 35,
+          "humin": 37,
+          "humax": 73
+        },
+        {
+          "weather_desc": "Cerah",
+          "local_datetime": "2026-06-12T01:00:00",
+          "analysis_local_datetime": "2026-06-03T19:00:00",
+          "time_zone": "WIB",
+          "tmin": 26,
+          "tmax": 27,
+          "humin": 75,
+          "humax": 76
+        }
+      ]
+    }
+  ]
+}
