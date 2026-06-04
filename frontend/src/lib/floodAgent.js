@@ -162,6 +162,82 @@ Catatan jarak: Saat banjir, jalur normal bisa terputus. BPBD 117 koordinasi pera
 Untuk rute realtime yang mempertimbangkan kondisi jalan: buka halaman Evakuasi di menu atas → masukkan alamat.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NAMA JALAN & LOKASI SPESIFIK (gunakan ketika user tanya jalan/rute/kawasan):
+
+5 KOTA ADMINISTRASI (bukan "kabupaten" — Jakarta adalah daerah khusus, tidak punya kabupaten kecuali Kep. Seribu):
+  Jakarta Pusat · Jakarta Utara · Jakarta Barat · Jakarta Selatan · Jakarta Timur
+  Kabupaten Administrasi: Kepulauan Seribu (kepulauan di Teluk Jakarta)
+
+JALAN UTAMA per Wilayah:
+Jakarta Utara:
+  • Jl. Yos Sudarso — arteri utama Jakut, sering banjir rob di Penjaringan
+  • Jl. Pluit Raya, Jl. Muara Baru Raya, Jl. Muara Angke — kawasan industri & nelayan rawan rob
+  • Jl. Bandengan Utara / Bandengan Selatan — Penjaringan, sering genangan
+  • Jl. Pademangan Raya, Jl. Ancol Barat — Pademangan
+  • Jl. Enggano (depan GOR Tanjung Priok), Jl. Sunter Agung Tengah
+  • Jl. RE Martadinata (Reklamasi Pantai Utara) — baru, tapi tetap pantau drainase
+  • Jl. Cilincing Raya, Jl. Semper Raya, Jl. Kalibaru Barat/Timur — Cilincing
+
+Jakarta Barat:
+  • Jl. Daan Mogot Raya (arteri utama Jakbar–Tangerang, sering macet banjir)
+  • Jl. Raya Semanan, Jl. Pegadungan — Kalideres, bantaran Kali Semanan
+  • Jl. Kapuk Raya, Jl. Cengkareng Raya, Jl. Outer Ring Road Barat — Cengkareng
+  • Jl. Kyai Tapa, Jl. S. Parman (Kali Sekretaris di sini) — Grogol Petamburan
+  • Jl. Raya Duri Kosambi, Jl. Angke Raya — Tambora/Kembangan
+  • Jl. Latumenten, Jl. Tubagus Angke — Grogol, dekat Kali Angke
+
+Jakarta Timur:
+  • Jl. Otista Raya (Otto Iskandar Dinata), Jl. Bekasi Timur Raya — Jatinegara
+  • Jl. Matraman Raya — Matraman/Jatinegara (jalur rawan kiriman)
+  • Jl. D.I. Panjaitan — Kantor Walikota JakTim di sini
+  • Jl. Kampung Melayu Besar — jantung titik kritis Ciliwung
+  • Jl. Cipinang Muara, Jl. Cipinang Indah — bantaran Kali Cipinang
+  • Jl. Pulogebang, Jl. Raya Bekasi Km.18 — Cakung
+  • Jl. Dewi Sartika, Jl. Condet Raya — Kramat Jati
+  • Jl. Penggilingan Raya, Jl. Cakung Drain — Cakung, dekat saluran
+
+Jakarta Selatan:
+  • Jl. Dr. Saharjo — Tebet, jembatan Ciliwung di sini
+  • Jl. Tebet Raya, Jl. Bukit Duri Tanjakan — bantaran Ciliwung
+  • Jl. MT. Haryono — Pancoran, sering macet saat banjir
+  • Jl. Pesanggrahan Raya, Jl. Petukangan Utara — Pesanggrahan/Kali Pesanggrahan
+  • Jl. Pasar Minggu Raya — Pasar Minggu, sering genangan
+  • Jl. TB Simatupang — Lenteng Agung/Jagakarsa, aman tapi pantau saat ekstrem
+  • Jl. Ragunan, Jl. Cilandak Raya — lebih aman, dataran relatif tinggi
+  • Jl. Ciledug Raya, Jl. Kebayoran Lama — Kebayoran Lama
+  • Jl. Fatmawati, Jl. RS Fatmawati — Cilandak, relatif aman
+
+Jakarta Pusat:
+  • Jl. Medan Merdeka Barat/Utara/Selatan/Timur — kawasan Monas, aman
+  • Jl. Benyamin Sueb — Kemayoran, JIEXPO, genangan saat hujan ekstrem
+  • Jl. Mangga Besar Raya, Jl. Mangga Dua Raya — Sawah Besar, genangan sesekali
+  • Jl. Senen Raya, Jl. Kramat Raya — Senen, relatif aman
+  • Jl. Imam Bonjol, Jl. Diponegoro, Jl. Cikini Raya — Menteng, aman
+  • Jl. Veteran, Jl. Juanda, Jl. Hayam Wuruk — Gambir, aman
+  • Jl. Gajah Mada, Jl. Hayam Wuruk — Taman Sari, pantau Kali Ciliwung di dekatnya
+
+KAWASAN/KOMPLEK:
+  Rawan: Perumahan Pluit Permai, Muara Baru Permai, Kampung Bandan, Pejagalan
+  Pantau: Sunter Agung, Pegangsaan Dua, Kelapa Gading (aman tapi pantau saat kiriman)
+  Aman: Senayan, SCBD, Sudirman-Thamrin, Kemang, BSD (bukan Jakarta tapi sering ditanya)
+
+SUNGAI / KALI UTAMA:
+  • Ciliwung: dari Bogor → Depok → Manggarai → Kampung Melayu → Jatinegara. PALING KRITIS.
+  • Kali Angke: dari Tangerang → Kalideres → Cengkareng → Muara Angke. Banjir kilat + kiriman.
+  • Kali Pesanggrahan: dari Tangerang → Pesanggrahan → Kebayoran → Muara Gembong
+  • Kali Sunter: dari Bogor timur → Cilincing → Sunter → Tanjung Priok
+  • Kali Cakung: dari Bekasi → Cakung → Cilincing. Banjir kiriman dari timur.
+  • Kali Sekretaris: Grogol → Tomang → Angke. Banjir kilat.
+  • Kali Sentiong: Kemayoran → Ancol. Genangan Kemayoran.
+
+INFRASTRUKTUR ANTI-BANJIR:
+  • Banjir Kanal Barat (BKB): Pintu Air Manggarai → Muara Angke. Pemotor utama limpasan.
+  • Banjir Kanal Timur (BKT): Cipinang → Marunda. Mengurangi banjir JakTim.
+  • SODETAN Ciliwung: terowongan bawah tanah Bukit Duri → BKT, kapasitas 60 m³/detik. Baru aktif 2023.
+  • 600+ pompa DSDADKI: Pluit (terbesar), Ancol, Muara Baru, Manggarai, Sunter, Sentiong, Waduk Ria Rio
+  • Waduk: Pluit, Sunter, Ria Rio (Pulogadung), Lebak Bulus. Penampung hujan lokal.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 FITUR WEBSITE deFlood.ai (untuk pertanyaan "ini apa", "cara pakai", "penjelasan"):
 • Command Center (Halaman Utama): dashboard realtime — Skor Risiko, status sensor TMA, curah hujan BMKG per wilayah
 • Skor Risiko 0–100: dihitung model XGBoost dari sensor TMA + curah hujan + akumulasi hujan + data BMKG. Update tiap 15 menit.
@@ -334,6 +410,38 @@ Kalau ada pompa mati atau saluran mampet di lingkunganmu:
 • Lapor ke RT/RW → diteruskan ke Kelurahan → Sudin SDA setempat
 
 Pantau status semua sensor di peta deFlood.ai untuk lihat titik kritis yang sedang naik.`,
+
+    jalan: `Jalan & kawasan rawan banjir di Jakarta:
+
+🔴 Jakarta Utara (paling rawan):
+• Jl. Pluit Raya, Jl. Muara Baru, Jl. Muara Angke — rob + kiriman, sering 50–150 cm
+• Jl. Yos Sudarso (Penjaringan–Pademangan) — rob saat pasang tinggi
+• Jl. Cilincing Raya, Jl. Kalibaru Timur — bantaran kali, kiriman dari hulu
+• Jl. Bandengan Utara/Selatan, Jl. Pademangan Raya
+
+🟠 Jakarta Timur:
+• Jl. Kampung Melayu Besar — TERCEPAT tergenang saat banjir kiriman Ciliwung
+• Jl. Otista Raya, Jl. Matraman Raya, Jl. D.I. Panjaitan — Jatinegara/Matraman
+• Jl. Cipinang Muara — bantaran Kali Cipinang
+• Jl. Pulogebang, Jl. Cakung Drain — kiriman dari Bekasi
+
+🟠 Jakarta Barat:
+• Jl. Daan Mogot Raya (Km.10–Km.20) — sering macet + banjir kiriman Semanan
+• Jl. Raya Semanan, Jl. Pegadungan — bantaran Kali Semanan
+• Jl. Kapuk Raya, Jl. Cengkareng Raya — dekat Kali Angke
+• Jl. Kyai Tapa, Jl. S. Parman — Kali Sekretaris
+
+🟡 Jakarta Selatan (banjir kiriman Ciliwung):
+• Jl. Dr. Saharjo, Jl. Bukit Duri Tanjakan — Tebet, bantaran Ciliwung
+• Jl. Pesanggrahan Raya, Jl. Petukangan — bantaran Kali Pesanggrahan
+• Jl. Pasar Minggu Raya — genangan sesekali
+
+🟢 Relatif Aman:
+• Kawasan Sudirman–Thamrin, Senayan/GBK, Menteng (Jl. Imam Bonjol, Jl. Diponegoro)
+• Jl. TB Simatupang (JakSel selatan), Jl. Fatmawati, Jl. Ragunan
+• Kawasan Monas (Jl. Medan Merdeka) — dataran tinggi
+
+Untuk rute yang mempertimbangkan kondisi jalan: buka halaman Evakuasi → masukkan alamat.`,
 
     web: `deFlood.ai adalah platform pemantauan banjir realtime Jakarta. Ini fitur-fiturnya:
 
@@ -601,6 +709,38 @@ If a pump is broken or a canal is blocked in your area:
 
 Monitor all sensor conditions on the deFlood.ai map to see which points are currently rising.`,
 
+    jalan: `Flood-prone streets and districts in Jakarta:
+
+🔴 North Jakarta (highest risk):
+• Jl. Pluit Raya, Jl. Muara Baru, Jl. Muara Angke — tidal + upstream, 50–150 cm common
+• Jl. Yos Sudarso (Penjaringan–Pademangan) — tidal flooding at high tide
+• Jl. Cilincing Raya, Jl. Kalibaru Timur — riverbank, upstream flooding
+• Jl. Bandengan Utara/Selatan, Jl. Pademangan Raya
+
+🟠 East Jakarta:
+• Jl. Kampung Melayu Besar — FASTEST to flood during Ciliwung overflow
+• Jl. Otista Raya, Jl. Matraman Raya, Jl. D.I. Panjaitan — Jatinegara/Matraman
+• Jl. Cipinang Muara — Kali Cipinang riverside
+• Jl. Pulogebang, Jl. Cakung Drain — upstream from Bekasi
+
+🟠 West Jakarta:
+• Jl. Daan Mogot Raya (Km.10–Km.20) — upstream flooding + traffic jams
+• Jl. Raya Semanan, Jl. Pegadungan — Kali Semanan riverside
+• Jl. Kapuk Raya, Jl. Cengkareng Raya — near Kali Angke
+• Jl. Kyai Tapa, Jl. S. Parman — Kali Sekretaris area
+
+🟡 South Jakarta (Ciliwung upstream):
+• Jl. Dr. Saharjo, Jl. Bukit Duri Tanjakan — Tebet, Ciliwung riverside
+• Jl. Pesanggrahan Raya, Jl. Petukangan — Kali Pesanggrahan
+• Jl. Pasar Minggu Raya — occasional flooding
+
+🟢 Relatively Safe:
+• Sudirman–Thamrin corridor, Senayan/GBK, Menteng (Jl. Imam Bonjol, Jl. Diponegoro)
+• Jl. TB Simatupang (South Jakarta), Jl. Fatmawati, Jl. Ragunan
+• Monas area (Jl. Medan Merdeka) — elevated ground
+
+For live routing: open the Evacuation page → enter your address.`,
+
     web: `deFlood.ai is Jakarta's realtime flood monitoring platform. Here's what it does:
 
 📊 Command Center (main page):
@@ -729,6 +869,8 @@ function _matchOffline(text, lang) {
     .replace(/web(site|app)?|aplikasi|app\b|fitur/g, "website");
   const kb = OFFLINE_KB[lang] ?? OFFLINE_KB.id;
 
+  // Street / road names
+  if (t.includes("jalan") || t.includes("jl.") || /\bjl\s+[a-z]/.test(t) || t.includes("street") || t.includes("road") || t.includes("kawasan") || t.includes("perumahan") || t.includes("komplek") || t.includes("kali ") || t.includes("sungai")) return kb.jalan;
   // Website / app explanation
   if (t.includes("website") || t.includes("ini apa") || t.includes("cara pakai") || t.includes("cara baca") || t.includes("penjelasan") || t.includes("explain") || t.includes("what is") || t.includes("how does") || t.includes("fitur")) return kb.web;
   // Flood duration / Katulampa

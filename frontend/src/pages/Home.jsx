@@ -18,28 +18,66 @@ const BASE_ZONES = [
 ];
 
 
-// waterLevelRatio: real sensor reading from DSDADKI (0–1.5 scale).
-// TMA now tracks real sensor data — when WLR rises, all zone TMA values rise.
-// Per-zone bias (z.bias / 200) preserves flood-frequency differentiation
-// (Kebayoran historically more flood-prone = higher TMA estimate than Cengkareng).
-function deriveZones(riskScore, realRainfall = 0, waterLevelRatio = 0.5) {
+// Maps each zone to its Jakarta kota administrasi (administrative city).
+// Used to pull realtime TMA + BMKG data per zone from wilayahSummary.
+const ZONE_WILAYAH_MAP = {
+  "Kebayoran":   "Jakarta Selatan",
+  "Penjaringan": "Jakarta Utara",
+  "Jatinegara":  "Jakarta Timur",
+  "Kalideres":   "Jakarta Barat",
+  "Cengkareng":  "Jakarta Barat",
+};
+
+// Bonus added to risk probability based on DSDADKI worst-status per wilayah.
+const STATUS_RISK_BONUS = { "Siaga 1": 35, "Siaga 2": 22, "Siaga 3": 12, "Normal": 0 };
+
+// deriveRealtimeZones: blends global ML score with per-wilayah DSDADKI sensor counts
+// and BMKG forecast. Falls back to pure ML when wilayahSummary is empty.
+function deriveRealtimeZones(riskScore, wilayahSummary = [], rainfall = 0, waterLevelRatio = 0.5) {
   const wlr = Math.max(0.3, Math.min(1.5, waterLevelRatio));
+  const summaryMap = {};
+  (wilayahSummary || []).forEach(w => { summaryMap[w.wilayah] = w; });
+  const hasRealtime = Object.keys(summaryMap).length > 0;
+
   return BASE_ZONES.map((z) => {
-    const prob = Math.max(0.04, Math.min(0.97, (riskScore + z.bias) / 100));
+    const wilayahName = ZONE_WILAYAH_MAP[z.zone];
+    const ws = summaryMap[wilayahName];
+
+    let prob;
+    if (hasRealtime && ws) {
+      // Realtime path: TMA status + siaga sensor counts + BMKG forecast + bias
+      const statusBonus = STATUS_RISK_BONUS[ws.worst_status] ?? 0;
+      const siagaBonus  = (ws.siaga1_count ?? 0) * 8 + (ws.siaga2_count ?? 0) * 4 + (ws.siaga3_count ?? 0) * 2;
+      const isRaining   = ws.forecast?.[0]?.weather_desc?.toLowerCase().includes("hujan");
+      const rainBonus   = isRaining ? (rainfall > 20 ? 12 : 6) : 0;
+      // 40% global ML + realtime sensor signals + historical bias
+      const blended = riskScore * 0.4 + statusBonus + siagaBonus + rainBonus + z.bias;
+      prob = Math.max(0.04, Math.min(0.97, blended / 100));
+    } else {
+      // Fallback: original ML derivation
+      prob = Math.max(0.04, Math.min(0.97, (riskScore + z.bias) / 100));
+    }
+
     let risk_level;
     if (prob >= 0.80) risk_level = "SIAGA_1";
     else if (prob >= 0.55) risk_level = "SIAGA_2";
     else if (prob >= 0.30) risk_level = "WASPADA";
     else risk_level = "NORMAL";
-    // TMA uses real WLR + per-zone historical bias so the value changes when
-    // sensors report rising water, not only when ML probability changes.
+
     const wlrBiased = Math.min(1.5, Math.max(0.3, wlr + z.bias / 200));
     return {
       ...z,
       probability: prob,
       tma: Math.round(z.tma_base * wlrBiased),
-      rainfall: realRainfall,
+      rainfall,
       risk_level,
+      // realtime extras — shown in ZoneCards when available
+      worstStatus:  ws?.worst_status ?? null,
+      siaga1Count:  ws?.siaga1_count ?? 0,
+      siaga2Count:  ws?.siaga2_count ?? 0,
+      siaga3Count:  ws?.siaga3_count ?? 0,
+      tmaCount:     ws?.tma_count ?? 0,
+      isRealtime:   hasRealtime && !!ws,
     };
   });
 }
@@ -471,42 +509,121 @@ function SensorStrip({ riskData }) {
   );
 }
 
-function RecommendationsPanel({ alertZones, recommendedActions = [] }) {
+function RecommendationsPanel({ riskData, stations = [] }) {
   const t = useT();
-  const zone1 = alertZones.find((z) => z.risk_level === "SIAGA_1");
-  const zone2 = alertZones.find((z) => z.risk_level === "SIAGA_2");
+  const { lang } = useApp();
+  const isId = lang === "id";
 
-  const actions = [
-    zone1
-      ? { label: t("rec.evacuate", { zone: zone1.zone }), primary: true,  icon: "!" }
-      : { label: t("rec.monitor"),   primary: false, icon: "◉" },
-    zone2
-      ? { label: t("rec.route", { zone: zone2.zone }), primary: false, icon: "↗" }
-      : { label: t("rec.weather"),  primary: false, icon: "↻" },
-    { label: t("rec.notify"), primary: false, icon: "✉" },
-  ];
+  const rainfall   = riskData?.rainfall ?? 0;
+  const riskTrend  = riskData?.trendState?.risk_trend;
+  const wSummary   = riskData?.wilayahSummary ?? [];
+
+  // Sort stations by severity, pick top alerts
+  const s1 = [...stations].filter(s => s.ratio >= 1.0).sort((a, b) => b.ratio - a.ratio);
+  const s2 = [...stations].filter(s => s.ratio >= 0.75 && s.ratio < 1.0).sort((a, b) => b.ratio - a.ratio);
+
+  // Most dangerous wilayah by status
+  const dangerW = [...wSummary]
+    .filter(w => ["Siaga 1","Siaga 2","Siaga 3"].includes(w.worst_status))
+    .sort((a, b) => ({ "Siaga 1":3,"Siaga 2":2,"Siaga 3":1 }[b.worst_status] ?? 0) - ({ "Siaga 1":3,"Siaga 2":2,"Siaga 3":1 }[a.worst_status] ?? 0));
+  const topW = dangerW[0];
+
+  // Build dynamic realtime action list
+  const dynActions = [];
+
+  if (s1.length > 0) {
+    const st = s1[0];
+    dynActions.push(isId
+      ? `🔴 ${st.nama} sudah ${Math.round(st.ratio * 100)}% ambang Siaga 1 (TMA ${st.tinggi_air} cm). Warga bantaran terdekat: siapkan evakuasi segera.`
+      : `🔴 ${st.nama} at ${Math.round(st.ratio * 100)}% of Alert-1 threshold (${st.tinggi_air} cm). Nearby residents: prepare immediate evacuation.`
+    );
+  }
+
+  if (s2.length > 0) {
+    const st = s2[0];
+    dynActions.push(isId
+      ? `🟠 ${st.nama} Siaga 2 (${Math.round(st.ratio * 100)}%, TMA ${st.tinggi_air} cm) — pantau setiap 15 mnt, siapkan tas darurat.`
+      : `🟠 ${st.nama} at Alert 2 (${Math.round(st.ratio * 100)}%, ${st.tinggi_air} cm) — monitor every 15 min, prepare emergency bag.`
+    );
+  }
+
+  if (topW) {
+    const sensorsNote = topW.siaga1_count > 0
+      ? (isId ? `${topW.siaga1_count} sensor Siaga 1 aktif` : `${topW.siaga1_count} active Alert-1 sensors`)
+      : (isId ? `${topW.siaga2_count} sensor Siaga 2` : `${topW.siaga2_count} Alert-2 sensors`);
+    dynActions.push(isId
+      ? `📍 ${topW.wilayah} — ${topW.worst_status}, ${sensorsNote}. Kurangi aktivitas di luar ruangan di wilayah ini.`
+      : `📍 ${topW.wilayah} — ${topW.worst_status}, ${sensorsNote}. Reduce outdoor activities in this district.`
+    );
+  }
+
+  if (rainfall > 20) {
+    dynActions.push(isId
+      ? `🌧 Curah hujan ${Math.round(rainfall)} mm/jam — potensi genangan cepat di titik rendah. Hindari bantaran kali dan underpass.`
+      : `🌧 Rainfall ${Math.round(rainfall)} mm/h — rapid pooling risk at low points. Avoid riverbanks and underpasses.`
+    );
+  } else if (rainfall > 5) {
+    dynActions.push(isId
+      ? `🌦 Hujan ringan ${Math.round(rainfall)} mm/jam — pantau apakah intensitas meningkat dalam 30 menit ke depan.`
+      : `🌦 Light rain ${Math.round(rainfall)} mm/h — monitor if intensity rises over the next 30 minutes.`
+    );
+  }
+
+  if (riskTrend === "increasing" && dynActions.length < 3) {
+    dynActions.push(isId
+      ? `↑ Tren risiko sedang naik — persiapkan evakuasi mandiri dan koordinasi dengan RT/RW setempat.`
+      : `↑ Risk trend rising — prepare self-evacuation plan and coordinate with local RT/RW.`
+    );
+  }
+
+  if (dynActions.length === 0) {
+    dynActions.push(isId
+      ? "✅ Kondisi saat ini terpantau normal. Tetap pantau sensor tiap 15 menit selama musim hujan."
+      : "✅ Current conditions appear normal. Keep monitoring sensors every 15 min during rain season."
+    );
+  }
+
+  // Buttons — contextual to most critical situation
+  const buttons = [];
+  if (s1.length > 0) {
+    const nm = s1[0].nama.split(/[\s/]/)[0];
+    buttons.push({ label: isId ? `Evakuasi — area ${nm}` : `Evacuate — ${nm} area`, primary: true, icon: "!" });
+  } else {
+    buttons.push({ label: isId ? "Pantau kondisi sensor" : "Monitor sensor conditions", primary: false, icon: "◉" });
+  }
+  buttons.push({
+    label: topW
+      ? (isId ? `Rute alternatif — ${topW.wilayah.replace("Jakarta ", "")}` : `Alt route — ${topW.wilayah.replace("Jakarta ", "")}`)
+      : (isId ? "Cek rute evakuasi" : "Check evacuation routes"),
+    primary: false, icon: "↗",
+  });
+  buttons.push({ label: isId ? "BPBD Jakarta — 117" : "BPBD Emergency: 117", primary: false, icon: "✉" });
 
   return (
     <div className="panel panel-body">
-      <p className="panel-title">{t("rec.title")}</p>
-      {recommendedActions.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "0.75rem" }}>
-          {recommendedActions.map((action, i) => (
-            <div key={i} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
-              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--cyan)", flexShrink: 0, marginTop: "0.15rem" }}>›</span>
-              <p style={{ fontSize: "0.75rem", color: "var(--muted)", lineHeight: 1.55, margin: 0 }}>{action}</p>
-            </div>
-          ))}
-        </div>
-      )}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.875rem" }}>
+        <p className="panel-title" style={{ marginBottom: 0 }}>{t("rec.title")}</p>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em" }}>● real</span>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "0.75rem" }}>
+        {dynActions.map((action, i) => (
+          <div key={i} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--cyan)", flexShrink: 0, marginTop: "0.15rem" }}>›</span>
+            <p style={{ fontSize: "0.75rem", color: "var(--muted)", lineHeight: 1.55, margin: 0 }}>{action}</p>
+          </div>
+        ))}
+      </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        {actions.map((a, i) => (
+        {buttons.map((a, i) => (
           <button key={i} className={`action-btn${a.primary ? " primary" : ""}`}>
             <span className="action-icon">{a.icon}</span>
             {a.label}
           </button>
         ))}
       </div>
+      <p style={{ marginTop: "0.625rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)" }}>
+        ● {isId ? "Rekomendasi dari sensor DSDADKI + BMKG realtime" : "Based on realtime DSDADKI sensors + BMKG data"}
+      </p>
     </div>
   );
 }
@@ -535,6 +652,76 @@ function StaleDataBanner({ snapshotFetchedAt }) {
   );
 }
 
+/* ── Dynamic status description ─────────────────────────────
+   Generates a plain-language summary from actual realtime sensor data.
+   Replaces the four static hand-written strings that lived in cfgMap.
+*/
+function buildStatusDesc(riskData, isId) {
+  const level      = riskData?.level ?? "waspada";
+  const wlr        = riskData?.waterLevelRatio ?? 0;
+  const rainfall   = riskData?.rainfall ?? 0;
+  const riskTrend  = riskData?.trendState?.risk_trend;
+  const stations   = riskData?.stations ?? [];
+  const wSummary   = riskData?.wilayahSummary ?? [];
+
+  const s1 = [...stations].filter(s => s.ratio >= 1.0).sort((a, b) => b.ratio - a.ratio);
+  const s2 = [...stations].filter(s => s.ratio >= 0.75 && s.ratio < 1.0).sort((a, b) => b.ratio - a.ratio);
+  const dangerW = [...wSummary]
+    .filter(w => ["Siaga 1","Siaga 2","Siaga 3"].includes(w.worst_status))
+    .sort((a, b) => ({ "Siaga 1":3,"Siaga 2":2,"Siaga 3":1 }[b.worst_status] ?? 0) - ({ "Siaga 1":3,"Siaga 2":2,"Siaga 3":1 }[a.worst_status] ?? 0));
+  const topW = dangerW[0];
+
+  if (level === "bahaya") {
+    const stNote = s1.length > 0
+      ? (isId ? `${s1.length} sensor melewati ambang Siaga 1 — terparah: ${s1[0].nama}` : `${s1.length} sensor(s) past Alert-1 threshold — worst: ${s1[0].nama}`)
+      : "";
+    const rfNote = rainfall > 0 ? (isId ? `, hujan ${Math.round(rainfall)} mm/jam` : `, rain ${Math.round(rainfall)} mm/h`) : "";
+    return isId
+      ? `KONDISI KRITIS! ${stNote}${rfNote}. Ikuti instruksi BPBD segera — hubungi 117. Bersiap evakuasi sekarang.`
+      : `CRITICAL! ${stNote}${rfNote}. Follow BPBD instructions immediately — call 117. Prepare to evacuate now.`;
+  }
+
+  if (level === "siaga") {
+    const wlrPct = Math.round(wlr * 100);
+    const sNote  = s2.length > 0
+      ? (isId ? ` ${s2.length} sensor Siaga 2${s1.length > 0 ? `, ${s1.length} Siaga 1` : ""}.` : ` ${s2.length} Alert-2 sensor(s)${s1.length > 0 ? `, ${s1.length} Alert-1` : ""}.`)
+      : "";
+    const wNote  = topW
+      ? (isId ? ` ${topW.wilayah} status ${topW.worst_status}.` : ` ${topW.wilayah} at ${topW.worst_status}.`)
+      : "";
+    return isId
+      ? `Ketinggian air ${wlrPct}% dari ambang siaga.${sNote}${wNote} Siapkan tas darurat dan pantau setiap 15 menit.`
+      : `Water level at ${wlrPct}% of alert threshold.${sNote}${wNote} Prepare emergency bag and monitor every 15 min.`;
+  }
+
+  if (level === "waspada") {
+    const tNote = riskTrend === "increasing"
+      ? (isId ? " Tren risiko sedang naik." : " Risk trend is rising.")
+      : riskTrend === "decreasing"
+      ? (isId ? " Situasi mulai membaik." : " Situation improving.")
+      : "";
+    const alertCount = s1.length + s2.length;
+    const sNote = alertCount > 0
+      ? (isId ? ` ${alertCount} sensor dalam kondisi siaga.` : ` ${alertCount} sensor(s) in alert state.`)
+      : "";
+    const rfNote = rainfall > 5
+      ? (isId ? ` Curah hujan ${Math.round(rainfall)} mm/jam.` : ` Rainfall ${Math.round(rainfall)} mm/h.`)
+      : "";
+    return isId
+      ? `Ada tanda awal yang perlu dipantau.${sNote}${tNote}${rfNote} Cek ketinggian air berkala.`
+      : `Early warning signs detected.${sNote}${tNote}${rfNote} Check water levels regularly.`;
+  }
+
+  // aman
+  const totalSt = stations.length;
+  const sNote = totalSt > 0
+    ? (isId ? ` Semua ${totalSt} sensor dalam batas normal.` : ` All ${totalSt} sensors within normal range.`)
+    : "";
+  return isId
+    ? `Jakarta saat ini aman dari risiko banjir.${sNote} Tidak ada tanda-tanda mengkhawatirkan.`
+    : `Jakarta is currently safe from flood risk.${sNote} No concerning signs detected.`;
+}
+
 /* ── Status Hero — the FIRST thing user sees: "apakah ada risiko banjir?" ── */
 function StatusHero({ riskData }) {
   const { lang } = useApp();
@@ -548,36 +735,14 @@ function StatusHero({ riskData }) {
   const snapshotFetchedAt = riskData?.snapshotFetchedAt;
 
   const cfgMap = {
-    aman: {
-      label: isId ? "Aman" : "Safe",
-      color: "var(--safe)", bg: "var(--safe-soft)", border: "var(--safe-border)",
-      desc: isId
-        ? "Jakarta saat ini aman dari risiko banjir. Tidak ada tanda-tanda mengkhawatirkan."
-        : "Jakarta is currently safe from flood risk. No concerning signs.",
-    },
-    waspada: {
-      label: isId ? "Waspada" : "Watch",
-      color: "var(--wsp)", bg: "var(--wsp-soft)", border: "var(--wsp-border)",
-      desc: isId
-        ? "Ada tanda awal yang perlu diperhatikan. Pantau ketinggian air secara berkala."
-        : "Early signs worth monitoring. Check water levels periodically.",
-    },
-    siaga: {
-      label: isId ? "Siaga" : "Alert",
-      color: "var(--s2)", bg: "var(--s2-soft)", border: "var(--s2-border)",
-      desc: isId
-        ? "Ketinggian air cukup tinggi dan perlu diwaspadai. Siapkan tas darurat dan terus pantau perkembangan."
-        : "Water levels are elevated. Prepare an emergency bag and keep monitoring.",
-    },
-    bahaya: {
-      label: isId ? "Bahaya!" : "Danger!",
-      color: "var(--s1)", bg: "var(--s1-soft)", border: "var(--s1-border)",
-      desc: isId
-        ? "KONDISI KRITIS! Ikuti instruksi BPBD segera. Bersiap untuk evakuasi sekarang."
-        : "CRITICAL CONDITIONS! Follow BPBD instructions immediately. Prepare to evacuate now.",
-    },
+    aman:    { label: isId ? "Aman"     : "Safe",    color: "var(--safe)", bg: "var(--safe-soft)", border: "var(--safe-border)" },
+    waspada: { label: isId ? "Waspada"  : "Watch",   color: "var(--wsp)",  bg: "var(--wsp-soft)",  border: "var(--wsp-border)"  },
+    siaga:   { label: isId ? "Siaga"    : "Alert",   color: "var(--s2)",   bg: "var(--s2-soft)",   border: "var(--s2-border)"   },
+    bahaya:  { label: isId ? "Bahaya!"  : "Danger!", color: "var(--s1)",   bg: "var(--s1-soft)",   border: "var(--s1-border)"   },
   };
   const cfg = cfgMap[level] ?? cfgMap.waspada;
+  // Dynamic description built from realtime sensor data — not hand-written strings
+  const dynamicDesc = buildStatusDesc(riskData, isId);
 
   let snapTimeStr = null;
   if (snapshotFetchedAt) {
@@ -613,7 +778,7 @@ function StatusHero({ riskData }) {
           {snapTimeStr && <span style={{ opacity: 0.65, marginLeft: "0.5rem" }}>· {snapTimeStr} WIB</span>}
         </div>
         <div className="status-hero-level" style={{ color: cfg.color }}>{cfg.label}</div>
-        <p className="status-hero-desc">{cfg.desc}</p>
+        <p className="status-hero-desc">{dynamicDesc}</p>
       </div>
       <div className="status-hero-stats">
         {wlr != null && (
@@ -670,113 +835,109 @@ const WILAYAH_STATUS_STYLE = {
   "Normal":  { color: "var(--safe)", bg: "var(--safe-soft)", border: "var(--safe-border)" },
 };
 
-function WilayahGrid({ wilayahSummary }) {
+/* ── Wilayah Forecast Grid — 12-hour BMKG timeline per district ──
+   Differentiated from WilayahRainfallStrip (which shows current BMKG snapshot).
+   This shows WHERE and WHEN rain will arrive in the next 1-12 hours.
+*/
+function WilayahForecastGrid({ wilayahSummary }) {
   const { lang } = useApp();
   const isId = lang === "id";
   if (!wilayahSummary || wilayahSummary.length === 0) return null;
+
+  const now = new Date();
+
+  const getTimeLabel = (slot, i) => {
+    if (!slot?.local_datetime) return i === 0 ? (isId ? "Skrg" : "Now") : `+${i * 3}j`;
+    const dt = new Date(slot.local_datetime);
+    const diffH = Math.round((dt - now) / 3_600_000);
+    if (i === 0 || diffH <= 0) return isId ? "Skrg" : "Now";
+    return isId ? `+${diffH}j` : `+${diffH}h`;
+  };
 
   return (
     <div className="panel panel-body fade-in">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.875rem" }}>
         <p className="panel-title" style={{ marginBottom: 0 }}>
-          {isId ? "Kondisi per Wilayah Jakarta" : "Jakarta District Conditions"}
+          {isId ? "Prakiraan Cuaca 1–12 Jam ke Depan" : "1–12 Hour Weather Forecast"}
         </p>
-        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)", letterSpacing: "0.06em" }}>
-          ● DSDADKI · BMKG
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--cyan)", letterSpacing: "0.06em" }}>
+          ● BMKG
         </span>
       </div>
 
-      <div className="wilayah-grid">
+      <div style={{ display: "flex", flexDirection: "column" }}>
         {wilayahSummary.map((w) => {
-          const cf = w.forecast?.[0];
-          const icon = WEATHER_ICON[cf?.weather_desc] ?? "🌤";
-          const isRain = cf?.weather_desc?.toLowerCase().includes("hujan");
-          const style = WILAYAH_STATUS_STYLE[w.worst_status] ?? WILAYAH_STATUS_STYLE["Normal"];
+          const style  = WILAYAH_STATUS_STYLE[w.worst_status] ?? WILAYAH_STATUS_STYLE["Normal"];
           const shortName = w.wilayah.replace("Jakarta ", "Jkt ");
+          const slots  = (w.forecast || []).slice(0, 4);
+          // Detect first upcoming rain slot (excluding slot 0 = "now")
+          const firstRainIdx = slots.findIndex((s, i) => i > 0 && s.weather_desc?.toLowerCase().includes("hujan"));
+          const firstRainSlot = firstRainIdx > 0 ? slots[firstRainIdx] : null;
 
           return (
-            <div key={w.wilayah} className="wilayah-card"
-              style={{ borderTopColor: style.color, borderTopWidth: "2px" }}>
-
-              {/* Wilayah + status */}
-              <div style={{ marginBottom: "0.5rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", fontWeight: 700, color: "var(--muted)", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "0.3rem" }}>
+            <div key={w.wilayah} className="forecast-row">
+              {/* Left label: wilayah name + TMA status */}
+              <div className="forecast-row-label">
+                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", fontWeight: 700,
+                  color: "var(--muted)", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "0.25rem" }}>
                   {shortName}
                 </div>
                 <span className="wilayah-status-badge"
                   style={{ background: style.bg, color: style.color, borderColor: style.border }}>
                   {w.worst_status}
                 </span>
-              </div>
-
-              {/* Weather icon + description */}
-              <div style={{ marginBottom: "0.5rem" }}>
-                <div style={{ fontSize: "1.4rem", lineHeight: 1, marginBottom: "0.2rem" }}>{icon}</div>
-                <div style={{ fontSize: "0.7rem", color: isRain ? "var(--cyan)" : "var(--text)", fontWeight: 500, lineHeight: 1.3 }}>
-                  {cf?.weather_desc ?? "—"}
+                {/* TMA sensor count */}
+                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.52rem", color: "var(--muted-2)", marginTop: "0.25rem" }}>
+                  {w.tma_count > 0 && `${w.tma_count} TMA`}
+                  {w.siaga1_count > 0 && (
+                    <span className="wilayah-siaga-pip" style={{ background: "var(--s1-soft)", color: "var(--s1)", borderColor: "var(--s1-border)", marginLeft: 3 }}>
+                      {w.siaga1_count}×S1
+                    </span>
+                  )}
+                  {w.siaga2_count > 0 && (
+                    <span className="wilayah-siaga-pip" style={{ background: "var(--s2-soft)", color: "var(--s2)", borderColor: "var(--s2-border)", marginLeft: 3 }}>
+                      {w.siaga2_count}×S2
+                    </span>
+                  )}
                 </div>
-                {cf?.tmin != null && (
-                  <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted)", marginTop: "0.15rem" }}>
-                    {cf.tmin}–{cf.tmax}°C · {cf.humin}–{cf.humax}%
+                {/* Rain-incoming alert */}
+                {firstRainSlot && (
+                  <div className="forecast-rain-alert" style={{ marginTop: "0.25rem" }}>
+                    🌧 {getTimeLabel(firstRainSlot, firstRainIdx)}
                   </div>
                 )}
               </div>
 
-              {/* TMA count + siaga badges */}
-              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.25rem", marginBottom: "0.5rem" }}>
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)" }}>
-                  {w.tma_count} TMA
-                </span>
-                {w.siaga1_count > 0 && (
-                  <span className="wilayah-siaga-pip" style={{ background: "var(--s1-soft)", color: "var(--s1)", borderColor: "var(--s1-border)" }}>
-                    {w.siaga1_count}×S1
-                  </span>
-                )}
-                {w.siaga2_count > 0 && (
-                  <span className="wilayah-siaga-pip" style={{ background: "var(--s2-soft)", color: "var(--s2)", borderColor: "var(--s2-border)" }}>
-                    {w.siaga2_count}×S2
-                  </span>
-                )}
-                {w.siaga3_count > 0 && (
-                  <span className="wilayah-siaga-pip" style={{ background: "var(--wsp-soft)", color: "var(--wsp)", borderColor: "var(--wsp-border)" }}>
-                    {w.siaga3_count}×S3
-                  </span>
+              {/* Forecast timeline slots */}
+              <div className="forecast-slots">
+                {slots.length > 0 ? slots.map((slot, i) => {
+                  const isRain = slot.weather_desc?.toLowerCase().includes("hujan");
+                  const icon = WEATHER_ICON[slot.weather_desc] ?? "🌤";
+                  return (
+                    <div key={i} className={`forecast-slot${isRain ? " rain" : ""}`}>
+                      <span className="forecast-slot-time">{getTimeLabel(slot, i)}</span>
+                      <span className="forecast-slot-icon">{icon}</span>
+                      <span className="forecast-slot-desc">{slot.weather_desc ?? "—"}</span>
+                      {slot.tmin != null && (
+                        <span className="forecast-slot-temp">{slot.tmin}–{slot.tmax}°</span>
+                      )}
+                    </div>
+                  );
+                }) : (
+                  <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)", padding: "0.5rem" }}>
+                    {isId ? "Tidak ada data prakiraan" : "No forecast data"}
+                  </div>
                 )}
               </div>
-
-              {/* Next forecast slots — show time + weather desc */}
-              {w.forecast?.length > 1 && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
-                  {w.forecast.slice(1, 3).map((slot, i) => {
-                    const slotIcon = WEATHER_ICON[slot.weather_desc] ?? "🌤";
-                    const dt = new Date(slot.local_datetime);
-                    const timeStr = dt.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-                    const isRainSlot = slot.weather_desc?.toLowerCase().includes("hujan");
-                    return (
-                      <div key={i} style={{
-                        display: "flex", alignItems: "center", gap: "4px",
-                        background: "var(--panel-3)", borderRadius: "5px", padding: "3px 6px",
-                      }}>
-                        <span style={{ fontSize: "0.78rem", flexShrink: 0 }}>{slotIcon}</span>
-                        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.53rem", color: "var(--muted-2)", flexShrink: 0 }}>{timeStr}</span>
-                        <span style={{ fontSize: "0.58rem", color: isRainSlot ? "var(--cyan)" : "var(--muted)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {slot.weather_desc}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           );
         })}
       </div>
 
-      {/* Footnote explaining rainfall context */}
-      <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", lineHeight: 1.6 }}>
+      <p style={{ marginTop: "0.875rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", lineHeight: 1.6 }}>
         {isId
-          ? "● Status TMA dari sensor DSDADKI realtime · Prakiraan dari BMKG per wilayah · Curah hujan 0 mm = tidak hujan di titik sensor OpenWeather — TMA bisa naik karena hujan di hulu (Bogor/Depok)"
-          : "● TMA from DSDADKI realtime · Forecast from BMKG per district · 0 mm rainfall = no rain at OpenWeather sensor point — TMA may rise from upstream rain (Bogor/Depok)"}
+          ? "● Prakiraan BMKG per kota administrasi · Slot tiap ~3 jam · 🌧 menandakan hujan akan masuk · TMA bisa naik karena kiriman dari Bogor/Depok meski tidak hujan di Jakarta"
+          : "● BMKG forecast per administrative city · Slots every ~3 hrs · 🌧 = rain incoming · TMA may rise from upstream Bogor/Depok flow even without local rain"}
       </p>
     </div>
   );
@@ -830,6 +991,7 @@ function ZoneCards({ zones }) {
   const { lang } = useApp();
   const isId = lang === "id";
   const colorMap = { s1: "var(--s1)", s2: "var(--s2)", wsp: "var(--wsp)", ok: "var(--safe)" };
+  const anyRealtime = zones.some(z => z.isRealtime);
 
   return (
     <div className="panel panel-body fade-in">
@@ -837,14 +999,15 @@ function ZoneCards({ zones }) {
         <p className="panel-title" style={{ marginBottom: 0 }}>
           {isId ? "Estimasi Risiko per Wilayah" : "Risk Estimate by Area"}
         </p>
-        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)", letterSpacing: "0.06em" }}>
-          {isId ? "○ estimasi ML" : "○ ML estimate"}
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", letterSpacing: "0.06em", color: anyRealtime ? "var(--safe)" : "var(--muted-2)" }}>
+          {anyRealtime ? (isId ? "● realtime + ML" : "● realtime + ML") : (isId ? "○ estimasi ML" : "○ ML estimate")}
         </span>
       </div>
       <div className="zone-cards">
         {zones.map((z, i) => {
           const cls = riskClass(z.risk_level);
           const color = colorMap[cls] ?? "var(--safe)";
+          const wsStyle = z.worstStatus ? (WILAYAH_STATUS_STYLE[z.worstStatus] ?? WILAYAH_STATUS_STYLE["Normal"]) : null;
           return (
             <div key={i} className="zone-card">
               <div className="zone-card-top">
@@ -863,14 +1026,43 @@ function ZoneCards({ zones }) {
                   {isId ? "kemungkinan banjir" : "flood chance"}
                 </span>
               </p>
+              {/* Realtime TMA detail when available */}
+              {z.isRealtime && (z.siaga1Count > 0 || z.siaga2Count > 0 || z.tmaCount > 0) && (
+                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.25rem", marginTop: "0.1rem" }}>
+                  {z.tmaCount > 0 && (
+                    <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.55rem", color: "var(--muted-2)" }}>
+                      {z.tmaCount} TMA
+                    </span>
+                  )}
+                  {z.siaga1Count > 0 && (
+                    <span className="wilayah-siaga-pip" style={{ background: "var(--s1-soft)", color: "var(--s1)", borderColor: "var(--s1-border)" }}>
+                      {z.siaga1Count}×S1
+                    </span>
+                  )}
+                  {z.siaga2Count > 0 && (
+                    <span className="wilayah-siaga-pip" style={{ background: "var(--s2-soft)", color: "var(--s2)", borderColor: "var(--s2-border)" }}>
+                      {z.siaga2Count}×S2
+                    </span>
+                  )}
+                  {z.siaga3Count > 0 && (
+                    <span className="wilayah-siaga-pip" style={{ background: "var(--wsp-soft)", color: "var(--wsp)", borderColor: "var(--wsp-border)" }}>
+                      {z.siaga3Count}×S3
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
       <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem", color: "var(--muted-2)" }}>
-        {isId
-          ? "○ Estimasi dari XGBoost + bias historis BPBD per zona. Bukan data sensor per-kecamatan."
-          : "○ Estimate from XGBoost + historical BPBD bias per zone. Not per-district sensor data."}
+        {anyRealtime
+          ? (isId
+            ? "● Dihitung dari sensor DSDADKI realtime + prakiraan BMKG + bobot historis BPBD per wilayah"
+            : "● Calculated from realtime DSDADKI sensors + BMKG forecast + historical BPBD weights per area")
+          : (isId
+            ? "○ Estimasi dari XGBoost + bias historis BPBD per zona. Data sensor wilayah belum tersedia."
+            : "○ XGBoost estimate + historical BPBD bias per zone. District sensor data unavailable.")}
       </p>
     </div>
   );
@@ -896,13 +1088,16 @@ export default function Home({ setRiskContext, riskLevel }) {
   const realSiaga2  = useMemo(() => stations.filter(s => s.ratio >= 0.75 && s.ratio < 1.0).length, [stations]);
   const totalStations = riskData?.tmaStationsActive ?? (stations.length || null);
 
-  // ── ML-derived geographic zones — used for map & zone table only ──────────
+  // ── Realtime zone derivation — blends ML with DSDADKI sensor counts + BMKG ──
   const zones = useMemo(
-    () => deriveZones(score, riskData?.rainfall ?? 0, riskData?.waterLevelRatio ?? 0.5),
-    [score, riskData?.rainfall, riskData?.waterLevelRatio],
+    () => deriveRealtimeZones(
+      score,
+      riskData?.wilayahSummary ?? [],
+      riskData?.rainfall ?? 0,
+      riskData?.waterLevelRatio ?? 0.5,
+    ),
+    [score, riskData?.wilayahSummary, riskData?.rainfall, riskData?.waterLevelRatio],
   );
-  // alertZones still used for RecommendationsPanel context (ML estimate)
-  const alertZones = zones.filter(z => ["SIAGA_1", "SIAGA_2"].includes(z.risk_level));
 
   if (loading) return <LoadingSpinner message="Mengambil data realtime..." />;
 
@@ -997,7 +1192,7 @@ export default function Home({ setRiskContext, riskLevel }) {
         {/* Right: Sidebar */}
         <div className="cmd-sidebar">
           <AlertPanel stations={stations} />
-          <RecommendationsPanel alertZones={alertZones} recommendedActions={riskData?.recommendedActions} />
+          <RecommendationsPanel riskData={riskData} stations={stations} />
         </div>
       </div>
 
@@ -1015,8 +1210,8 @@ export default function Home({ setRiskContext, riskLevel }) {
       {/* Zone cards — ML geographic estimate (not per-sensor) */}
       <ZoneCards zones={zones} />
 
-      {/* Per-wilayah conditions: TMA status + BMKG forecast combined */}
-      <WilayahGrid wilayahSummary={riskData?.wilayahSummary} />
+      {/* Per-wilayah 12h forecast — differentiated from rainfall strip above */}
+      <WilayahForecastGrid wilayahSummary={riskData?.wilayahSummary} />
 
       {/* BMKG weather forecast — DKI aggregate (shown when wilayah grid unavailable) */}
       {(!riskData?.wilayahSummary?.length) && <ForecastPanel forecast={riskData?.bmkgForecast} />}
