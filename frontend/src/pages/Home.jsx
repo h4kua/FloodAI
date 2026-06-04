@@ -1330,12 +1330,14 @@ function WeatherCurrentCard({ riskData }) {
             : (isId ? "Berawan" : "Cloudy");
           return (
             <div key={wilayah} className={`ow-wilayah-card${isRain ? " rain" : ""}`}>
-              <div className="ow-wilayah-name">{short}</div>
-              <div className="ow-wilayah-icon">{icon}</div>
-              <div className={`ow-wilayah-desc${isRain ? " rain" : ""}`}>{desc}</div>
+              <div className="ow-wilayah-card-header">
+                <div className="ow-wilayah-name">{short}</div>
+                <div className="ow-wilayah-icon">{icon}</div>
+              </div>
               {ow.temp != null && (
                 <div className="ow-wilayah-temp">{ow.temp.toFixed(1)}°C</div>
               )}
+              <div className={`ow-wilayah-desc${isRain ? " rain" : ""}`}>{desc}</div>
               <div className="ow-wilayah-chips">
                 {ow.humidity != null && (
                   <span className="ow-mini-chip">💧 {Math.round(ow.humidity)}%</span>

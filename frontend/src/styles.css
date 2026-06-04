@@ -1109,25 +1109,31 @@ body {
 .weather-chip-sub   { font-family: 'JetBrains Mono', monospace; font-size: 0.54rem; color: var(--muted-2); margin-top: 1px; }
 
 /* ── OpenWeather Per-Wilayah Grid ────────────────────────────── */
-.ow-wilayah-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 0.5rem; }
+.ow-wilayah-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.625rem; }
 .ow-wilayah-card {
   background: var(--panel-2); border: 1px solid var(--line);
-  border-radius: 10px; padding: 0.625rem 0.75rem;
-  display: flex; flex-direction: column; gap: 0.2rem;
-  transition: border-color 0.2s;
+  border-top: 2px solid var(--line-2);
+  border-radius: 12px; padding: 0.875rem 0.875rem 0.75rem;
+  display: flex; flex-direction: column; gap: 0;
+  transition: border-color 0.18s, background 0.18s;
 }
-.ow-wilayah-card.rain { border-color: rgba(56,189,248,0.28); background: rgba(56,189,248,0.04); }
-.ow-wilayah-name { font-family: 'JetBrains Mono', monospace; font-size: 0.56rem; color: var(--muted-2); letter-spacing: 0.07em; text-transform: uppercase; }
-.ow-wilayah-icon { font-size: 1.6rem; line-height: 1.15; }
-.ow-wilayah-desc { font-family: 'Space Grotesk', sans-serif; font-size: 0.72rem; font-weight: 600; color: var(--text); line-height: 1.25; }
+.ow-wilayah-card.rain {
+  border-color: rgba(56,189,248,0.28);
+  border-top-color: var(--cyan);
+  background: rgba(56,189,248,0.04);
+}
+.ow-wilayah-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.625rem; }
+.ow-wilayah-name { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; font-weight: 600; line-height: 1.1; padding-top: 0.1rem; }
+.ow-wilayah-icon { font-size: 2rem; line-height: 1; flex-shrink: 0; }
+.ow-wilayah-temp  { font-family: 'Space Grotesk', sans-serif; font-size: 1.35rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; line-height: 1; margin-bottom: 0.2rem; }
+.ow-wilayah-desc { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--muted); line-height: 1.35; margin-bottom: 0.5rem; }
 .ow-wilayah-desc.rain { color: var(--cyan); }
-.ow-wilayah-temp  { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700; color: var(--text); }
-.ow-wilayah-feels { font-family: 'JetBrains Mono', monospace; font-size: 0.54rem; color: var(--muted-2); }
-.ow-wilayah-chips { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.25rem; }
+.ow-wilayah-chips { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.ow-wilayah-feels { font-family: 'JetBrains Mono', monospace; font-size: 0.54rem; color: var(--muted-2); margin-top: 0.3rem; }
 .ow-mini-chip {
-  font-family: 'JetBrains Mono', monospace; font-size: 0.54rem; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.56rem; color: var(--muted);
   background: var(--panel); border: 1px solid var(--line);
-  border-radius: 5px; padding: 0.1rem 0.35rem; white-space: nowrap;
+  border-radius: 5px; padding: 0.15rem 0.4rem; white-space: nowrap;
 }
 .ow-mini-chip.rain { color: var(--cyan); border-color: rgba(56,189,248,0.24); }
 
