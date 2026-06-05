@@ -1,5 +1,6 @@
 import { useApp } from "../lib/appContext";
 import ChatBot from "../components/ChatBot";
+import { use3DTilt } from "../hooks/use3DTilt";
 
 const isId = (lang) => lang === "id";
 
@@ -10,10 +11,13 @@ const LinkedInSVG = () => (
 );
 
 function Section({ title, children }) {
+  const tiltRef = use3DTilt({ maxTilt: 5 });
   return (
-    <div className="panel panel-body">
-      <p className="about-section-title">{title}</p>
-      {children}
+    <div ref={tiltRef} className="panel panel-body card-3d">
+      <div className="card-3d-content">
+        <p className="about-section-title">{title}</p>
+        {children}
+      </div>
     </div>
   );
 }
@@ -42,14 +46,19 @@ function Stat({ value, label }) {
 }
 
 function TeamCard({ role, roleType, name, linkedin }) {
+  const tiltRef = use3DTilt({ maxTilt: 12 });
   return (
-    <div className="team-card">
-      <span className={`team-role ${roleType}`}>{role}</span>
-      <p className="team-name">{name}</p>
-      <a href={linkedin} target="_blank" rel="noopener noreferrer" className="li-btn">
-        <LinkedInSVG />
-        LinkedIn
-      </a>
+    <div ref={tiltRef} className="team-card card-3d">
+      <div className="card-3d-content" style={{ display: "flex", flex: 1, flexDirection: "column", justifyContent: "space-between", height: "100%", width: "100%" }}>
+        <div>
+          <span className={`team-role ${roleType}`}>{role}</span>
+          <p className="team-name">{name}</p>
+        </div>
+        <a href={linkedin} target="_blank" rel="noopener noreferrer" className="li-btn">
+          <LinkedInSVG />
+          LinkedIn
+        </a>
+      </div>
     </div>
   );
 }
@@ -96,6 +105,7 @@ function PipelineStep({ num, label, desc, color = "var(--cyan)" }) {
 export default function About({ riskContext = {} }) {
   const { lang } = useApp();
   const id = isId(lang);
+  const heroTiltRef = use3DTilt({ maxTilt: 4 });
 
   return (
     <>
@@ -108,22 +118,24 @@ export default function About({ riskContext = {} }) {
       <div className="about-grid fade-in">
 
         {/* Hero banner */}
-        <div className="about-hero">
-          <div style={{ flex: 1, minWidth: 220 }}>
-            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "1.75rem", fontWeight: 800, letterSpacing: "-0.03em", color: "var(--cyan)", marginBottom: "0.5rem" }}>
-              deFlood<span style={{ color: "var(--s1)" }}>.ai</span>
-            </p>
-            <p style={{ fontSize: "0.88rem", color: "var(--text)", lineHeight: 1.7, maxWidth: 480 }}>
-              {id
-                ? "Sistem kecerdasan banjir berbasis AI untuk Jakarta. Menggabungkan data sensor realtime dari 38 stasiun TMA, model machine learning XGBoost, prakiraan BMKG, dan AI generatif untuk membantu operator dan warga memantau serta merespons risiko banjir."
-                : "An AI-powered flood intelligence system for Jakarta. Combines realtime sensor data from 38 TMA stations, XGBoost machine learning, BMKG forecasts, and generative AI to help operators and residents monitor and respond to flood risks."}
-            </p>
-          </div>
-          <div className="stat-grid" style={{ minWidth: 200 }}>
-            <Stat value="0.863" label="AUC-ROC" />
-            <Stat value="16" label={id ? "Fitur ML" : "ML Features"} />
-            <Stat value="38" label={id ? "Stasiun TMA" : "TMA Stations"} />
-            <Stat value="4" label={id ? "Level Risiko" : "Risk Levels"} />
+        <div ref={heroTiltRef} className="about-hero card-3d">
+          <div className="card-3d-content" style={{ display: "flex", flex: 1, flexWrap: "wrap", gap: "1.5rem", alignItems: "center", width: "100%" }}>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "1.75rem", fontWeight: 800, letterSpacing: "-0.03em", color: "var(--cyan)", marginBottom: "0.5rem" }}>
+                deFlood<span style={{ color: "var(--s1)" }}>.ai</span>
+              </p>
+              <p style={{ fontSize: "0.88rem", color: "var(--text)", lineHeight: 1.7, maxWidth: 480 }}>
+                {id
+                  ? "Sistem kecerdasan banjir berbasis AI untuk Jakarta. Menggabungkan data sensor realtime dari 38 stasiun TMA, model machine learning XGBoost, prakiraan BMKG, dan AI generatif untuk membantu operator dan warga memantau serta merespons risiko banjir."
+                  : "An AI-powered flood intelligence system for Jakarta. Combines realtime sensor data from 38 TMA stations, XGBoost machine learning, BMKG forecasts, and generative AI to help operators and residents monitor and respond to flood risks."}
+              </p>
+            </div>
+            <div className="stat-grid" style={{ minWidth: 200 }}>
+              <Stat value="0.863" label="AUC-ROC" />
+              <Stat value="16" label={id ? "Fitur ML" : "ML Features"} />
+              <Stat value="38" label={id ? "Stasiun TMA" : "TMA Stations"} />
+              <Stat value="4" label={id ? "Level Risiko" : "Risk Levels"} />
+            </div>
           </div>
         </div>
 

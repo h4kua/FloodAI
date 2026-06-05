@@ -1577,3 +1577,98 @@ body {
   .tour-title { font-size: 0.95rem; }
   .tour-desc  { font-size: 0.79rem; margin-bottom: 0.875rem; }
 }
+
+/* ================================================================
+   3D OVERHAUL & OVERRIDE STYLES (Neo-Kinpaku & Emil Kowalski rules)
+   ================================================================ */
+
+/* Snappy and hardware-accelerated transitions */
+.card-3d {
+  position: relative;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform;
+  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translateZ(var(--tilt-z, 0px));
+  transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Floating shadow on tilt hover */
+@media (hover: hover) and (pointer: fine) {
+  .card-3d:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.65), 0 0 25px rgba(56, 189, 248, 0.08);
+    border-color: var(--cyan-border);
+  }
+  [data-theme="light"] .card-3d:hover {
+    box-shadow: 0 15px 30px rgba(40, 30, 10, 0.15);
+  }
+}
+
+/* Interactive gloss/shine gradient overlay */
+.card-3d::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--shine-x, 50%) var(--shine-y, 50%), rgba(255, 255, 255, var(--shine-opacity, 0)) 0%, transparent 60%);
+  border-radius: inherit;
+  z-index: 10;
+  transition: background 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Parallax element shifts within 3D cards */
+.card-3d-title,
+.card-3d-badge,
+.card-3d-content {
+  transform: translateZ(20px);
+  transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Press Active States (Responsive Feedback) */
+.btn:active,
+.nav-btn:active,
+.topbar-toggle:active,
+.action-btn:active,
+.quickie:active,
+.chatbot-send:active,
+.chatbot-toggle:active,
+.tour-reopen-btn:active,
+.kec-group-btn:active,
+.chatbot-close:active {
+  transform: scale(0.97) !important;
+  transition: transform 80ms cubic-bezier(0.23, 1, 0.32, 1) !important;
+}
+
+/* Smooth enter animations using keyframes with starting-style feel */
+.fade-in {
+  animation: premium-fade-in 350ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes premium-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Stagger animations for list loads (e.g. weather cards, forecast table rows) */
+.stagger-1 { animation-delay: 30ms !important; }
+.stagger-2 { animation-delay: 60ms !important; }
+.stagger-3 { animation-delay: 90ms !important; }
+.stagger-4 { animation-delay: 120ms !important; }
+.stagger-5 { animation-delay: 150ms !important; }
+
+/* Responsive adjustments for mobile touch */
+@media (max-width: 640px) {
+  .card-3d {
+    /* Disable dynamic transform values on mobile/touch to save processor cycles */
+    transform: none !important;
+  }
+  .card-3d::after {
+    display: none !important;
+  }
+}
+

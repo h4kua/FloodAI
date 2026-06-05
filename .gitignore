@@ -102,3 +102,5 @@ data/raw/pintu_air_latest.json
 .venv/
 .env
 .env*
+_skills_tmp/
+

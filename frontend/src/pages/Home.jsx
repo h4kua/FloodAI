@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useFloodRisk } from "../hooks/useFloodRisk";
 import FloodMap from "../components/FloodMap";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ChatBot from "../components/ChatBot";
 import { useT, useApp } from "../lib/appContext";
+import { use3DTilt } from "../hooks/use3DTilt";
 
 /* ── Station name cleaner ───────────────────────────────── */
 function cleanStationName(nama) {
@@ -92,6 +93,24 @@ const WEATHER_ICON = {
   "Hujan Lebat": "⛈", "Hujan Petir": "⛈", "Hujan Es": "🌨",
 };
 
+function MetricCard({ c, noteStyle }) {
+  const tiltRef = use3DTilt({ maxTilt: 10 });
+  return (
+    <div ref={tiltRef} className={`metric-card card-3d ${c.color}`}>
+      <div className="card-3d-content" style={{ display: "flex", flex: 1, flexDirection: "column", justifyContent: "space-between", height: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          <span className="metric-label">{c.label}</span>
+          <span className="metric-real-badge" style={noteStyle}>● real</span>
+        </div>
+        <div>
+          <div className={`metric-value ${c.color}`}>{c.value}</div>
+          <div className="metric-sub">{c.sub}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MetricsRow({ siaga1, siaga2, totalStations, score }) {
   const t = useT();
   const noteStyle = { fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em", opacity: 0.85 };
@@ -104,16 +123,7 @@ function MetricsRow({ siaga1, siaga2, totalStations, score }) {
   return (
     <div className="cmd-metrics">
       {cards.map((c) => (
-        <div key={c.label} className={`metric-card ${c.color}`}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span className="metric-label">{c.label}</span>
-            <span className="metric-real-badge" style={noteStyle}>● real</span>
-          </div>
-          <div>
-            <div className={`metric-value ${c.color}`}>{c.value}</div>
-            <div className="metric-sub">{c.sub}</div>
-          </div>
-        </div>
+        <MetricCard key={c.label} c={c} noteStyle={noteStyle} />
       ))}
     </div>
   );
@@ -204,34 +214,39 @@ function WilayahRainfallStrip({ wilayahSummary, rainfall, lang }) {
 // Previously showed fake zone derivations — now 100% from sensor readings.
 function AlertPanel({ stations }) {
   const t = useT();
+  const tiltRef = use3DTilt({ maxTilt: 6 });
   const alertStations = (stations || []).filter(s => s.ratio >= 0.75).slice(0, 5);
 
   if (alertStations.length === 0) return (
-    <div className="panel panel-body">
-      <p className="panel-title">{t("alert.title")}</p>
-      <p style={{ fontSize: "0.8rem", color: "var(--muted)", fontFamily: "'JetBrains Mono',monospace" }}>
-        {t("alert.none")}
-      </p>
+    <div ref={tiltRef} className="panel panel-body card-3d">
+      <div className="card-3d-content">
+        <p className="panel-title">{t("alert.title")}</p>
+        <p style={{ fontSize: "0.8rem", color: "var(--muted)", fontFamily: "'JetBrains Mono',monospace" }}>
+          {t("alert.none")}
+        </p>
+      </div>
     </div>
   );
   return (
-    <div className="panel panel-body">
-      <p className="panel-title">{t("alert.title")}</p>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        {alertStations.map((s, i) => (
-          <div key={i} className={`alert-item ${stationClass(s.ratio)}`}>
-            <span className="alert-dot" />
-            <div style={{ minWidth: 0 }}>
-              <p className="alert-zone-name" style={{ fontSize: "0.78rem" }}>{s.nama}</p>
-              <p className="alert-zone-sub">TMA {s.tinggi_air} cm · {Math.round(s.ratio * 100)}% siaga</p>
+    <div ref={tiltRef} className="panel panel-body card-3d">
+      <div className="card-3d-content">
+        <p className="panel-title">{t("alert.title")}</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          {alertStations.map((s, i) => (
+            <div key={i} className={`alert-item ${stationClass(s.ratio)}`}>
+              <span className="alert-dot" />
+              <div style={{ minWidth: 0 }}>
+                <p className="alert-zone-name" style={{ fontSize: "0.78rem" }}>{s.nama}</p>
+                <p className="alert-zone-sub">TMA {s.tinggi_air} cm · {Math.round(s.ratio * 100)}% siaga</p>
+              </div>
+              <RiskBadge level={stationRiskLevel(s.ratio)} />
             </div>
-            <RiskBadge level={stationRiskLevel(s.ratio)} />
-          </div>
-        ))}
+          ))}
+        </div>
+        <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)" }}>
+          ● Sensor DSDADKI realtime
+        </p>
       </div>
-      <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)" }}>
-        ● Sensor DSDADKI realtime
-      </p>
     </div>
   );
 }
@@ -443,6 +458,7 @@ function SensorStrip({ riskData }) {
 
 function RecommendationsPanel({ riskData, stations = [], onNavigate }) {
   const t = useT();
+  const tiltRef = use3DTilt({ maxTilt: 6 });
   const { lang } = useApp();
   const isId = lang === "id";
 
@@ -547,35 +563,37 @@ function RecommendationsPanel({ riskData, stations = [], onNavigate }) {
   });
 
   return (
-    <div className="panel panel-body">
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.875rem" }}>
-        <p className="panel-title" style={{ marginBottom: 0 }}>{t("rec.title")}</p>
-        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em" }}>● real</span>
+    <div ref={tiltRef} className="panel panel-body card-3d">
+      <div className="card-3d-content">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.875rem" }}>
+          <p className="panel-title" style={{ marginBottom: 0 }}>{t("rec.title")}</p>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em" }}>● real</span>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "0.75rem" }}>
+          {dynActions.map((action, i) => (
+            <div key={i} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--cyan)", flexShrink: 0, marginTop: "0.15rem" }}>›</span>
+              <p style={{ fontSize: "0.75rem", color: "var(--muted)", lineHeight: 1.55, margin: 0 }}>{action}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          {buttons.map((a, i) => (
+            <button
+              key={i}
+              className={`action-btn${a.primary ? " primary" : ""}${a.isCall ? " action-btn-call" : ""}`}
+              onClick={a.onClick}
+              title={a.title}
+            >
+              <span className="action-icon">{a.icon}</span>
+              {a.label}
+            </button>
+          ))}
+        </div>
+        <p style={{ marginTop: "0.625rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)" }}>
+          ● {isId ? "Rekomendasi dari sensor DSDADKI + BMKG realtime" : "Based on realtime DSDADKI sensors + BMKG data"}
+        </p>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "0.75rem" }}>
-        {dynActions.map((action, i) => (
-          <div key={i} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
-            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--cyan)", flexShrink: 0, marginTop: "0.15rem" }}>›</span>
-            <p style={{ fontSize: "0.75rem", color: "var(--muted)", lineHeight: 1.55, margin: 0 }}>{action}</p>
-          </div>
-        ))}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        {buttons.map((a, i) => (
-          <button
-            key={i}
-            className={`action-btn${a.primary ? " primary" : ""}${a.isCall ? " action-btn-call" : ""}`}
-            onClick={a.onClick}
-            title={a.title}
-          >
-            <span className="action-icon">{a.icon}</span>
-            {a.label}
-          </button>
-        ))}
-      </div>
-      <p style={{ marginTop: "0.625rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)" }}>
-        ● {isId ? "Rekomendasi dari sensor DSDADKI + BMKG realtime" : "Based on realtime DSDADKI sensors + BMKG data"}
-      </p>
     </div>
   );
 }
@@ -789,6 +807,7 @@ function buildStatusDesc(riskData, isId) {
 function StatusHero({ riskData }) {
   const { lang } = useApp();
   const isId = lang === "id";
+  const tiltRef = use3DTilt({ maxTilt: 5 });
 
   const level    = riskData?.level ?? "waspada";
   const score    = riskData?.riskScore ?? 0;
@@ -830,8 +849,8 @@ function StatusHero({ riskData }) {
   const sparkY = (p) => sparkH - 4 - Math.round(Math.min(p, 1) * (sparkH - 8));
 
   return (
-    <div className={`status-hero fade-in level-${level}`}>
-      <div className="status-hero-main">
+    <div ref={tiltRef} className={`status-hero card-3d fade-in level-${level}`}>
+      <div className="status-hero-main card-3d-content">
         <div style={{
           fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem",
           color: cfg.color, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.25rem",
@@ -842,7 +861,7 @@ function StatusHero({ riskData }) {
         <div className="status-hero-level" style={{ color: cfg.color }}>{cfg.label}</div>
         <p className="status-hero-desc">{dynamicDesc}</p>
       </div>
-      <div className="status-hero-stats">
+      <div className="status-hero-stats card-3d-content">
         {wlr != null && (
           <div className="hero-stat">
             <div className="hero-stat-value" style={{ color: cfg.color }}>{Math.round(wlr * 100)}%</div>
@@ -1285,37 +1304,11 @@ const OWM_ICON_MAP = {
 
 // WeatherCurrentCard — shows per-wilayah OWM data when available,
 // falls back to single-point when openweatherWilayah is empty.
-function WeatherCurrentCard({ riskData }) {
-  const { lang } = useApp();
-  const isId     = lang === "id";
-  const owWilayah = riskData?.openweatherWilayah ?? {};
-  const owCenter  = riskData?.openweather;
-  const hasWilayah = Object.keys(owWilayah).length > 0;
-
-  // ── Fallback: single-point card ───────────────────────────
-  if (!hasWilayah) {
-    const ow       = owCenter;
-    const rainfall = riskData?.rainfall ?? 0;
-    const temp     = ow?.temp ?? riskData?.temperature;
-    const humidity = ow?.humidity ?? riskData?.humidity;
-    if (!temp && !ow) return null;
-
-    const weatherIcon = OWM_ICON_MAP[ow?.weather_main] ?? (rainfall > 5 ? "🌧" : "🌤");
-    const descRaw = ow?.weather_desc ?? (rainfall > 20 ? "hujan lebat" : rainfall > 5 ? "hujan ringan" : "berawan");
-    const desc = descRaw.charAt(0).toUpperCase() + descRaw.slice(1);
-
-    const chips = [
-      temp     != null && { icon: "🌡", label: isId ? "Suhu" : "Temp",     value: `${temp.toFixed(1)}°C`,       sub: ow?.feels_like != null ? `feels ${ow.feels_like.toFixed(1)}°` : null },
-      humidity != null && { icon: "💧", label: isId ? "Lembap" : "Humidity", value: `${Math.round(humidity)}%` },
-      { icon: "🌧", label: isId ? "Hujan" : "Rainfall", value: rainfall > 0 ? `${Math.round(rainfall)} mm/j` : (isId ? "Tidak hujan" : "No rain"), color: rainfall > 0 ? "var(--cyan)" : "var(--safe)" },
-      ow?.wind_speed  != null && { icon: "💨", label: isId ? "Angin" : "Wind",    value: `${ow.wind_speed.toFixed(1)} m/s`, sub: windDirection(ow.wind_deg, isId) },
-      ow?.pressure    != null && { icon: "📊", label: isId ? "Tekanan" : "Pressure", value: `${ow.pressure} hPa` },
-      ow?.clouds      != null && { icon: "☁",  label: isId ? "Tutupan" : "Cloud",  value: `${ow.clouds}%` },
-      ow?.visibility  != null && { icon: "👁",  label: isId ? "Pandang" : "Visibility", value: `${(ow.visibility / 1000).toFixed(0)} km` },
-    ].filter(Boolean);
-
-    return (
-      <div className="weather-current-card fade-in">
+function WeatherSingleCard({ ow, temp, humidity, rainfall, weatherIcon, desc, chips, isId }) {
+  const tiltRef = use3DTilt({ maxTilt: 6 });
+  return (
+    <div ref={tiltRef} className="weather-current-card card-3d fade-in">
+      <div className="card-3d-content">
         <div className="weather-current-header">
           <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
             <span style={{ fontSize: "2.75rem", lineHeight: 1 }}>{weatherIcon}</span>
@@ -1347,6 +1340,90 @@ function WeatherCurrentCard({ riskData }) {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function WeatherWilayahCard({ entry, isId }) {
+  const tiltRef = use3DTilt({ maxTilt: 8 });
+  const icon = OWM_ICON_MAP[entry.ow.weather_main] ?? "🌤";
+  const isRain = entry.ow.rainfall_1h > 0 || entry.ow.weather_main === "Rain" || entry.ow.weather_main === "Drizzle";
+  const desc = entry.ow.weather_desc
+    ? entry.ow.weather_desc.charAt(0).toUpperCase() + entry.ow.weather_desc.slice(1)
+    : (isId ? "Berawan" : "Cloudy");
+
+  return (
+    <div ref={tiltRef} className={`ow-wilayah-card card-3d${isRain ? " rain" : ""}`}>
+      <div className="ow-wilayah-card-header card-3d-title">
+        <div className="ow-wilayah-name">{entry.short}</div>
+        <div className="ow-wilayah-icon">{icon}</div>
+      </div>
+      <div className="card-3d-content">
+        {entry.ow.temp != null && (
+          <div className="ow-wilayah-temp">{entry.ow.temp.toFixed(1)}°C</div>
+        )}
+        <div className={`ow-wilayah-desc${isRain ? " rain" : ""}`}>{desc}</div>
+        <div className="ow-wilayah-chips">
+          {entry.ow.humidity != null && (
+            <span className="ow-mini-chip">💧 {Math.round(entry.ow.humidity)}%</span>
+          )}
+          {entry.ow.wind_speed != null && (
+            <span className="ow-mini-chip">💨 {entry.ow.wind_speed.toFixed(1)}m/s</span>
+          )}
+          {isRain && entry.ow.rainfall_1h > 0 && (
+            <span className="ow-mini-chip rain">🌧 {entry.ow.rainfall_1h.toFixed(1)}mm/j</span>
+          )}
+        </div>
+        {entry.ow.feels_like != null && (
+          <div className="ow-wilayah-feels">feels {entry.ow.feels_like.toFixed(1)}°</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// WeatherCurrentCard — shows per-wilayah OWM data when available,
+// falls back to single-point when openweatherWilayah is empty.
+function WeatherCurrentCard({ riskData }) {
+  const { lang } = useApp();
+  const isId     = lang === "id";
+  const owWilayah = riskData?.openweatherWilayah ?? {};
+  const owCenter  = riskData?.openweather;
+  const hasWilayah = Object.keys(owWilayah).length > 0;
+
+  // ── Fallback: single-point card ───────────────────────────
+  if (!hasWilayah) {
+    const ow       = owCenter;
+    const rainfall = riskData?.rainfall ?? 0;
+    const temp     = ow?.temp ?? riskData?.temperature;
+    const humidity = ow?.humidity ?? riskData?.humidity;
+    if (!temp && !ow) return null;
+
+    const weatherIcon = OWM_ICON_MAP[ow?.weather_main] ?? (rainfall > 5 ? "🌧" : "🌤");
+    const descRaw = ow?.weather_desc ?? (rainfall > 20 ? "hujan lebat" : rainfall > 5 ? "hujan ringan" : "berawan");
+    const desc = descRaw.charAt(0).toUpperCase() + descRaw.slice(1);
+
+    const chips = [
+      temp     != null && { icon: "🌡", label: isId ? "Suhu" : "Temp",     value: `${temp.toFixed(1)}°C`,       sub: ow?.feels_like != null ? `feels ${ow.feels_like.toFixed(1)}°` : null },
+      humidity != null && { icon: "💧", label: isId ? "Lembap" : "Humidity", value: `${Math.round(humidity)}%` },
+      { icon: "🌧", label: isId ? "Hujan" : "Rainfall", value: rainfall > 0 ? `${Math.round(rainfall)} mm/j` : (isId ? "Tidak hujan" : "No rain"), color: rainfall > 0 ? "var(--cyan)" : "var(--safe)" },
+      ow?.wind_speed  != null && { icon: "💨", label: isId ? "Angin" : "Wind",    value: `${ow.wind_speed.toFixed(1)} m/s`, sub: windDirection(ow.wind_deg, isId) },
+      ow?.pressure    != null && { icon: "📊", label: isId ? "Tekanan" : "Pressure", value: `${ow.pressure} hPa` },
+      ow?.clouds      != null && { icon: "☁",  label: isId ? "Tutupan" : "Cloud",  value: `${ow.clouds}%` },
+      ow?.visibility  != null && { icon: "👁",  label: isId ? "Pandang" : "Visibility", value: `${(ow.visibility / 1000).toFixed(0)} km` },
+    ].filter(Boolean);
+
+    return (
+      <WeatherSingleCard
+        ow={ow}
+        temp={temp}
+        humidity={humidity}
+        rainfall={rainfall}
+        weatherIcon={weatherIcon}
+        desc={desc}
+        chips={chips}
+        isId={isId}
+      />
     );
   }
 
@@ -1371,39 +1448,9 @@ function WeatherCurrentCard({ riskData }) {
       </div>
 
       <div className="ow-wilayah-grid">
-        {wilayahEntries.map(({ wilayah, short, ow }) => {
-          const icon    = OWM_ICON_MAP[ow.weather_main] ?? "🌤";
-          const isRain  = ow.rainfall_1h > 0 || ow.weather_main === "Rain" || ow.weather_main === "Drizzle";
-          const desc    = ow.weather_desc
-            ? ow.weather_desc.charAt(0).toUpperCase() + ow.weather_desc.slice(1)
-            : (isId ? "Berawan" : "Cloudy");
-          return (
-            <div key={wilayah} className={`ow-wilayah-card${isRain ? " rain" : ""}`}>
-              <div className="ow-wilayah-card-header">
-                <div className="ow-wilayah-name">{short}</div>
-                <div className="ow-wilayah-icon">{icon}</div>
-              </div>
-              {ow.temp != null && (
-                <div className="ow-wilayah-temp">{ow.temp.toFixed(1)}°C</div>
-              )}
-              <div className={`ow-wilayah-desc${isRain ? " rain" : ""}`}>{desc}</div>
-              <div className="ow-wilayah-chips">
-                {ow.humidity != null && (
-                  <span className="ow-mini-chip">💧 {Math.round(ow.humidity)}%</span>
-                )}
-                {ow.wind_speed != null && (
-                  <span className="ow-mini-chip">💨 {ow.wind_speed.toFixed(1)}m/s</span>
-                )}
-                {isRain && ow.rainfall_1h > 0 && (
-                  <span className="ow-mini-chip rain">🌧 {ow.rainfall_1h.toFixed(1)}mm/j</span>
-                )}
-              </div>
-              {ow.feels_like != null && (
-                <div className="ow-wilayah-feels">feels {ow.feels_like.toFixed(1)}°</div>
-              )}
-            </div>
-          );
-        })}
+        {wilayahEntries.map((entry, idx) => (
+          <WeatherWilayahCard key={entry.wilayah} entry={entry} isId={isId} />
+        ))}
       </div>
 
       <p style={{ marginTop: "0.625rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)", lineHeight: 1.5 }}>
