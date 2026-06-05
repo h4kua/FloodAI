@@ -151,6 +151,7 @@
       {
         "nama": "P.A. Marina Ancol (Laut)",
         "lokasi": "Laut",
+        "wilayah": "Jakarta Utara",
         "tinggi_air": 2860.0,
         "siaga1": 2500.0,
         "siaga2": 2000.0,
@@ -163,6 +164,7 @@
       {
         "nama": "P.A. Cengkareng Drain",
         "lokasi": "Cengkareng",
+        "wilayah": "Jakarta Barat",
         "tinggi_air": 2738.0,
         "siaga1": 3100.0,
         "siaga2": 2700.0,
@@ -175,6 +177,7 @@
       {
         "nama": "P.A. Karet 1",
         "lokasi": "Banjir Kanal Barat",
+        "wilayah": "Jakarta Selatan",
         "tinggi_air": 4949.0,
         "siaga1": 6000.0,
         "siaga2": 5500.0,
@@ -187,6 +190,7 @@
       {
         "nama": "P.A. Manggarai 2",
         "lokasi": "Ciliwung",
+        "wilayah": "Jakarta Selatan",
         "tinggi_air": 5443.0,
         "siaga1": 9500.0,
         "siaga2": 8500.0,
@@ -199,6 +203,7 @@
       {
         "nama": "P.A. Kaliduri 1",
         "lokasi": "Kali Duri",
+        "wilayah": "Jakarta Utara",
         "tinggi_air": 1832.0,
         "siaga1": 3200.0,
         "siaga2": 2700.0,
@@ -211,6 +216,7 @@
       {
         "nama": "P.A. Ancol Flushing 1",
         "lokasi": "Ciliwung",
+        "wilayah": "Jakarta Utara",
         "tinggi_air": 1215.0,
         "siaga1": 2200.0,
         "siaga2": 1900.0,
@@ -223,6 +229,7 @@
       {
         "nama": "P.A. Marina Ancol (Kali)",
         "lokasi": "Kali",
+        "wilayah": "Jakarta Utara",
         "tinggi_air": 1179.0,
         "siaga1": 2500.0,
         "siaga2": 2000.0,
@@ -235,6 +242,7 @@
       {
         "nama": "P.A. Pulo Gadung 2",
         "lokasi": "Sunter",
+        "wilayah": "Jakarta Timur",
         "tinggi_air": 2928.0,
         "siaga1": 7700.0,
         "siaga2": 7000.0,
@@ -247,6 +255,7 @@
       {
         "nama": "P.S. Sunter Hulu",
         "lokasi": "Sunter",
+        "wilayah": "Jakarta Timur",
         "tinggi_air": 756.0,
         "siaga1": 2500.0,
         "siaga2": 2000.0,
@@ -259,6 +268,7 @@
       {
         "nama": "P.S. Depok 2",
         "lokasi": "Ciliwung",
+        "wilayah": "Depok",
         "tinggi_air": 988.0,
         "siaga1": 3500.0,
         "siaga2": 2700.0,
@@ -271,6 +281,7 @@
       {
         "nama": "P.S. Pesanggrahan 1",
         "lokasi": "Pesanggrahan",
+        "wilayah": "Depok",
         "tinggi_air": 651.0,
         "siaga1": 3500.0,
         "siaga2": 2500.0,
@@ -283,6 +294,7 @@
       {
         "nama": "P.A. Jembatan Merah 1",
         "lokasi": "Ciliwung",
+        "wilayah": "Jakarta Pusat",
         "tinggi_air": 461.0,
         "siaga1": 2500.0,
         "siaga2": 2000.0,
@@ -295,6 +307,7 @@
       {
         "nama": "P.A. Istiqlal 1",
         "lokasi": "Ciliwung",
+        "wilayah": "Jakarta Pusat",
         "tinggi_air": 628.0,
         "siaga1": 3500.0,
         "siaga2": 3000.0,
@@ -307,6 +320,7 @@
       {
         "nama": "P.S. Krukut Hulu 2",
         "lokasi": "Krukut",
+        "wilayah": "Jakarta Selatan",
         "tinggi_air": 448.0,
         "siaga1": 3000.0,
         "siaga2": 2500.0,
@@ -319,6 +333,7 @@
       {
         "nama": "Waduk Kampung Rambutan 1",
         "lokasi": "Cipinang",
+        "wilayah": "Jakarta Timur",
         "tinggi_air": 421.0,
         "siaga1": 3000.0,
         "siaga2": 2500.0,
@@ -331,6 +346,7 @@
       {
         "nama": "P.S. Angke Hulu 1",
         "lokasi": "Angke",
+        "wilayah": "Ciledug",
         "tinggi_air": 351.0,
         "siaga1": 3000.0,
         "siaga2": 2500.0,
@@ -343,6 +359,7 @@
       {
         "nama": "Bendung. Katulampa 2",
         "lokasi": "Ciliwung",
+        "wilayah": "Bogor",
         "tinggi_air": 153.0,
         "siaga1": 2000.0,
         "siaga2": 1500.0,
@@ -380,6 +397,7 @@
     {
       "nama": "P.A. Marina Ancol (Laut)",
       "lokasi": "Laut",
+      "wilayah": "Jakarta Utara",
       "tinggi_air": 2860.0,
       "siaga1": 2500.0,
       "siaga2": 2000.0,
@@ -392,6 +410,7 @@
     {
       "nama": "P.A. Cengkareng Drain",
       "lokasi": "Cengkareng",
+      "wilayah": "Jakarta Barat",
       "tinggi_air": 2738.0,
       "siaga1": 3100.0,
       "siaga2": 2700.0,
@@ -404,6 +423,7 @@
     {
       "nama": "P.A. Karet 1",
       "lokasi": "Banjir Kanal Barat",
+      "wilayah": "Jakarta Selatan",
       "tinggi_air": 4949.0,
       "siaga1": 6000.0,
       "siaga2": 5500.0,
@@ -416,6 +436,7 @@
     {
       "nama": "P.A. Manggarai 2",
       "lokasi": "Ciliwung",
+      "wilayah": "Jakarta Selatan",
       "tinggi_air": 5443.0,
       "siaga1": 9500.0,
       "siaga2": 8500.0,
@@ -428,6 +449,7 @@
     {
       "nama": "P.A. Kaliduri 1",
       "lokasi": "Kali Duri",
+      "wilayah": "Jakarta Utara",
       "tinggi_air": 1832.0,
       "siaga1": 3200.0,
       "siaga2": 2700.0,
@@ -440,6 +462,7 @@
     {
       "nama": "P.A. Ancol Flushing 1",
       "lokasi": "Ciliwung",
+      "wilayah": "Jakarta Utara",
       "tinggi_air": 1215.0,
       "siaga1": 2200.0,
       "siaga2": 1900.0,
@@ -452,6 +475,7 @@
     {
       "nama": "P.A. Marina Ancol (Kali)",
       "lokasi": "Kali",
+      "wilayah": "Jakarta Utara",
       "tinggi_air": 1179.0,
       "siaga1": 2500.0,
       "siaga2": 2000.0,
@@ -464,6 +488,7 @@
     {
       "nama": "P.A. Pulo Gadung 2",
       "lokasi": "Sunter",
+      "wilayah": "Jakarta Timur",
       "tinggi_air": 2928.0,
       "siaga1": 7700.0,
       "siaga2": 7000.0,
@@ -476,6 +501,7 @@
     {
       "nama": "P.S. Sunter Hulu",
       "lokasi": "Sunter",
+      "wilayah": "Jakarta Timur",
       "tinggi_air": 756.0,
       "siaga1": 2500.0,
       "siaga2": 2000.0,
@@ -488,6 +514,7 @@
     {
       "nama": "P.S. Depok 2",
       "lokasi": "Ciliwung",
+      "wilayah": "Depok",
       "tinggi_air": 988.0,
       "siaga1": 3500.0,
       "siaga2": 2700.0,
@@ -500,6 +527,7 @@
     {
       "nama": "P.S. Pesanggrahan 1",
       "lokasi": "Pesanggrahan",
+      "wilayah": "Depok",
       "tinggi_air": 651.0,
       "siaga1": 3500.0,
       "siaga2": 2500.0,
@@ -512,6 +540,7 @@
     {
       "nama": "P.A. Jembatan Merah 1",
       "lokasi": "Ciliwung",
+      "wilayah": "Jakarta Pusat",
       "tinggi_air": 461.0,
       "siaga1": 2500.0,
       "siaga2": 2000.0,
@@ -524,6 +553,7 @@
     {
       "nama": "P.A. Istiqlal 1",
       "lokasi": "Ciliwung",
+      "wilayah": "Jakarta Pusat",
       "tinggi_air": 628.0,
       "siaga1": 3500.0,
       "siaga2": 3000.0,
@@ -536,6 +566,7 @@
     {
       "nama": "P.S. Krukut Hulu 2",
       "lokasi": "Krukut",
+      "wilayah": "Jakarta Selatan",
       "tinggi_air": 448.0,
       "siaga1": 3000.0,
       "siaga2": 2500.0,
@@ -548,6 +579,7 @@
     {
       "nama": "Waduk Kampung Rambutan 1",
       "lokasi": "Cipinang",
+      "wilayah": "Jakarta Timur",
       "tinggi_air": 421.0,
       "siaga1": 3000.0,
       "siaga2": 2500.0,
@@ -560,6 +592,7 @@
     {
       "nama": "P.S. Angke Hulu 1",
       "lokasi": "Angke",
+      "wilayah": "Ciledug",
       "tinggi_air": 351.0,
       "siaga1": 3000.0,
       "siaga2": 2500.0,
@@ -572,6 +605,7 @@
     {
       "nama": "Bendung. Katulampa 2",
       "lokasi": "Ciliwung",
+      "wilayah": "Bogor",
       "tinggi_air": 153.0,
       "siaga1": 2000.0,
       "siaga2": 1500.0,
@@ -593,14 +627,6 @@
       "worst_rank": 0,
       "forecast": [
         {
-          "local_datetime": "2026-06-05T01:00:00",
-          "weather_desc": "Berawan",
-          "tmin": 26,
-          "tmax": 33,
-          "humin": 53,
-          "humax": 91
-        },
-        {
           "local_datetime": "2026-06-06T13:00:00",
           "weather_desc": "Berawan",
           "tmin": 27,
@@ -615,6 +641,14 @@
           "tmax": 34,
           "humin": 48,
           "humax": 85
+        },
+        {
+          "local_datetime": "2026-06-08T01:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 27,
+          "tmax": 34,
+          "humin": 44,
+          "humax": 74
         }
       ]
     },
@@ -627,14 +661,6 @@
       "worst_status": "Siaga 1",
       "worst_rank": 4,
       "forecast": [
-        {
-          "local_datetime": "2026-06-05T01:00:00",
-          "weather_desc": "Berawan",
-          "tmin": 26,
-          "tmax": 33,
-          "humin": 58,
-          "humax": 89
-        },
         {
           "local_datetime": "2026-06-06T13:00:00",
           "weather_desc": "Berawan",
@@ -650,6 +676,14 @@
           "tmax": 32,
           "humin": 53,
           "humax": 85
+        },
+        {
+          "local_datetime": "2026-06-08T01:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 27,
+          "tmax": 32,
+          "humin": 48,
+          "humax": 75
         }
       ]
     },
@@ -662,14 +696,6 @@
       "worst_status": "Siaga 2",
       "worst_rank": 3,
       "forecast": [
-        {
-          "local_datetime": "2026-06-05T01:00:00",
-          "weather_desc": "Berawan",
-          "tmin": 26,
-          "tmax": 33,
-          "humin": 55,
-          "humax": 93
-        },
         {
           "local_datetime": "2026-06-06T13:00:00",
           "weather_desc": "Berawan",
@@ -685,6 +711,14 @@
           "tmax": 33,
           "humin": 50,
           "humax": 89
+        },
+        {
+          "local_datetime": "2026-06-08T13:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 45,
+          "humax": 80
         }
       ]
     },
@@ -697,14 +731,6 @@
       "worst_status": "Siaga 3",
       "worst_rank": 2,
       "forecast": [
-        {
-          "local_datetime": "2026-06-05T01:00:00",
-          "weather_desc": "Berawan",
-          "tmin": 25,
-          "tmax": 33,
-          "humin": 51,
-          "humax": 94
-        },
         {
           "local_datetime": "2026-06-06T13:00:00",
           "weather_desc": "Berawan",
@@ -720,6 +746,14 @@
           "tmax": 34,
           "humin": 48,
           "humax": 90
+        },
+        {
+          "local_datetime": "2026-06-08T01:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 43,
+          "humax": 82
         }
       ]
     },
@@ -732,14 +766,6 @@
       "worst_status": "Normal",
       "worst_rank": 0,
       "forecast": [
-        {
-          "local_datetime": "2026-06-05T01:00:00",
-          "weather_desc": "Berawan",
-          "tmin": 25,
-          "tmax": 34,
-          "humin": 50,
-          "humax": 92
-        },
         {
           "local_datetime": "2026-06-06T13:00:00",
           "weather_desc": "Berawan",
@@ -755,8 +781,108 @@
           "tmax": 34,
           "humin": 46,
           "humax": 88
+        },
+        {
+          "local_datetime": "2026-06-08T01:00:00",
+          "weather_desc": "Berawan",
+          "tmin": 26,
+          "tmax": 34,
+          "humin": 42,
+          "humax": 78
         }
       ]
     }
-  ]
+  ],
+  "openweather_current": {
+    "temp": 28.7,
+    "feels_like": 32.78,
+    "pressure": 1012,
+    "humidity": 74,
+    "wind_speed": 1.34,
+    "wind_deg": 99,
+    "wind_gust": 2.24,
+    "clouds": 63,
+    "visibility": 10000,
+    "weather_main": "Clouds",
+    "weather_desc": "broken clouds",
+    "weather_icon": "04n",
+    "rainfall_1h": 0.0
+  },
+  "openweather_wilayah": {
+    "Jakarta Pusat": {
+      "temp": 30.04,
+      "feels_like": 37.04,
+      "pressure": 1011,
+      "humidity": 81,
+      "wind_speed": 2.24,
+      "wind_deg": 136,
+      "wind_gust": 3.58,
+      "clouds": 95,
+      "visibility": 6228,
+      "weather_main": "Clouds",
+      "weather_desc": "overcast clouds",
+      "weather_icon": "04n",
+      "rainfall_1h": 0.0
+    },
+    "Jakarta Utara": {
+      "temp": 30,
+      "feels_like": 37,
+      "pressure": 1011,
+      "humidity": 82,
+      "wind_speed": 2.83,
+      "wind_deg": 75,
+      "wind_gust": 3.46,
+      "clouds": 93,
+      "visibility": 7561,
+      "weather_main": "Clouds",
+      "weather_desc": "overcast clouds",
+      "weather_icon": "04n",
+      "rainfall_1h": 0.0
+    },
+    "Jakarta Barat": {
+      "temp": 30.02,
+      "feels_like": 37.02,
+      "pressure": 1011,
+      "humidity": 82,
+      "wind_speed": 2.24,
+      "wind_deg": 136,
+      "wind_gust": 3.58,
+      "clouds": 93,
+      "visibility": 10000,
+      "weather_main": "Clouds",
+      "weather_desc": "overcast clouds",
+      "weather_icon": "04n",
+      "rainfall_1h": 0.0
+    },
+    "Jakarta Selatan": {
+      "temp": 29.85,
+      "feels_like": 36.85,
+      "pressure": 1010,
+      "humidity": 80,
+      "wind_speed": 2.24,
+      "wind_deg": 136,
+      "wind_gust": 3.58,
+      "clouds": 97,
+      "visibility": 7643,
+      "weather_main": "Clouds",
+      "weather_desc": "overcast clouds",
+      "weather_icon": "04n",
+      "rainfall_1h": 0.0
+    },
+    "Jakarta Timur": {
+      "temp": 29.93,
+      "feels_like": 36.93,
+      "pressure": 1011,
+      "humidity": 84,
+      "wind_speed": 1.99,
+      "wind_deg": 78,
+      "wind_gust": 3.15,
+      "clouds": 98,
+      "visibility": 5070,
+      "weather_main": "Clouds",
+      "weather_desc": "overcast clouds",
+      "weather_icon": "04n",
+      "rainfall_1h": 0.0
+    }
+  }
 }

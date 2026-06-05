@@ -1,154 +1,90 @@
 [
   {
-    "title": "Hujan Lebat disertai Petir di Sulawesi Utara",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CSR20260516005_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 17 May 2026, 00:57 WITA di sebagian wilayah Sulawesi Utara, khususnya di Biaro, Tagulandang.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 03:30 WITA.",
+    "title": "Hujan Lebat disertai Petir di Kep. Riau",
+    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CKR20260603007_alert.xml",
+    "description": "Hujan lebat disertai petir akan terjadi pada 03 June 2026, 22:36 WIB di sebagian wilayah Kep. Riau, khususnya di Lingga Timur.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 04 June 2026, 01:00 WIB.",
     "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sun, 17 May 2026 00:45:00 +0800",
-    "alert_code": "CSR20260516005"
-  },
-  {
-    "title": "Hujan Lebat disertai Petir di Maluku Utara",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CMU20260516007_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 17 May 2026, 02:00 WIT di sebagian wilayah Maluku Utara, khususnya di Galela, Galela Barat, Galela Selatan, Gane Barat, Gane Timur, Gane Timur Tengah, Kota Maba, Loloda Kepulauan, Maba, Maba Utara, Morotai Jaya, Morotai Selatan Barat, Pulau Batang Dua, Tobelo, Tobelo Barat, Tobelo Selatan, Tobelo Tengah, Tobelo Timur, Tobelo Utara, Wasile, Wasile Selatan, Wasile Tengah, Wasile Utara.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 04:00 WIT.",
-    "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sun, 17 May 2026 01:42:00 +0900",
-    "alert_code": "CMU20260516007"
-  },
-  {
-    "title": "Hujan Lebat disertai Petir di Kep. Bangka Belitung",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CBB20260516014_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 16 May 2026, 23:30 WIB di sebagian wilayah Kep. Bangka Belitung, khususnya di Kelapa, Mentok, Simpang Teritip, Sungai Selan, Tempilang.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 02:00 WIB.",
-    "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sat, 16 May 2026 23:20:00 +0700",
-    "alert_code": "CBB20260516014"
-  },
-  {
-    "title": "Hujan Lebat disertai Petir di Jawa Timur",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CJT20260516015_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 16 May 2026, 23:45 WIB di sebagian wilayah Jawa Timur, khususnya di Bangilan, Camplong, Jatirogo, Kedewan, Kedungdung, Kenduruan, Konang, Omben, Tambelangan.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 02:00 WIB.",
-    "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sat, 16 May 2026 23:15:00 +0700",
-    "alert_code": "CJT20260516015"
-  },
-  {
-    "title": "Hujan Lebat disertai Petir di Bali",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CBL20260516005_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 17 May 2026, 00:15 WITA di sebagian wilayah Bali, khususnya di Denpasar Timur.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 02:15 WITA.",
-    "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sun, 17 May 2026 00:11:00 +0800",
-    "alert_code": "CBL20260516005"
-  },
-  {
-    "title": "Hujan Lebat disertai Petir di Sulawesi Tenggara",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CST20260516005_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 17 May 2026, 00:30 WITA di sebagian wilayah Sulawesi Tenggara, khususnya di Abeli, Abeli, Abeli, Abeli, Asera, Asera, Asera, Asera, Baruga, Batukara, Besulutu, Bonegunu, Iwoimendaa, Kadia, Kambu, Kapoiala, Kapontori, Katoi, Kodeoha, Konda, Kulisusu, Laeya, Lainea, Lalonggasumeeto, Lambai, Lasalimu, Lasolo Kepulauan, Lasusua, Latoma, Lembo, Maligano, Mandonga, Molawe, Moramo, Moramo Utara, Morosi, Motui, Mowila, Ngapa, Palangga Selatan, Pasarwajo, Poasia, Pondidaha, Rante Angin, Routa, Sabulakoa, Siotapina, Soropia, Tinanggea, Tiworo Utara, Tiwu, Ueesi, Wawo, Wolasi, Wolowa, Wonggeduku, Wonggeduku, Wonggeduku, Wonggeduku, Wua-Wua.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 02:30 WITA.",
-    "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sun, 17 May 2026 00:00:00 +0800",
-    "alert_code": "CST20260516005"
+    "pub_date": "Wed, 03 Jun 2026 22:26:00 +0700",
+    "alert_code": "CKR20260603007"
   },
   {
     "title": "Hujan Lebat disertai Petir di Sumatera Selatan",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CSS20260516008_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 16 May 2026, 23:25 WIB di sebagian wilayah Sumatera Selatan, khususnya di Air Kumbang, Air Salek, Air Sugihan, Babat Supat, Babat Toman, Banyuasin I, Banyuasin Ii, Banyuasin Iii, Batang Hari Leko, Bayung Lencir, Betung, Bts. Ulu, Cengal, Dempo Selatan, Dempo Tengah, Dempo Utara, Gelumbang, Gumay Talang, Gumay Ulu, Gunung Megang, Indralaya Utara, Jarai, Karang Dapo, Karang Jaya, Kayu Agung, Kedaton Peninjauan Raya, Kelekar, Keluang, Kikim Barat, Kikim Selatan, Kikim Tengah, Kikim Timur, Kisam Tinggi, Lahat, Lais, Lalan, Lawang Kidul, Lawang Wetan, Lengkiti, Lintang Kanan, Lubai, Lubai Ulu, Lubuk Batang, Lubuk Linggau Barat I, Lubuk Linggau Barat Ii, Lubuk Linggau Selatan I, Lubuk Linggau Selatan Ii, Lubuk Linggau Timur I, Lubuk Linggau Timur Ii, Lubuk Linggau Utara I, Lubuk Linggau Utara Ii, Makarti Jaya, Megang Sakti, Merapi Barat, Merapi Selatan, Muara Belida, Muara Beliti, Muara Enim, Muara Jaya, Muara Kelingi, Muara Lakitan, Muara Padang, Muara Pinang, Muara Sugihan, Muara Telang, Muarapayang, Mulak Ulu, Nibung, Pagar Alam Selatan, Pagar Alam Utara, Pagar Gunung, Pajar Bulan, Pampangan, Pedamaran, Pendopo, Pendopo Barat, Pengandonan, Peninjauan, Penukal, Penukal Utara, Plakat Tinggi, Pseksu, Pulau Rimau, Pulaupinang, Purwodadi, Rambang, Rambang Dangku, Rambang Kuang, Rantau Bayur, Rawas Ilir, Rawas Ulu, Runjung Agung, Rupit, Sanga Desa, Sekayu, Selangit, Sembawa, Semende Darat Laut, Semende Darat Ulu, Semidang Aji, Sikap Dalam, Sindang Danau, Stl Ulu Terawas, Suak Tapeh, Sukamerindu, Sumber Harta, Sumber Marga Telang, Sungai Are, Sungai Keruh, Sungai Lilin, Sungai Rotan, Talang Kelapa, Talang Padang, Tanjung Agung, Tanjung Batu, Tanjung Lago, Tanjung Sakti Pumi, Tanjungtebat, Tebing Tinggi, Tiang Pumpung Kepungut, Tuah Negeri, Tugumulyo, Tulung Selapan, Tungkal Ilir, Tungkal Jaya, Ulu Musi, Ulu Ogan, Ulu Rawas.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 02:00 WIB.",
+    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CSS20260603003_alert.xml",
+    "description": "Hujan lebat disertai petir akan terjadi pada 03 June 2026, 22:40 WIB di sebagian wilayah Sumatera Selatan, khususnya di Kisam Tinggi, Lais, Lengkiti, Merapi Barat, Merapi Timur, Muara Enim, Pengandonan, Sekayu, Semidang Aji, Sungai Keruh, Talang Ubi, Tanjung Agung, Ulu Ogan.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 04 June 2026, 00:40 WIB.",
     "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sat, 16 May 2026 23:00:00 +0700",
-    "alert_code": "CSS20260516008"
+    "pub_date": "Wed, 03 Jun 2026 22:10:00 +0700",
+    "alert_code": "CSS20260603003"
   },
   {
-    "title": "Hujan Lebat disertai Petir di Gorontalo",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CGT20260516008_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 17 May 2026, 00:08 WITA di sebagian wilayah Gorontalo, khususnya di Sumalata.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 02:15 WITA.",
+    "title": "Hujan Lebat disertai Petir di Riau",
+    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CRU20260603008_alert.xml",
+    "description": "Hujan lebat disertai petir akan terjadi pada 03 June 2026, 22:00 WIB di sebagian wilayah Riau, khususnya di Bandar Sei Kijang, Bangkinang, Bangkinang Kota, Bonai Darussalam, Bukit Kapur, Bukit Raya, Kampar, Kampar Kiri Hilir, Kampar Kiri Tengah, Kampar Utara, Kandis, Kerinci Kanan, Kuok, Langgam, Marpoyan Damai, Perhentian Raja, Rumbio Jaya, Rupat, Rupat Utara, Salo, Siak Hulu, Tambang, Tampan, Tanah Putih, Tapung Hilir, Tapung Hulu, Tenayan Raya, Xiii Koto Kampar.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 04 June 2026, 01:00 WIB.",
     "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sat, 16 May 2026 23:56:00 +0800",
-    "alert_code": "CGT20260516008"
+    "pub_date": "Wed, 03 Jun 2026 21:53:00 +0700",
+    "alert_code": "CRU20260603008"
   },
   {
-    "title": "Hujan Lebat disertai Petir di Sulawesi Selatan",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CSL20260516004_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 17 May 2026, 00:00 WITA di sebagian wilayah Sulawesi Selatan, khususnya di Angkona, Awangpone, Barebbo, Kalaena, Malangke, Malili, Malllawa, Mangkutana, Masamba, Palakka, Pujananting, Sabbang, Tanete Riaja, Tanete Riattang, Tanete Riattang Barat, Tanete Riattang Timur, Tomoni, Tomoni Timur.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 02:00 WITA.",
+    "title": "Hujan Lebat disertai Petir di Kalimantan Selatan",
+    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CKS20260603003_alert.xml",
+    "description": "Hujan lebat disertai petir akan terjadi pada 03 June 2026, 23:00 WITA di sebagian wilayah Kalimantan Selatan, khususnya di Hampang.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 04 June 2026, 01:00 WITA.",
     "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sat, 16 May 2026 23:30:00 +0800",
-    "alert_code": "CSL20260516004"
+    "pub_date": "Wed, 03 Jun 2026 22:50:00 +0800",
+    "alert_code": "CKS20260603003"
   },
   {
-    "title": "Hujan Lebat disertai Petir di Papua",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CPU20260516008_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 17 May 2026, 00:45 WIT di sebagian wilayah Papua, khususnya di Bonggo, Mamberamo Hulu, Pantai Timur, Pantai Timur Bagian Barat, Tor Atas.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 03:15 WIT.",
+    "title": "Hujan Lebat disertai Petir di Sumatera Utara",
+    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CSU20260603005_alert.xml",
+    "description": "Hujan lebat disertai petir akan terjadi pada 03 June 2026, 21:50 WIB di sebagian wilayah Sumatera Utara, khususnya di Adian Koting, Andam Dewi, Bangun Purba, Barus, Barus Utara, Batang Kuis, Beringin, Deli Tua, Dolok Sanggul, Galang, Gunung Sitember, Harian, Lae Parira, Lubuk Pakam, Medan Amplas, Namorambe, Onan Ganjang, Pagar Merbau, Pakkat, Pantai Cermin, Pantai Labu, Parlilitan, Parmonangan, Pasaribu Tobing, Patumbak, Pegajahan, Perbaungan, Percut Sei Tuan, Pollung, Sei. Rampah, Serba Jadi, Sibiru-Biru, Siempat Nempu, Siempat Nempu Hilir, Siempat Nempu Hulu, Sijamapolang, Silima Pungga Pungga, Sipoholon, Sirandorung, Sitelu Tali Urang Jehe, Sosor Gadong, Stm Hilir, Tanah Pinem, Tanjung Beringin, Tanjung Morawa, Tarutung, Teluk Mengkudu, Tigalingga.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 04 June 2026, 00:50 WIB.",
     "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sun, 17 May 2026 00:30:00 +0900",
-    "alert_code": "CPU20260516008"
+    "pub_date": "Wed, 03 Jun 2026 21:40:00 +0700",
+    "alert_code": "CSU20260603005"
   },
   {
     "title": "Hujan Lebat disertai Petir di Kalimantan Tengah",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CKG20260516006_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 16 May 2026, 22:48 WIB di sebagian wilayah Kalimantan Tengah, khususnya di Antang Kalang, Banama Tingang, Barito Tuhup Raya, Batang Kawa, Belantikan Raya, Bukit Batu, Bukit Santuai, Kahayan Tengah, Kamipang, Kapuas Tengah, Katingan Hilir, Katingan Kuala, Lahei, Lahei Barat, Laung Tuhup, Mantangai, Manuhing, Mendawai, Murung, Pasak Talawang, Permata Intan, Pulau Malan, Rakumpit, Rungan, Sebangau Kuala, Sepang Simin, Seruyan Hulu, Seruyan Tengah, Suling Tambun, Sungai Babuat, Tanah Siang, Tanah Siang Selatan, Tasik Payawan, Telaga Antang, Teluk Sampit, Tewang Sangalang Garing, Timpah.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 01:20 WIB.",
+    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CKG20260603006_alert.xml",
+    "description": "Hujan lebat disertai petir akan terjadi pada 03 June 2026, 20:58 WIB di sebagian wilayah Kalimantan Tengah, khususnya di Damang Batu, Jelai, Kahayan Hulu Utara, Kapuas Hulu, Kurun, Mandau Talawang, Mantangai, Miri Manasa, Pasak Talawang, Permata Intan, Rungan Hulu, Sumber Barito, Sungai Babuat, Tewah.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 03 June 2026, 23:30 WIB.",
     "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sat, 16 May 2026 22:30:00 +0700",
-    "alert_code": "CKG20260516006"
+    "pub_date": "Wed, 03 Jun 2026 20:50:00 +0700",
+    "alert_code": "CKG20260603006"
   },
   {
-    "title": "Hujan Lebat disertai Petir di Papua Pegunungan",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CPP20260516002_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 17 May 2026, 00:41 WIT di sebagian wilayah Papua Pegunungan, khususnya di Abenaho, Anggruk, Apalapsili, Asologaima, Asolokobal, Benawa, Bewani, Bokondini, Bokoneri, Bolakme, Bpiri, Bugi, Dirwemna, Dow, Egiam, Elelim, Endomen, Eragayam, Gundagi, Hereapini, Hubikiak, Hubikosi, Ibele, Ilugwa, Itlay Hisage, Kai, Kamboneri, Karu, Kobagma, Kolawa, Kona, Koragi, Kosarek, Kurima, Kurulu, Libarek, Maima, Megambilis, Molagalome, Muliama, Musatfak, Napua, Nipsan, Panggema, Piramid, Pisugi, Poganeri, Popugoba, Pronggoli, Siepkosi, Silo Karno Doga, Tagime, Tagineri, Talambo, Ubahak, Ubalihi, Usilimo, Wadangku, Walelagama, Walma, Wame, Wamena, Wari/Taiyeve Ii, Welarek, Welesi, Wesaput, Wita Waya, Wolo, Wouma, Wunim, Yahuliambut, Yalengga, Yogosem, Yuko, Yuneri.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 04:59 WIT.",
+    "title": "Hujan Lebat disertai Petir di Lampung",
+    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CLG20260603010_alert.xml",
+    "description": "Hujan lebat disertai petir akan terjadi pada 03 June 2026, 21:00 WIB di sebagian wilayah Lampung, khususnya di Banjit, Jati Agung, Kasui, Natar, Sekincau, Ulu Belu.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 03 June 2026, 22:30 WIB.",
     "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sun, 17 May 2026 00:28:00 +0900",
-    "alert_code": "CPP20260516002"
+    "pub_date": "Wed, 03 Jun 2026 20:50:00 +0700",
+    "alert_code": "CLG20260603010"
+  },
+  {
+    "title": "Hujan Lebat disertai Petir di Aceh",
+    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CAH20260603005_alert.xml",
+    "description": "Hujan lebat disertai petir akan terjadi pada 03 June 2026, 20:20 WIB di sebagian wilayah Aceh, khususnya di Babul Rahmah, Babussalam, Badar, Bakongan, Bakongan Timur, Bambel, Bukit Tusam, Darul Hasanah, Deleng Pokhkisen, Ketambe, Kluet Selatan, Kluet Tengah, Kluet Timur, Kluet Utara, Kota Bahagia, Lawe Alas, Lawe Bulan, Lawe Sumur, Pasi Raja, Samadua, Tanoh Alas, Tapaktuan, Trumon Tengah, Trumon Timur.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 03 June 2026, 23:41 WIB.",
+    "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
+    "pub_date": "Wed, 03 Jun 2026 20:10:00 +0700",
+    "alert_code": "CAH20260603005"
   },
   {
     "title": "Hujan Lebat disertai Petir di Sulawesi Tengah",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CSG20260516005_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 16 May 2026, 23:40 WITA di sebagian wilayah Sulawesi Tengah, khususnya di Dolo Selatan, Kulawi, Ratolindo, Rio Pakava.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 02:30 WITA.",
+    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CSG20260603004_alert.xml",
+    "description": "Hujan lebat disertai petir akan terjadi pada 03 June 2026, 21:20 WITA di sebagian wilayah Sulawesi Tengah, khususnya di Balinggi, Lindu, Lore Utara, Menui Kepulauan, Nokilalaki, Palolo, Parigi, Parigi Barat, Parigi Selatan, Parigi Tengah, Parigi Utara, Poso Pesisir Utara, Sausu, Torue.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 03 June 2026, 23:20 WITA.",
     "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sat, 16 May 2026 23:28:00 +0800",
-    "alert_code": "CSG20260516005"
+    "pub_date": "Wed, 03 Jun 2026 21:07:00 +0800",
+    "alert_code": "CSG20260603004"
   },
   {
-    "title": "Hujan Lebat disertai Petir di Maluku Utara",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CMU20260516006_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 17 May 2026, 00:40 WIT di sebagian wilayah Maluku Utara, khususnya di Gane Timur, Jailolo, Kao Teluk, Maba, Morotai Jaya, Morotai Selatan Barat, Morotai Utara, Pulau Batang Dua, Wasile Utara.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 02:40 WIT.",
+    "title": "Hujan Lebat disertai Petir di Kalimantan Timur",
+    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CKT20260603004_alert.xml",
+    "description": "Hujan lebat disertai petir akan terjadi pada 03 June 2026, 21:12 WITA di sebagian wilayah Kalimantan Timur, khususnya di Gunung Tabur, Pulau Derawan, Segah.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 03 June 2026, 23:15 WITA.",
     "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sun, 17 May 2026 00:24:00 +0900",
-    "alert_code": "CMU20260516006"
-  },
-  {
-    "title": "Hujan Lebat disertai Petir di Nusa Tenggara Barat",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CNB20260516010_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 16 May 2026, 23:30 WITA di sebagian wilayah Nusa Tenggara Barat, khususnya di Moyo Hilir, Pekat.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 01:30 WITA.",
-    "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sat, 16 May 2026 23:20:00 +0800",
-    "alert_code": "CNB20260516010"
-  },
-  {
-    "title": "Hujan Lebat disertai Petir di Nusa Tenggara Barat",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CNB20260516011_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 16 May 2026, 23:30 WITA di sebagian wilayah Nusa Tenggara Barat, khususnya di Moyo Hilir, Pekat, Praya Tengah.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 01:30 WITA.",
-    "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sat, 16 May 2026 23:20:00 +0800",
-    "alert_code": "CNB20260516011"
-  },
-  {
-    "title": "Hujan Lebat disertai Petir di Sulawesi Barat",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CSK20260516002_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 16 May 2026, 23:40 WITA di sebagian wilayah Sulawesi Barat, khususnya di Bambaira, Bambalamotu, Pasangkayu, Pedongga.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 02:40 WITA.",
-    "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sat, 16 May 2026 23:15:00 +0800",
-    "alert_code": "CSK20260516002"
-  },
-  {
-    "title": "Hujan Lebat disertai Petir di Jawa Tengah",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CJH20260516005_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 16 May 2026, 22:00 WIB di sebagian wilayah Jawa Tengah, khususnya di Banjarejo, Blora, Cepu, Gabus, Gubug, Jati, Jepon, Kedungtuban, Kradenan, Kradenan, Kunduran, Ngaringan, Ngawen, Penawangan, Pulokulon, Purwodadi, Randublatung, Sambong, Tawangharjo, Toroh, Tunjungan.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 17 May 2026, 00:30 WIB.",
-    "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sat, 16 May 2026 21:50:00 +0700",
-    "alert_code": "CJH20260516005"
+    "pub_date": "Wed, 03 Jun 2026 21:00:00 +0800",
+    "alert_code": "CKT20260603004"
   },
   {
     "title": "Hujan Lebat disertai Petir di Jambi",
-    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CJI20260516004_alert.xml",
-    "description": "Hujan lebat disertai petir akan terjadi pada 16 May 2026, 20:45 WIB di sebagian wilayah Jambi, khususnya di Bajubang, Bangko  Barat, Bathin Viii, Batin Xxiv, Berbak, Cermin Nan Gedang, Dendang, Kuala Jambi, Kumpeh, Mandiangin, Mendahara, Muara Sabak Barat, Muara Sabak Timur, Pauh, Pelawan, Renah Pembarap, Sadu, Sarolangun.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 16 May 2026, 23:50 WIB.",
+    "link": "https://www.bmkg.go.id/alerts/nowcast/id/CJI20260603004_alert.xml",
+    "description": "Hujan lebat disertai petir akan terjadi pada 03 June 2026, 20:20 WIB di sebagian wilayah Jambi, khususnya di Lembah Masurai, Muara Siau, Pangkalan Jambu, Sadu.\n Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.\n Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.\n Kondisi diperkirakan dapat berlangsung hingga 03 June 2026, 23:00 WIB.",
     "author": "cuaca.ekstrem@bmkg.go.id (BMKG)",
-    "pub_date": "Sat, 16 May 2026 20:15:00 +0700",
-    "alert_code": "CJI20260516004"
+    "pub_date": "Wed, 03 Jun 2026 19:50:00 +0700",
+    "alert_code": "CJI20260603004"
   }
 ]

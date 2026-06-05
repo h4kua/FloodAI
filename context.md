@@ -357,6 +357,47 @@ bf50558 feat: AI-style logo
 
 ---
 
+## Session summary — what changed 2026-06-04 (session 2)
+
+### KecamatanZones — replaces ZoneCards
+- `ZoneCards` (5 wilayah cards with duplicated "Jkt Utara / Jakarta Utara" names) removed
+- New `KecamatanZones` component: groups real DSDADKI stations by wilayah, sorted highest→lowest ratio per group, groups sorted by worst station ratio
+- Wilayah inferred from `station.wilayah` (added to backend) with lat/lon geographic fallback (`inferWilayah()`) for backward compat
+- "Hulu / Luar Jakarta" group for upstream/non-Jakarta stations (Katulampa etc.)
+- Backend: `realtime_native/feature_builder.py` now includes `"wilayah": str(r.get("file_export") or "")` in each station_summary entry
+
+### WeatherCurrentCard — new OpenWeather widget
+- Shows current weather: icon, description, temp, feels_like, humidity, rainfall, wind, pressure, clouds, visibility
+- Uses `riskData.openweather` (new field mapped from `json.openweather_current`)
+- Backend: `inference.py` reads `poskobanjir/data/raw/openweather_current.json` and includes it in response as `openweather_current`
+- Frontend: `useFloodRisk.js` maps `json.openweather_current` → `riskData.openweather`
+
+### WilayahForecastGrid — table layout redesign
+- Replaced sparse row+slots layout with proper table: header row (time labels) + data rows (wilayah × slot)
+- Always renders 4 columns; fills empty slots with "—"
+- Wilayah rows sorted by `worst_rank` (most dangerous first)
+- CSS: `.forecast-table`, `.forecast-table-header`, `.forecast-table-row`, `.fct-*`
+
+### Evacuation page improvements
+- `DESTINATIONS` expanded from 5 → 11 shelters with `address`, `phone`, `capacity`, `area` fields
+- Shelter detail card shown when shelter is selected (address, phone, capacity, click-to-call)
+- Emergency kit checklist ("ISI TAS DARURAT") — 10 items in 2-column grid
+- CSS: `.shelter-detail-card`
+
+### About page improvements
+- `MetricBar` component: label + value + progress bar for AUC, Brier, ECE, Recall
+- "PERFORMA MODEL" section with visual metric bars
+- `PipelineStep` component: numbered step with circle badge
+- "CARA KERJA SISTEM" section showing 4-step pipeline
+
+### CSS additions (styles.css)
+- `.kec-zones-list`, `.kec-group`, `.kec-group-header`, `.kec-group-title`, `.kec-rows`, `.kec-row`, `.kec-row-*`
+- `.weather-current-card`, `.weather-current-header`, `.weather-chips-grid`, `.weather-chip`, `.weather-chip-*`
+- `.forecast-table`, `.forecast-table-header`, `.forecast-table-row`, `.fct-*`
+- `.shelter-detail-card`
+
+---
+
 ## Session summary — what changed 2026-06-04
 
 ### Architecture changes
