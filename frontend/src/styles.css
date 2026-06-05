@@ -441,6 +441,9 @@ body {
   display: flex; flex-direction: column; gap: 3px;
   pointer-events: none;
 }
+[data-theme="light"] .map-legend {
+  background: rgba(250,249,247,0.94); border-color: rgba(60,45,20,0.12);
+}
 .legend-row {
   display: flex; align-items: center; gap: 6px;
   font-family: 'JetBrains Mono', monospace;
@@ -461,7 +464,7 @@ body {
 }
 .zone-table td {
   padding: 0.72rem 0.875rem 0.72rem 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--line);
   font-size: 0.84rem; vertical-align: middle;
 }
 .zone-table tr:last-child td { border-bottom: none; }
@@ -723,6 +726,7 @@ body {
 .leaflet-popup-close-button { color: var(--muted) !important; }
 .leaflet-control-zoom a { background: var(--panel) !important; color: var(--text) !important; border-color: var(--line) !important; }
 .leaflet-control-attribution { background: rgba(13,17,23,0.8) !important; color: var(--muted-2) !important; }
+[data-theme="light"] .leaflet-control-attribution { background: rgba(244,242,238,0.90) !important; }
 .leaflet-control-attribution a { color: var(--muted) !important; }
 
 /* ── Footer ──────────────────────────────────────────────────── */

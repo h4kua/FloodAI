@@ -83,8 +83,8 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
               dashArray: "4 4",
             }}
           >
-            <Popup>
-              <div style={{ fontFamily: "'Inter', sans-serif", minWidth: 190 }}>
+            <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>
+              <div style={{ fontFamily: "'Inter', sans-serif", minWidth: 180 }}>
                 <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 14 }}>{d.name}</p>
                 <p style={{ fontSize: 11, color: "#8f96a9", margin: 0 }}>
                   {t("map.popupEstNote")}
@@ -113,8 +113,8 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
                 opacity: 0.9,
               }}
             >
-              <Popup>
-                <div style={{ fontFamily: "'Inter', sans-serif", minWidth: 190 }}>
+              <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>
+                <div style={{ fontFamily: "'Inter', sans-serif", minWidth: 180 }}>
                   <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{s.nama}</p>
                   <p style={{ fontSize: 12, color, fontWeight: 700, marginBottom: 6 }}>
                     {s.status_siaga} — {Math.round(s.ratio * 100)}% siaga

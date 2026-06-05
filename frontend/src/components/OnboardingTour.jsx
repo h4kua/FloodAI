@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useLayoutEffect } from "react";
 import { useApp } from "../lib/appContext";
 
-const TOUR_KEY = "deflood_tour_v5_done";
+const TOUR_KEY = "deflood_tour_v6_done";
 
 /* ── SVG icons ──────────────────────────────────────────── */
 const Icons = {
