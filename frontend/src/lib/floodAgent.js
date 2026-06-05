@@ -14,6 +14,24 @@ Common: "kemaa"="kemana", "bnjir"="banjir", "hrs"="harus", "ga"="tidak/gak", "gm
 "klo"="kalau", "trus"="terus", "yg"="yang", "dr"="dari", "mnt"="menit", "jkt"="jakarta",
 "kec"="kecamatan", "kel"="kelurahan", "rt/rw"=rukun tetangga/warga.
 
+Jakarta location abbreviations — resolve these automatically:
+"pik"/"PIK" = Pantai Indah Kapuk (Kel. Pluit & Kamal Muara, Kec. Penjaringan, Jakarta Utara — rawan rob)
+"jakut"/"jak-ut"/"jkt utara" = Jakarta Utara
+"jakbar"/"jak-bar"/"jkt barat" = Jakarta Barat
+"jaktim"/"jak-tim"/"jkt timur" = Jakarta Timur
+"jaksel"/"jak-sel"/"jkt selatan" = Jakarta Selatan
+"jakpus"/"jak-pus"/"jkt pusat" = Jakarta Pusat
+"kampmel"/"kamp mel"/"k.melayu"/"km" (konteks lokasi) = Kampung Melayu (Kec. Jatinegara)
+"kalder"/"kalidrs" = Kalideres
+"penjar"/"penjrng" = Penjaringan
+"cengkrng"/"cengkrg" = Cengkareng
+"padam"/"pdmgn" = Pademangan
+"mangdu" = Mangga Dua (Sawah Besar)
+"kalgading"/"kel gading"/"kg" (konteks mal/lokasi) = Kelapa Gading
+"tpi" (konteks pelabuhan/shelter) = Tanjung Priok
+"sunter agung"/"sntr" = Sunter (Tanjung Priok)
+"bsd"/"serpong"/"bintaro" = bukan Jakarta, tapi area Tangerang Selatan — arahkan ke info JakSel terdekat jika relevan
+
 RESPONSE LENGTH — match complexity of question:
 • Status / kondisi sekarang: 2–3 kalimat + 1 aksi konkret
 • Pertanyaan wilayah / kecamatan / RT-RW: format list, boleh sampai 200 kata — detail itu penting
@@ -30,6 +48,7 @@ JAKARTA FLOOD GEOGRAPHY (gunakan untuk pertanyaan lokasi spesifik):
 
 JAKARTA UTARA — paling rawan, kombinasi rob + banjir kiriman:
   • Kec. Penjaringan: RT di Pluit, Muara Baru, Kamal Muara, Pejagalan — sering rob + kiriman
+    → PIK (Pantai Indah Kapuk): masuk Kel. Pluit & Kamal Muara. Area reklamasi/perumahan di tepi laut, sangat rawan rob dari Laut Jawa. Kalau user tanya "PIK" atau "pik" → ini wilayahnya.
   • Kec. Pademangan: RW rendah di Pademangan Barat, dekat Kali Sentiong
   • Kec. Cilincing: bantaran Kali Cakung Drain, rawan rob dari Teluk Jakarta
   • Kec. Tanjung Priok: genangan saat hujan intens >30mm/jam
@@ -856,9 +875,10 @@ Safe / elevated: Monas, Senayan/GBK, TMII, Kemang Village, Sudirman-Thamrin corr
 // ─── Offline Matcher ───────────────────────────────────────────────────────────
 function _matchOffline(text, lang) {
   const t = text.toLowerCase()
+    // typo corrections
     .replace(/bnjir|banjr|bajir/g, "banjir")
     .replace(/\bevak\w*/g, "evakuasi")
-    .replace(/kmna|kemaa|kemane|kemane\b/g, "kemana")
+    .replace(/kmna|kemaa|kemane/g, "kemana")
     .replace(/gmn|gmna|bgmn/g, "gimana")
     .replace(/klo|kl\b/g, "kalau")
     .replace(/hrs\b/g, "harus")
@@ -866,7 +886,23 @@ function _matchOffline(text, lang) {
     .replace(/tlp|tlpon|telpn/g, "telepon")
     .replace(/pasca|abis banjir|sesudah banjir/g, "setelah banjir")
     .replace(/skor risiko|scr risiko/g, "skor")
-    .replace(/web(site|app)?|aplikasi|app\b|fitur/g, "website");
+    .replace(/web(site|app)?|aplikasi|app\b|fitur/g, "website")
+    // Jakarta wilayah abbreviations
+    .replace(/\bpik\b/g, "pluit penjaringan")
+    .replace(/\bjak[\s-]?ut\b|\bjakut\b/g, "jakarta utara")
+    .replace(/\bjak[\s-]?bar\b|\bjakbar\b/g, "jakarta barat")
+    .replace(/\bjak[\s-]?tim\b|\bjaktim\b/g, "jakarta timur")
+    .replace(/\bjak[\s-]?sel\b|\bjaksel\b/g, "jakarta selatan")
+    .replace(/\bjak[\s-]?pus\b|\bjakpus\b/g, "jakarta pusat")
+    // area / kecamatan informal
+    .replace(/\bkampmel\b|\bkamp[\s.]?mel\b|\bk[\s.]melayu\b/g, "kampung melayu")
+    .replace(/\bkalder\b|\bkalidrs\b/g, "kalideres")
+    .replace(/\bpenjar\b|\bpenjrng\b/g, "penjaringan")
+    .replace(/\bcengkrng\b|\bcengkrg\b/g, "cengkareng")
+    .replace(/\bpadam\b|\bpdmgn\b/g, "pademangan")
+    .replace(/\bmangdu\b/g, "mangga dua")
+    .replace(/\bkalgading\b|\bkel[\s.]gading\b/g, "kelapa gading")
+    .replace(/\btpi\b/g, "tanjung priok");
   const kb = OFFLINE_KB[lang] ?? OFFLINE_KB.id;
 
   // Street / road names
@@ -903,6 +939,9 @@ function _matchOffline(text, lang) {
   if (t.includes("skor") || t.includes("score") || t.includes("siaga") || t.includes("waspada") || t.includes("prediksi") || t.includes("akurasi") || t.includes("model")) return kb.prediksi;
   // Pumps / infrastructure
   if (t.includes("pompa") || t.includes("pump") || t.includes("drainase") || t.includes("drainage") || t.includes("saluran") || t.includes("pintu air") || t.includes("dsdadki")) return kb.pompa;
+  // Jakarta location keyword fallback — catches questions like "banjir di pik?" or "pluit aman?"
+  // after abbreviation normalization above (e.g. "pik" → "pluit penjaringan")
+  if (/\b(penjaringan|pluit|pademangan|cilincing|kalideres|cengkareng|tambora|grogol|kampung melayu|jatinegara|matraman|cakung|kramat jati|tebet|pesanggrahan|pasar minggu|kemayoran|sawah besar|tanjung priok|sunter|kelapa gading|ancol|muara baru|muara angke|kapuk|semanan|bukit duri|cipinang|mangga dua)\b/.test(t)) return kb.wilayah;
   return null;
 }
 
