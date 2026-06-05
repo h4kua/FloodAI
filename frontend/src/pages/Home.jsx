@@ -1613,7 +1613,7 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
       {(!riskData?.wilayahSummary?.length) && <ForecastPanel forecast={riskData?.bmkgForecast} />}
 
       {/* Floating chatbot */}
-      <ChatBot riskContext={{ level, rainfall: riskData?.rainfall }} />
+      <ChatBot riskContext={{ ...riskData, level }} />
     </>
   );
 }

@@ -24,6 +24,7 @@ export function useChat(riskContext = {}, lang = "id") {
   // null = probe in-flight, true = AI ready, false = offline KB
   const [aiOnline, setAiOnline] = useState(null);
   const probed = useRef(false);
+  const messagesRef = useRef(messages);
 
   useEffect(() => {
     if (probed.current) return;
@@ -31,12 +32,16 @@ export function useChat(riskContext = {}, lang = "id") {
     probeGroqHealth().then((ok) => setAiOnline(ok));
   }, []);
 
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
   const sendMessage = async (text) => {
     const userMsg = { role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
     try {
-      const history = messages.map((m) => ({ role: m.role, content: m.content }));
+      const history = messagesRef.current.map((m) => ({ role: m.role, content: m.content }));
       const result = await sendToFloodAgent(text, history, riskContext, lang);
       setAiOnline(result.isAI === true);
       setMessages((prev) => [

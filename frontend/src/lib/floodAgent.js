@@ -945,10 +945,64 @@ function _matchOffline(text, lang) {
   return null;
 }
 
+function compactStations(stations = []) {
+  return stations
+    .filter(Boolean)
+    .slice()
+    .sort((a, b) => (b.ratio ?? 0) - (a.ratio ?? 0))
+    .slice(0, 6)
+    .map((s) => ({
+      nama: s.nama,
+      lokasi: s.lokasi,
+      status_siaga: s.status_siaga,
+      ratio: s.ratio,
+      tinggi_air: s.tinggi_air,
+    }));
+}
+
+function compactWilayahSummary(wilayahSummary = []) {
+  return wilayahSummary
+    .filter(Boolean)
+    .slice(0, 6)
+    .map((w) => ({
+      wilayah: w.wilayah,
+      worst_status: w.worst_status,
+      worst_rank: w.worst_rank,
+      tma_count: w.tma_count,
+      forecast: (w.forecast ?? []).slice(0, 3).map((f) => ({
+        local_datetime: f.local_datetime,
+        weather_desc: f.weather_desc,
+        tmin: f.tmin,
+        tmax: f.tmax,
+        humin: f.humin,
+        humax: f.humax,
+      })),
+    }));
+}
+
+function buildAgentContext(riskContext = {}) {
+  return {
+    level: riskContext.level,
+    riskScore: riskContext.riskScore,
+    rainfall: riskContext.rainfall,
+    rainfallAcc3h: riskContext.rainfallAcc3h,
+    rainfallAcc6h: riskContext.rainfallAcc6h,
+    rainfallTrendMmH: riskContext.rainfallTrendMmH,
+    humidity: riskContext.humidity,
+    temperature: riskContext.temperature,
+    waterLevelRatio: riskContext.waterLevelRatio,
+    waterLevelDelta: riskContext.waterLevelDelta,
+    bmkgAlerts: riskContext.bmkgAlerts,
+    snapshotFetchedAt: riskContext.snapshotFetchedAt,
+    tmaStationsActive: riskContext.tmaStationsActive,
+    recommendedActions: (riskContext.recommendedActions ?? []).slice(0, 3),
+    stations: compactStations(riskContext.stations ?? []),
+    wilayahSummary: compactWilayahSummary(riskContext.wilayahSummary ?? []),
+  };
+}
+
 export async function sendToFloodAgent(message, history = [], riskContext = {}, lang = "id") {
-  const contextPrefix = riskContext.level
-    ? `[flood_risk: ${riskContext.level} | rainfall: ${riskContext.rainfall ?? 0} mm/h]\n`
-    : "";
+  const context = buildAgentContext(riskContext);
 
   const controller = new AbortController();
   const chatTimer = setTimeout(() => controller.abort(), 28000);
@@ -957,9 +1011,11 @@ export async function sendToFloodAgent(message, history = [], riskContext = {}, 
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: contextPrefix + message,
+        message,
         history: history.map((m) => ({ role: m.role, content: m.content })),
         system: SYSTEM_PROMPT,
+        context,
+        lang,
       }),
       signal: controller.signal,
     });
