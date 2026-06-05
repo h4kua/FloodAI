@@ -508,8 +508,36 @@ async def _scheduled_refresh() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     configure_logging()
-    load_runtime_bundle()
-    app.state.pipeline = FloodDecisionPipeline(persist=os.getenv("DB_PERSISTENCE_ENABLED", "true").lower() == "true")
+
+    # ── Model bundle load ────────────────────────────────────────────────────
+    # Wrapped in try/except so a bundle version mismatch or missing file never
+    # prevents the server from binding to the port. Prediction endpoints will
+    # return 503 if the bundle failed to load rather than the whole app crashing.
+    try:
+        load_runtime_bundle()
+    except Exception as exc:
+        _log.error(
+            "startup_bundle_load_failed",
+            error_type=type(exc).__name__,
+            error=str(exc),
+            exc_info=True,
+        )
+
+    # ── Pipeline init ────────────────────────────────────────────────────────
+    # Same pattern: a DB connection error during pipeline init should not
+    # prevent the healthz endpoint from being reachable.
+    try:
+        app.state.pipeline = FloodDecisionPipeline(
+            persist=os.getenv("DB_PERSISTENCE_ENABLED", "true").lower() == "true"
+        )
+    except Exception as exc:
+        _log.error(
+            "startup_pipeline_init_failed",
+            error_type=type(exc).__name__,
+            error=str(exc),
+            exc_info=True,
+        )
+        app.state.pipeline = None
 
     interval_minutes = _refresh_interval_minutes()
     scheduler.add_job(
@@ -522,7 +550,7 @@ async def lifespan(app: FastAPI):
     )
     scheduler.start()
     _log.info(f"snapshot_scheduler_started (interval_minutes={interval_minutes})")
-    # Immediate refresh so a fresh Railway deploy updates the snapshot right away
+    # Immediate refresh so a fresh deploy updates the snapshot right away
     # instead of waiting a full interval.
     asyncio.create_task(_scheduled_refresh())
 
@@ -695,9 +723,12 @@ async def demo_dashboard(
     origin: Optional[str] = None,
     destination: Optional[str] = None,
 ) -> HTMLResponse:
+    pipeline = getattr(request.app.state, "pipeline", None)
+    if pipeline is None:
+        raise HTTPException(status_code=503, detail={"error": "pipeline_unavailable", "hint": "Check startup logs for pipeline init errors"})
     return await _bounded_threadpool(
         build_demo_page,
-        pipeline=request.app.state.pipeline,
+        pipeline=pipeline,
         origin=origin,
         destination=destination,
     )

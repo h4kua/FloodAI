@@ -1186,11 +1186,18 @@ function KecamatanZones({ stations, wilayahSummary, globalProbability }) {
       : []),
   ];
 
-  if (allGroups.length === 0) return null;
+  // ⚠️ Hooks must be called unconditionally — BEFORE any early return
+  const [openSet, setOpenSet] = useState(() => new Set());
 
-  const [openSet, setOpenSet] = useState(
-    () => new Set(allGroups.slice(0, 2).map(g => g.wilayah))
-  );
+  // Sync initial open state when groups first become available
+  useEffect(() => {
+    if (allGroups.length > 0 && openSet.size === 0) {
+      setOpenSet(new Set(allGroups.slice(0, 2).map(g => g.wilayah)));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allGroups.length]);
+
+  if (allGroups.length === 0) return null;
   const toggle = (w) => setOpenSet(prev => {
     const next = new Set(prev); next.has(w) ? next.delete(w) : next.add(w); return next;
   });
