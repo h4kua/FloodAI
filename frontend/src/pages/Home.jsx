@@ -1156,65 +1156,67 @@ function KecamatanZones({ stations, wilayahSummary, globalProbability }) {
   const JAKARTA_ORDER = ["Jakarta Utara","Jakarta Barat","Jakarta Selatan","Jakarta Timur","Jakarta Pusat"];
   const OTHER_LABEL   = isId ? "Hulu / Luar Jakarta" : "Upstream / Outside Jakarta";
 
-  // wilayah summary lookup by name
-  const wMap = Object.fromEntries((wilayahSummary ?? []).map(w => [w.wilayah, w]));
+  const wMap = useMemo(() => Object.fromEntries((wilayahSummary ?? []).map(w => [w.wilayah, w])), [wilayahSummary]);
 
-  // Group stations by wilayah
-  const byWilayah = {};
-  for (const s of (stations || [])) {
-    const raw = s.wilayah || inferWilayah(s.lat, s.lon);
-    const key = JAKARTA_ORDER.includes(raw) ? raw : OTHER_LABEL;
-    (byWilayah[key] = byWilayah[key] || []).push(s);
-  }
-  Object.values(byWilayah).forEach(g => g.sort((a, b) => b.ratio - a.ratio));
-
-  const gp = (globalProbability ?? 50) / 100;
-
-  const jakartaGroups = JAKARTA_ORDER
-    .filter(w => byWilayah[w]?.length)
-    .map(w => {
-      const stns = byWilayah[w];
-      const floodProb = computeWilayahFloodProb(wMap[w], stns, gp);
-      return { wilayah: w, stations: stns, floodProb };
-    })
-    .sort((a, b) => b.floodProb - a.floodProb);
-
-  const allGroups = [
-    ...jakartaGroups,
-    ...(byWilayah[OTHER_LABEL]?.length
-      ? [{ wilayah: OTHER_LABEL, stations: byWilayah[OTHER_LABEL], floodProb: null }]
-      : []),
-  ];
-
-  // ⚠️ Hooks must be called unconditionally — BEFORE any early return
-  const [openSet, setOpenSet] = useState(() => new Set());
-
-  // Sync initial open state when groups first become available
-  useEffect(() => {
-    if (allGroups.length > 0 && openSet.size === 0) {
-      setOpenSet(new Set(allGroups.slice(0, 2).map(g => g.wilayah)));
+  const allGroups = useMemo(() => {
+    const byWilayah = {};
+    for (const s of (stations || [])) {
+      const raw = s.wilayah || inferWilayah(s.lat, s.lon);
+      const key = JAKARTA_ORDER.includes(raw) ? raw : OTHER_LABEL;
+      (byWilayah[key] = byWilayah[key] || []).push(s);
     }
+    Object.values(byWilayah).forEach(g => g.sort((a, b) => b.ratio - a.ratio));
+
+    const gp = (globalProbability ?? 50) / 100;
+    const jakartaGroups = JAKARTA_ORDER
+      .filter(w => byWilayah[w]?.length)
+      .map(w => ({ wilayah: w, stations: byWilayah[w], floodProb: computeWilayahFloodProb(wMap[w], byWilayah[w], gp) }))
+      .sort((a, b) => b.floodProb - a.floodProb);
+
+    return [
+      ...jakartaGroups,
+      ...(byWilayah[OTHER_LABEL]?.length ? [{ wilayah: OTHER_LABEL, stations: byWilayah[OTHER_LABEL], floodProb: null }] : []),
+    ];
+  }, [stations, wMap, globalProbability]);
+
+  const [openSet, setOpenSet] = useState(() => new Set());
+  const groupKey = allGroups.map(g => g.wilayah).join("|");
+  useEffect(() => {
+    if (allGroups.length > 0)
+      setOpenSet(new Set(allGroups.slice(0, 2).map(g => g.wilayah)));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allGroups.length]);
+  }, [groupKey]);
 
   if (allGroups.length === 0) return null;
+
   const toggle = (w) => setOpenSet(prev => {
-    const next = new Set(prev); next.has(w) ? next.delete(w) : next.add(w); return next;
+    const next = new Set(prev);
+    next.has(w) ? next.delete(w) : next.add(w);
+    return next;
   });
-  const allOpen = openSet.size >= allGroups.length;
+  const allOpen   = openSet.size >= allGroups.length;
   const toggleAll = () =>
     setOpenSet(allOpen ? new Set() : new Set(allGroups.map(g => g.wilayah)));
 
   const colorMap = { s1: "var(--s1)", s2: "var(--s2)", wsp: "var(--wsp)", ok: "var(--safe)" };
 
   return (
-    <div className="panel panel-body fade-in">
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+    <div className="panel fade-in" style={{ padding: "1.25rem 1.375rem" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.875rem" }}>
         <p className="panel-title" style={{ marginBottom: 0 }}>
           {isId ? "Kemungkinan Banjir per Wilayah" : "Flood Probability by District"}
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-          <button onClick={toggleAll} className="kec-toggle-all-btn">
+          <button
+            type="button"
+            onClick={toggleAll}
+            style={{
+              background: "none", border: "1px solid var(--line)", borderRadius: 6,
+              padding: "0.22rem 0.6rem", cursor: "pointer",
+              fontFamily: "'JetBrains Mono',monospace", fontSize: "0.57rem",
+              color: "var(--muted)", letterSpacing: "0.03em",
+            }}
+          >
             {allOpen ? (isId ? "Tutup Semua ↑" : "Collapse All ↑") : (isId ? "Buka Semua ↓" : "Expand All ↓")}
           </button>
           <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em" }}>● realtime</span>
@@ -1287,8 +1289,8 @@ function KecamatanZones({ stations, wilayahSummary, globalProbability }) {
 
       <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", lineHeight: 1.5 }}>
         {isId
-          ? "● Probabilitas = sensor TMA realtime + skala model XGBoost · Klik wilayah untuk detail sensor · Diurutkan probabilitas tertinggi → terendah"
-          : "● Probability = realtime TMA sensors + XGBoost model scale · Click district for sensor detail · Sorted highest → lowest probability"}
+          ? "● Probabilitas = sensor TMA realtime + skala model XGBoost · Klik satu wilayah untuk membuka detail sensor · Diurutkan probabilitas tertinggi → terendah"
+          : "● Probability = realtime TMA sensors + XGBoost model scale · Click one district to open sensor detail · Sorted highest → lowest probability"}
       </p>
     </div>
   );
