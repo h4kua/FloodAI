@@ -46,9 +46,12 @@ def _feed_item_to_basic_alert(item: dict) -> dict:
     }
 
 
+_MAX_BMKG_DETAIL_FETCHES = 10  # cap sequential HTTP calls to bound pipeline runtime
+
+
 def _fetch_bmkg_alerts(feed_items):
     alerts = []
-    for item in feed_items:
+    for item in feed_items[:_MAX_BMKG_DETAIL_FETCHES]:
         alert_code = item.get("alert_code")
         if not alert_code:
             continue

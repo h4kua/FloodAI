@@ -36,7 +36,9 @@ _POSKOBANJIR_ENTRY = "main.py"
 # Internal build budget. The /internal/refresh-snapshot endpoint applies its own
 # (larger) overall timeout; this caps just the subprocess so a hung upstream fetch
 # cannot block indefinitely.
-_BUILD_TIMEOUT_S = 40.0
+# 120s allows for sequential BMKG alert-detail fetches from Railway (US→Indonesia
+# latency means 14 alerts × ~4s each ≈ 56s, well within the old 40s budget).
+_BUILD_TIMEOUT_S = 120.0
 
 _SNAPSHOT_KEYS = (
     "fetched_at_utc",
