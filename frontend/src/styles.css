@@ -1023,7 +1023,10 @@ body {
   border-radius: var(--r); padding: 1.125rem 1.375rem;
 }
 .rainfall-wilayah-cards {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem;
+  /* auto-fit = container-responsive: keeps 5 cols at full width, reflows to
+     fewer when the panel narrows inside a bento pair (viewport media queries
+     can't see panel width, so they don't help there). */
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); gap: 0.75rem;
 }
 .rain-card {
   background: var(--panel-2); border: 1px solid var(--line);
@@ -1175,7 +1178,7 @@ body {
 .weather-chip-sub   { font-family: 'JetBrains Mono', monospace; font-size: 0.54rem; color: var(--muted-2); margin-top: 1px; }
 
 /* ── OpenWeather Per-Wilayah Grid ────────────────────────────── */
-.ow-wilayah-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.625rem; }
+.ow-wilayah-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.625rem; }
 .ow-wilayah-card {
   background: var(--panel-2); border: 1px solid var(--line);
   border-top: 2px solid var(--line-2);

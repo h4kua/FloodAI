@@ -1915,17 +1915,17 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
       {/* ══ ZONE: Cuaca & prakiraan ═════════════════════════════════ */}
       <SectionDivider label={isId ? "Cuaca & Prakiraan" : "Weather & Forecast"} />
 
-      {/* Per-wilayah rainfall — full-width, clearly readable */}
-      <WilayahRainfallStrip
-        wilayahSummary={riskData?.wilayahSummary}
-        rainfall={riskData?.rainfall}
-        lang={lang ?? "id"}
-      />
+      {/* Paired per-wilayah weather: BMKG rain forecast ‖ OpenWeather current */}
+      <div className="bento-2">
+        <WilayahRainfallStrip
+          wilayahSummary={riskData?.wilayahSummary}
+          rainfall={riskData?.rainfall}
+          lang={lang ?? "id"}
+        />
+        <WeatherCurrentCard riskData={riskData} />
+      </div>
 
-      {/* OpenWeather current conditions */}
-      <WeatherCurrentCard riskData={riskData} />
-
-      {/* Per-wilayah 12h BMKG forecast — table layout */}
+      {/* Per-wilayah 12h BMKG forecast — full-width time-series table */}
       <WilayahForecastGrid wilayahSummary={riskData?.wilayahSummary} />
 
       {/* BMKG fallback when wilayah grid unavailable */}
