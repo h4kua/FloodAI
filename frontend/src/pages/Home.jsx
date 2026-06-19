@@ -1763,10 +1763,22 @@ function CrewAnalysisPanel() {
   );
 }
 
+/* ── SectionDivider — labelled zone separator for the dashboard ────────── */
+function SectionDivider({ label, count }) {
+  return (
+    <div className="dash-section">
+      <span className="dash-section-label">{label}</span>
+      {count != null && <span className="dash-section-count">{count}</span>}
+      <span className="dash-section-line" />
+    </div>
+  );
+}
+
 /* ── Page ──────────────────────────────────────────────── */
 export default function Home({ setRiskContext, riskLevel, onNavigate }) {
   const t = useT();
   const { lang } = useApp();
+  const isId = lang === "id";
   const { riskData, loading, refreshing, error, refresh, lastUpdated } = useFloodRisk();
   const level = riskData?.level ?? riskLevel ?? "waspada";
   const score = riskData?.riskScore ?? 45;
@@ -1846,17 +1858,11 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
       {/* 3 core metric cards — all real sensor data */}
       <MetricsRow siaga1={realSiaga1} siaga2={realSiaga2} totalStations={totalStations} calibratedStations={stations.length || null} score={score} />
 
-      {/* Per-wilayah rainfall — full-width, clearly readable */}
-      <WilayahRainfallStrip
-        wilayahSummary={riskData?.wilayahSummary}
-        rainfall={riskData?.rainfall}
-        lang={lang ?? "id"}
-      />
-
-      {/* Sensor detail strip */}
+      {/* Sensor detail strip — quick-read chips right under the headline metrics */}
       <SensorStrip riskData={riskData} />
 
-      {/* Map + Sidebar */}
+      {/* ══ ZONE: Peta risiko & tindakan ══════════════════════════ */}
+      <SectionDivider label={isId ? "Peta Risiko & Tindakan" : "Risk Map & Actions"} />
       <div className="cmd-main fade-in">
         {/* Left: Map — cmd-left stretches to match sidebar */}
         <div className="cmd-left">
@@ -1883,21 +1889,37 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
         </div>
       </div>
 
-      {/* Model analysis card — realtime ML output with signal chips */}
-      <ModelOutputCard riskData={riskData} score={score} />
+      {/* ══ ZONE: Analisis AI — ML + multi-agen, dipasangkan ═════════ */}
+      <SectionDivider label={isId ? "Analisis Kecerdasan Buatan" : "AI Analysis"} />
+      <div className="bento-2">
+        <ModelOutputCard riskData={riskData} score={score} />
+        <CrewAnalysisPanel />
+      </div>
 
-      {/* Multi-agent AI deep analysis — CrewAI 3-agent panel */}
-      <CrewAnalysisPanel />
-
-      {/* Real DSDADKI station table — all live sensor readings */}
+      {/* ══ ZONE: Sensor & wilayah ══════════════════════════════════ */}
+      <SectionDivider
+        label={isId ? "Sensor & Wilayah" : "Sensors & Districts"}
+        count={stations.length > 0 ? (isId ? `${stations.length} pos pantau` : `${stations.length} stations`) : null}
+      />
       <div id="station-panel-anchor" />
-      <StationPanel stations={stations} />
+      {/* Paired views: flat sorted sensor table ‖ per-district grouped probability */}
+      <div className="bento-2">
+        <StationPanel stations={stations} />
+        <KecamatanZones
+          stations={stations}
+          wilayahSummary={riskData?.wilayahSummary}
+          globalProbability={score}
+        />
+      </div>
 
-      {/* Kecamatan / area flood probability — sensor TMA + XGBoost context */}
-      <KecamatanZones
-        stations={stations}
+      {/* ══ ZONE: Cuaca & prakiraan ═════════════════════════════════ */}
+      <SectionDivider label={isId ? "Cuaca & Prakiraan" : "Weather & Forecast"} />
+
+      {/* Per-wilayah rainfall — full-width, clearly readable */}
+      <WilayahRainfallStrip
         wilayahSummary={riskData?.wilayahSummary}
-        globalProbability={score}
+        rainfall={riskData?.rainfall}
+        lang={lang ?? "id"}
       />
 
       {/* OpenWeather current conditions */}

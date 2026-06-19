@@ -411,6 +411,41 @@ body {
 .cmd-left .map-panel { flex: 1; }
 .cmd-sidebar { display: flex; flex-direction: column; gap: 0.875rem; }
 
+/* ── Dashboard section dividers — break the long scroll into zones ── */
+.dash-section {
+  display: flex; align-items: center; gap: 0.75rem;
+  margin-top: 0.75rem;          /* + parent gap (1rem) = clear zone break */
+}
+.dash-section-label {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.64rem; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text); opacity: 0.78; white-space: nowrap;
+}
+.dash-section-label::before {
+  content: ''; width: 6px; height: 6px; border-radius: 2px;
+  background: var(--cyan); flex-shrink: 0;
+  box-shadow: 0 0 8px var(--cyan-border);
+}
+.dash-section-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem; color: var(--muted-2);
+  letter-spacing: 0.04em; white-space: nowrap;
+}
+.dash-section-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--line-2) 0%, var(--line) 35%, transparent 100%);
+}
+
+/* ── Bento pairing — two related panels side-by-side, responsive ── */
+.bento-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: 0.875rem;
+  align-items: start;
+}
+
 /* ── Panel base ──────────────────────────────────────────────── */
 .panel {
   background: linear-gradient(160deg, var(--panel) 0%, var(--panel-2) 100%);
