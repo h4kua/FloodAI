@@ -1190,6 +1190,7 @@ body {
   transition: background 0.15s, transform 0.1s var(--ease-out);
 }
 .kec-group-btn:hover { background: var(--panel-2); }
+.kec-group.open .kec-group-btn { background: rgba(56,189,248,0.06); }
 .kec-group-btn:active { transform: scale(0.98); }
 .kec-group-btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 .kec-chevron {
@@ -1671,4 +1672,3 @@ body {
     display: none !important;
   }
 }
-

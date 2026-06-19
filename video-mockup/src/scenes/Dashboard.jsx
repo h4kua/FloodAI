@@ -3,6 +3,7 @@ import { useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { T, MONO, SANS, BODY } from "../tokens";
 import { LaptopDevice, LAPTOP_W, LAPTOP_H, LAPTOP_BEZEL } from "../components/LaptopDevice";
 import { ParticleField } from "../components/ParticleField";
+import { sceneZoom, countUp, LightSweep } from "../components/FX";
 
 // ─── Content rendered inside the laptop screen ────────────────────────────────
 const SENSORS = [
@@ -21,7 +22,7 @@ const WILAYAH = [
 ];
 
 function DashboardScreen({ frame, fps }) {
-  const scrollY = interpolate(frame, [100, 280], [0, 155], { extrapolateRight: "clamp" });
+  const scrollY = interpolate(frame, [44, 95], [0, 65], { extrapolateRight: "clamp" });
   const sparkW  = interpolate(frame, [20, 80], [0, 100], { extrapolateRight: "clamp" });
   const metricOp = interpolate(frame, [22, 46], [0, 1], { extrapolateRight: "clamp" });
   const tableOp  = interpolate(frame, [38, 62], [0, 1], { extrapolateRight: "clamp" });
@@ -57,7 +58,7 @@ function DashboardScreen({ frame, fps }) {
                   <div style={{ flex: 1, height: 6, borderRadius: 3, background: "#161b22" }}>
                     <div style={{ width: `${sparkW}%`, maxWidth: "42%", height: "100%", background: `linear-gradient(90deg,${T.safe},${T.wsp})`, borderRadius: 3, boxShadow: `0 0 10px rgba(251,191,36,0.5)` }} />
                   </div>
-                  <span style={{ fontFamily: SANS, fontWeight: 800, fontSize: 22, color: T.wsp, lineHeight: 1 }}>42</span>
+                  <span style={{ fontFamily: SANS, fontWeight: 800, fontSize: 22, color: T.wsp, lineHeight: 1 }}>{Math.round(countUp(frame, 0, 42, 20, 55))}</span>
                   <span style={{ fontFamily: MONO, fontSize: 10, color: T.muted }}>/100</span>
                 </div>
                 <div style={{ fontFamily: MONO, fontSize: 10, color: T.muted, marginTop: 6 }}>Hujan ringan · 3 sensor siaga · Banjir lokal mungkin terjadi</div>
@@ -168,9 +169,9 @@ function DashboardScreen({ frame, fps }) {
 
 // ─── Feature metrics beside laptop ───────────────────────────────────────────
 const FEATURES = [
-  { val: "38+",  label: "Sensor Aktif",      sub: "Update setiap 15 mnt", c: T.cyan },
-  { val: "94%",  label: "Akurasi XGBoost",   sub: "14 fitur cuaca & air", c: T.safe },
-  { val: "<1s",  label: "Latency Realtime",  sub: "Streaming DSDADKI",    c: T.wsp  },
+  { end: 38, suffix: "+", label: "Sensor Aktif",      sub: "Update setiap 15 mnt", c: T.cyan },
+  { end: 94, suffix: "%", label: "Akurasi XGBoost",   sub: "14 fitur cuaca & air", c: T.safe },
+  { fixed: "<1s",         label: "Latency Realtime",  sub: "Streaming DSDADKI",    c: T.wsp  },
 ];
 
 // ─── Scene ───────────────────────────────────────────────────────────────────
@@ -178,7 +179,7 @@ export function DashboardScene() {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const sceneOp = interpolate(frame, [0, 14, 304, 330], [0, 1, 1, 0], { extrapolateRight: "clamp", extrapolateLeft: "clamp" });
+  const sceneOp = interpolate(frame, [0, 14, 108, 120], [0, 1, 1, 0], { extrapolateRight: "clamp", extrapolateLeft: "clamp" });
 
   // Laptop spins in from left
   const laptopRotY = spring({ frame: Math.max(0, frame - 8), fps, from: 52, to: -10, config: { damping: 14, stiffness: 68 } });
@@ -194,7 +195,7 @@ export function DashboardScene() {
   const glowPulse = 0.75 + 0.25 * Math.sin(frame * 0.026);
 
   return (
-    <div style={{ position: "absolute", inset: 0, background: "#03060c", overflow: "hidden", opacity: sceneOp }}>
+    <div style={{ position: "absolute", inset: 0, background: "#03060c", overflow: "hidden", opacity: sceneOp, transform: `scale(${sceneZoom(frame, 330, 0.05)})` }}>
       {/* Ambient */}
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 100% 70% at 28% 50%, rgba(56,189,248,0.055) 0%, transparent 60%)", pointerEvents: "none" }} />
       <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(56,189,248,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.022) 1px, transparent 1px)", backgroundSize: "90px 90px", pointerEvents: "none" }} />
@@ -219,6 +220,7 @@ export function DashboardScene() {
         <div style={{ transform: `translateX(${laptopX}px)`, opacity: laptopOp, flexShrink: 0, zIndex: 2, position: "relative" }}>
           <LaptopDevice rotY={laptopRotY} floatY={laptopFloat}>
             <DashboardScreen frame={frame} fps={fps} />
+            <LightSweep frame={frame} start={36} duration={38} />
           </LaptopDevice>
         </div>
 
@@ -236,12 +238,14 @@ export function DashboardScene() {
           {/* Metric chips */}
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {FEATURES.map((f, i) => {
-              const delay = 62 + i * 18;
+              const delay = 52 + i * 14;
               const chipOp = interpolate(frame, [delay, delay + 22], [0, 1], { extrapolateRight: "clamp" });
               const chipY  = spring({ frame: Math.max(0, frame - delay), fps, from: 14, to: 0, config: { damping: 10 } });
               return (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, opacity: chipOp, transform: `translateY(${chipY}px)` }}>
-                  <div style={{ fontFamily: SANS, fontWeight: 800, fontSize: 32, color: f.c, lineHeight: 1, width: 70 }}>{f.val}</div>
+                  <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 32, color: f.c, lineHeight: 1, width: 70 }}>
+                    {f.fixed ?? `${Math.round(countUp(frame, 0, f.end, delay, 20))}${f.suffix}`}
+                  </div>
                   <div>
                     <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 15, color: T.text }}>{f.label}</div>
                     <div style={{ fontFamily: MONO, fontSize: 12, color: T.muted, marginTop: 2 }}>{f.sub}</div>
@@ -257,7 +261,7 @@ export function DashboardScene() {
             display: "inline-flex", alignItems: "center", gap: 8,
             background: "#161b22", border: `1px solid ${T.cyanBorder}`,
             borderRadius: 999, padding: "8px 20px",
-            opacity: interpolate(frame, [90, 110], [0, 1], { extrapolateRight: "clamp" }),
+            opacity: interpolate(frame, [75, 95], [0, 1], { extrapolateRight: "clamp" }),
           }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: T.safe, boxShadow: `0 0 6px ${T.safe}`, display: "block" }} />
             <span style={{ fontFamily: MONO, fontSize: 13, color: T.muted, letterSpacing: "0.06em" }}>Live · deflood.ai/dashboard</span>
