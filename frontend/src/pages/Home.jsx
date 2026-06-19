@@ -111,12 +111,12 @@ function MetricCard({ c, noteStyle }) {
   );
 }
 
-function MetricsRow({ siaga1, siaga2, totalStations, score }) {
+function MetricsRow({ siaga1, siaga2, totalStations, calibratedStations, score }) {
   const t = useT();
   const noteStyle = { fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em", opacity: 0.85 };
   const cards = [
     { label: t("metric.alertZones"), value: siaga1 + siaga2, sub: t("metric.alertSub", { s1: siaga1, s2: siaga2 }), color: siaga1 > 0 ? "red" : siaga2 > 0 ? "orange" : "green" },
-    { label: t("metric.activeStations"), value: totalStations ?? "—", sub: t("metric.activeStationsSub"), color: "green" },
+    { label: t("metric.activeStations"), value: totalStations ?? "—", sub: t("metric.activeStationsSub", { cal: calibratedStations ?? "—" }), color: "green" },
     { label: t("metric.riskScore"), value: score, sub: t("metric.riskSub"), color: score >= 70 ? "red" : score >= 45 ? "orange" : "green" },
   ];
 
@@ -796,11 +796,20 @@ function buildStatusDesc(riskData, isId) {
   // aman
   const totalSt = stations.length;
   const sNote = totalSt > 0
-    ? (isId ? ` Semua ${totalSt} sensor dalam batas normal.` : ` All ${totalSt} sensors within normal range.`)
+    ? (isId ? ` Semua ${totalSt} stasiun terkalibrasi dalam batas normal.` : ` All ${totalSt} calibrated stations within normal range.`)
     : "";
+  // Mirror the OOD badge gate (isOutlier && WLR < 0.75): when the input is
+  // statistically unusual, don't claim "nothing concerning" — that contradicts
+  // the visible Anomali chip. Frame it as honest uncertainty instead.
+  const oodActive = riskData?.isOutlier && wlr < 0.75;
+  const closing = oodActive
+    ? (isId
+      ? " Data sensor sedikit tidak biasa — verdict aman ini perlu dipantau berkala."
+      : " Sensor input is slightly unusual — keep monitoring this 'safe' verdict.")
+    : (isId ? " Tidak ada tanda-tanda mengkhawatirkan." : " No concerning signs detected.");
   return isId
-    ? `Jakarta saat ini aman dari risiko banjir.${sNote} Tidak ada tanda-tanda mengkhawatirkan.`
-    : `Jakarta is currently safe from flood risk.${sNote} No concerning signs detected.`;
+    ? `Jakarta saat ini aman dari risiko banjir.${sNote}${closing}`
+    : `Jakarta is currently safe from flood risk.${sNote}${closing}`;
 }
 
 /* ── Status Hero — the FIRST thing user sees: "apakah ada risiko banjir?" ── */
@@ -1552,7 +1561,7 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
       <StatusHero riskData={riskData} />
 
       {/* 3 core metric cards — all real sensor data */}
-      <MetricsRow siaga1={realSiaga1} siaga2={realSiaga2} totalStations={totalStations} score={score} />
+      <MetricsRow siaga1={realSiaga1} siaga2={realSiaga2} totalStations={totalStations} calibratedStations={stations.length || null} score={score} />
 
       {/* Per-wilayah rainfall — full-width, clearly readable */}
       <WilayahRainfallStrip
