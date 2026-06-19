@@ -178,8 +178,10 @@ def _verbose_persistence_errors() -> bool:
 
 def _build_dynamic_decision_reason(perception, failure_modes: list) -> str:
     """
-    Build a human-readable decision_reason string from actual station siaga states.
-    Called AFTER DB persistence so the enum value is saved correctly.
+    Build a human-readable decision explanation from actual station siaga states.
+    Stored under result["decision_reason_detail"] — NOT the canonical
+    `decision_reason` enum, which must stay machine-valid for the output contract
+    and the CHECK-constrained DB column.
     """
     try:
         posko = list(getattr(perception, "poskobanjir", None) or [])
@@ -736,9 +738,13 @@ class FloodDecisionPipeline:
                     result_hash_after_persist,
                 )
 
-        # FIX 3: Override decision_reason with a human-readable string built from
-        # actual station states AFTER persistence (DB needs the enum value).
-        result["decision_reason"] = _build_dynamic_decision_reason(
+        # FIX 3: Attach a human-readable decision explanation built from actual
+        # station states. This MUST NOT clobber `decision_reason` — that field is
+        # a closed canonical enum (RISK / INVALID_INPUT / FALLBACK / …) enforced
+        # by core.output_contract and persisted to a CHECK-constrained column.
+        # The rich free-text string lives in its own field, exactly like FIX 4's
+        # `decision_override_reason` below.
+        result["decision_reason_detail"] = _build_dynamic_decision_reason(
             perception, result.get("failure_modes", [])
         )
 

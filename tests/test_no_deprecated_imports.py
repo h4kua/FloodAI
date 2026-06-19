@@ -70,9 +70,8 @@ def test_no_imports_target_quarantine_directory():
         pytest.fail(msg)
 
 
-def test_quarantine_directory_exists():
-    """Sanity: the quarantine directory and README must exist."""
-    quarantine = REPO_ROOT / "_deprecated"
-    readme = quarantine / "README.md"
-    assert quarantine.is_dir(), "_deprecated/ directory missing"
-    assert readme.is_file(), "_deprecated/README.md missing"
+# NOTE: the former `test_quarantine_directory_exists` was removed — the
+# `_deprecated/` quarantine has been fully cleaned up, so asserting that the
+# scaffolding still exists is obsolete. The import-guard above remains valid
+# (it simply finds no offenders) and protects against re-introducing a
+# dependency on a quarantine directory if one is ever recreated.

@@ -51,6 +51,13 @@ if str(_PROJECT_ROOT) not in sys.path:
 # Selenium scraper module is imported anywhere downstream.
 os.environ["FLOOD_ALLOW_RUNTIME_SCRAPE"] = "1"
 
+try:
+    from api.observability import ensure_utf8_console
+
+    ensure_utf8_console()
+except Exception:  # noqa: BLE001 — never let logging setup crash the job
+    pass
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s — %(message)s",

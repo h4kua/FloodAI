@@ -686,7 +686,9 @@ def _render_dashboard(
                 ("System status", _safe_text(result.get("system_status"))),
                 ("Risk level", _safe_text(result.get("risk_level"))),
                 ("Confidence", conf_display),
-                ("Decision reason", _safe_text(result.get("decision_reason"))),
+                ("Decision reason", _safe_text(
+                    result.get("decision_reason_detail") or result.get("decision_reason")
+                )),
                 *(
                     [("Decision override", html.escape(str(result["decision_override_reason"])))]
                     if result.get("decision_override_reason")

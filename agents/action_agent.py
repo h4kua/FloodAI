@@ -643,6 +643,12 @@ class ActionAgent:
             "has_critical_violation": bool(p.get("has_critical_violation", False)),
             "n_critical_violations": n_critical,
             "n_combo_flags": n_combo_flags,
+            # Audit-grade quarantine list: which stations were excluded for
+            # reporting a physically impossible water level. Needed so a stored
+            # prediction is queryable for per-station faults (PostgreSQL audit)
+            # and so consumers can distinguish a quarantined station from a
+            # snapshot-wide critical violation.
+            "quarantined_stations": list(p.get("quarantined_stations") or []),
         }
 
     def _format_public_signals(self, signals: dict) -> dict:

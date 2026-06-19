@@ -35,7 +35,13 @@ def test_security_headers_present_on_success_response():
         response = client.get("/healthz", headers={"host": "localhost"})
 
     assert response.status_code == 200
-    assert response.headers["Content-Security-Policy"] == "default-src 'self'; style-src 'self' 'unsafe-inline'"
+    assert response.headers["Content-Security-Policy"] == (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' data: https://cdn.jsdelivr.net"
+    )
     assert response.headers["X-Content-Type-Options"] == "nosniff"
     assert response.headers["Referrer-Policy"] == "no-referrer"
     assert response.headers["Permissions-Policy"] == "geolocation=()"
@@ -47,7 +53,13 @@ def test_security_headers_present_on_not_found_response():
         response = client.get("/missing", headers={"host": "localhost"})
 
     assert response.status_code == 404
-    assert response.headers["Content-Security-Policy"] == "default-src 'self'; style-src 'self' 'unsafe-inline'"
+    assert response.headers["Content-Security-Policy"] == (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' data: https://cdn.jsdelivr.net"
+    )
     assert response.headers["X-Frame-Options"] == "DENY"
 
 

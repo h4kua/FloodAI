@@ -60,12 +60,14 @@ MOCK_SNAPSHOT = {
 
 
 def _make_pipeline_stub(*, result=None, exc: BaseException | None = None) -> SimpleNamespace:
-    def run_from_file(*args, **kwargs):
+    # The /demo route loads the snapshot itself (api.dashboard._load_snapshot)
+    # and calls pipeline.run(snapshot, ...) — NOT the removed run_from_file().
+    def run(*args, **kwargs):
         if exc is not None:
             raise exc
         return result
 
-    return SimpleNamespace(run_from_file=run_from_file)
+    return SimpleNamespace(run=run)
 
 
 @pytest.fixture
@@ -88,7 +90,13 @@ def test_demo_route_renders_html(client_with_stub_pipeline):
     stub = _make_pipeline_stub(result=MOCK_RESULT)
     client = client_with_stub_pipeline(stub)
     try:
-        with patch("api.dashboard._load_snapshot", return_value=MOCK_SNAPSHOT):
+        # Isolate the render from live Supabase: _query_db_health and
+        # _query_risk_history both hit the network and otherwise make this a
+        # slow, flaky integration test (request_timeout). The unit under test
+        # is HTML rendering of the pipeline result, not DB connectivity.
+        with patch("api.dashboard._load_snapshot", return_value=MOCK_SNAPSHOT), \
+             patch("api.dashboard._query_db_health", return_value={"connected": True}), \
+             patch("api.dashboard._query_risk_history", return_value=[]):
             response = client.get("/demo")
     finally:
         client.__exit__(None, None, None)
@@ -137,7 +145,13 @@ def test_demo_route_snapshot_failure_shows_degraded_state(client_with_stub_pipel
     client = client_with_stub_pipeline(stub)
     fake_log = Mock()
     try:
-        with patch("api.dashboard._load_snapshot", side_effect=OSError("snapshot unreadable")), \
+        # The route calls _load_snapshot twice: first for the pipeline input
+        # (must succeed so the pipeline produces a result), then again for the
+        # raw-snapshot metadata panel (this one fails → degraded notice).
+        with patch(
+            "api.dashboard._load_snapshot",
+            side_effect=[MOCK_SNAPSHOT, OSError("snapshot unreadable")],
+        ), \
              patch("api.dashboard._query_db_health", return_value={"connected": False}), \
              patch("api.dashboard._log", fake_log):
             response = client.get("/demo")

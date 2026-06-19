@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
 import time
 import uuid
 from typing import Callable
@@ -27,8 +28,28 @@ except ImportError:  # pragma: no cover - dependency is declared for production.
         return b""
 
 
+def ensure_utf8_console() -> None:
+    """
+    Make stdout/stderr emit UTF-8 so non-ASCII log glyphs (em-dash, arrows)
+    don't render as mojibake (e.g. ``�``) on a Windows console defaulting to
+    cp1252. Idempotent and best-effort — a no-op when the stream already speaks
+    UTF-8 or doesn't support reconfiguration (e.g. a redirected pipe).
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:
+            continue
+        if (getattr(stream, "encoding", "") or "").lower().replace("-", "") == "utf8":
+            continue
+        try:
+            reconfigure(encoding="utf-8")
+        except (ValueError, OSError):  # pragma: no cover - platform dependent
+            pass
+
+
 def configure_logging() -> None:
     """Configure stdlib logging and structlog JSON output when available."""
+    ensure_utf8_console()
     level_name = os.getenv("LOG_LEVEL", "INFO").upper()
     logging.basicConfig(
         level=getattr(logging, level_name, logging.INFO),
