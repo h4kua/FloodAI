@@ -1,10 +1,36 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
 import { useApp, useT } from "../lib/appContext";
+import floodProneZones from "../data/floodProneZones.json";
 
 const TILE_DARK  = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 const TILE_LIGHT = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 const TILE_ATTR  = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
+
+// River-coded palette for historically flood-prone points. Mapped from the
+// "by_kelurahan" join in river_flood_zones.json so neighbouring points along
+// the same river share a colour and form a visual "spine" on the map.
+const RIVER_COLORS = {
+  "CILIWUNG":                          "#ef4444",
+  "CILIWUNG ARAH ISTANA NEGARA":       "#f97316",
+  "CILIWUNG ARAH KANAL BANJIR BARAT":  "#fb923c",
+  "SUNTER":                            "#3b82f6",
+  "KRUKUT":                            "#10b981",
+  "PESANGGRAHAN":                      "#a855f7",
+  "PESANGGRAHAN & ANGKE":              "#c084fc",
+  "ANGKE":                             "#f59e0b",
+  "CIPINANG":                          "#eab308",
+};
+const PRONE_DEFAULT_COLOR = "#64748b";
+
+function proneColor(rivers) {
+  const r = rivers?.[0];
+  return RIVER_COLORS[r] ?? PRONE_DEFAULT_COLOR;
+}
+
+function titleCase(s) {
+  return (s || "").toLowerCase().split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
 
 // Tight DKI Jakarta administrative boundary.
 const JAKARTA_BOUNDS = [[-6.375, 106.695], [-6.095, 107.005]];
@@ -40,8 +66,10 @@ function FitJakarta() {
 // station coords are available — NOT used when real stations are shown.
 export default function FloodMap({ riskScore = 45, stations = [] }) {
   const t = useT();
-  const { theme } = useApp();
+  const { theme, lang } = useApp();
+  const isId = lang === "id";
   const tileUrl = theme === "light" ? TILE_LIGHT : TILE_DARK;
+  const [showProne, setShowProne] = useState(true);
 
   // Only plot stations that have validated Jakarta coordinates.
   const mappedStations = useMemo(
@@ -49,6 +77,7 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
     [stations],
   );
   const hasRealStations = mappedStations.length > 0;
+  const pronePoints = floodProneZones.points ?? [];
 
   return (
     <div style={{ position: "relative", flex: 1, minHeight: "320px" }}>
@@ -88,6 +117,49 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
                 <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 14 }}>{d.name}</p>
                 <p style={{ fontSize: 11, color: "#8f96a9", margin: 0 }}>
                   {t("map.popupEstNote")}
+                </p>
+              </div>
+            </Popup>
+          </CircleMarker>
+        ))}
+
+        {/* BNPB historical flood-prone points — bundled reference data.
+            154 points joined with river_flood_zones.json (130/154 carry a
+            river association) so the layer doubles as a soft "river spine"
+            overlay even though no polylines are drawn. Rendered BEFORE
+            sensor markers so the live readings sit on top. */}
+        {showProne && pronePoints.map((p, i) => (
+          <CircleMarker
+            key={`p-${i}`}
+            center={[p.lat, p.lon]}
+            radius={4}
+            pathOptions={{
+              fillColor: proneColor(p.rivers),
+              fillOpacity: 0.55,
+              color: proneColor(p.rivers),
+              weight: 0.8,
+              opacity: 0.75,
+            }}
+          >
+            <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>
+              <div style={{ fontFamily: "'Inter', sans-serif", minWidth: 180 }}>
+                <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>
+                  {titleCase(p.kelurahan)}
+                </p>
+                <p style={{ fontSize: 11, color: "#8f96a9", marginBottom: 4 }}>
+                  {titleCase(p.kecamatan)} · {titleCase((p.wilayah || "").replace("KOTA ADM. ", ""))}
+                </p>
+                {p.rivers?.length > 0 ? (
+                  <p style={{ fontSize: 11, color: proneColor(p.rivers), fontWeight: 600, marginBottom: 4 }}>
+                    {isId ? "Sungai" : "River"}: {p.rivers.map(titleCase).join(", ")}
+                  </p>
+                ) : (
+                  <p style={{ fontSize: 10, color: "#8f96a9", fontStyle: "italic", marginBottom: 4 }}>
+                    {isId ? "Tidak terkait sungai utama" : "Not tied to a major river"}
+                  </p>
+                )}
+                <p style={{ fontSize: 10, color: "#6b7280", margin: 0, marginTop: 4 }}>
+                  ● {isId ? "Titik rawan historis (BNPB)" : "Historical flood-prone point (BNPB)"}
                 </p>
               </div>
             </Popup>
@@ -155,6 +227,46 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
           <span style={{ color: "var(--muted-2)", fontSize: "0.62rem" }}>
             {hasRealStations ? t("legend.sensorMarkers") : t("legend.mlEstimate")}
           </span>
+        </div>
+
+        {/* Flood-prone overlay toggle + per-river colour key */}
+        <div style={{ marginTop: 6, borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 6 }}>
+          <button
+            type="button"
+            onClick={() => setShowProne(v => !v)}
+            style={{
+              display: "flex", alignItems: "center", gap: 6, width: "100%",
+              background: "transparent", border: "none", padding: 0, cursor: "pointer",
+              color: "var(--muted-2)", fontFamily: "'JetBrains Mono',monospace",
+              fontSize: "0.62rem", letterSpacing: "0.04em",
+            }}
+            title={isId ? "Toggle titik rawan historis" : "Toggle historical flood-prone points"}
+          >
+            <span style={{
+              width: 10, height: 10, borderRadius: 2,
+              border: `1.5px solid ${showProne ? "var(--cyan, #38bdf8)" : "rgba(143,150,169,0.45)"}`,
+              background: showProne ? "var(--cyan, #38bdf8)" : "transparent",
+              flexShrink: 0,
+            }} />
+            {isId ? `Titik rawan BNPB (${pronePoints.length})` : `BNPB flood-prone (${pronePoints.length})`}
+          </button>
+          {showProne && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2px 8px", marginTop: 6 }}>
+              {[
+                ["Ciliwung",     RIVER_COLORS.CILIWUNG],
+                ["Sunter",       RIVER_COLORS.SUNTER],
+                ["Krukut",       RIVER_COLORS.KRUKUT],
+                ["Pesanggrahan", RIVER_COLORS.PESANGGRAHAN],
+                ["Angke",        RIVER_COLORS.ANGKE],
+                ["Cipinang",     RIVER_COLORS.CIPINANG],
+              ].map(([name, color]) => (
+                <div key={name} className="legend-row" style={{ fontSize: "0.58rem" }}>
+                  <span className="legend-dot" style={{ background: color, width: 6, height: 6 }} />
+                  {name}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

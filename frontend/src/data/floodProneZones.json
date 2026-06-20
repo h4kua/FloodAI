@@ -1,0 +1,1515 @@
+{
+  "_meta": {
+    "point_count": 154,
+    "joined_with_river": 130,
+    "source": "data/bundled/flood_prone_points.json + river_flood_zones.json"
+  },
+  "points": [
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "MAMPANG PRAPATAN",
+      "kelurahan": "BANGKA",
+      "lat": -6.214879,
+      "lon": 106.819983,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "BENDUNGAN HILIR",
+      "lat": -6.201581,
+      "lon": 106.808297,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "BENDUNGAN HILIR",
+      "lat": -6.208086,
+      "lon": 106.808687,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "BENDUNGAN HILIR",
+      "lat": -6.207986,
+      "lon": 106.808755,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "BENDUNGAN HILIR",
+      "lat": -6.200481,
+      "lon": 106.810587,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "BENDUNGAN HILIR",
+      "lat": -6.199486,
+      "lon": 106.813522,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "BENDUNGAN HILIR",
+      "lat": -6.214857,
+      "lon": 106.815124,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "JATINEGARA",
+      "kelurahan": "BIDARA CINA",
+      "lat": -6.240897,
+      "lon": 106.866261,
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SENEN",
+      "kelurahan": "BUNGUR",
+      "lat": -6.168909,
+      "lon": 106.846348,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SENEN",
+      "kelurahan": "BUNGUR",
+      "lat": -6.168901,
+      "lon": 106.846352,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "CAKUNG",
+      "kelurahan": "CAKUNG BARAT",
+      "lat": -6.174049,
+      "lon": 106.939457,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "CEMPAKA BARU",
+      "lat": -6.170335,
+      "lon": 106.860745,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA",
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "CEMPAKA BARU",
+      "lat": -6.172293,
+      "lon": 106.860909,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA",
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "CEMPAKA PUTIH",
+      "kelurahan": "CEMPAKA PUTIH BARAT",
+      "lat": -6.183807,
+      "lon": 106.867573,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "CEMPAKA PUTIH",
+      "kelurahan": "CEMPAKA PUTIH TIMUR",
+      "lat": -6.173712,
+      "lon": 106.870379,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "CIRACAS",
+      "kelurahan": "CIBUBUR",
+      "lat": -6.350042,
+      "lon": 106.876385,
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "JAGAKARSA",
+      "kelurahan": "CIGANJUR",
+      "lat": -6.324882,
+      "lon": 106.804457,
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "PANCORAN",
+      "kelurahan": "CIKOKO",
+      "lat": -6.245382,
+      "lon": 106.85233,
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "CILANDAK",
+      "kelurahan": "CILANDAK BARAT",
+      "lat": -6.282455,
+      "lon": 106.791809,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "CILANDAK",
+      "kelurahan": "CILANDAK BARAT",
+      "lat": -6.2852,
+      "lon": 106.8165,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "CIPAYUNG",
+      "kelurahan": "CILANGKAP",
+      "lat": -6.333835,
+      "lon": 106.903111,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "KRAMATJATI",
+      "kelurahan": "CILILITAN",
+      "lat": -6.259398,
+      "lon": 106.865302,
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "CILANDAK",
+      "kelurahan": "CIPETE SELATAN",
+      "lat": -6.274007,
+      "lon": 106.798651,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "KEBAYORAN BARU",
+      "kelurahan": "CIPETE UTARA",
+      "lat": -6.2669,
+      "lon": 106.7972,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "PULOGADUNG",
+      "kelurahan": "CIPINANG",
+      "lat": -6.210873,
+      "lon": 106.898512,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "JATINEGARA",
+      "kelurahan": "CIPINANG BESAR SELATAN",
+      "lat": -6.235883,
+      "lon": 106.878484,
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "MAKASAR",
+      "kelurahan": "CIPINANG MELAYU",
+      "lat": -6.252134,
+      "lon": 106.872832,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "JATINEGARA",
+      "kelurahan": "CIPINANG MUARA",
+      "lat": -6.237389,
+      "lon": 106.891973,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "CIRACAS",
+      "kelurahan": "CIRACAS",
+      "lat": -6.334218,
+      "lon": 106.875612,
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "DUREN SAWIT",
+      "kelurahan": "DUREN SAWIT",
+      "lat": -6.22954,
+      "lon": 106.909939,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "DURI KEPA",
+      "lat": -6.1882,
+      "lon": 106.7736,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "DURI KEPA",
+      "lat": -6.1905,
+      "lon": 106.7778,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "JOHAR BARU",
+      "kelurahan": "GALUR",
+      "lat": -6.1815,
+      "lon": 106.865,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "JOHAR BARU",
+      "kelurahan": "GALUR",
+      "lat": -6.1808,
+      "lon": 106.8653,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "CILANDAK",
+      "kelurahan": "GANDARIA SELATAN",
+      "lat": -6.270603,
+      "lon": 106.794008,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "CILANDAK",
+      "kelurahan": "GANDARIA SELATAN",
+      "lat": -6.270574,
+      "lon": 106.794031,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "PASAR REBO",
+      "kelurahan": "GEDONG",
+      "lat": -6.330614,
+      "lon": 106.900151,
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "GELORA",
+      "lat": -6.207666,
+      "lon": 106.796311,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "GELORA",
+      "lat": -6.213994,
+      "lon": 106.798204,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "TAMAN SARI",
+      "kelurahan": "GLODOK",
+      "lat": -6.146278,
+      "lon": 106.812754,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "KEBAYORAN BARU",
+      "kelurahan": "GUNUNG",
+      "lat": -6.2348,
+      "lon": 106.788432,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "GUNUNG SAHARI SELATAN",
+      "lat": -6.162319,
+      "lon": 106.842265,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "GUNUNG SAHARI SELATAN",
+      "lat": -6.157092,
+      "lon": 106.846986,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SAWAH BESAR",
+      "kelurahan": "GUNUNG SAHARI UTARA",
+      "lat": -6.152995,
+      "lon": 106.838638,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SAWAH BESAR",
+      "kelurahan": "GUNUNG SAHARI UTARA",
+      "lat": -6.153002,
+      "lon": 106.838645,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "HARAPAN MULYA",
+      "lat": -6.167877,
+      "lon": 106.857622,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA",
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "JAGAKARSA",
+      "kelurahan": "JAGAKARSA",
+      "lat": -6.332747,
+      "lon": 106.81737,
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "PASAR MINGGU",
+      "kelurahan": "JATI PADANG",
+      "lat": -6.28561,
+      "lon": 106.83486,
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEMBANGAN",
+      "kelurahan": "JOGLO",
+      "lat": -6.2205,
+      "lon": 106.7589,
+      "rivers": [
+        "ANGKE",
+        "PESANGGRAHAN & ANGKE"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "PANCORAN",
+      "kelurahan": "KALIBATA",
+      "lat": -6.260452,
+      "lon": 106.846903,
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KALIDERES",
+      "kelurahan": "KALIDERES",
+      "lat": -6.149429,
+      "lon": 106.711682,
+      "rivers": [
+        "ANGKE"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "kecamatan": "PENJARINGAN",
+      "kelurahan": "KAMAL MUARA",
+      "lat": -6.098122,
+      "lon": 106.714183,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "kecamatan": "PENJARINGAN",
+      "kelurahan": "KAMAL MUARA",
+      "lat": -6.098124,
+      "lon": 106.714198,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "KAMPUNG BALI",
+      "lat": -6.186117,
+      "lon": 106.811091,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "KAMPUNG BALI",
+      "lat": -6.184936,
+      "lon": 106.81286,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "JATINEGARA",
+      "kelurahan": "KAMPUNG MELAYU",
+      "lat": -6.216456,
+      "lon": 106.857421,
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "JOHAR BARU",
+      "kelurahan": "KAMPUNG RAWA",
+      "lat": -6.185,
+      "lon": 106.86,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "CENGKARENG",
+      "kelurahan": "KAPUK",
+      "lat": -6.131298,
+      "lon": 106.746082,
+      "rivers": [
+        "ANGKE"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SAWAH BESAR",
+      "kelurahan": "KARANG ANYAR",
+      "lat": -6.155767,
+      "lon": 106.828933,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "KARET TENGSIN",
+      "lat": -6.205626,
+      "lon": 106.811009,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "KARET TENGSIN",
+      "lat": -6.205642,
+      "lon": 106.811248,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "KARET TENGSIN",
+      "lat": -6.212001,
+      "lon": 106.814925,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SAWAH BESAR",
+      "kelurahan": "KARTINI",
+      "lat": -6.155178,
+      "lon": 106.831415,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SAWAH BESAR",
+      "kelurahan": "KARTINI",
+      "lat": -6.153339,
+      "lon": 106.831681,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "TAMAN SARI",
+      "kelurahan": "KEAGUNGAN",
+      "lat": -6.149031,
+      "lon": 106.813084,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "KEBON JERUK",
+      "lat": -6.1944,
+      "lon": 106.7844,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "KEBON JERUK",
+      "lat": -6.192,
+      "lon": 106.785,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "KEBON JERUK",
+      "lat": -6.188,
+      "lon": 106.7875,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "KEBON KOSONG",
+      "lat": -6.159754,
+      "lon": 106.855071,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA",
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "KEBON KOSONG",
+      "lat": -6.153246,
+      "lon": 106.858076,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA",
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "MATRAMAN",
+      "kelurahan": "KEBON MANGGIS",
+      "lat": -6.205578,
+      "lon": 106.855678,
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "KEBON MELATI",
+      "lat": -6.191972,
+      "lon": 106.811037,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "KEBON MELATI",
+      "lat": -6.197517,
+      "lon": 106.821078,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "MENTENG",
+      "kelurahan": "KEBON SIRIH",
+      "lat": -6.184198,
+      "lon": 106.829183,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "KEDOYA SELATAN",
+      "lat": -6.183631,
+      "lon": 106.756812,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "KEDOYA UTARA",
+      "lat": -6.165857,
+      "lon": 106.762902,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "KELAPA DUA",
+      "lat": -6.2015,
+      "lon": 106.7808,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "KELAPA DUA",
+      "lat": -6.2002,
+      "lon": 106.7821,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "CIRACAS",
+      "kelurahan": "KELAPA DUA WETAN",
+      "lat": -6.343959,
+      "lon": 106.884645,
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "KEMAYORAN",
+      "lat": -6.163971,
+      "lon": 106.847811,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA",
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEMBANGAN",
+      "kelurahan": "KEMBANGAN SELATAN",
+      "lat": -6.189305,
+      "lon": 106.720422,
+      "rivers": [
+        "PESANGGRAHAN & ANGKE"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEMBANGAN",
+      "kelurahan": "KEMBANGAN SELATAN",
+      "lat": -6.185138,
+      "lon": 106.729812,
+      "rivers": [
+        "PESANGGRAHAN & ANGKE"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEMBANGAN",
+      "kelurahan": "KEMBANGAN SELATAN",
+      "lat": -6.183246,
+      "lon": 106.751758,
+      "rivers": [
+        "PESANGGRAHAN & ANGKE"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEMBANGAN",
+      "kelurahan": "KEMBANGAN SELATAN",
+      "lat": -6.18489,
+      "lon": 106.753945,
+      "rivers": [
+        "PESANGGRAHAN & ANGKE"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SENEN",
+      "kelurahan": "KENARI",
+      "lat": -6.1997,
+      "lon": 106.8496,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SENEN",
+      "kelurahan": "KENARI",
+      "lat": -6.199,
+      "lon": 106.85,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "DUREN SAWIT",
+      "kelurahan": "KLENDER",
+      "lat": -6.217263,
+      "lon": 106.903684,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "DUREN SAWIT",
+      "kelurahan": "KLENDER",
+      "lat": -6.219344,
+      "lon": 106.906959,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "DUREN SAWIT",
+      "kelurahan": "KLENDER",
+      "lat": -6.219319,
+      "lon": 106.912853,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SENEN",
+      "kelurahan": "KRAMAT",
+      "lat": -6.185179,
+      "lon": 106.847774,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "KRAMATJATI",
+      "kelurahan": "KRAMATJATI",
+      "lat": -6.285297,
+      "lon": 106.873239,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "TAMAN SARI",
+      "kelurahan": "KRUKUT",
+      "lat": -6.155482,
+      "lon": 106.816473,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "TAMAN SARI",
+      "kelurahan": "KRUKUT",
+      "lat": -6.155495,
+      "lon": 106.816498,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "MAMPANG PRAPATAN",
+      "kelurahan": "KUNINGAN BARAT",
+      "lat": -6.235233,
+      "lon": 106.818793,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "CILANDAK",
+      "kelurahan": "LEBAK BULUS",
+      "lat": -6.304579,
+      "lon": 106.784439,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "CILANDAK",
+      "kelurahan": "LEBAK BULUS",
+      "lat": -6.304567,
+      "lon": 106.784483,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "kecamatan": "PADEMANGAN",
+      "kelurahan": "PADEMANGAN TIMUR",
+      "lat": -6.137315,
+      "lon": 106.840332,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "kecamatan": "PADEMANGAN",
+      "kelurahan": "PADEMANGAN TIMUR",
+      "lat": -6.12894,
+      "lon": 106.845678,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SAWAH BESAR",
+      "kelurahan": "PASAR BARU",
+      "lat": -6.161633,
+      "lon": 106.834092,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SENEN",
+      "kelurahan": "PASEBAN",
+      "lat": -6.191782,
+      "lon": 106.853845,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KALIDERES",
+      "kelurahan": "PEGADUNGAN",
+      "lat": -6.124765,
+      "lon": 106.697982,
+      "rivers": [
+        "ANGKE"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "kecamatan": "KELAPA GADING",
+      "kelurahan": "PEGANGSAAN DUA",
+      "lat": -6.148132,
+      "lon": 106.916171,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "kecamatan": "KELAPA GADING",
+      "kelurahan": "PEGANGSAAN DUA",
+      "lat": -6.149947,
+      "lon": 106.917667,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "PASAR REBO",
+      "kelurahan": "PEKAYON",
+      "lat": -6.347948,
+      "lon": 106.875841,
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "MAMPANG PRAPATAN",
+      "kelurahan": "PELA MAMPANG",
+      "lat": -6.185596,
+      "lon": 106.815066,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "MAMPANG PRAPATAN",
+      "kelurahan": "PELA MAMPANG",
+      "lat": -6.2433,
+      "lon": 106.8233,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "PANCORAN",
+      "kelurahan": "PENGADEGAN",
+      "lat": -6.251315,
+      "lon": 106.861639,
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "kecamatan": "PENJARINGAN",
+      "kelurahan": "PENJARINGAN",
+      "lat": -6.132554,
+      "lon": 106.781685,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "kecamatan": "PENJARINGAN",
+      "kelurahan": "PENJARINGAN",
+      "lat": -6.222643,
+      "lon": 106.83351,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "PETAMBURAN",
+      "lat": -6.193107,
+      "lon": 106.807957,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "TANAH ABANG",
+      "kelurahan": "PETAMBURAN",
+      "lat": -6.193109,
+      "lon": 106.807962,
+      "rivers": [
+        "CILIWUNG ARAH KANAL BANJIR BARAT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "KEBAYORAN BARU",
+      "kelurahan": "PETOGOGAN",
+      "lat": -6.244265,
+      "lon": 106.813506,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "GAMBIR",
+      "kelurahan": "PETOJO UTARA",
+      "lat": -6.17049,
+      "lon": 106.813488,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "GAMBIR",
+      "kelurahan": "PETOJO UTARA",
+      "lat": -6.170492,
+      "lon": 106.819228,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "GAMBIR",
+      "kelurahan": "PETOJO UTARA",
+      "lat": -6.170485,
+      "lon": 106.819291,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "kecamatan": "PENJARINGAN",
+      "kelurahan": "PLUIT",
+      "lat": -6.108098,
+      "lon": 106.769752,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "DUREN SAWIT",
+      "kelurahan": "PONDOK KELAPA",
+      "lat": -6.24,
+      "lon": 106.93,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "DUREN SAWIT",
+      "kelurahan": "PONDOK KOPI",
+      "lat": -6.232401,
+      "lon": 106.942957,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "CILANDAK",
+      "kelurahan": "PONDOK LABU",
+      "lat": -6.306464,
+      "lon": 106.798521,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "CIRACAS",
+      "kelurahan": "RAMBUTAN",
+      "lat": -6.301845,
+      "lon": 106.872099,
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "CAKUNG",
+      "kelurahan": "RAWA TERATE",
+      "lat": -6.185812,
+      "lon": 106.922767,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "CEMPAKA PUTIH",
+      "kelurahan": "RAWASARI",
+      "lat": -6.193721,
+      "lon": 106.857843,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "CEMPAKA PUTIH",
+      "kelurahan": "RAWASARI",
+      "lat": -6.188808,
+      "lon": 106.870325,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "CEMPAKA PUTIH",
+      "kelurahan": "RAWASARI",
+      "lat": -6.187052,
+      "lon": 106.87463,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KALIDERES",
+      "kelurahan": "SEMANAN",
+      "lat": -6.14943,
+      "lon": 106.711681,
+      "rivers": [
+        "ANGKE"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SENEN",
+      "kelurahan": "SENEN",
+      "lat": -6.181047,
+      "lon": 106.835454,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "SERDANG",
+      "lat": -6.153518,
+      "lon": 106.85711,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA",
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "SERDANG",
+      "lat": -6.155041,
+      "lon": 106.859323,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA",
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "SERDANG",
+      "lat": -6.156895,
+      "lon": 106.861167,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA",
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "SERDANG",
+      "lat": -6.159361,
+      "lon": 106.863941,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA",
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEMBANGAN",
+      "kelurahan": "SRENGSENG",
+      "lat": -6.12377,
+      "lon": 106.715936,
+      "rivers": [
+        "ANGKE",
+        "PESANGGRAHAN & ANGKE"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "SUKABUMI SELATAN",
+      "lat": -6.219514,
+      "lon": 106.770077,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "SUKABUMI UTARA",
+      "lat": -6.2178,
+      "lon": 106.7815,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "SUKABUMI UTARA",
+      "lat": -6.2185,
+      "lon": 106.782,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "KEBON JERUK",
+      "kelurahan": "SUKABUMI UTARA",
+      "lat": -6.22,
+      "lon": 106.7825,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "SUMUR BATU",
+      "lat": -6.166934,
+      "lon": 106.873935,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "kecamatan": "TANJUNG PRIOK",
+      "kelurahan": "SUNTER AGUNG",
+      "lat": -6.147667,
+      "lon": 106.854893,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "kecamatan": "TANJUNG PRIOK",
+      "kelurahan": "SUNTER AGUNG",
+      "lat": -6.126866,
+      "lon": 106.857188,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "CIRACAS",
+      "kelurahan": "SUSUKAN",
+      "lat": -6.30738,
+      "lon": 106.868174,
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "MAKASAR",
+      "kelurahan": "MAKASAR",
+      "lat": -6.271194,
+      "lon": 106.894547,
+      "rivers": [
+        "CIPINANG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "SAWAH BESAR",
+      "kelurahan": "MANGGA DUA SELATAN",
+      "lat": -6.173491,
+      "lon": 106.889216,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "TEBET",
+      "kelurahan": "MANGGARAI",
+      "lat": -6.209834,
+      "lon": 106.850523,
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "TAMAN SARI",
+      "kelurahan": "MAPHAR",
+      "lat": -6.1557,
+      "lon": 106.818462,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "TAMAN SARI",
+      "kelurahan": "TAMAN SARI",
+      "lat": -6.150654,
+      "lon": 106.823277,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "JOHAR BARU",
+      "kelurahan": "TANAH TINGGI",
+      "lat": -6.1795,
+      "lon": 106.8655,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "JOHAR BARU",
+      "kelurahan": "TANAH TINGGI",
+      "lat": -6.18,
+      "lon": 106.866,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "JAGAKARSA",
+      "kelurahan": "TANJUNG BARAT",
+      "lat": -6.309537,
+      "lon": 106.850701,
+      "rivers": [
+        "CILIWUNG"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA BARAT",
+      "kecamatan": "GROGOL PETAMBURAN",
+      "kelurahan": "TANJUNG DUREN UTARA",
+      "lat": -6.152345,
+      "lon": 106.742567,
+      "rivers": [
+        "PESANGGRAHAN"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "MAMPANG PRAPATAN",
+      "kelurahan": "TEGAL PARANG",
+      "lat": -6.251,
+      "lon": 106.8294,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA SELATAN",
+      "kecamatan": "MAMPANG PRAPATAN",
+      "kelurahan": "TEGAL PARANG",
+      "lat": -6.24988,
+      "lon": 106.83354,
+      "rivers": [
+        "KRUKUT"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA TIMUR",
+      "kecamatan": "KRAMATJATI",
+      "kelurahan": "TENGAH",
+      "lat": -6.289985,
+      "lon": 106.86454,
+      "rivers": []
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA UTARA",
+      "kecamatan": "KOJA",
+      "kelurahan": "TUGU UTARA",
+      "lat": -6.121722,
+      "lon": 106.91318,
+      "rivers": [
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "UTAN PANJANG",
+      "lat": -6.165459,
+      "lon": 106.852223,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA",
+        "SUNTER"
+      ]
+    },
+    {
+      "wilayah": "KOTA ADM. JAKARTA PUSAT",
+      "kecamatan": "KEMAYORAN",
+      "kelurahan": "UTAN PANJANG",
+      "lat": -6.170706,
+      "lon": 106.865251,
+      "rivers": [
+        "CILIWUNG ARAH ISTANA NEGARA",
+        "SUNTER"
+      ]
+    }
+  ]
+}
