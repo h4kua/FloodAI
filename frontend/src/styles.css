@@ -443,8 +443,11 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
   gap: 0.875rem;
-  align-items: start;
+  align-items: stretch;   /* paired cards share the row height → symmetric */
 }
+/* Make the paired cards fill their stretched grid cell so the backgrounds
+   line up as matched rectangles instead of ragged different heights. */
+.bento-2 > * { height: 100%; }
 
 /* ── Panel base ──────────────────────────────────────────────── */
 .panel {

@@ -89,11 +89,57 @@ function AlertRibbon({ siaga1Count, siaga2Count, lastSync }) {
   return null;
 }
 
-const WEATHER_ICON = {
-  "Cerah": "☀", "Cerah Berawan": "⛅", "Berawan": "☁", "Berawan Tebal": "☁",
-  "Udara Kabur": "🌫", "Asap": "🌫", "Hujan Ringan": "🌧", "Hujan Sedang": "🌧",
-  "Hujan Lebat": "⛈", "Hujan Petir": "⛈", "Hujan Es": "🌨",
-};
+/* ── Weather iconography — inline monochrome SVG (no emoji) ─────────────────
+   Normalizes any BMKG weather_desc (Indonesian) or OpenWeather weather_main
+   (English) to one condition, then renders a clean line-icon in currentColor
+   so it inherits the surrounding text/accent color.
+*/
+function weatherCond(text) {
+  const s = (text || "").toLowerCase();
+  if (s.includes("petir") || s.includes("thunder")) return "storm";
+  if (s.includes("hujan") || s.includes("rain") || s.includes("drizzle") || s.includes("gerimis")) return "rain";
+  if (s.includes("es") || s.includes("snow") || s.includes("salju")) return "snow";
+  if (s.includes("kabur") || s.includes("asap") || s.includes("mist") || s.includes("fog") || s.includes("haze") || s.includes("smoke") || s.includes("dust")) return "mist";
+  if (s.includes("cerah berawan") || s.includes("partly") || s.includes("few cloud") || s.includes("scattered")) return "partly";
+  if (s.includes("berawan") || s.includes("cloud") || s.includes("mendung") || s.includes("overcast")) return "cloudy";
+  if (s.includes("cerah") || s.includes("clear") || s.includes("sun")) return "clear";
+  return "cloudy";
+}
+
+function WeatherGlyph({ cond, size = 22, color }) {
+  const p = { fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round" };
+  const cloud = (dy = 0) => (
+    <path d={`M7 ${16 + dy}h8a3 3 0 0 0 .3-5.98A4.4 4.4 0 0 0 6.7 ${10 + dy} 3 3 0 0 0 7 ${16 + dy}Z`} {...p} />
+  );
+  const rays = [0, 45, 90, 135, 180, 225, 270, 315].map((a) => {
+    const r = (a * Math.PI) / 180;
+    return <line key={a} x1={12 + 6.5 * Math.cos(r)} y1={12 + 6.5 * Math.sin(r)} x2={12 + 9 * Math.cos(r)} y2={12 + 9 * Math.sin(r)} {...p} />;
+  });
+  let body;
+  switch (cond) {
+    case "clear":  body = (<><circle cx="12" cy="12" r="4.2" {...p} />{rays}</>); break;
+    case "partly": body = (<><circle cx="9" cy="8.5" r="3" {...p} />{cloud(2)}</>); break;
+    case "rain":   body = (<>{cloud(-2)}<line x1="9" y1="17" x2="8" y2="20.5" {...p} /><line x1="13" y1="17" x2="12" y2="20.5" {...p} /></>); break;
+    case "storm":  body = (<>{cloud(-2)}<path d="M12.5 16l-2.5 3.2h3l-2.5 3.2" {...p} /></>); break;
+    case "snow":   body = (<>{cloud(-2)}<line x1="9" y1="18.2" x2="9" y2="20.5" {...p} /><line x1="13" y1="18.2" x2="13" y2="20.5" {...p} /></>); break;
+    case "mist":   body = (<><line x1="4.5" y1="9" x2="19.5" y2="9" {...p} /><line x1="4.5" y1="13" x2="17" y2="13" {...p} /><line x1="6.5" y1="17" x2="19.5" y2="17" {...p} /></>); break;
+    default:       body = cloud(0);
+  }
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" style={{ color, display: "block", flexShrink: 0 }}>
+      {body}
+    </svg>
+  );
+}
+
+function PhoneGlyph({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" style={{ display: "block" }}>
+      <path d="M6.6 4h2.9l1.4 3.8-2 1.4a10.8 10.8 0 0 0 4.9 4.9l1.4-2 3.8 1.4v2.9a2 2 0 0 1-2.2 2A15.8 15.8 0 0 1 4.6 6.2 2 2 0 0 1 6.6 4Z"
+        fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 function MetricCard({ c, noteStyle }) {
   const tiltRef = use3DTilt({ maxTilt: 10 });
@@ -127,87 +173,6 @@ function MetricsRow({ siaga1, siaga2, totalStations, calibratedStations, score }
       {cards.map((c) => (
         <MetricCard key={c.label} c={c} noteStyle={noteStyle} />
       ))}
-    </div>
-  );
-}
-
-/* ── Wilayah Rainfall Strip ────────────────────────────────
-   Dedicated full-width row showing per-wilayah weather from BMKG.
-   Placed immediately after the 3 metric cards so users see it
-   without scrolling. Falls back to OpenWeather overall rainfall
-   when BMKG per-wilayah data is unavailable.
-*/
-function WilayahRainfallStrip({ wilayahSummary, rainfall, lang }) {
-  const isId = lang === "id";
-  const hasWilayah = (wilayahSummary?.length ?? 0) > 0;
-  const rainMm = rainfall ?? 0;
-
-  const noteStyle = {
-    fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem",
-    color: "var(--safe)", letterSpacing: "0.06em", opacity: 0.85,
-  };
-
-  return (
-    <div className="rainfall-strip fade-in">
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem", color: "var(--muted)", letterSpacing: "0.07em", textTransform: "uppercase" }}>
-          {isId ? "Curah Hujan per Wilayah Jakarta" : "Rainfall per Jakarta District"}
-        </span>
-        <span style={noteStyle}>● {hasWilayah ? "BMKG" : "OpenWeather"}</span>
-      </div>
-
-      {hasWilayah ? (
-        <div className="rainfall-wilayah-cards">
-          {wilayahSummary.map((w) => {
-            const cf = w.forecast?.[0];
-            const isRain = cf?.weather_desc?.toLowerCase().includes("hujan");
-            const icon = WEATHER_ICON[cf?.weather_desc] ?? "☁";
-            const shortName = w.wilayah.replace("Jakarta ", "Jkt ");
-            const statusStyle = WILAYAH_STATUS_STYLE[w.worst_status] ?? WILAYAH_STATUS_STYLE["Normal"];
-            return (
-              <div key={w.wilayah} className={`rain-card ${isRain ? "raining" : "clear"}`}>
-                <div className="rain-card-top">
-                  <span className="rain-card-name">{shortName}</span>
-                  <span className="rain-card-badge"
-                    style={{ background: statusStyle.bg, color: statusStyle.color, borderColor: statusStyle.border }}>
-                    {w.worst_status}
-                  </span>
-                </div>
-                <div className="rain-card-icon">{icon}</div>
-                <div className={`rain-card-desc${isRain ? " raining" : ""}`}>
-                  {cf?.weather_desc ?? (isId ? "Tidak ada data" : "No data")}
-                </div>
-                {cf?.tmin != null && (
-                  <div className="rain-card-temp">{cf.tmin}–{cf.tmax}°C · {cf.humin}–{cf.humax}%</div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        /* Fallback: no BMKG per-wilayah — show single OpenWeather reading */
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <span style={{ fontSize: "2rem" }}>{rainMm > 20 ? "🌧" : rainMm > 0 ? "🌦" : "☁"}</span>
-          <div>
-            <div style={{ fontSize: "1.1rem", fontWeight: 700, color: rainMm > 0 ? "var(--cyan)" : "var(--text)" }}>
-              {rainMm > 0 ? `${Math.round(rainMm)} mm/jam` : (isId ? "Tidak Hujan" : "No Rain")}
-            </div>
-            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted)", marginTop: "2px" }}>
-              {isId ? "Data OpenWeather — titik pusat Jakarta" : "OpenWeather — Jakarta center point"}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div style={{ marginTop: "0.625rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.57rem", color: "var(--muted-2)", lineHeight: 1.5 }}>
-        {hasWilayah
-          ? (isId
-            ? "● Prakiraan BMKG per kota administrasi · Status TMA dari sensor DSDADKI realtime · Update tiap 15 menit"
-            : "● BMKG forecast per administrative city · TMA status from DSDADKI realtime sensors · Updates every 15 min")
-          : (isId
-            ? "● Data OpenWeather — satu titik pengukuran untuk seluruh Jakarta. Curah hujan bisa berbeda tiap wilayah."
-            : "● OpenWeather — single measurement point for all Jakarta. Rainfall varies by district.")}
-      </div>
     </div>
   );
 }
@@ -480,15 +445,15 @@ function RecommendationsPanel({ riskData, stations = [], onNavigate }) {
   if (s1.length > 0) {
     const st = s1[0];
     dynActions.push(isId
-      ? `🔴 ${st.nama} sudah ${Math.round(st.ratio * 100)}% ambang Siaga 1 (TMA ${st.tinggi_air} cm). Warga bantaran terdekat: siapkan evakuasi segera.`
-      : `🔴 ${st.nama} at ${Math.round(st.ratio * 100)}% of Alert-1 threshold (${st.tinggi_air} cm). Nearby residents: prepare immediate evacuation.`
+      ? `${st.nama} sudah ${Math.round(st.ratio * 100)}% ambang Siaga 1 (TMA ${st.tinggi_air} cm). Warga bantaran terdekat: siapkan evakuasi segera.`
+      : `${st.nama} at ${Math.round(st.ratio * 100)}% of Alert-1 threshold (${st.tinggi_air} cm). Nearby residents: prepare immediate evacuation.`
     );
   }
   if (s2.length > 0) {
     const st = s2[0];
     dynActions.push(isId
-      ? `🟠 ${st.nama} Siaga 2 (${Math.round(st.ratio * 100)}%, TMA ${st.tinggi_air} cm) — pantau setiap 15 mnt, siapkan tas darurat.`
-      : `🟠 ${st.nama} at Alert 2 (${Math.round(st.ratio * 100)}%, ${st.tinggi_air} cm) — monitor every 15 min, prepare emergency bag.`
+      ? `${st.nama} Siaga 2 (${Math.round(st.ratio * 100)}%, TMA ${st.tinggi_air} cm) — pantau setiap 15 mnt, siapkan tas darurat.`
+      : `${st.nama} at Alert 2 (${Math.round(st.ratio * 100)}%, ${st.tinggi_air} cm) — monitor every 15 min, prepare emergency bag.`
     );
   }
   if (topW) {
@@ -496,31 +461,31 @@ function RecommendationsPanel({ riskData, stations = [], onNavigate }) {
       ? (isId ? `${topW.siaga1_count} sensor Siaga 1 aktif` : `${topW.siaga1_count} active Alert-1 sensors`)
       : (isId ? `${topW.siaga2_count} sensor Siaga 2` : `${topW.siaga2_count} Alert-2 sensors`);
     dynActions.push(isId
-      ? `📍 ${topW.wilayah} — ${topW.worst_status}, ${sensorsNote}. Kurangi aktivitas di luar ruangan di wilayah ini.`
-      : `📍 ${topW.wilayah} — ${topW.worst_status}, ${sensorsNote}. Reduce outdoor activities in this district.`
+      ? `${topW.wilayah} — ${topW.worst_status}, ${sensorsNote}. Kurangi aktivitas di luar ruangan di wilayah ini.`
+      : `${topW.wilayah} — ${topW.worst_status}, ${sensorsNote}. Reduce outdoor activities in this district.`
     );
   }
   if (rainfall > 20) {
     dynActions.push(isId
-      ? `🌧 Curah hujan ${Math.round(rainfall)} mm/jam — potensi genangan cepat di titik rendah. Hindari bantaran kali dan underpass.`
-      : `🌧 Rainfall ${Math.round(rainfall)} mm/h — rapid pooling risk at low points. Avoid riverbanks and underpasses.`
+      ? `Curah hujan ${Math.round(rainfall)} mm/jam — potensi genangan cepat di titik rendah. Hindari bantaran kali dan underpass.`
+      : `Rainfall ${Math.round(rainfall)} mm/h — rapid pooling risk at low points. Avoid riverbanks and underpasses.`
     );
   } else if (rainfall > 5) {
     dynActions.push(isId
-      ? `🌦 Hujan ringan ${Math.round(rainfall)} mm/jam — pantau apakah intensitas meningkat dalam 30 menit ke depan.`
-      : `🌦 Light rain ${Math.round(rainfall)} mm/h — monitor if intensity rises over the next 30 minutes.`
+      ? `Hujan ringan ${Math.round(rainfall)} mm/jam — pantau apakah intensitas meningkat dalam 30 menit ke depan.`
+      : `Light rain ${Math.round(rainfall)} mm/h — monitor if intensity rises over the next 30 minutes.`
     );
   }
   if (riskTrend === "increasing" && dynActions.length < 3) {
     dynActions.push(isId
-      ? `↑ Tren risiko sedang naik — persiapkan evakuasi mandiri dan koordinasi dengan RT/RW setempat.`
-      : `↑ Risk trend rising — prepare self-evacuation plan and coordinate with local RT/RW.`
+      ? `Tren risiko sedang naik — persiapkan evakuasi mandiri dan koordinasi dengan RT/RW setempat.`
+      : `Risk trend rising — prepare self-evacuation plan and coordinate with local RT/RW.`
     );
   }
   if (dynActions.length === 0) {
     dynActions.push(isId
-      ? "✅ Kondisi saat ini terpantau normal. Tetap pantau sensor tiap 15 menit selama musim hujan."
-      : "✅ Current conditions appear normal. Keep monitoring sensors every 15 min during rain season."
+      ? "Kondisi saat ini terpantau normal. Tetap pantau sensor tiap 15 menit selama musim hujan."
+      : "Current conditions appear normal. Keep monitoring sensors every 15 min during rain season."
     );
   }
 
@@ -558,7 +523,7 @@ function RecommendationsPanel({ riskData, stations = [], onNavigate }) {
   });
   buttons.push({
     label: isId ? "BPBD Jakarta — 117" : "BPBD Emergency: 117",
-    primary: false, icon: "📞",
+    primary: false, icon: <PhoneGlyph size={14} />,
     onClick: callBPBD,
     title: isId ? "Telepon BPBD sekarang" : "Call BPBD now",
     isCall: true,
@@ -709,7 +674,7 @@ function StaleDataBanner({ snapshotFetchedAt, onRefresh, refreshing }) {
       display: "flex", alignItems: "center", gap: "0.75rem",
       fontSize: "0.78rem", color: "var(--wsp)",
     }}>
-      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.85rem", fontWeight: 700, flexShrink: 0 }}>⚠</span>
+      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.95rem", fontWeight: 800, flexShrink: 0, lineHeight: 1 }}>!</span>
       <span style={{ flex: 1, lineHeight: 1.5 }}>
         {isId
           ? `Data sensor sudah ${ageLabel} tidak diperbarui. Scraper otomatis mungkin mengalami gangguan.`
@@ -938,7 +903,7 @@ const WILAYAH_STATUS_STYLE = {
 };
 
 /* ── Wilayah Forecast Grid — compact 12-hour BMKG timeline ──
-   Differentiated from WilayahRainfallStrip (current snapshot).
+   The single BMKG per-wilayah weather panel (includes the current slot).
    Shows WHERE and WHEN rain arrives over the next 1-12 hours.
    Design: compact rows, fixed-width slot cards, rain incoming pills.
 */
@@ -1018,8 +983,8 @@ function WilayahForecastGrid({ wilayahSummary }) {
                     </span>
                   )}
                   {firstRainI > 0 && (
-                    <span className="forecast-rain-alert" style={{ marginTop: 0 }}>
-                      🌧 {getTimeLabel(slots[firstRainI], firstRainI)}
+                    <span className="forecast-rain-alert" style={{ marginTop: 0, display: "inline-flex", alignItems: "center", gap: 3 }}>
+                      <WeatherGlyph cond="rain" size={11} /> {getTimeLabel(slots[firstRainI], firstRainI)}
                     </span>
                   )}
                 </div>
@@ -1036,10 +1001,9 @@ function WilayahForecastGrid({ wilayahSummary }) {
                   );
                 }
                 const isRain = slot.weather_desc?.toLowerCase().includes("hujan");
-                const icon   = WEATHER_ICON[slot.weather_desc] ?? "🌤";
                 return (
                   <div key={i} className={`fct-cell${isRain ? " rain" : ""}`}>
-                    <span className="fct-icon">{icon}</span>
+                    <span className="fct-icon"><WeatherGlyph cond={weatherCond(slot.weather_desc)} size={22} /></span>
                     <span className={`fct-desc${isRain ? " rain" : ""}`}>{slot.weather_desc ?? "—"}</span>
                     {slot.tmin != null && (
                       <span className="fct-temp">{slot.tmin}–{slot.tmax}°</span>
@@ -1057,8 +1021,8 @@ function WilayahForecastGrid({ wilayahSummary }) {
 
       <p style={{ marginTop: "0.875rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", lineHeight: 1.6 }}>
         {isId
-          ? "● Prakiraan BMKG per kota administrasi · 🌧 = hujan akan masuk · Slot interval ~6 jam · TMA bisa naik meski tidak hujan di Jakarta (kiriman Bogor/Depok)"
-          : "● BMKG per administrative city · 🌧 = rain incoming · ~6h slot interval · TMA may rise without local rain (upstream Bogor/Depok)"}
+          ? "● Prakiraan BMKG per kota administrasi · ikon biru = hujan akan masuk · Slot interval ~6 jam · TMA bisa naik meski tidak hujan di Jakarta (kiriman Bogor/Depok)"
+          : "● BMKG per administrative city · blue icon = rain incoming · ~6h slot interval · TMA may rise without local rain (upstream Bogor/Depok)"}
       </p>
     </div>
   );
@@ -1077,7 +1041,6 @@ function ForecastPanel({ forecast }) {
           const dt = new Date(slot.local_datetime);
           const timeStr = dt.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
           const dateStr = dt.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
-          const icon = WEATHER_ICON[slot.weather_desc] ?? "🌤";
           const isRain = slot.weather_desc?.toLowerCase().includes("hujan");
           return (
             <div key={i} style={{
@@ -1090,7 +1053,9 @@ function ForecastPanel({ forecast }) {
               <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--muted-2)", letterSpacing: "0.06em" }}>
                 {dateStr} · {timeStr}
               </span>
-              <span style={{ fontSize: "1.25rem" }}>{icon}</span>
+              <span style={{ color: isRain ? "var(--cyan)" : "var(--muted)" }}>
+                <WeatherGlyph cond={weatherCond(slot.weather_desc)} size={24} />
+              </span>
               <span style={{ fontSize: "0.72rem", color: "var(--text)", lineHeight: 1.3, fontWeight: 500 }}>{slot.weather_desc}</span>
               {slot.tmin != null && (
                 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted)" }}>
@@ -1316,12 +1281,6 @@ function windDirection(deg, isId) {
   return isId ? id[idx] : en[idx];
 }
 
-const OWM_ICON_MAP = {
-  Clear: "☀", Clouds: "☁", Rain: "🌧", Drizzle: "🌦",
-  Thunderstorm: "⛈", Snow: "❄", Mist: "🌫", Fog: "🌁",
-  Haze: "🌫", Dust: "💨", Smoke: "🌫",
-};
-
 // WeatherCurrentCard — shows per-wilayah OWM data when available,
 // falls back to single-point when openweatherWilayah is empty.
 function WeatherSingleCard({ ow, temp, humidity, rainfall, weatherIcon, desc, chips, isId }) {
@@ -1331,7 +1290,7 @@ function WeatherSingleCard({ ow, temp, humidity, rainfall, weatherIcon, desc, ch
       <div className="card-3d-content">
         <div className="weather-current-header">
           <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
-            <span style={{ fontSize: "2.75rem", lineHeight: 1 }}>{weatherIcon}</span>
+            <span style={{ display: "flex", color: "var(--cyan)" }}>{weatherIcon}</span>
             <div>
               <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.56rem", color: "var(--muted-2)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "0.1rem" }}>
                 {isId ? "Cuaca Jakarta Sekarang" : "Jakarta Current Weather"}
@@ -1350,7 +1309,6 @@ function WeatherSingleCard({ ow, temp, humidity, rainfall, weatherIcon, desc, ch
         <div className="weather-chips-grid">
           {chips.map((c, i) => (
             <div key={i} className="weather-chip">
-              <span className="weather-chip-icon">{c.icon}</span>
               <div>
                 <div className="weather-chip-label">{c.label}</div>
                 <div className="weather-chip-value" style={c.color ? { color: c.color } : {}}>{c.value}</div>
@@ -1366,7 +1324,6 @@ function WeatherSingleCard({ ow, temp, humidity, rainfall, weatherIcon, desc, ch
 
 function WeatherWilayahCard({ entry, isId }) {
   const tiltRef = use3DTilt({ maxTilt: 8 });
-  const icon = OWM_ICON_MAP[entry.ow.weather_main] ?? "🌤";
   const isRain = entry.ow.rainfall_1h > 0 || entry.ow.weather_main === "Rain" || entry.ow.weather_main === "Drizzle";
   const desc = entry.ow.weather_desc
     ? entry.ow.weather_desc.charAt(0).toUpperCase() + entry.ow.weather_desc.slice(1)
@@ -1376,7 +1333,9 @@ function WeatherWilayahCard({ entry, isId }) {
     <div ref={tiltRef} className={`ow-wilayah-card card-3d${isRain ? " rain" : ""}`}>
       <div className="ow-wilayah-card-header card-3d-title">
         <div className="ow-wilayah-name">{entry.short}</div>
-        <div className="ow-wilayah-icon">{icon}</div>
+        <div className="ow-wilayah-icon" style={{ color: isRain ? "var(--cyan)" : "var(--muted)" }}>
+          <WeatherGlyph cond={weatherCond(entry.ow.weather_main)} size={22} />
+        </div>
       </div>
       <div className="card-3d-content">
         {entry.ow.temp != null && (
@@ -1385,13 +1344,13 @@ function WeatherWilayahCard({ entry, isId }) {
         <div className={`ow-wilayah-desc${isRain ? " rain" : ""}`}>{desc}</div>
         <div className="ow-wilayah-chips">
           {entry.ow.humidity != null && (
-            <span className="ow-mini-chip">💧 {Math.round(entry.ow.humidity)}%</span>
+            <span className="ow-mini-chip">RH {Math.round(entry.ow.humidity)}%</span>
           )}
           {entry.ow.wind_speed != null && (
-            <span className="ow-mini-chip">💨 {entry.ow.wind_speed.toFixed(1)}m/s</span>
+            <span className="ow-mini-chip">{entry.ow.wind_speed.toFixed(1)} m/s</span>
           )}
           {isRain && entry.ow.rainfall_1h > 0 && (
-            <span className="ow-mini-chip rain">🌧 {entry.ow.rainfall_1h.toFixed(1)}mm/j</span>
+            <span className="ow-mini-chip rain">{entry.ow.rainfall_1h.toFixed(1)} mm/j</span>
           )}
         </div>
         {entry.ow.feels_like != null && (
@@ -1419,18 +1378,19 @@ function WeatherCurrentCard({ riskData }) {
     const humidity = ow?.humidity ?? riskData?.humidity;
     if (!temp && !ow) return null;
 
-    const weatherIcon = OWM_ICON_MAP[ow?.weather_main] ?? (rainfall > 5 ? "🌧" : "🌤");
     const descRaw = ow?.weather_desc ?? (rainfall > 20 ? "hujan lebat" : rainfall > 5 ? "hujan ringan" : "berawan");
     const desc = descRaw.charAt(0).toUpperCase() + descRaw.slice(1);
+    const cond = ow?.weather_main ? weatherCond(ow.weather_main) : weatherCond(descRaw);
+    const weatherIcon = <WeatherGlyph cond={cond} size={42} />;
 
     const chips = [
-      temp     != null && { icon: "🌡", label: isId ? "Suhu" : "Temp",     value: `${temp.toFixed(1)}°C`,       sub: ow?.feels_like != null ? `feels ${ow.feels_like.toFixed(1)}°` : null },
-      humidity != null && { icon: "💧", label: isId ? "Lembap" : "Humidity", value: `${Math.round(humidity)}%` },
-      { icon: "🌧", label: isId ? "Hujan" : "Rainfall", value: rainfall > 0 ? `${Math.round(rainfall)} mm/j` : (isId ? "Tidak hujan" : "No rain"), color: rainfall > 0 ? "var(--cyan)" : "var(--safe)" },
-      ow?.wind_speed  != null && { icon: "💨", label: isId ? "Angin" : "Wind",    value: `${ow.wind_speed.toFixed(1)} m/s`, sub: windDirection(ow.wind_deg, isId) },
-      ow?.pressure    != null && { icon: "📊", label: isId ? "Tekanan" : "Pressure", value: `${ow.pressure} hPa` },
-      ow?.clouds      != null && { icon: "☁",  label: isId ? "Tutupan" : "Cloud",  value: `${ow.clouds}%` },
-      ow?.visibility  != null && { icon: "👁",  label: isId ? "Pandang" : "Visibility", value: `${(ow.visibility / 1000).toFixed(0)} km` },
+      temp     != null && { label: isId ? "Suhu" : "Temp",     value: `${temp.toFixed(1)}°C`,       sub: ow?.feels_like != null ? `feels ${ow.feels_like.toFixed(1)}°` : null },
+      humidity != null && { label: isId ? "Lembap" : "Humidity", value: `${Math.round(humidity)}%` },
+      { label: isId ? "Hujan" : "Rainfall", value: rainfall > 0 ? `${Math.round(rainfall)} mm/j` : (isId ? "Tidak hujan" : "No rain"), color: rainfall > 0 ? "var(--cyan)" : "var(--safe)" },
+      ow?.wind_speed  != null && { label: isId ? "Angin" : "Wind",    value: `${ow.wind_speed.toFixed(1)} m/s`, sub: windDirection(ow.wind_deg, isId) },
+      ow?.pressure    != null && { label: isId ? "Tekanan" : "Pressure", value: `${ow.pressure} hPa` },
+      ow?.clouds      != null && { label: isId ? "Tutupan" : "Cloud",  value: `${ow.clouds}%` },
+      ow?.visibility  != null && { label: isId ? "Pandang" : "Visibility", value: `${(ow.visibility / 1000).toFixed(0)} km` },
     ].filter(Boolean);
 
     return (
@@ -1576,9 +1536,9 @@ function CrewAnalysisPanel() {
           </p>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1rem" }}>
             {[
-              isId ? "🌧 Ahli Cuaca" : "🌧 Weather Agent",
-              isId ? "💧 Ahli Hidrologi" : "💧 Hydrology Agent",
-              isId ? "⚡ Koordinator Risiko" : "⚡ Risk Coordinator",
+              isId ? "Ahli Cuaca" : "Weather Agent",
+              isId ? "Ahli Hidrologi" : "Hydrology Agent",
+              isId ? "Koordinator Risiko" : "Risk Coordinator",
             ].map(a => (
               <span key={a} style={{
                 fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem",
@@ -1622,9 +1582,9 @@ function CrewAnalysisPanel() {
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", width: "100%", maxWidth: 320 }}>
             {[
-              [isId ? "🌧 Ahli Cuaca" : "🌧 Weather Agent",     isId ? "menganalisis kondisi atmosfer & BMKG..." : "analyzing atmosphere & BMKG..."],
-              [isId ? "💧 Ahli Hidrologi" : "💧 Hydrology Agent", isId ? "meninjau data TMA & hidrologi sungai..." : "reviewing TMA & river hydrology..."],
-              [isId ? "⚡ Koordinator" : "⚡ Coordinator",         isId ? "menyusun laporan risiko akhir..." : "compiling final risk report..."],
+              [isId ? "Ahli Cuaca" : "Weather Agent",     isId ? "menganalisis kondisi atmosfer & BMKG..." : "analyzing atmosphere & BMKG..."],
+              [isId ? "Ahli Hidrologi" : "Hydrology Agent", isId ? "meninjau data TMA & hidrologi sungai..." : "reviewing TMA & river hydrology..."],
+              [isId ? "Koordinator" : "Coordinator",         isId ? "menyusun laporan risiko akhir..." : "compiling final risk report..."],
             ].map(([name, action], i) => {
               const done   = i < agentPhase;
               const active = i === agentPhase;
@@ -1683,7 +1643,7 @@ function CrewAnalysisPanel() {
                   borderRadius: "8px", padding: "0.625rem 0.75rem",
                 }}>
                   <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.55rem", color: "var(--cyan)", letterSpacing: "0.08em", marginBottom: "0.35rem" }}>
-                    {isId ? "🌧 AHLI CUACA" : "🌧 WEATHER AGENT"}
+                    {isId ? "AHLI CUACA" : "WEATHER AGENT"}
                   </div>
                   <p style={{ fontSize: "0.72rem", color: "var(--muted)", lineHeight: 1.6, margin: 0 }}>{crew.analisis_cuaca}</p>
                 </div>
@@ -1694,7 +1654,7 @@ function CrewAnalysisPanel() {
                   borderRadius: "8px", padding: "0.625rem 0.75rem",
                 }}>
                   <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.55rem", color: "var(--safe)", letterSpacing: "0.08em", marginBottom: "0.35rem" }}>
-                    {isId ? "💧 AHLI HIDROLOGI" : "💧 HYDROLOGY AGENT"}
+                    {isId ? "AHLI HIDROLOGI" : "HYDROLOGY AGENT"}
                   </div>
                   <p style={{ fontSize: "0.72rem", color: "var(--muted)", lineHeight: 1.6, margin: 0 }}>{crew.analisis_hidrologi}</p>
                 </div>
@@ -1726,7 +1686,7 @@ function CrewAnalysisPanel() {
               borderRadius: "8px", padding: "0.625rem 0.875rem",
               display: "flex", gap: "0.625rem", alignItems: "flex-start",
             }}>
-              <span style={{ fontSize: "1rem", flexShrink: 0 }}>📢</span>
+              <span style={{ width: 6, height: 6, borderRadius: 2, background: CREW_PURPLE, flexShrink: 0, marginTop: 5 }} />
               <div>
                 <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.55rem", color: CREW_PURPLE, letterSpacing: "0.08em", marginBottom: "0.25rem" }}>
                   {isId ? "PESAN PETUGAS LAPANGAN" : "FIELD OFFICER MESSAGE"}
@@ -1915,17 +1875,12 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
       {/* ══ ZONE: Cuaca & prakiraan ═════════════════════════════════ */}
       <SectionDivider label={isId ? "Cuaca & Prakiraan" : "Weather & Forecast"} />
 
-      {/* Paired per-wilayah weather: BMKG rain forecast ‖ OpenWeather current */}
-      <div className="bento-2">
-        <WilayahRainfallStrip
-          wilayahSummary={riskData?.wilayahSummary}
-          rainfall={riskData?.rainfall}
-          lang={lang ?? "id"}
-        />
-        <WeatherCurrentCard riskData={riskData} />
-      </div>
+      {/* OpenWeather current conditions per district (observed) */}
+      <WeatherCurrentCard riskData={riskData} />
 
-      {/* Per-wilayah 12h BMKG forecast — full-width time-series table */}
+      {/* Per-wilayah 12h BMKG forecast — full-width time-series table.
+          This already includes the current slot, so a separate BMKG
+          "rainfall strip" would duplicate it — removed. */}
       <WilayahForecastGrid wilayahSummary={riskData?.wilayahSummary} />
 
       {/* BMKG fallback when wilayah grid unavailable */}
