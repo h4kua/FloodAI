@@ -220,7 +220,103 @@ function AlertPanel({ stations }) {
 
 // StationPanel: full table of ALL real DSDADKI stations with live readings.
 // Shows top 6 by default; user can expand to see all.
-function StationPanel({ stations }) {
+/* ── ExcludedStationsBreakdown — transparent "why fewer than the source" list ──
+   Explains the 18-vs-38 gap: lists the stations excluded from scoring,
+   grouped by reason (uncalibrated / pump / non-standard datum).
+*/
+function ExcludedStationsBreakdown({ quality }) {
+  const { lang } = useApp();
+  const isId = lang === "id";
+  const [open, setOpen] = useState(false);
+  if (!quality) return null;
+
+  const groups = [
+    {
+      key: "uncal",
+      items: quality.excluded_uncalibrated || [],
+      label: isId ? "Belum terkalibrasi" : "Uncalibrated",
+      reason: isId
+        ? "Ambang siaga placeholder (Siaga 1 = 2 = 3) — belum disetel di sumber DSDADKI, jadi rasio TMA tidak bermakna."
+        : "Placeholder thresholds (Alert 1 = 2 = 3) — never set at the DSDADKI source, so the TMA ratio is meaningless.",
+      color: "var(--muted)",
+    },
+    {
+      key: "pump",
+      items: quality.excluded_pump || [],
+      label: isId ? "Stasiun pompa" : "Pump stations",
+      reason: isId
+        ? "Ambangnya batas operasional mesin pompa, bukan ambang peringatan banjir."
+        : "Thresholds are pump-machinery operational limits, not flood-warning thresholds.",
+      color: "var(--cyan)",
+    },
+    {
+      key: "datum",
+      items: quality.excluded_bad_datum || [],
+      label: isId ? "Datum non-standar" : "Non-standard datum",
+      reason: isId
+        ? "Tinggi air di luar rentang data latih model (mis. nilai negatif)."
+        : "Water level outside the model's training range (e.g. negative values).",
+      color: "var(--wsp)",
+    },
+  ].filter((g) => g.items.length > 0);
+
+  const totalExcluded = groups.reduce((n, g) => n + g.items.length, 0);
+  if (totalExcluded === 0) return null;
+
+  return (
+    <div style={{ marginTop: "0.75rem", borderTop: "1px solid var(--line)", paddingTop: "0.75rem" }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        style={{
+          width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+          background: "none", border: "1px solid var(--line)", borderRadius: 8,
+          padding: "0.5rem 0.75rem", cursor: "pointer",
+          fontFamily: "'JetBrains Mono',monospace", fontSize: "0.64rem",
+          color: "var(--muted)", letterSpacing: "0.03em",
+        }}
+      >
+        <span>
+          {isId
+            ? `${totalExcluded} pos pantau dikecualikan dari skoring`
+            : `${totalExcluded} stations excluded from scoring`}
+        </span>
+        <span style={{ color: "var(--muted-2)" }}>{open ? "↑" : "↓"}</span>
+      </button>
+
+      {open && (
+        <div style={{ marginTop: "0.625rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          {groups.map((g) => (
+            <div key={g.key}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.2rem" }}>
+                <span style={{ width: 6, height: 6, borderRadius: 2, background: g.color, flexShrink: 0 }} />
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", fontWeight: 700, color: "var(--text)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                  {g.label} · {g.items.length}
+                </span>
+              </div>
+              <p style={{ fontSize: "0.68rem", color: "var(--muted-2)", lineHeight: 1.5, margin: "0 0 0.375rem 0.85rem" }}>
+                {g.reason}
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem", marginLeft: "0.85rem" }}>
+                {g.items.map((it, i) => (
+                  <span key={i} style={{
+                    fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem",
+                    color: "var(--muted)", background: "var(--panel-2)",
+                    border: "1px solid var(--line)", borderRadius: 5, padding: "0.18rem 0.45rem",
+                  }}>
+                    {it.nama}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StationPanel({ stations, quality }) {
   const { lang } = useApp();
   const isId = lang === "id";
   const [showAll, setShowAll] = useState(false);
@@ -230,14 +326,25 @@ function StationPanel({ stations }) {
   const PREVIEW = 6;
   const displayed = showAll ? stations : stations.slice(0, PREVIEW);
   const hasMore = stations.length > PREVIEW;
+  const total = quality?.total ?? null;
+  const scored = quality?.scored ?? stations.length;
 
   return (
     <div className="panel panel-body fade-in">
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-        <p className="panel-title" style={{ marginBottom: 0 }}>
-          {isId ? "Sensor Ketinggian Air — DSDADKI" : "Water Level Sensors — DSDADKI"}
-        </p>
-        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em" }}>● real</span>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "0.75rem", gap: "1rem" }}>
+        <div>
+          <p className="panel-title" style={{ marginBottom: "0.15rem" }}>
+            {isId ? "Sensor Ketinggian Air — DSDADKI" : "Water Level Sensors — DSDADKI"}
+          </p>
+          <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", margin: 0, letterSpacing: "0.02em" }}>
+            {total != null
+              ? (isId
+                ? `Menampilkan ${scored} pos terkalibrasi dari ${total} total di sumber`
+                : `Showing ${scored} calibrated of ${total} total at the source`)
+              : (isId ? "Pos pantau terkalibrasi" : "Calibrated monitoring stations")}
+          </p>
+        </div>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em", flexShrink: 0, whiteSpace: "nowrap" }}>● real</span>
       </div>
       <div className="zone-table-wrap">
         <table className="zone-table">
@@ -285,6 +392,9 @@ function StationPanel({ stations }) {
           ? "● Sensor pintu air & pos pantau DSDADKI · Persentase = Tinggi Air ÷ Ambang Siaga 1 · Update tiap 15 menit"
           : "● DSDADKI water gate & monitoring station sensors · Percent = Water Level ÷ Siaga-1 Threshold · Updates every 15 min"}
       </p>
+
+      {/* Transparent 18-vs-38: which source stations were excluded and why */}
+      <ExcludedStationsBreakdown quality={quality} />
     </div>
   );
 }
@@ -1864,7 +1974,7 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
       <div id="station-panel-anchor" />
       {/* Paired views: flat sorted sensor table ‖ per-district grouped probability */}
       <div className="bento-2">
-        <StationPanel stations={stations} />
+        <StationPanel stations={stations} quality={riskData?.stationQuality} />
         <KecamatanZones
           stations={stations}
           wilayahSummary={riskData?.wilayahSummary}

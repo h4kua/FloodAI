@@ -72,6 +72,10 @@ export function useFloodRisk() {
         // Real DSDADKI station readings sorted by siaga ratio desc.
         // Each entry: { nama, tinggi_air, siaga1, ratio, status_siaga }
         stations: json.stations ?? [],
+        // Transparent 18-vs-38 breakdown: { total, scored, excluded_uncalibrated[],
+        // excluded_pump[], excluded_bad_datum[] } — explains why fewer stations
+        // are shown than exist at the DSDADKI source.
+        stationQuality: json.diagnostics?.station_quality ?? null,
         // Per-wilayah TMA + BMKG forecast summary
         wilayahSummary: json.wilayah_summary ?? [],
         // OpenWeather current conditions — pusat Jakarta

@@ -586,6 +586,27 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
         for r in valid_records
         if _is_pump_station(r) and _is_calibrated_station(r)
     ]
+    # Stations with placeholder thresholds (siaga1=siaga2=siaga3) — never
+    # operationally calibrated at the DSDADKI source, so their ratio is meaningless.
+    uncalibrated_stations = [
+        {
+            "nama": str(r.get("nama_pintu_air") or r.get("wilayah") or "unknown"),
+            "lokasi": str(r.get("lokasi") or ""),
+            "tinggi_air": _safe_float(r.get("tinggi_air")),
+        }
+        for r in valid_records
+        if not _is_calibrated_station(r)
+    ]
+    # Single source of truth for "which stations are actually scored/shown":
+    # calibrated, non-pump, with a usable siaga-1 threshold. Reused by both the
+    # stations_summary payload and the station_quality breakdown so counts agree.
+    scored_records = [
+        r
+        for r in valid_records
+        if _is_calibrated_station(r)
+        and not _is_pump_station(r)
+        and _safe_float(r.get("siaga1")) > 0
+    ]
     water_level_ratio = _water_level_ratio_from_records(poskobanjir_records)
     bmkg_scores = _bmkg_category_scores_from_alerts(alerts)
 
@@ -689,14 +710,20 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
                     "lat": _valid_jakarta_lat(r.get("latitude")),
                     "lon": _valid_jakarta_lon(r.get("longitude")),
                 }
-                for r in valid_records
-                if _is_calibrated_station(r)
-                and not _is_pump_station(r)
-                and _safe_float(r.get("siaga1")) > 0
+                for r in scored_records
             ],
             key=lambda x: x["ratio"],
             reverse=True,
         )[:20],
+        # Transparent 18-vs-38 breakdown for the UI: total source stations,
+        # how many are actually scored, and which were excluded and why.
+        "station_quality": {
+            "total": len(poskobanjir_records),
+            "scored": len(scored_records),
+            "excluded_uncalibrated": uncalibrated_stations,
+            "excluded_pump": pump_stations_excluded,
+            "excluded_bad_datum": excluded_stations,
+        },
         "trend_state": {
             **trend_state,
             "rainfall_acc_3h": round(current_row.get("rainfall_3h_proxy_mm", 0.0), 4),
