@@ -137,6 +137,14 @@ def _build_ml_context(prediction: dict) -> str:
     ])
 
 
+def _build_historical_context(location: str) -> str:
+    try:
+        from services.historical_context_builder import build_historical_briefing
+        return build_historical_briefing(location)
+    except Exception:
+        return ""
+
+
 # ---------------------------------------------------------------------------
 # Output helpers
 # ---------------------------------------------------------------------------
@@ -298,6 +306,7 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
         weather_ctx = _build_weather_context(snapshot, prediction)
         hydro_ctx = _build_hydrology_context(snapshot, prediction)
         ml_ctx = _build_ml_context(prediction)
+        hist_ctx = _build_historical_context(location)
 
         # --- Tasks ---
 
@@ -332,17 +341,20 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
             context=[weather_task],
         )
 
+        hist_block = f"\n\n{hist_ctx}" if hist_ctx else ""
         coordinator_task = Task(
             description=(
                 f"Berdasarkan analisis cuaca dan hidrologi dari rekan-rekanmu, "
                 f"serta data prediksi model ML berikut:\n\n"
                 f"{ml_ctx}\n\n"
-                f"Lokasi: {location}\n\n"
+                f"Lokasi: {location}\n"
+                f"{hist_block}\n\n"
                 "Buat laporan risiko banjir dalam format JSON. "
                 "PENTING: Balas HANYA dengan JSON valid — tidak ada teks sebelum atau sesudah.\n\n"
                 "{\n"
                 '  "status_banjir": "AMAN" atau "WASPADA" atau "BAHAYA",\n'
-                '  "penjelasan": "2-3 kalimat untuk warga — kalimat aktif, sebut nama wilayah",\n'
+                '  "penjelasan": "2-3 kalimat untuk warga — sebut nama wilayah & kelurahan spesifik, '
+                'sebutkan estimasi kedalaman air dari data historis jika relevan",\n'
                 '  "tindakan": ["aksi 1", "aksi 2", "aksi 3"],\n'
                 '  "populasi_terdampak": "estimasi jiwa atau null",\n'
                 '  "tingkat_kepercayaan": "misal 72%",\n'
@@ -355,6 +367,15 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
                 "- Larang kata: berdasarkan, terdapat, diketahui, signifikan, komprehensif\n"
                 "- Kalimat maksimal 15 kata — langsung dan aktif\n"
                 "- tindakan pakai kata kerja: evakuasi, siapkan, hubungi, pantau, pindahkan\n"
+                "- Sebut nama wilayah/kelurahan yang spesifik, bukan hanya 'Jakarta'\n"
+                "- Kalau ada data historis, sebutkan estimasi kedalaman banjir (misal '50-100 cm')\n"
+                "- PROPORSIONAL — sesuaikan nada dengan tingkat risiko:\n"
+                "  • AMAN: tenang dan singkat. JANGAN sebut evakuasi atau dokumen darurat.\n"
+                "  • WASPADA: waspada tapi JANGAN panik. Belum banjir — beri langkah persiapan ringan "
+                "(cek drainase, pantau info, siapkan senter). JANGAN suruh evakuasi atau pindahkan barang "
+                "kecuali air sudah masuk halaman.\n"
+                "  • BAHAYA: setiap detik penting. Baru di sini boleh sebut evakuasi, tas darurat, "
+                "pindahkan dokumen.\n"
             ),
             expected_output=(
                 "JSON valid dengan kunci: status_banjir, penjelasan, tindakan (list 3 item), "

@@ -453,7 +453,52 @@ class ActionAgent:
                     "No operational action required at this time."
                 )
 
+        # Kelurahan-specific targeting — names the historically worst-affected
+        # kelurahan for this district so operators know WHERE to prioritise
+        # field movement, not just which kota administrasi is at risk. Only
+        # appended for DANGER (deployment language permitted) and VERY_HIGH +
+        # WARNING (pre-position language). Defensive: never break the advisory
+        # pipeline if bundled history is missing.
+        if risk_level == "DANGER" or (cls == "VERY_HIGH" and risk_level == "WARNING"):
+            kel_line = self._build_kelurahan_priority_line(district, risk_level)
+            if kel_line:
+                prepended.append(kel_line)
+
         return prepended + list(actions), None
+
+    @staticmethod
+    def _build_kelurahan_priority_line(district: str, risk_level: str) -> str:
+        """
+        Return one-line kelurahan priority directive using BNPB 2014–2023
+        historical top-kelurahan list. Empty string when no history available.
+        """
+        try:
+            from services.historical_context_builder import build_chat_historical_context
+        except Exception:
+            return ""
+        ctx = build_chat_historical_context(district)
+        if not ctx:
+            return ""
+        top_kel = ctx.get("top_kelurahan") or []
+        names = [
+            " ".join(w.capitalize() for w in (k.get("name") or "").split())
+            for k in top_kel[:3]
+            if k.get("name")
+        ]
+        if not names:
+            return ""
+        max_depth = ctx.get("max_depth_cm") or 0
+        kel_phrase = ", ".join(names)
+        if risk_level == "DANGER":
+            return (
+                f"[BNPB TARGETED] {district} — prioritise field assets toward "
+                f"kelurahan {kel_phrase} (historically worst-affected, max "
+                f"recorded depth {max_depth:.0f} cm)."
+            )
+        return (
+            f"[BNPB TARGETED] {district} — focus pre-position monitoring on "
+            f"kelurahan {kel_phrase} (most frequent historical flood points)."
+        )
 
     def _generate_system_interpretation(self, evaluation: "EvaluationResult") -> str:
         """

@@ -17,6 +17,11 @@ export function RecommendationsPanel({ riskData, stations = [], onNavigate }) {
   const rainfall  = riskData?.rainfall ?? 0;
   const riskTrend = riskData?.trendState?.risk_trend;
   const wSummary  = riskData?.wilayahSummary ?? [];
+  // Kelurahan-targeted lines come from backend's _kelurahan_targeted_actions
+  // (BNPB 2014–2023 history × live wilayah siaga ranks). They're listed first
+  // because they answer "where specifically to act", not just "what to do".
+  const backendActions = riskData?.recommendedActions ?? [];
+  const kelTargeted = backendActions.filter(a => typeof a === "string" && a.toLowerCase().includes("kelurahan"));
 
   const s1 = [...stations].filter(s => s.ratio >= 1.0).sort((a, b) => b.ratio - a.ratio);
   const s2 = [...stations].filter(s => s.ratio >= 0.75 && s.ratio < 1.0).sort((a, b) => b.ratio - a.ratio);
@@ -72,6 +77,10 @@ export function RecommendationsPanel({ riskData, stations = [], onNavigate }) {
       ? "Kondisi saat ini terpantau normal. Tetap pantau sensor tiap 15 menit selama musim hujan."
       : "Current conditions appear normal. Keep monitoring sensors every 15 min during rain season."
     );
+  }
+  // Prepend backend kelurahan-targeted lines so location-specific guidance lands first
+  if (kelTargeted.length > 0) {
+    dynActions.unshift(...kelTargeted);
   }
 
   // ── Functional buttons ────────────────────────────────────
@@ -262,8 +271,8 @@ export function StaleDataBanner({ snapshotFetchedAt, onRefresh, refreshing }) {
       <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.95rem", fontWeight: 800, flexShrink: 0, lineHeight: 1 }}>!</span>
       <span style={{ flex: 1, lineHeight: 1.5 }}>
         {isId
-          ? `Data sensor sudah ${ageLabel} tidak diperbarui. Scraper otomatis mungkin mengalami gangguan.`
-          : `Sensor data hasn't updated for ${ageLabel}. The automatic scraper may be down.`}
+          ? `Sensor DSDADKI belum mengirim data baru sejak ${ageLabel} lalu. Sistem refresh kami tetap berjalan tiap 15 menit — yang stale adalah pengukuran di hulu, bukan koneksi kami.`
+          : `DSDADKI sensors haven't pushed new readings for ${ageLabel}. Our refresh job keeps running every 15 min — the upstream measurements are stale, not our connection.`}
       </span>
       {onRefresh && (
         <button

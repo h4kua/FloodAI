@@ -71,7 +71,16 @@ def _static_jakarta_knowledge() -> str:
     return (
         "Operational guardrails: answer as a Jakarta flood assistant; prioritize BPBD/official "
         "instructions; never claim exact street safety without live ground confirmation; for danger "
-        "or trapped users give immediate actions and emergency numbers BPBD 117, Basarnas 115, DKI 112."
+        "or trapped users give immediate actions and emergency numbers BPBD 117, Basarnas 115, DKI 112.\n\n"
+        "PROPORTIONAL TONE — match urgency to actual risk level:\n"
+        "- AMAN/Normal: calm, brief. Do NOT mention evacuation, emergency bags, or moving belongings.\n"
+        "- WASPADA/Warning: alert but NOT panicking. Rain is heavy but water has NOT entered homes yet. "
+        "Suggest: check drains, prepare flashlight, monitor RT/RW updates. "
+        "Do NOT suggest evacuation, packing emergency bags, or moving valuables upstairs — that's overreacting.\n"
+        "- BAHAYA/Danger: lives at risk NOW. Only here: evacuation, emergency bags, move documents.\n\n"
+        "LOCATION SPECIFICITY: always mention specific kelurahan, kecamatan, or river names when available.\n"
+        "DEPTH ESTIMATES: when historical data is available, mention typical flood depths (e.g. '50-100 cm').\n"
+        "HISTORICAL CONTEXT: reference past flood frequency and impact when it helps the user understand risk."
     )
 
 
@@ -120,6 +129,15 @@ def _build_retrieved_context(req: ChatRequest) -> str:
     wilayah = frontend.get("wilayahSummary") or prediction.get("wilayah_summary") or []
     recommended_actions = _list_value(prediction.get("recommended_action"))
 
+    hist_context = {}
+    try:
+        from services.historical_context_builder import build_chat_historical_context
+        district = (diagnostics.get("district") or prediction.get("location") or "Jakarta")
+        if isinstance(district, str) and district.strip():
+            hist_context = build_chat_historical_context(district)
+    except Exception:
+        pass
+
     context = {
         "assistant_mode": "retrieve_then_answer",
         "language": "Indonesian" if req.lang != "en" else "English",
@@ -153,6 +171,7 @@ def _build_retrieved_context(req: ChatRequest) -> str:
             for item in (wilayah if isinstance(wilayah, list) else [])[:6]
             if isinstance(item, dict)
         ],
+        "historical_flood_data": hist_context if hist_context else None,
         "snapshot_source": {
             "fetched_at_utc": snapshot.get("fetched_at_utc"),
             "records": (snapshot.get("summary") or {}).get("total_poskobanjir_records")
@@ -163,6 +182,8 @@ def _build_retrieved_context(req: ChatRequest) -> str:
             "Use this context only when relevant to the user's question.",
             "If data timestamps are stale, say 'data terakhir' and avoid pretending it is live.",
             "Give next actions before explanation for emergency-sounding messages.",
+            "When mentioning flood risk, reference historical_flood_data for depth estimates and affected areas.",
+            "Be PROPORTIONAL: WASPADA means alert, NOT panic. Don't suggest evacuation for WASPADA status.",
         ],
     }
     return json.dumps(context, ensure_ascii=False, separators=(",", ":"))[:_MAX_CONTEXT_CHARS]

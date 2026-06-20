@@ -89,23 +89,91 @@ def _risk_interpretation(risk_level, diagnostics):
     )
 
 
-def _recommended_action(risk_level):
+def _titlecase_name(name: str) -> str:
+    """Normalize all-caps kelurahan/kecamatan names from BNPB records."""
+    return " ".join(w.capitalize() for w in (name or "").split())
+
+
+def _kelurahan_targeted_actions(risk_level: str, wilayah_summary: list) -> list[str]:
+    """
+    Build kelurahan-specific action items by joining the live worst-affected
+    districts (from realtime TMA siaga ranks) with the BNPB 2014–2023
+    historical top-kelurahan list. Returns [] when no district crosses the
+    siaga threshold for the current risk_level or when bundled history is
+    unavailable.
+
+    Threshold per risk_level:
+      DANGER  → worst_rank >= 2 (Siaga 3 or worse — evacuation-language enriched)
+      WARNING → worst_rank >= 3 (Siaga 2 or worse — monitoring-language only)
+      SAFE    → never enriched (proportional tone)
+    """
+    if risk_level == "SAFE" or not wilayah_summary:
+        return []
+    threshold = 2 if risk_level == "DANGER" else 3
+    candidates = [
+        w for w in wilayah_summary
+        if isinstance(w, dict) and w.get("worst_rank", 0) >= threshold
+    ]
+    if not candidates:
+        return []
+    candidates.sort(key=lambda w: w.get("worst_rank", 0), reverse=True)
+
+    try:
+        from services.historical_context_builder import build_chat_historical_context
+    except Exception:
+        return []
+
+    targeted: list[str] = []
+    for w in candidates[:2]:
+        district = w.get("wilayah", "")
+        ctx = build_chat_historical_context(district)
+        if not ctx:
+            continue
+        top_kel = ctx.get("top_kelurahan") or []
+        names = [_titlecase_name(k.get("name", "")) for k in top_kel[:3] if k.get("name")]
+        if not names:
+            continue
+        max_depth = ctx.get("max_depth_cm") or 0
+        kel_phrase = ", ".join(names)
+        if risk_level == "DANGER":
+            targeted.append(
+                f"Prioritaskan evakuasi dan tim lapangan di {district} — kelurahan {kel_phrase} "
+                f"adalah titik historis paling rawan (maks {max_depth:.0f} cm)."
+            )
+        else:  # WARNING
+            targeted.append(
+                f"Pra-posisi pemantauan di {district} — kelurahan {kel_phrase} "
+                "paling sering banjir secara historis. Belum perlu evakuasi."
+            )
+    return targeted
+
+
+def _recommended_action(risk_level, wilayah_summary=None):
     if risk_level == "DANGER":
-        return [
+        base = [
             "Aktifkan koordinasi lintas pihak: BPBD/posko lokal, operator pintu air, dan tim lapangan di titik rawan.",
             "Keluarkan peringatan dini terarah untuk wilayah yang memiliki histori genangan atau elevasi rendah.",
             "Prioritaskan pemeriksaan pintu air, saluran utama, dan titik yang menunjukkan kenaikan muka air tercepat.",
         ]
-    if risk_level == "WARNING":
-        return [
+    elif risk_level == "WARNING":
+        base = [
             "Naikkan frekuensi monitoring BMKG, OpenWeather, dan Posko Banjir agar eskalasi bisa ditangkap lebih cepat.",
             "Siapkan personel siaga terbatas dan verifikasi kondisi drainase, pompa, atau titik limpasan yang sering bermasalah.",
             "Gunakan status ini untuk komunikasi internal dan kesiapan operasional, belum untuk alarm publik penuh.",
         ]
-    return [
-        "Lanjutkan monitoring rutin dan simpan histori realtime untuk retraining agar model makin akurat dari waktu ke waktu.",
-        "Gunakan periode aman ini untuk validasi data, kalibrasi threshold, dan evaluasi kesiapan infrastruktur lokal.",
-    ]
+    else:
+        base = [
+            "Lanjutkan monitoring rutin dan simpan histori realtime untuk retraining agar model makin akurat dari waktu ke waktu.",
+            "Gunakan periode aman ini untuk validasi data, kalibrasi threshold, dan evaluasi kesiapan infrastruktur lokal.",
+        ]
+
+    # Targeted recommendations land FIRST so operators see them before the
+    # generic playbook. Defensive — never crash live prediction on history-lookup failure.
+    try:
+        targeted = _kelurahan_targeted_actions(risk_level, wilayah_summary or [])
+    except Exception:
+        targeted = []
+    return targeted + base
 
 
 def _siaga_rank(status_str: str) -> int:
@@ -288,7 +356,7 @@ def predict_realtime_native(
         "probability": probability,
         "risk_level": risk_level,
         "risk_interpretation": _risk_interpretation(risk_level, engineered.diagnostics),
-        "recommended_action": _recommended_action(risk_level),
+        "recommended_action": _recommended_action(risk_level, wilayah_summary),
         "risk_thresholds": thresholds,
         # ISO-8601 UTC timestamp when the sensor snapshot was built.
         # Lets the frontend show "Data sensor dari XX:XX WIB" so users know

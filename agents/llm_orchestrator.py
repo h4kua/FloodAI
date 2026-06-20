@@ -61,12 +61,23 @@ ATURAN BAHASA — WAJIB DIIKUTI
 ③ JANGAN mulai kalimat dengan:
    "Berdasarkan…", "Terdapat…", "Diketahui bahwa…", "Sistem mendeteksi…"
 
-④ NADA PER STATUS — ikuti register emosi berikut:
-   • AMAN    → tenang, singkat, tidak lebay. Warga tidak perlu khawatir.
-   • WASPADA → waspada tapi belum panik. Hujan deras sedang mendekat.
-               Beri tahu warga apa yang harus disiapkan sekarang.
-   • BAHAYA  → ada nyawa yang terancam saat ini. Setiap detik penting.
+④ NADA PER STATUS — PROPORSIONAL, jangan berlebihan:
+   • AMAN    → tenang, singkat. "Tidak perlu khawatir."
+               JANGAN sebut evakuasi, tas darurat, atau pindahkan barang.
+   • WASPADA → waspada tapi BELUM panik. Hujan deras terjadi tapi AIR BELUM MASUK rumah.
+               Langkah: cek drainase, siapkan senter, pantau info RT/RW.
+               JANGAN suruh evakuasi. JANGAN suruh pindahkan barang ke lantai atas.
+               JANGAN suruh siapkan tas siaga — itu reaksi berlebihan untuk WASPADA.
+   • BAHAYA  → ada nyawa yang terancam SEKARANG. Setiap detik penting.
+               BARU DI SINI boleh: evakuasi, tas darurat, pindahkan dokumen/barang.
                Gunakan kalimat perintah langsung tanpa basa-basi.
+
+⑤ LOKASI SPESIFIK & KEDALAMAN
+   - Selalu sebut nama wilayah/kelurahan/kecamatan yang spesifik (dari field "lokasi_detail").
+   - Kalau ada data historis (field "historical_context"), sebutkan estimasi kedalaman
+     banjir yang mungkin terjadi. Contoh: "Banjir di sini biasanya 50–100 cm."
+   - Sebutkan nama sungai/kali yang relevan jika ada di data.
+   - Sebutkan dampak historis singkat jika relevan (berapa jiwa terdampak sebelumnya).
 
 ════════════════════════════════════════
 CONTOH KALIMAT YANG BENAR ✓
@@ -82,22 +93,24 @@ STATUS AMAN:
   petugas    → "Pantau sensor tiap 30 menit — tidak ada aksi darurat."
 
 STATUS WASPADA:
-  penjelasan → "Hujan deras sedang terjadi dan air di Kanal Barat mulai naik.
-                Belum berbahaya, tapi bisa berubah cepat dalam 1–2 jam ke depan.
-                Siapkan diri dan pantau terus pengumuman."
-  tindakan   → ["Siapkan tas siaga berisi dokumen penting dan obat-obatan",
-                "Pindahkan barang berharga ke lantai atas sekarang",
-                "Hubungi ketua RT jika air mulai masuk halaman"]
-  petugas    → "Buka posko, hubungi RT/RW rawan, siap evakuasi dalam 15 menit."
+  penjelasan → "Hujan deras turun di Jakarta Timur, terutama sekitar Kec. Jatinegara.
+                Air di Kali Ciliwung naik tapi masih di bawah batas siaga.
+                Pantau terus info dari RT/RW — belum perlu evakuasi."
+  tindakan   → ["Cek saluran air dan drainase di sekitar rumah — pastikan tidak mampet",
+                "Siapkan senter dan power bank untuk jaga-jaga listrik padam",
+                "Pantau info dari RT/RW dan status sensor tiap 30 menit"]
+  petugas    → "Pantau sensor tiap 15 menit, hubungi RT/RW rawan, belum perlu buka posko."
+  CATATAN    → Di WASPADA, JANGAN suruh warga evakuasi, pindahkan barang ke lantai atas,
+               atau siapkan tas darurat. Itu reaksi berlebihan — simpan untuk BAHAYA.
 
 STATUS BAHAYA:
-  penjelasan → "Air sudah melewati batas bahaya di Jakarta Utara.
-                Tinggalkan rumah sekarang — jangan tunggu air masuk.
-                Pergi ke titik evakuasi terdekat."
-  tindakan   → ["EVAKUASI sekarang — bawa dokumen, obat, dan anak-anak",
-                "Jauhi saluran air, got, dan kali yang meluap",
-                "Hubungi 112 jika butuh bantuan evakuasi"]
-  petugas    → "Evakuasi paksa di RW rawan — air naik cepat, jangan tunda!"
+  penjelasan → "Air Kali Ciliwung sudah melewati batas bahaya di Kampung Melayu.
+                Dari data historis, banjir di sini bisa mencapai 1–2 meter.
+                Tinggalkan rumah sekarang — pergi ke GOR Jatinegara atau titik evakuasi terdekat."
+  tindakan   → ["EVAKUASI sekarang — bawa KTP, obat rutin, dan anak-anak lebih dulu",
+                "Jauhi Kali Ciliwung dan saluran air yang sudah meluap",
+                "Hubungi 112 atau BPBD 117 jika butuh bantuan evakuasi"]
+  petugas    → "Evakuasi paksa Kampung Melayu dan Bidara Cina — air naik cepat, jangan tunda!"
 
 ════════════════════════════════════════
 CONTOH KALIMAT YANG SALAH ✗ (jangan tiru)
@@ -213,16 +226,27 @@ def _fallback_explanation(prediction: dict) -> dict:
     district   = _extract_district(prediction)
     population = _extract_population(prediction)
 
+    hist_depth = ""
+    try:
+        from services.historical_context_builder import build_chat_historical_context
+        hist = build_chat_historical_context(district)
+        if hist and hist.get("avg_depth_cm"):
+            avg = hist["avg_depth_cm"]
+            mx = hist.get("max_depth_cm", 0)
+            hist_depth = f" Dari data historis, banjir di sini biasanya {avg:.0f}–{mx:.0f} cm."
+    except Exception:
+        pass
+
     if status == "BAHAYA":
         penjelasan = (
             f"Air sudah melewati batas bahaya di {district}. "
-            "Tinggalkan rumah sekarang — jangan tunggu air masuk. "
+            f"Tinggalkan rumah sekarang — jangan tunggu air masuk.{hist_depth} "
             "Pergi ke titik evakuasi terdekat."
         )
         tindakan = [
-            "EVAKUASI sekarang — bawa dokumen, obat, dan anak-anak terlebih dahulu",
+            "EVAKUASI sekarang — bawa KTP, obat rutin, dan anak-anak lebih dulu",
             "Jauhi saluran air, got terbuka, dan bantaran kali yang meluap",
-            "Hubungi 112 atau posko BPBD jika butuh bantuan evakuasi",
+            "Hubungi 112 atau BPBD 117 jika butuh bantuan evakuasi",
         ]
         pesan_petugas = (
             f"Evakuasi paksa di {district} — air naik cepat, jangan tunda!"
@@ -230,23 +254,23 @@ def _fallback_explanation(prediction: dict) -> dict:
 
     elif status == "WASPADA":
         penjelasan = (
-            f"Hujan deras terjadi dan air di {district} mulai naik. "
-            "Belum berbahaya, tapi bisa berubah cepat dalam 1–2 jam ke depan. "
-            "Siapkan diri dan pantau terus pengumuman."
+            f"Hujan deras turun di {district} dan air mulai naik. "
+            "Belum berbahaya, tapi bisa berubah dalam 1–2 jam ke depan. "
+            "Pantau terus info dari RT/RW — belum perlu evakuasi."
         )
         tindakan = [
-            "Siapkan tas siaga berisi dokumen penting, obat-obatan, dan pakaian ganti",
-            "Pindahkan barang berharga dan elektronik ke lantai atas sekarang",
-            "Hubungi ketua RT segera jika air mulai masuk halaman rumah",
+            "Cek saluran air dan drainase di sekitar rumah — pastikan tidak mampet",
+            "Siapkan senter dan power bank untuk jaga-jaga listrik padam",
+            "Pantau info dari RT/RW dan status sensor tiap 30 menit",
         ]
         pesan_petugas = (
-            f"Buka posko {district}, hubungi RT/RW rawan, siap evakuasi dalam 15 menit."
+            f"Pantau sensor {district} tiap 15 menit, hubungi RT/RW rawan — belum perlu buka posko."
         )
 
     else:  # AMAN
         penjelasan = (
             f"Air sungai di {district} masih jauh di bawah batas aman. "
-            "Curah hujan rendah dan tidak ada tanda-tanda peningkatan risiko. "
+            "Curah hujan rendah dan tidak ada tanda peningkatan risiko. "
             "Warga tidak perlu khawatir saat ini."
         )
         tindakan = [
@@ -328,10 +352,12 @@ def _build_user_message(prediction: dict) -> str:
     """
     Serialise the subset of prediction fields that Claude needs.
     Includes `lokasi_detail` so Claude uses the specific district name
-    rather than writing generic location-free sentences.
+    rather than writing generic location-free sentences. Also includes
+    historical flood context (depths, rivers, affected kelurahan) so the
+    explanation is grounded in real data.
     """
     district = _extract_district(prediction)
-    safe_fields = {
+    safe_fields: dict[str, Any] = {
         "lokasi_detail":          district,
         "risk_level":             prediction.get("risk_level"),
         "confidence_score":       prediction.get("confidence_score"),
@@ -343,6 +369,13 @@ def _build_user_message(prediction: dict) -> str:
         "recommended_action":     prediction.get("recommended_action"),
         "data_freshness_minutes": prediction.get("data_freshness_minutes"),
     }
+    try:
+        from services.historical_context_builder import build_historical_briefing
+        hist = build_historical_briefing(district)
+        if hist:
+            safe_fields["historical_context"] = hist
+    except Exception:
+        pass
     return json.dumps(safe_fields, ensure_ascii=False, default=str)
 
 
