@@ -33,6 +33,16 @@ router = APIRouter(tags=["crew-analysis"])
 # Set CREW_TIMEOUT_S env var to tune without a deploy.
 _CREW_TIMEOUT_S = float(os.getenv("CREW_TIMEOUT_S", "45"))
 
+# Snapshot-keyed cache for the public /predict/crew-realtime endpoint. The crew
+# output only depends on the snapshot, which refreshes every ~15 min, so running
+# the 3 Groq LLM calls again for the same snapshot is pure waste — and the
+# endpoint is unauthenticated, so without this it could be spammed into cost.
+# A single-entry cache keyed on fetched_at_utc covers the only "current" snapshot;
+# the lock serializes concurrent first-time builds so the crew runs once, not
+# once per click.
+_crew_cache: dict = {"key": None, "result": None}
+_crew_cache_lock = asyncio.Lock()
+
 _EXAMPLE_PAYLOAD = {
     "fetched_at_utc": "2026-05-18T11:30:00Z",
     "location": "Jakarta Utara",
@@ -133,7 +143,21 @@ async def predict_crew_realtime_endpoint(request: Request) -> dict:
     except Exception as exc:
         raise HTTPException(status_code=503, detail="snapshot_unreadable") from exc
 
-    return await _run_crew_on_snapshot(request, snapshot)
+    cache_key = snapshot.get("fetched_at_utc")
+    # Fast path: this snapshot has already been analysed — return it without
+    # burning three more LLM calls.
+    if cache_key and _crew_cache["key"] == cache_key and _crew_cache["result"] is not None:
+        return _crew_cache["result"]
+
+    async with _crew_cache_lock:
+        # Re-check under the lock: a concurrent request may have just filled it.
+        if cache_key and _crew_cache["key"] == cache_key and _crew_cache["result"] is not None:
+            return _crew_cache["result"]
+        result = await _run_crew_on_snapshot(request, snapshot)
+        if cache_key:
+            _crew_cache["key"] = cache_key
+            _crew_cache["result"] = result
+        return result
 
 
 @router.post(
