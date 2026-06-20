@@ -1,0 +1,74 @@
+name: Refresh flood snapshot
+
+# Keeps the production snapshot fresh without paying for an always-on machine.
+#
+# The snapshot is refreshed by an in-process APScheduler inside the FastAPI app,
+# but Fly.io stops the machine when idle (auto_stop_machines='stop',
+# min_machines_running=0), so the scheduler only runs while someone is browsing.
+# This cron pings the refresh endpoint on a schedule, which BOTH wakes the
+# machine (auto_start_machines=true) AND rebuilds the snapshot.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   REFRESH_URL      Full URL, e.g. https://<your-app>.fly.dev/internal/refresh-snapshot
+#   INTERNAL_SECRET  Must equal the INTERNAL_SECRET env set on Fly
+#                    (fly secrets set INTERNAL_SECRET=...). If unset on Fly the
+#                    endpoint returns 503 and this job will report it.
+
+on:
+  schedule:
+    # Every 15 minutes. GitHub may delay runs under load; that is fine here.
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}  # allow manual runs for testing
+
+# Don't pile up overlapping refreshes if a run is slow.
+concurrency:
+  group: refresh-snapshot
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping refresh endpoint
+        env:
+          REFRESH_URL: ${{ secrets.REFRESH_URL }}
+          INTERNAL_SECRET: ${{ secrets.INTERNAL_SECRET }}
+        run: |
+          if [ -z "$REFRESH_URL" ] || [ -z "$INTERNAL_SECRET" ]; then
+            echo "::error::REFRESH_URL and INTERNAL_SECRET repository secrets must be set."
+            exit 1
+          fi
+
+          # -m 120: cold-start wake + the endpoint's own 45s build budget.
+          # Capture body and HTTP status separately.
+          body="$(mktemp)"
+          code="$(curl -sS -m 120 -o "$body" -w '%{http_code}' \
+            -X POST "$REFRESH_URL" \
+            -H "X-Internal-Secret: $INTERNAL_SECRET" \
+            -H 'Content-Type: application/json' || echo 000)"
+
+          echo "HTTP $code"
+          echo "Response: $(cat "$body")"
+
+          case "$code" in
+            200)
+              echo "Snapshot refreshed."
+              ;;
+            429)
+              # Already refreshed within the min interval — not an error.
+              echo "Already fresh (rate-limited). OK."
+              ;;
+            503)
+              echo "::error::Endpoint disabled — set INTERNAL_SECRET in the Fly production env."
+              exit 1
+              ;;
+            401)
+              echo "::error::Invalid internal secret — REFRESH secret must match Fly's INTERNAL_SECRET."
+              exit 1
+              ;;
+            *)
+              echo "::error::Refresh failed with HTTP $code."
+              exit 1
+              ;;
+          esac
