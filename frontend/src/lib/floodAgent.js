@@ -143,23 +143,23 @@ Jakarta Selatan, Kec. Pesanggrahan:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 LANDMARK JAKARTA & STATUS RAWAN BANJIR:
 
-🏪 Mall / Pusat Perbelanjaan:
+Mall / Pusat Perbelanjaan:
   RAWAN: Pluit Village Mall & Emporium Pluit (Penjaringan — area rob), ITC Roxy Mas (Grogol, banjir kilat), Mangga Dua Square (Sawah Besar, genangan)
   PANTAU: Mall Ambassador (Tebet, dekat Ciliwung), Ciputra Mall (Grogol), Seasons City (Tambora)
   AMAN (elevated/drainase baik): Grand Indonesia, Plaza Indonesia, Senayan City, Pondok Indah Mall, Taman Anggrek, Central Park, Lippo Mall Kemang, Kota Kasablanka, Kelapa Gading MOI
 
-🏥 Rumah Sakit / Puskesmas:
+Rumah Sakit / Puskesmas:
   Area rawan (tapi gedung umumnya elevated): RSUD Koja (Cilincing), RSUD Jatinegara (dekat Ciliwung), RS Pelabuhan (Penjaringan)
   Aman, bisa jadi rujukan darurat: RSCM (Gambir, JakPus), RSUD Tarakan (Gambir), RS Carolus (Senen), RSPI Sulianti Saroso (Tanjung Priok), RS Fatmawati (JakSel)
 
-🏫 Sekolah (sering jadi posko evakuasi):
+Sekolah (sering jadi posko evakuasi):
   SDN Pluit 01–05 (Kec. Penjaringan) — biasa jadi titik evakuasi warga Muara Baru
   SDN Kampung Melayu 01–03 (Kec. Jatinegara) — posko banjir kiriman Ciliwung
   SDN Kalideres 01–04 (Kec. Kalideres) — titik kumpul banjir Kali Semanan
   SDN Cengkareng 01–06 (Kec. Cengkareng) — posko banjir Kali Angke
   SMAN / SMPN di kecamatan rawan sering dibuka BPBD → hubungi RT/RW atau BPBD 117
 
-🏛️ Tempat / Landmark Lain:
+Tempat / Landmark Lain:
   Rawan genangan: Pasar Ikan Muara Baru, Pasar Jatinegara, Pasar Kalideres, Terminal Kalideres
   Aman / dataran tinggi: Monas, Senayan/GBK, TMII, Ancol (bagian boulevard), Kemang Village
 
@@ -297,15 +297,15 @@ Kalau semua hijau = aman. Kalau ada merah/oranye = pantau lebih sering.`,
 
     wilayah: `Wilayah Jakarta yang paling rawan banjir berdasarkan data historis:
 
-🔴 Sangat Rawan:
+Sangat Rawan:
 • Jakarta Utara — Penjaringan (Pluit, Muara Baru), Pademangan, Cilincing. Kombinasi rob + banjir kiriman.
 • Jakarta Timur — Jatinegara/Kampung Melayu (aliran Ciliwung dari Bogor), Cakung
 
-🟠 Rawan:
+Rawan:
 • Jakarta Barat — Kalideres (Kali Semanan), Cengkareng, Tambora (Kali Angke)
 • Jakarta Selatan — Tebet/Bukit Duri (bantaran Ciliwung), Pesanggrahan, Pasar Minggu
 
-🟡 Waspada Saat Hujan Deras:
+Waspada Saat Hujan Deras:
 • Jakarta Pusat — Kemayoran, Sawah Besar (genangan lokal, biasanya cepat surut)
 
 Cek kondisi wilayahmu secara real di peta sensor deFlood.ai atau hubungi RT/RW setempat.`,
@@ -324,11 +324,11 @@ Lihat 2–3 tanda sekaligus? Langsung siapkan tas darurat dan cek rute evakuasi.
 
     shelter: `Titik pengungsian di Jakarta (buka/tutup sesuai kondisi darurat — selalu konfirmasi ke BPBD 117):
 
-📍 Jakarta Utara: GOR Tanjung Priok (Jl. Enggano No.1, Tanjung Priok), SD/SMP Negeri di Kec. Penjaringan, Kantor Kec. Cilincing
-📍 Jakarta Barat: GOR Kalideres (Jl. Daan Mogot Km.19, Kalideres), Gedung Serbaguna Kec. Tambora
-📍 Jakarta Timur: GOR Cakung, Kantor Walikota Jakarta Timur (Jl. D.I. Panjaitan, Matraman)
-📍 Jakarta Selatan: Stadion Lebak Bulus (Kec. Cilandak), Balai Rakyat Kec. Pasar Minggu
-📍 Jakarta Pusat: Gedung Walikota Jakarta Pusat (Kec. Menteng), GOR Kemayoran
+Jakarta Utara: GOR Tanjung Priok (Jl. Enggano No.1, Tanjung Priok), SD/SMP Negeri di Kec. Penjaringan, Kantor Kec. Cilincing
+Jakarta Barat: GOR Kalideres (Jl. Daan Mogot Km.19, Kalideres), Gedung Serbaguna Kec. Tambora
+Jakarta Timur: GOR Cakung, Kantor Walikota Jakarta Timur (Jl. D.I. Panjaitan, Matraman)
+Jakarta Selatan: Stadion Lebak Bulus (Kec. Cilandak), Balai Rakyat Kec. Pasar Minggu
+Jakarta Pusat: Gedung Walikota Jakarta Pusat (Kec. Menteng), GOR Kemayoran
 
 Cara cepat: buka halaman Evakuasi di menu atas → masukkan alamatmu → dapat rute otomatis ke shelter terdekat.
 Nomor BPBD Jakarta: 117 (24 jam, tahu shelter aktif real time).`,
@@ -432,30 +432,30 @@ Pantau status semua sensor di peta deFlood.ai untuk lihat titik kritis yang seda
 
     jalan: `Jalan & kawasan rawan banjir di Jakarta:
 
-🔴 Jakarta Utara (paling rawan):
+Jakarta Utara (paling rawan):
 • Jl. Pluit Raya, Jl. Muara Baru, Jl. Muara Angke — rob + kiriman, sering 50–150 cm
 • Jl. Yos Sudarso (Penjaringan–Pademangan) — rob saat pasang tinggi
 • Jl. Cilincing Raya, Jl. Kalibaru Timur — bantaran kali, kiriman dari hulu
 • Jl. Bandengan Utara/Selatan, Jl. Pademangan Raya
 
-🟠 Jakarta Timur:
+Jakarta Timur:
 • Jl. Kampung Melayu Besar — TERCEPAT tergenang saat banjir kiriman Ciliwung
 • Jl. Otista Raya, Jl. Matraman Raya, Jl. D.I. Panjaitan — Jatinegara/Matraman
 • Jl. Cipinang Muara — bantaran Kali Cipinang
 • Jl. Pulogebang, Jl. Cakung Drain — kiriman dari Bekasi
 
-🟠 Jakarta Barat:
+Jakarta Barat:
 • Jl. Daan Mogot Raya (Km.10–Km.20) — sering macet + banjir kiriman Semanan
 • Jl. Raya Semanan, Jl. Pegadungan — bantaran Kali Semanan
 • Jl. Kapuk Raya, Jl. Cengkareng Raya — dekat Kali Angke
 • Jl. Kyai Tapa, Jl. S. Parman — Kali Sekretaris
 
-🟡 Jakarta Selatan (banjir kiriman Ciliwung):
+Jakarta Selatan (banjir kiriman Ciliwung):
 • Jl. Dr. Saharjo, Jl. Bukit Duri Tanjakan — Tebet, bantaran Ciliwung
 • Jl. Pesanggrahan Raya, Jl. Petukangan — bantaran Kali Pesanggrahan
 • Jl. Pasar Minggu Raya — genangan sesekali
 
-🟢 Relatif Aman:
+Relatif Aman:
 • Kawasan Sudirman–Thamrin, Senayan/GBK, Menteng (Jl. Imam Bonjol, Jl. Diponegoro)
 • Jl. TB Simatupang (JakSel selatan), Jl. Fatmawati, Jl. Ragunan
 • Kawasan Monas (Jl. Medan Merdeka) — dataran tinggi
@@ -464,117 +464,117 @@ Untuk rute yang mempertimbangkan kondisi jalan: buka halaman Evakuasi → masukk
 
     web: `deFlood.ai adalah platform pemantauan banjir realtime Jakarta. Ini fitur-fiturnya:
 
-📊 Command Center (halaman utama):
+Command Center (halaman utama):
 • Skor Risiko (0–100): model XGBoost dari 38+ sensor TMA + cuaca
 • 3 kartu metrik: jumlah stasiun siaga, total stasiun aktif, skor risiko terkini
 • Strip Curah Hujan: kondisi cuaca BMKG per 5 wilayah Jakarta (lengkap suhu + kelembapan)
 • Sensor strip: muka air %, tren naik/turun, akumulasi hujan, anomali
 
-🗺️ Peta Risiko:
+Peta Risiko:
 • Titik sensor pintu air DSDADKI realtime (warna = level siaga)
 • Estimasi zona risiko ML per area Jakarta
 • Klik titik sensor untuk lihat detail ketinggian air
 
-📋 Tabel Sensor:
+Tabel Sensor:
 • Semua pos pantau dengan tinggi air aktual vs ambang Siaga 1
 • Progress bar persentase untuk tiap stasiun
 
-🚨 Halaman Evakuasi:
+Halaman Evakuasi:
 • Masukkan alamatmu → dapat rute ke shelter pengungsian terdekat
 • 5 langkah evakuasi terstandar BPBD
 
-🤖 Chatbot Flo (aku!):
+Chatbot Flo (aku!):
 • Tanya kondisi banjir, info wilayah RT/RW, jarak ke shelter, kontak darurat, cara baca sensor
 
 Data diperbarui setiap 15 menit dari DSDADKI, BMKG, dan OpenWeather.`,
 
     rtrw: `RT/RW rawan banjir di Jakarta berdasarkan data historis BPBD:
 
-📍 Jakarta Utara — Kec. Penjaringan:
+Jakarta Utara — Kec. Penjaringan:
 • Kel. Pluit: RT 001–021/RW 001–017 (Muara Baru, Muara Angke — ROB + kiriman, paling parah)
 • Kel. Pejagalan: RT 001–008/RW 001–003
 • Kel. Penjaringan: RT 001–010/RW 001–004
 
-📍 Jakarta Utara — Kec. Pademangan:
+Jakarta Utara — Kec. Pademangan:
 • Kel. Pademangan Barat: RT 001–020/RW 001–009 (dekat Kali Sentiong, ~40–80 cm)
 
-📍 Jakarta Utara — Kec. Cilincing:
+Jakarta Utara — Kec. Cilincing:
 • Kel. Semper Barat: RT 001–018/RW 001–008 | Kel. Kalibaru: RT 001–012/RW 001–005
 
-📍 Jakarta Timur — Kec. Jatinegara:
+Jakarta Timur — Kec. Jatinegara:
 • Kel. Kampung Melayu: RT 001–016/RW 001–007 (TERCEPAT tergenang saat kiriman Ciliwung)
 • Kel. Cipinang Muara: RT 001–014/RW 001–006 | Kel. Bidara Cina: RT 001–012/RW 001–005
 
-📍 Jakarta Timur — Kec. Matraman:
+Jakarta Timur — Kec. Matraman:
 • Kel. Utan Kayu Selatan: RT 001–010/RW 001–004 | Kel. Kebon Manggis: RT 001–009/RW 001–004
 
-📍 Jakarta Barat — Kec. Kalideres:
+Jakarta Barat — Kec. Kalideres:
 • Kel. Kalideres: RT 001–018/RW 001–008 | Kel. Semanan: RT 001–015/RW 001–006
 
-📍 Jakarta Barat — Kec. Cengkareng:
+Jakarta Barat — Kec. Cengkareng:
 • Kel. Cengkareng Barat: RT 001–020/RW 001–010 | Kel. Kapuk: RT 001–025/RW 001–011
 
-📍 Jakarta Selatan — Kec. Tebet:
+Jakarta Selatan — Kec. Tebet:
 • Kel. Bukit Duri: RT 001–012/RW 001–005 (bantaran Ciliwung, bisa 1–2 meter)
 • Kel. Kebon Baru: RT 001–010/RW 001–004
 
-📍 Jakarta Selatan — Kec. Pesanggrahan:
+Jakarta Selatan — Kec. Pesanggrahan:
 • Kel. Petukangan Utara: RT 001–016/RW 001–007 | Kel. Pesanggrahan: RT 001–014/RW 001–006
 
 Nomor RT/RW adalah rentang — tidak semua nomor di rentang itu selalu terdampak. Yang paling berisiko adalah RT yang langsung di bantaran kali. Cek kondisi aktual ke ketua RT/RW setempat.`,
 
     landmark: `Status rawan banjir tempat-tempat umum di Jakarta:
 
-🏪 Mall / Pusat Perbelanjaan:
+Mall / Pusat Perbelanjaan:
 RAWAN: Pluit Village & Emporium Pluit (Penjaringan — area rob), ITC Roxy Mas (Grogol), Mangga Dua Square (Sawah Besar), Seasons City (Tambora)
 PANTAU: Mall Ambassador (Tebet, dekat Ciliwung), Ciputra Mall (Grogol Petamburan)
 AMAN (elevated/drainase baik): Grand Indonesia, Plaza Indonesia, Senayan City, Pondok Indah Mall, Taman Anggrek, Central Park, Lippo Mall Kemang, Kota Kasablanka, MOI Kelapa Gading
 
-🏥 Rumah Sakit (gedung umumnya elevated meski areanya rawan):
+Rumah Sakit (gedung umumnya elevated meski areanya rawan):
 Dekat area rawan: RSUD Koja (Cilincing), RSUD Jatinegara, RS Pelabuhan (Penjaringan)
 Aman sebagai rujukan darurat: RSCM (Gambir), RSUD Tarakan (Gambir), RS Carolus (Senen), RSPI Sulianti Saroso (Tanjung Priok), RS Fatmawati (JakSel), RS Budi Kemuliaan (JakPus)
 
-🏫 Sekolah (sering jadi posko evakuasi):
+Sekolah (sering jadi posko evakuasi):
 SDN Pluit 01–05 (Kec. Penjaringan) · SDN Kampung Melayu 01–03 (Kec. Jatinegara)
 SDN Kalideres 01–04 (Kec. Kalideres) · SDN Cengkareng 01–06 (Kec. Cengkareng)
 → Hubungi BPBD 117 atau RT/RW untuk status posko aktif saat kejadian
 
-🏛️ Tempat Lain:
+Tempat Lain:
 Rawan genangan: Pasar Ikan Muara Baru, Pasar Jatinegara, Pasar Kalideres, Terminal Kalideres, Terminal Pulo Gadung (pantau saat kiriman)
 Aman / dataran tinggi: Monas, Senayan/GBK, TMII, Kemang Village, kawasan Sudirman-Thamrin`,
 
     jarak: `Estimasi jarak dari titik rawan ke shelter terdekat (perkiraan — untuk rute akurat buka halaman Evakuasi):
 
-📍 Dari Pluit (Kel. Pluit, JakUt):
+Dari Pluit (Kel. Pluit, JakUt):
 → GOR Tanjung Priok (Jl. Enggano No.1): ~4 km, ~10 mnt kendaraan
 
-📍 Dari Pademangan Barat:
+Dari Pademangan Barat:
 → GOR Tanjung Priok: ~3 km, ~8 mnt kendaraan
 
-📍 Dari Kampung Melayu (Kec. Jatinegara):
+Dari Kampung Melayu (Kec. Jatinegara):
 → Kantor Walikota JakTim: ~4,5 km, ~12 mnt
 → GOR Cakung: ~6 km, ~15 mnt
 
-📍 Dari Bukit Duri / Tebet:
+Dari Bukit Duri / Tebet:
 → Balai Rakyat Kec. Pasar Minggu: ~3 km, ~8 mnt
 → Stadion Lebak Bulus: ~7 km, ~20 mnt
 
-📍 Dari Kalideres (Kel. Kalideres):
+Dari Kalideres (Kel. Kalideres):
 → GOR Kalideres (Jl. Daan Mogot Km.19): ~1,5 km, ~5 mnt — PALING DEKAT
 
-📍 Dari Semanan / Cengkareng Barat:
+Dari Semanan / Cengkareng Barat:
 → GOR Kalideres: ~3–4 km, ~8–10 mnt
 
-📍 Dari Cilincing / Semper Barat:
+Dari Cilincing / Semper Barat:
 → Kantor Kec. Cilincing: ~1–2 km, bisa jalan kaki kalau tidak terputus banjir
 
-📍 Dari Cakung:
+Dari Cakung:
 → GOR Cakung: ~2 km, ~6 mnt
 
-📍 Dari Kemayoran:
+Dari Kemayoran:
 → GOR Kemayoran: ~1 km, ~3 mnt
 
-⚠️ Saat banjir: jalan normal sering terputus. Hubungi BPBD 117 untuk evakuasi pakai perahu atau kendaraan khusus. Untuk rute yang mempertimbangkan kondisi jalan realtime → buka halaman Evakuasi di menu atas.`,
+Saat banjir: jalan normal sering terputus. Hubungi BPBD 117 untuk evakuasi pakai perahu atau kendaraan khusus. Untuk rute yang mempertimbangkan kondisi jalan realtime → buka halaman Evakuasi di menu atas.`,
   },
 
   en: {
@@ -596,15 +596,15 @@ All green = safe. Orange/red = monitor closely or prepare to evacuate.`,
 
     wilayah: `Jakarta's most flood-prone areas based on historical data:
 
-🔴 High Risk:
+High Risk:
 • North Jakarta — Penjaringan (Pluit, Muara Baru), Pademangan, Cilincing. Tidal + upstream flooding.
 • East Jakarta — Jatinegara/Kampung Melayu (Ciliwung river from Bogor), Cakung
 
-🟠 At Risk:
+At Risk:
 • West Jakarta — Kalideres (Kali Semanan), Cengkareng, Tambora (Kali Angke)
 • South Jakarta — Tebet/Bukit Duri (Ciliwung riverside), Pesanggrahan, Pasar Minggu
 
-🟡 Watch during heavy rain:
+Watch during heavy rain:
 • Central Jakarta — Kemayoran, Sawah Besar (local flooding, usually drains faster)
 
 Check realtime sensor conditions on the deFlood.ai map or ask your local RT/RW leader.`,
@@ -623,11 +623,11 @@ See 2–3 signs at once? Start preparing your emergency bag and check evacuation
 
     shelter: `Jakarta emergency shelter locations (open/close based on emergency — always confirm with BPBD 117):
 
-📍 North Jakarta: GOR Tanjung Priok (Jl. Enggano No.1), Penjaringan sub-district schools, Cilincing sub-district office
-📍 West Jakarta: GOR Kalideres (Jl. Daan Mogot Km.19), Tambora community hall
-📍 East Jakarta: GOR Cakung, East Jakarta City Hall (Jl. D.I. Panjaitan, Matraman)
-📍 South Jakarta: Lebak Bulus Stadium (Cilandak), Pasar Minggu community center
-📍 Central Jakarta: Central Jakarta City Hall (Menteng), GOR Kemayoran
+North Jakarta: GOR Tanjung Priok (Jl. Enggano No.1), Penjaringan sub-district schools, Cilincing sub-district office
+West Jakarta: GOR Kalideres (Jl. Daan Mogot Km.19), Tambora community hall
+East Jakarta: GOR Cakung, East Jakarta City Hall (Jl. D.I. Panjaitan, Matraman)
+South Jakarta: Lebak Bulus Stadium (Cilandak), Pasar Minggu community center
+Central Jakarta: Central Jakarta City Hall (Menteng), GOR Kemayoran
 
 Fastest way: open the Evacuation page from the top menu → enter your address → automatic route to nearest shelter.
 BPBD Jakarta: 117 (24 hours, real-time shelter availability).`,
@@ -730,30 +730,30 @@ Monitor all sensor conditions on the deFlood.ai map to see which points are curr
 
     jalan: `Flood-prone streets and districts in Jakarta:
 
-🔴 North Jakarta (highest risk):
+North Jakarta (highest risk):
 • Jl. Pluit Raya, Jl. Muara Baru, Jl. Muara Angke — tidal + upstream, 50–150 cm common
 • Jl. Yos Sudarso (Penjaringan–Pademangan) — tidal flooding at high tide
 • Jl. Cilincing Raya, Jl. Kalibaru Timur — riverbank, upstream flooding
 • Jl. Bandengan Utara/Selatan, Jl. Pademangan Raya
 
-🟠 East Jakarta:
+East Jakarta:
 • Jl. Kampung Melayu Besar — FASTEST to flood during Ciliwung overflow
 • Jl. Otista Raya, Jl. Matraman Raya, Jl. D.I. Panjaitan — Jatinegara/Matraman
 • Jl. Cipinang Muara — Kali Cipinang riverside
 • Jl. Pulogebang, Jl. Cakung Drain — upstream from Bekasi
 
-🟠 West Jakarta:
+West Jakarta:
 • Jl. Daan Mogot Raya (Km.10–Km.20) — upstream flooding + traffic jams
 • Jl. Raya Semanan, Jl. Pegadungan — Kali Semanan riverside
 • Jl. Kapuk Raya, Jl. Cengkareng Raya — near Kali Angke
 • Jl. Kyai Tapa, Jl. S. Parman — Kali Sekretaris area
 
-🟡 South Jakarta (Ciliwung upstream):
+South Jakarta (Ciliwung upstream):
 • Jl. Dr. Saharjo, Jl. Bukit Duri Tanjakan — Tebet, Ciliwung riverside
 • Jl. Pesanggrahan Raya, Jl. Petukangan — Kali Pesanggrahan
 • Jl. Pasar Minggu Raya — occasional flooding
 
-🟢 Relatively Safe:
+Relatively Safe:
 • Sudirman–Thamrin corridor, Senayan/GBK, Menteng (Jl. Imam Bonjol, Jl. Diponegoro)
 • Jl. TB Simatupang (South Jakarta), Jl. Fatmawati, Jl. Ragunan
 • Monas area (Jl. Medan Merdeka) — elevated ground
@@ -762,113 +762,113 @@ For live routing: open the Evacuation page → enter your address.`,
 
     web: `deFlood.ai is Jakarta's realtime flood monitoring platform. Here's what it does:
 
-📊 Command Center (main page):
+Command Center (main page):
 • Risk Score (0–100): XGBoost model from 38+ TMA sensors + weather data
 • 3 metric cards: alert stations, active stations, current risk score
 • Rainfall Strip: BMKG weather per 5 Jakarta districts (includes temp + humidity)
 • Sensor strip: water level %, trend arrows, rain accumulation, anomaly detection
 
-🗺️ Risk Map:
+Risk Map:
 • Real-time DSDADKI water gate sensor dots (color = alert level)
 • ML-based risk zone estimates per Jakarta area
 • Click any sensor dot to see water level details
 
-📋 Station Table:
+Station Table:
 • All monitoring points with actual water height vs Siaga 1 threshold
 • Progress bar showing percentage of danger threshold
 
-🚨 Evacuation Page:
+Evacuation Page:
 • Enter your address → get route to nearest emergency shelter
 • 5 standard BPBD evacuation steps
 
-🤖 Chatbot Flo (me!):
+Chatbot Flo (me!):
 • Ask about flood conditions, RT/RW risk, distance to shelters, emergency contacts, sensor readings
 
 Data updates every 15 minutes from DSDADKI, BMKG, and OpenWeather.`,
 
     rtrw: `Flood-prone RT/RW in Jakarta (based on BPBD historical data):
 
-📍 North Jakarta — Kec. Penjaringan:
+North Jakarta — Kec. Penjaringan:
 • Kel. Pluit: RT 001–021/RW 001–017 (Muara Baru, Muara Angke — tidal + upstream, worst area)
 • Kel. Pejagalan: RT 001–008/RW 001–003 | Kel. Penjaringan: RT 001–010/RW 001–004
 
-📍 North Jakarta — Kec. Pademangan:
+North Jakarta — Kec. Pademangan:
 • Kel. Pademangan Barat: RT 001–020/RW 001–009 (near Kali Sentiong, ~40–80 cm)
 
-📍 North Jakarta — Kec. Cilincing:
+North Jakarta — Kec. Cilincing:
 • Kel. Semper Barat: RT 001–018/RW 001–008 | Kel. Kalibaru: RT 001–012/RW 001–005
 
-📍 East Jakarta — Kec. Jatinegara:
+East Jakarta — Kec. Jatinegara:
 • Kel. Kampung Melayu: RT 001–016/RW 001–007 (FASTEST to flood — Ciliwung overflow)
 • Kel. Cipinang Muara: RT 001–014/RW 001–006 | Kel. Bidara Cina: RT 001–012/RW 001–005
 
-📍 East Jakarta — Kec. Matraman:
+East Jakarta — Kec. Matraman:
 • Kel. Utan Kayu Selatan: RT 001–010/RW 001–004 | Kel. Kebon Manggis: RT 001–009/RW 001–004
 
-📍 West Jakarta — Kec. Kalideres:
+West Jakarta — Kec. Kalideres:
 • Kel. Kalideres: RT 001–018/RW 001–008 | Kel. Semanan: RT 001–015/RW 001–006
 
-📍 West Jakarta — Kec. Cengkareng:
+West Jakarta — Kec. Cengkareng:
 • Kel. Cengkareng Barat: RT 001–020/RW 001–010 | Kel. Kapuk: RT 001–025/RW 001–011
 
-📍 South Jakarta — Kec. Tebet:
+South Jakarta — Kec. Tebet:
 • Kel. Bukit Duri: RT 001–012/RW 001–005 (Ciliwung riverside, can reach 1–2 meters)
 • Kel. Kebon Baru: RT 001–010/RW 001–004
 
-📍 South Jakarta — Kec. Pesanggrahan:
+South Jakarta — Kec. Pesanggrahan:
 • Kel. Petukangan Utara: RT 001–016/RW 001–007 | Kel. Pesanggrahan: RT 001–014/RW 001–006
 
 RT/RW numbers are ranges — not every number in the range floods. Highest risk is RTs directly on riverbanks. Confirm with your local RT/RW leader.`,
 
     landmark: `Flood risk status of key Jakarta locations:
 
-🏪 Malls / Shopping Centers:
+Malls / Shopping Centers:
 AT RISK: Pluit Village & Emporium Pluit (tidal flooding), ITC Roxy Mas (Grogol), Mangga Dua Square, Seasons City (Tambora)
 WATCH: Mall Ambassador (Tebet, near Ciliwung), Ciputra Mall (Grogol)
 SAFE (elevated/good drainage): Grand Indonesia, Plaza Indonesia, Senayan City, Pondok Indah Mall, Taman Anggrek, Central Park, Lippo Mall Kemang, Kota Kasablanka, MOI Kelapa Gading
 
-🏥 Hospitals (buildings usually elevated even in flood-prone areas):
+Hospitals (buildings usually elevated even in flood-prone areas):
 Near flood zones: RSUD Koja (Cilincing), RSUD Jatinegara, RS Pelabuhan (Penjaringan)
 Safe emergency referrals: RSCM (Gambir), RSUD Tarakan, RS Carolus (Senen), RSPI Sulianti Saroso, RS Fatmawati
 
-🏫 Schools (often become evacuation shelters):
+Schools (often become evacuation shelters):
 SDN Pluit 01–05 · SDN Kampung Melayu 01–03 · SDN Kalideres 01–04 · SDN Cengkareng 01–06
 → Call BPBD 117 or local RT/RW to confirm which schools are active shelters during flooding
 
-🏛️ Other Landmarks:
+Other Landmarks:
 Flood-prone: Pasar Ikan Muara Baru, Pasar Jatinegara, Terminal Kalideres, Terminal Pulo Gadung
 Safe / elevated: Monas, Senayan/GBK, TMII, Kemang Village, Sudirman-Thamrin corridor`,
 
     jarak: `Estimated distances from flood-prone areas to nearest shelters (use the Evacuation page for live routing):
 
-📍 From Pluit (Kel. Pluit, North Jakarta):
+From Pluit (Kel. Pluit, North Jakarta):
 → GOR Tanjung Priok (Jl. Enggano No.1): ~4 km, ~10 min by vehicle
 
-📍 From Pademangan Barat:
+From Pademangan Barat:
 → GOR Tanjung Priok: ~3 km, ~8 min
 
-📍 From Kampung Melayu (Kec. Jatinegara):
+From Kampung Melayu (Kec. Jatinegara):
 → East Jakarta City Hall: ~4.5 km, ~12 min | GOR Cakung: ~6 km, ~15 min
 
-📍 From Bukit Duri / Tebet:
+From Bukit Duri / Tebet:
 → Balai Rakyat Pasar Minggu: ~3 km, ~8 min | Lebak Bulus Stadium: ~7 km, ~20 min
 
-📍 From Kalideres:
+From Kalideres:
 → GOR Kalideres (Jl. Daan Mogot Km.19): ~1.5 km, ~5 min — CLOSEST
 
-📍 From Semanan / Cengkareng Barat:
+From Semanan / Cengkareng Barat:
 → GOR Kalideres: ~3–4 km, ~8–10 min
 
-📍 From Cilincing / Semper Barat:
+From Cilincing / Semper Barat:
 → Cilincing sub-district office: ~1–2 km, walkable if roads aren't cut off
 
-📍 From Cakung:
+From Cakung:
 → GOR Cakung: ~2 km, ~6 min
 
-📍 From Kemayoran:
+From Kemayoran:
 → GOR Kemayoran: ~1 km, ~3 min
 
-⚠️ During flooding: normal roads are often blocked. Call BPBD 117 for boat or special vehicle evacuation. For real-time routing → open the Evacuation page from the top menu.`,
+During flooding: normal roads are often blocked. Call BPBD 117 for boat or special vehicle evacuation. For real-time routing → open the Evacuation page from the top menu.`,
   },
 };
 

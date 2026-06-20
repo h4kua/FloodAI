@@ -304,7 +304,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           </div>
           {!userLocation && (
             <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)", textAlign: "center" }}>
-              {lang === "en" ? "💡 Tip: Type address above or click directly on the map" : "💡 Tip: Ketik alamat di atas atau klik langsung di peta"}
+              {lang === "en" ? "Tip: Type address above or click directly on the map" : "Tip: Ketik alamat di atas atau klik langsung di peta"}
             </p>
           )}
 
@@ -344,29 +344,26 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
                     {selectedDest.name}
                   </div>
                   {selectedDest.area && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                      <span style={{ fontSize: "0.7rem" }}>📍</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.56rem", color: "var(--muted-2)", letterSpacing: "0.06em", textTransform: "uppercase", flexShrink: 0 }}>{lang === "en" ? "Area" : "Wilayah"}</span>
                       <span style={{ fontSize: "0.78rem", color: "var(--muted)" }}>{selectedDest.area}</span>
                     </div>
                   )}
                   {selectedDest.address && (
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: "0.375rem" }}>
-                      <span style={{ fontSize: "0.7rem", marginTop: "0.1rem" }}>🏠</span>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "0.45rem" }}>
+                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.56rem", color: "var(--muted-2)", letterSpacing: "0.06em", textTransform: "uppercase", marginTop: "0.15rem", flexShrink: 0 }}>{lang === "en" ? "Addr" : "Alamat"}</span>
                       <span style={{ fontSize: "0.78rem", color: "var(--muted)", lineHeight: 1.4 }}>{selectedDest.address}</span>
                     </div>
                   )}
                   <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.25rem", flexWrap: "wrap" }}>
                     {selectedDest.capacity && (
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                        <span style={{ fontSize: "0.7rem" }}>👥</span>
-                        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", color: "var(--safe)" }}>
-                          {selectedDest.capacity.toLocaleString()} {lang === "en" ? "cap." : "kapasitas"}
-                        </span>
-                      </div>
+                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", color: "var(--safe)" }}>
+                        {selectedDest.capacity.toLocaleString()} {lang === "en" ? "cap." : "kapasitas"}
+                      </span>
                     )}
                     {selectedDest.phone && (
                       <a href={`tel:${selectedDest.phone}`} style={{ display: "flex", alignItems: "center", gap: "0.3rem", textDecoration: "none" }}>
-                        <span style={{ fontSize: "0.7rem" }}>📞</span>
+                        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.56rem", color: "var(--muted-2)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{lang === "en" ? "Tel" : "Telp"}</span>
                         <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", color: "var(--cyan)" }}>
                           {selectedDest.phone}
                         </span>
@@ -405,13 +402,13 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
               <p className="panel-title">{lang === "en" ? "Emergency Kit Checklist" : "Isi Tas Darurat"}</p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.35rem" }}>
                 {(lang === "en" ? [
-                  "📄 ID & documents", "💊 Medicines (3+ days)", "👗 Clothes (3 days)", "🔦 Flashlight + batteries",
-                  "🔋 Power bank", "💧 Drinking water", "🍫 Non-perishable food", "📱 Phone + charger",
-                  "💰 Cash", "🏥 First aid kit",
+                  "ID & documents", "Medicines (3+ days)", "Clothes (3 days)", "Flashlight + batteries",
+                  "Power bank", "Drinking water", "Non-perishable food", "Phone + charger",
+                  "Cash", "First aid kit",
                 ] : [
-                  "📄 KTP & dokumen penting", "💊 Obat-obatan (3+ hari)", "👗 Pakaian (3 hari)", "🔦 Senter + baterai",
-                  "🔋 Power bank", "💧 Air minum", "🍫 Makanan tahan lama", "📱 HP + charger",
-                  "💰 Uang tunai", "🏥 P3K",
+                  "KTP & dokumen penting", "Obat-obatan (3+ hari)", "Pakaian (3 hari)", "Senter + baterai",
+                  "Power bank", "Air minum", "Makanan tahan lama", "HP + charger",
+                  "Uang tunai", "P3K",
                 ]).map((item, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.75rem", color: "var(--muted)", lineHeight: 1.4 }}>
                     <span style={{ flexShrink: 0 }}>›</span>

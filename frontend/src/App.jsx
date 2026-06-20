@@ -76,8 +76,22 @@ function AppShell() {
           <button className="topbar-toggle" onClick={() => setLang(l => l === "id" ? "en" : "id")} title="Switch language">
             {lang === "id" ? "EN" : "ID"}
           </button>
-          <button className="topbar-toggle" onClick={() => setTheme(th => th === "dark" ? "light" : "dark")} title="Toggle theme">
-            {theme === "dark" ? "☀" : "🌙"}
+          <button className="topbar-toggle" onClick={() => setTheme(th => th === "dark" ? "light" : "dark")} title="Toggle theme" aria-label="Toggle theme">
+            {theme === "dark" ? (
+              /* sun — click to go light */
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true" style={{ display: "block" }}>
+                <circle cx="12" cy="12" r="4.2" />
+                {[0,45,90,135,180,225,270,315].map((a) => {
+                  const r = (a*Math.PI)/180;
+                  return <line key={a} x1={12+6.5*Math.cos(r)} y1={12+6.5*Math.sin(r)} x2={12+9*Math.cos(r)} y2={12+9*Math.sin(r)} />;
+                })}
+              </svg>
+            ) : (
+              /* moon — click to go dark */
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ display: "block" }}>
+                <path d="M20 14.5A8 8 0 1 1 9.5 4a6.3 6.3 0 0 0 10.5 10.5Z" />
+              </svg>
+            )}
           </button>
           <div className="chip live">
             <span className="live-dot" />
