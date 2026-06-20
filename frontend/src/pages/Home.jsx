@@ -1022,6 +1022,56 @@ function WilayahForecastGrid({ wilayahSummary }) {
   const isId = lang === "id";
   if (!wilayahSummary || wilayahSummary.length === 0) return null;
 
+  // Stale-snapshot fallback: the backend keeps only FUTURE BMKG slots
+  // (inference.py: utc_dt >= now). When the snapshot is very old every slot is
+  // in the past and gets filtered out, leaving an empty grid of dashes.
+  // Show an honest "unavailable" state instead — but keep the siaga badges,
+  // which still carry the last-known TMA status.
+  const hasAnyForecast = wilayahSummary.some((w) => (w.forecast?.length ?? 0) > 0);
+  if (!hasAnyForecast) {
+    const sortedW = [...wilayahSummary].sort((a, b) => (b.worst_rank ?? 0) - (a.worst_rank ?? 0));
+    return (
+      <div className="panel panel-body fade-in">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+          <p className="panel-title" style={{ marginBottom: 0 }}>
+            {isId ? "Prakiraan Cuaca 1–12 Jam ke Depan" : "1–12 Hour Weather Forecast"}
+          </p>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--cyan)", letterSpacing: "0.06em" }}>● BMKG</span>
+        </div>
+        <div style={{ textAlign: "center", padding: "1.25rem 1rem", border: "1px dashed var(--line-2)", borderRadius: 10 }}>
+          <p style={{ fontSize: "0.85rem", color: "var(--wsp)", fontWeight: 600, margin: "0 0 0.35rem" }}>
+            {isId ? "Prakiraan cuaca belum tersedia" : "Weather forecast unavailable"}
+          </p>
+          <p style={{ fontSize: "0.75rem", color: "var(--muted)", lineHeight: 1.55, margin: 0, maxWidth: 520, marginInline: "auto" }}>
+            {isId
+              ? "Semua slot prakiraan BMKG sudah lewat karena data sensor kedaluwarsa — scraper otomatis belum memperbarui. Status siaga di bawah memakai pembacaan terakhir."
+              : "All BMKG forecast slots are in the past because the sensor data is stale — the auto-scraper hasn't refreshed. The alert badges below use the last reading."}
+          </p>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.875rem" }}>
+          {sortedW.map((w) => {
+            const st = WILAYAH_STATUS_STYLE[w.worst_status] ?? WILAYAH_STATUS_STYLE["Normal"];
+            return (
+              <div key={w.wilayah} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.66rem", fontWeight: 700, color: "var(--text)" }}>
+                  {w.wilayah.replace("Jakarta ", "")}
+                </span>
+                <span className="wilayah-status-badge" style={{ background: st.bg, color: st.color, borderColor: st.border }}>
+                  {w.worst_status}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <p style={{ marginTop: "0.875rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", lineHeight: 1.6 }}>
+          {isId
+            ? "● Prakiraan akan muncul lagi setelah data sensor diperbarui"
+            : "● The forecast returns once the sensor data refreshes"}
+        </p>
+      </div>
+    );
+  }
+
   const now = new Date();
   const getTimeLabel = (slot, i) => {
     if (!slot?.local_datetime) return i === 0 ? (isId ? "Skrg" : "Now") : `+${i * 6}j`;
