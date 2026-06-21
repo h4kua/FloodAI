@@ -36,7 +36,7 @@ def test_build_realtime_native_features_from_snapshot_contains_temporal_columns(
 
     assert list(engineered.frame.columns) == REALTIME_NATIVE_FEATURES
     assert engineered.frame.iloc[0]["rainfall_roll3_mean"] >= 0
-    assert engineered.frame.iloc[0]["water_level_ratio"] >= 0
+    assert engineered.frame.iloc[0]["water_level_delta"] >= 0
     assert engineered.frame.iloc[0]["bmkg_weighted_score"] > 0
 
 

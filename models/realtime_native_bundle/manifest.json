@@ -2,23 +2,19 @@
   "bundle_version": "2.0.0",
   "model_variant": "realtime_native",
   "schema_version": "2",
-  "created_at": "2026-06-21T09:14:13.625550+00:00",
-  "training_dataset_fingerprint": "sha256:5e7ac60ff864471b7dfd0be451e3bbf8376bfaa660883a2be7e298796c45c608",
+  "created_at": "2026-06-21T11:56:52.075951+00:00",
+  "training_dataset_fingerprint": "sha256:7521e047ca692f7142a933e08ba3941da76f8ea88ba94614b6c0cbd80d1309dd",
   "feature_schema": {
-    "feature_count": 20,
+    "feature_count": 16,
     "features": [
       "rainfall_mm",
-      "rainfall_3h_proxy_mm",
       "rainfall_lag_1",
       "rainfall_lag_2",
       "rainfall_roll3_mean",
       "humidity_pct",
       "temperature_c",
-      "bmkg_severity_score",
       "bmkg_certainty_score",
-      "bmkg_urgency_score",
       "bmkg_weighted_score",
-      "water_level_ratio",
       "water_level_lag_1",
       "water_level_delta",
       "hydro_meteorological_index",
@@ -43,14 +39,14 @@
     "numpy": "1.26.4"
   },
   "sha256": {
-    "model.pkl": "0a4a8f7db49152285c638761ca1740dd5cf89b54ea5ef2a09aa66db1b5769b2f",
-    "scaler.pkl": "76549acc18fceaa57b7e97d09308d44383a806e7342279cf479350bc78731829",
-    "ood.pkl": "1d4a1d40710cfbac966e22d1851859a395c1cc16225e3f4026a8010eae9abbcb",
-    "threshold.json": "87924e8ff2972022c8db8d65a5bc1bb26050e175c1fa4f5cdf2a6831012fa4bc",
-    "calibration.json": "eba5f0efe3957744ccf6b6c28c109a526075ac2766d0b3c624c307b522f4c7dc",
-    "feature_list.json": "7db9bfb188a4ff7cb72bbdbbba3d6f4b85a2546b8c64d71d1dd3fce5cbaa367e",
-    "model_card.json": "71b56681b544843570e3271b85f4eb3ebc6d480a53719fd2387787258b04954b",
-    "training_stats.json": "706bacfd01eeb2873d8c7360f80592160d96232352361853c8310116aa0eaf00",
-    "xgboost_model.json": "fb2e31e53ce28833ecfb6ce8430d030304293d1729a281acbbd26fbdfbd080b8"
+    "model.pkl": "6c5aa35e5f4c87aafeda8e187c75ee1aa4340448036cc722eb79e857b2c99635",
+    "scaler.pkl": "6c05af5cf61971dd05292f4a0b8212098e7af0397f44504b203c9a14291ce2f4",
+    "ood.pkl": "20f2c4e462699abfc369fbf550181f234a81554aec0e4ef2a27d50383066a857",
+    "threshold.json": "8f6ccc4f4127b42a4aebfa7b4a119b4196cb564151fa9132bc7e92dd154a21d9",
+    "calibration.json": "7632e28768b3ea188d0d3a2ce97778fe41ec45c9b0bf8defc2ea1d44394283e6",
+    "feature_list.json": "787c71cf19989965311138a4cbbc0325160ccd24cae94d0c75fab6de8eec4861",
+    "model_card.json": "1a324dc51c13038f43255b03bab64d7b21279aa968d63c9267729062521a3fb0",
+    "training_stats.json": "e714419bef85841450d0958d78b60a37806b408a8257aa014cc762c6df51b226",
+    "xgboost_model.json": "37931e45698a7c2daedb5d36bdbaedd2b490c39af110a679b913b1063e4588bc"
   }
 }

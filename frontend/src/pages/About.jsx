@@ -131,10 +131,10 @@ export default function About({ riskContext = {} }) {
               </p>
             </div>
             <div className="stat-grid" style={{ minWidth: 200 }}>
-              <Stat value="0.863" label="AUC-ROC" />
-              <Stat value="16" label={id ? "Fitur ML" : "ML Features"} />
+              <Stat value="0.855" label="AUC-ROC" />
+              <Stat value="82.1%" label="Recall" />
               <Stat value="38" label={id ? "Stasiun TMA" : "TMA Stations"} />
-              <Stat value="4" label={id ? "Level Risiko" : "Risk Levels"} />
+              <Stat value="16" label={id ? "Fitur ML" : "ML Features"} />
             </div>
           </div>
         </div>
@@ -143,31 +143,31 @@ export default function About({ riskContext = {} }) {
         <Section title={id ? "Performa Model" : "Model Performance"}>
           <p style={{ fontSize: "0.78rem", color: "var(--muted)", marginBottom: "1rem", lineHeight: 1.6 }}>
             {id
-              ? "Model dilatih dengan 1,990 baris data historis (chronological 80/15/5 split). Dikalibrasi dengan isotonic regression."
-              : "Model trained on 1,990 historical rows (chronological 80/15/5 split). Calibrated with isotonic regression."}
+              ? "Model dilatih dengan 1,990 baris data historis (chronological 80/15/5 split). Menggunakan SMOTE oversampling dan focal loss untuk menangani class imbalance banjir."
+              : "Model trained on 1,990 historical rows (chronological 80/15/5 split). Uses SMOTE oversampling and focal loss to handle flood class imbalance."}
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
             <MetricBar label="AUC-ROC"
               hint={id ? "(↑ lebih baik)" : "(↑ higher is better)"}
-              value={0.863} max={1} color="var(--safe)"
+              value={0.855} max={1} color="var(--safe)"
               format={v => v.toFixed(3)} />
             <MetricBar label={id ? "Recall @ Siaga" : "Recall @ Alert"}
               hint={id ? "(↑ lebih baik)" : "(↑ higher is better)"}
-              value={0.588} max={1} color="var(--s2)"
-              format={v => (v * 100).toFixed(0) + "%"} />
+              value={0.821} max={1} color="var(--s2)"
+              format={v => (v * 100).toFixed(1) + "%"} />
             <MetricBar label="Brier Score"
               hint={id ? "(↓ lebih baik)" : "(↓ lower is better)"}
-              value={0.066} max={0.25} color="var(--cyan)"
-              lowerIsBetter format={() => "0.066"} />
+              value={0.086} max={0.25} color="var(--cyan)"
+              lowerIsBetter format={() => "0.086"} />
             <MetricBar label={id ? "ECE (Kalibrasi)" : "ECE (Calibration)"}
               hint={id ? "(↓ lebih baik)" : "(↓ lower is better)"}
-              value={0.004} max={0.25} color="var(--wsp)"
-              lowerIsBetter format={() => "0.004"} />
+              value={0.028} max={0.25} color="var(--wsp)"
+              lowerIsBetter format={() => "0.028"} />
           </div>
           <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", lineHeight: 1.5 }}>
             {id
-              ? "● AUC mendekati 1 = klasifikasi lebih baik · ECE mendekati 0 = probabilitas lebih terkalibrasi · Brier Score mendekati 0 = prediksi lebih akurat"
-              : "● AUC → 1 = better discrimination · ECE → 0 = better calibration · Brier Score → 0 = more accurate probability"}
+              ? "● AUC mendekati 1 = klasifikasi lebih baik · ECE mendekati 0 = probabilitas lebih terkalibrasi · Recall tinggi = lebih sedikit banjir terlewat"
+              : "● AUC → 1 = better discrimination · ECE → 0 = better calibration · High recall = fewer missed floods"}
           </p>
         </Section>
 
@@ -179,7 +179,7 @@ export default function About({ riskContext = {} }) {
               desc={id ? "Scraper otomatis tiap 15 menit mengambil data TMA dari 38 pos DSDADKI, cuaca OpenWeather, dan peringatan BMKG." : "Automated scraper every 15 min fetches TMA data from 38 DSDADKI posts, OpenWeather conditions, and BMKG alerts."} />
             <PipelineStep num="2" color="var(--wsp)"
               label={id ? "Feature Engineering (16 Fitur)" : "Feature Engineering (16 Features)"}
-              desc={id ? "Membangun fitur: rasio muka air, akumulasi hujan, lag temporal, indeks hidro-meteorologi, skor BMKG, dan flag musim." : "Builds: water level ratio, rainfall accumulation, temporal lags, hydro-met index, BMKG scores, monsoon flag."} />
+              desc={id ? "Membangun 16 fitur: curah hujan (realtime, lag, rolling), interaksi curah hujan×muka air, akselerasi & rolling-max muka air, intensitas hujan, indeks hidro-meteorologi, skor BMKG, dan flag musim." : "Builds 16 features: rainfall (realtime, lags, rolling), rainfall×water-level interaction, water-level acceleration & rolling-max, rainfall intensity ratio, hydro-met index, BMKG scores, and monsoon flag."} />
             <PipelineStep num="3" color="var(--s2)"
               label={id ? "Inferensi ML (XGBoost)" : "ML Inference (XGBoost)"}
               desc={id ? "Model menghasilkan probabilitas banjir 0–1. Hydro override rule-based menaikkan level jika TMA ≥75% threshold." : "Model outputs flood probability 0–1. Rule-based hydro override elevates level if TMA ≥ 75% threshold."} />
@@ -213,20 +213,20 @@ export default function About({ riskContext = {} }) {
         <Section title={id ? "Model Machine Learning" : "Machine Learning Model"}>
           <Row tag="XGB" accent title="XGBoost 3.2.0 Classifier"
             desc={id
-              ? "Model gradient boosting yang mengklasifikasikan risiko ke 4 level: AMAN, WASPADA, SIAGA, BAHAYA berdasarkan kondisi cuaca dan hidrologi terkini. Dilatih dengan scikit-learn 1.8.0."
-              : "Gradient boosting model classifying risk into 4 levels: SAFE, WATCH, ALERT, DANGER based on current weather and hydrological conditions. Trained with scikit-learn 1.8.0."} />
+              ? "Model gradient boosting dengan focal loss (gamma=1.5) dan SMOTE oversampling. Mengklasifikasikan risiko ke 4 level: AMAN, WASPADA, SIAGA, BAHAYA. Recall 82.1% — dirancang untuk meminimalkan banjir yang terlewat."
+              : "Gradient boosting model with focal loss (gamma=1.5) and SMOTE oversampling. Classifies risk into 4 levels: SAFE, WATCH, ALERT, DANGER. 82.1% recall — designed to minimize missed floods."} />
           <Row tag="16F" title={id ? "16 Fitur Input" : "16 Input Features"}
             desc={id
-              ? "Curah hujan (realtime, lag, roll-3), tinggi muka air (ratio & delta), suhu, kelembapan, skor BMKG (severity/certainty/urgency), indeks hidro-meteorologi, dan flag musim."
-              : "Rainfall (realtime, lag, roll-3), water level ratio & delta, temperature, humidity, BMKG scores (severity/certainty/urgency), hydro-meteorological index, and monsoon flag."} />
+              ? "Curah hujan (realtime, lag, rolling, intensitas), interaksi curah hujan×muka air, akselerasi & rolling-max muka air, suhu, kelembapan, skor BMKG (certainty/weighted), indeks hidro-meteorologi, dan flag musim."
+              : "Rainfall (realtime, lags, rolling, intensity ratio), rainfall×water-level interaction, water-level acceleration & rolling-max, temperature, humidity, BMKG scores (certainty/weighted), hydro-meteorological index, and monsoon flag."} />
           <Row tag="OOD" title={id ? "IsolationForest — Deteksi Anomali Data" : "IsolationForest — Out-of-Distribution Detection"}
             desc={id
-              ? "Model sekunder IsolationForest mendeteksi kondisi di luar distribusi data training. Flag OOD hanya tampil ketika muka air rendah (<75%) karena muka air ≥75% sudah ditangani hydro override secara eksplisit."
-              : "Secondary IsolationForest model detects conditions outside the training distribution. OOD flag only appears at low water levels (<75%) since levels ≥75% are handled explicitly by the hydro override."} />
-          <Row tag="ECE" title={id ? "Kalibrasi (ECE 0.004)" : "Calibration (ECE 0.004)"}
+              ? "Model sekunder IsolationForest (16 fitur) mendeteksi kondisi di luar distribusi data training. Flag OOD hanya tampil ketika muka air rendah (<75%) karena muka air ≥75% sudah ditangani hydro override secara eksplisit."
+              : "Secondary IsolationForest model (16 features) detects conditions outside the training distribution. OOD flag only appears at low water levels (<75%) since levels ≥75% are handled explicitly by the hydro override."} />
+          <Row tag="ECE" title={id ? "Kalibrasi (ECE 0.028)" : "Calibration (ECE 0.028)"}
             desc={id
-              ? "Expected Calibration Error 0.004 (n=586 test rows, 1.990 training rows) — dikalibrasi dengan isotonic regression. Brier score 0.066. Model dilatih dengan chronological 80/15/5 split dan scale_pos_weight untuk menangani class imbalance banjir."
-              : "ECE 0.004 (n=586 test rows, 1,990 training rows) — calibrated with isotonic regression. Brier score 0.066. Trained with chronological 80/15/5 split and scale_pos_weight to handle flood class imbalance."} />
+              ? "Expected Calibration Error 0.028 (n=586 test rows, 1.990 training rows). Brier score 0.086. Model dilatih dengan chronological 80/15/5 split, SMOTE oversampling (192→768 positives), dan focal loss untuk menangani class imbalance banjir."
+              : "ECE 0.028 (n=586 test rows, 1,990 training rows). Brier score 0.086. Trained with chronological 80/15/5 split, SMOTE oversampling (192→768 positives), and focal loss to handle flood class imbalance."} />
         </Section>
 
         {/* AI Chat & Agents */}

@@ -3,17 +3,13 @@
   "purpose": "Realtime-native flood prediction using only operationally available signals",
   "feature_set": [
     "rainfall_mm",
-    "rainfall_3h_proxy_mm",
     "rainfall_lag_1",
     "rainfall_lag_2",
     "rainfall_roll3_mean",
     "humidity_pct",
     "temperature_c",
-    "bmkg_severity_score",
     "bmkg_certainty_score",
-    "bmkg_urgency_score",
     "bmkg_weighted_score",
-    "water_level_ratio",
     "water_level_lag_1",
     "water_level_delta",
     "hydro_meteorological_index",
@@ -26,13 +22,13 @@
   "training_dataset": "D:\\FloodAI - Copy\\data\\processed\\realtime_native_training_bootstrap.csv",
   "report_path": "D:\\FloodAI - Copy\\artifacts\\reports\\realtime_native_model_report.json",
   "threshold_path": "D:\\FloodAI - Copy\\models\\optimal_threshold_realtime_native.json",
-  "operating_threshold": 0.18999967475732168,
+  "operating_threshold": 0.19625576958060265,
   "calibration_method": "isotonic",
   "confidence_floor_on_outlier": 0.6,
   "ood_detector": {
     "algorithm": "IsolationForest",
     "n_estimators": 200,
-    "contamination": 0.030397505845674203,
+    "contamination": 0.03,
     "contamination_source": "observed_anomaly_rate"
   }
 }

@@ -1,24 +1,24 @@
 {
   "dataset_path": "D:\\FloodAI - Copy\\data\\processed\\realtime_native_training_bootstrap.csv",
-  "feature_count": 20,
+  "feature_count": 16,
   "training_rows": 1990,
   "validation_rows": 352,
   "test_rows": 586,
   "performance": {
-    "optimal_threshold": 0.18999967475732168,
-    "train_accuracy": 0.8799688230709275,
-    "test_accuracy": 0.8003412969283277,
-    "test_precision": 0.2953020134228188,
-    "test_recall": 0.7857142857142857,
-    "test_f1": 0.4292682926829268,
-    "test_roc_auc": 0.8663241239892183,
-    "validation_recall_at_threshold": 0.7647058823529411,
-    "validation_precision_at_threshold": 0.325
+    "optimal_threshold": 0.19625576958060265,
+    "train_accuracy": 0.852689010132502,
+    "test_accuracy": 0.7798634812286689,
+    "test_precision": 0.2787878787878788,
+    "test_recall": 0.8214285714285714,
+    "test_f1": 0.416289592760181,
+    "test_roc_auc": 0.855289757412399,
+    "validation_recall_at_threshold": 0.7941176470588235,
+    "validation_precision_at_threshold": 0.3
   },
   "calibration": {
     "method": "isotonic",
-    "test_brier": 0.08635097236878662,
-    "test_ece": 0.027999992134119866
+    "test_brier": 0.09010514237836886,
+    "test_ece": 0.028087341038233772
   },
   "scientific_notes": {
     "training_mode": "bootstrap_proxy_until_realtime_history_available",

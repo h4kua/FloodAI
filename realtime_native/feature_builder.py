@@ -29,17 +29,13 @@ REALTIME_NATIVE_BOOTSTRAP_DATASET_PATH = PROCESSED_DATA_DIR / "realtime_native_t
 
 REALTIME_NATIVE_FEATURES = [
     "rainfall_mm",
-    "rainfall_3h_proxy_mm",
     "rainfall_lag_1",
     "rainfall_lag_2",
     "rainfall_roll3_mean",
     "humidity_pct",
     "temperature_c",
-    "bmkg_severity_score",
     "bmkg_certainty_score",
-    "bmkg_urgency_score",
     "bmkg_weighted_score",
-    "water_level_ratio",
     "water_level_lag_1",
     "water_level_delta",
     "hydro_meteorological_index",

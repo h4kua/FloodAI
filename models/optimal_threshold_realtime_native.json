@@ -1,10 +1,10 @@
 {
   "model_variant": "realtime_native",
-  "threshold": 0.18999967475732168,
-  "warning_threshold": 0.08999967475732168,
-  "danger_threshold": 0.18999967475732168,
-  "validation_recall": 0.7647058823529411,
-  "validation_precision": 0.325,
+  "threshold": 0.19625576958060265,
+  "warning_threshold": 0.09625576958060264,
+  "danger_threshold": 0.19625576958060265,
+  "validation_recall": 0.7941176470588235,
+  "validation_precision": 0.3,
   "selection_rule": "max recall s.t. precision >= 0.3; target recall floor = 0.8; tiebreak F2.",
   "calibration_method": "isotonic"
 }
