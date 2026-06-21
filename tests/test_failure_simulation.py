@@ -485,12 +485,12 @@ class TestConflictingSignals:
     ) -> None:
         """
         Conflict type 2: sustained heavy rainfall but no water-level response.
-        With no temporal history, rainfall_roll3_mean approximates rainfall_mm = 60 mm
+        rainfall_roll3_mean = mean(rainfall_mm, lag1, lag2) = (80+5+5)/3 ≈ 30
         which is > 25 mm threshold.
         water_level_ratio = 80 / 950 = 0.084 < 0.20 threshold.
         """
         snapshot = make_base_snapshot()
-        snapshot["openweather"]["rain"] = {"1h": 60.0, "3h": 180.0}
+        snapshot["openweather"]["rain"] = {"1h": 80.0, "3h": 240.0}
         snapshot["openweather"]["main"]["humidity"] = 95.0
         snapshot["bmkg_alerts"] = [
             {"severity": "Severe", "certainty": "Observed", "urgency": "Immediate"}
@@ -502,7 +502,7 @@ class TestConflictingSignals:
 
         assert "signal_conflict" in _failure_types(result), (
             f"POTENTIAL LOGIC FLAW: 'signal_conflict' not detected for heavy rain "
-            f"(60 mm/h) with no hydro response (water_level_ratio = 0.084). "
+            f"(80 mm/h) with no hydro response (water_level_ratio = 0.084). "
             f"Conflict type 2 fires when roll3_mean > 25 AND ratio < 0.20. "
             f"Got: {_failure_types(result)}"
         )

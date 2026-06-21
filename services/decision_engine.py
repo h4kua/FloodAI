@@ -64,6 +64,7 @@ _AUTHORITY_TO_SOURCE = {
     DecisionAuthority.L1_9_OOD_FLOOR:  "ood_floor",
     DecisionAuthority.L2_INTEGRITY: "system_guardrail",
     DecisionAuthority.L3_ML:       "ml_adaptive",
+    DecisionAuthority.L3_1_PRECISION_GATE: "precision_gate",
     DecisionAuthority.L4_TREND:    "trend_informed",
 }
 
@@ -250,6 +251,7 @@ def run_decision_engine(
       L2  INTEGRITY — severe failures escalate one level OR
                        inconsistency override (E9/E12)
       L3  ML        — calibrated probability vs adaptive thresholds
+      L3.1 PRECISION_GATE — suppress marginal PRE_ALERT when baseline disagrees
       L3.7 NEW      — multi-signal early WARNING (E3)
       L4  TREND     — sustained -> DANGER OR rising-trend SAFE -> PRE_ALERT (E4)
     """
@@ -447,11 +449,15 @@ def _build_canonical_inputs(kw: dict) -> dict:
         except (TypeError, ValueError):
             ood_score_value = 0.0
 
+    baseline_result = kw.get("baseline_result") or {}
+    baseline_prob = float(baseline_result.get("baseline_probability") or 0.0)
+
     reasoning = ReasoningInputs(
         probability=float(kw.get("probability") or 0.0),
         confidence=float(kw.get("adjusted_confidence") or 0.0),
         model_variant="realtime_native",
         ood_score=ood_score_value,
+        baseline_probability=baseline_prob,
     )
 
     failures: list[CanonicalFailureMode] = []

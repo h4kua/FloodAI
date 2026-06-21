@@ -14,5 +14,9 @@
   "water_level_lag_1",
   "water_level_delta",
   "hydro_meteorological_index",
-  "monsoon_season"
+  "monsoon_season",
+  "rainfall_wlr_interaction",
+  "wlr_acceleration",
+  "wlr_roll3_max",
+  "rainfall_intensity_ratio"
 ]

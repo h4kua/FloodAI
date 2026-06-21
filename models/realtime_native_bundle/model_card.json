@@ -17,18 +17,22 @@
     "water_level_lag_1",
     "water_level_delta",
     "hydro_meteorological_index",
-    "monsoon_season"
+    "monsoon_season",
+    "rainfall_wlr_interaction",
+    "wlr_acceleration",
+    "wlr_roll3_max",
+    "rainfall_intensity_ratio"
   ],
-  "training_dataset": "D:\\Buat Lomba\\Buat Lomba\\data\\processed\\realtime_native_training_bootstrap.csv",
-  "report_path": "D:\\Buat Lomba\\Buat Lomba\\artifacts\\reports\\realtime_native_model_report.json",
-  "threshold_path": "D:\\Buat Lomba\\Buat Lomba\\models\\optimal_threshold_realtime_native.json",
-  "operating_threshold": 0.24204986294110617,
+  "training_dataset": "D:\\FloodAI - Copy\\data\\processed\\realtime_native_training_bootstrap.csv",
+  "report_path": "D:\\FloodAI - Copy\\artifacts\\reports\\realtime_native_model_report.json",
+  "threshold_path": "D:\\FloodAI - Copy\\models\\optimal_threshold_realtime_native.json",
+  "operating_threshold": 0.18999967475732168,
   "calibration_method": "isotonic",
   "confidence_floor_on_outlier": 0.6,
   "ood_detector": {
     "algorithm": "IsolationForest",
     "n_estimators": 200,
-    "contamination": 0.03015075376884422,
+    "contamination": 0.030397505845674203,
     "contamination_source": "observed_anomaly_rate"
   }
 }

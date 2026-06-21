@@ -253,6 +253,61 @@ def test_L3_pre_alert_via_threshold_band():
 
 
 # ---------------------------------------------------------------------------
+# L3.1 - precision gate
+# ---------------------------------------------------------------------------
+
+
+def test_L3_1_precision_gate_suppresses_marginal_pre_alert():
+    """Marginal PRE_ALERT with low baseline and no physical signals → SAFE."""
+    r = run_decision_engine(
+        **_kwargs(
+            probability=0.25,
+            baseline_result={"baseline_probability": 0.05},
+            signals={"rainfall_mm": 3.0, "bmkg_severity": 0.10},
+        )
+    )
+    assert r.risk_level == "SAFE"
+    assert r.decision_source == "precision_gate"
+
+
+def test_L3_1_precision_gate_skips_when_baseline_confirms():
+    """PRE_ALERT preserved when baseline agrees risk is elevated."""
+    r = run_decision_engine(
+        **_kwargs(
+            probability=0.25,
+            baseline_result={"baseline_probability": 0.20},
+            signals={"rainfall_mm": 3.0, "bmkg_severity": 0.10},
+        )
+    )
+    assert r.risk_level == "PRE_ALERT"
+
+
+def test_L3_1_precision_gate_skips_when_rainfall_active():
+    """PRE_ALERT preserved when rainfall is clearly active."""
+    r = run_decision_engine(
+        **_kwargs(
+            probability=0.25,
+            baseline_result={"baseline_probability": 0.05},
+            signals={"_rainfall_mm": 15.0, "bmkg_severity": 0.10},
+        )
+    )
+    assert r.risk_level == "PRE_ALERT"
+
+
+def test_L3_1_precision_gate_never_suppresses_warning():
+    """WARNING is never suppressed, even with low baseline."""
+    r = run_decision_engine(
+        **_kwargs(
+            probability=0.60,
+            baseline_result={"baseline_probability": 0.05},
+            signals={"rainfall_mm": 3.0, "bmkg_severity": 0.10},
+            adaptive_classification={"effective_danger_threshold": 0.75},
+        )
+    )
+    assert r.risk_level == "WARNING"
+
+
+# ---------------------------------------------------------------------------
 # L3.3 - E9/E12 inconsistency override
 # ---------------------------------------------------------------------------
 
@@ -513,6 +568,7 @@ def test_decision_source_values_are_stable():
         "ood_floor",
         "system_guardrail",
         "ml_adaptive",
+        "precision_gate",
         "trend_informed",
     }
 

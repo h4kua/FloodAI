@@ -44,6 +44,11 @@ REALTIME_NATIVE_FEATURES = [
     "water_level_delta",
     "hydro_meteorological_index",
     "monsoon_season",
+    # v2 features — recall improvement batch
+    "rainfall_wlr_interaction",
+    "wlr_acceleration",
+    "wlr_roll3_max",
+    "rainfall_intensity_ratio",
 ]
 
 
@@ -394,6 +399,26 @@ def _add_temporal_columns(current_row, history):
     # Clamp delta to physically realistic range for 15-min interval
     water_level_delta = max(-_MAX_REALISTIC_DELTA, min(_MAX_REALISTIC_DELTA, water_level_delta))
 
+    # v2 features — capture non-linear flood signals the base 16 miss
+    rainfall_mm = current_row["rainfall_mm"]
+
+    # Interaction: high rain + high water = disproportionately dangerous
+    rainfall_wlr_interaction = rainfall_mm * current_wlr
+
+    # WLR acceleration: delta-of-delta — rapid *change in rate* precedes floods
+    water_level_lag_2 = water_history[-2] if len(water_history) >= 2 else water_level_lag_1
+    prev_delta = water_level_lag_1 - water_level_lag_2
+    wlr_acceleration = water_level_delta - prev_delta
+    wlr_acceleration = max(-0.5, min(0.5, wlr_acceleration))
+
+    # Rolling 1-hour max WLR: captures peak even if current reading dipped
+    recent_wlr = (water_history[-3:] if len(water_history) >= 3 else water_history) + [current_wlr]
+    wlr_roll3_max = max(recent_wlr) if recent_wlr else current_wlr
+
+    # Rainfall intensity ratio: current vs rolling mean — spike detection
+    roll_mean = current_row.get("rainfall_roll3_mean", rainfall_mm)
+    rainfall_intensity_ratio = rainfall_mm / max(roll_mean, 0.1)
+
     current_row.update(
         {
             "rainfall_lag_1": rainfall_lag_1,
@@ -401,6 +426,10 @@ def _add_temporal_columns(current_row, history):
             "rainfall_roll3_mean": rainfall_roll3_mean,
             "water_level_lag_1": water_level_lag_1,
             "water_level_delta": water_level_delta,
+            "rainfall_wlr_interaction": round(rainfall_wlr_interaction, 4),
+            "wlr_acceleration": round(wlr_acceleration, 4),
+            "wlr_roll3_max": round(wlr_roll3_max, 4),
+            "rainfall_intensity_ratio": round(min(rainfall_intensity_ratio, 10.0), 4),
         }
     )
     return current_row
@@ -836,6 +865,23 @@ def build_bootstrap_training_dataset(
     df["rainfall_lag_2"] = df["rainfall_lag_2"].fillna(df["rainfall_lag_1"])
     df["water_level_lag_1"] = df["water_level_lag_1"].fillna(df["water_level_ratio"])
     df["water_level_delta"] = df["water_level_delta"].fillna(0.0)
+
+    # v2 features
+    df["rainfall_wlr_interaction"] = df["rainfall_mm"] * df["water_level_ratio"]
+    water_level_lag_2 = df.groupby(group_keys)["water_level_ratio"].shift(2).fillna(
+        df["water_level_lag_1"]
+    )
+    prev_delta = df["water_level_lag_1"] - water_level_lag_2
+    df["wlr_acceleration"] = (df["water_level_delta"] - prev_delta).clip(-0.5, 0.5).fillna(0.0)
+    df["wlr_roll3_max"] = (
+        df.groupby(group_keys)["water_level_ratio"]
+        .rolling(3, min_periods=1)
+        .max()
+        .reset_index(level=group_keys, drop=True)
+    ).fillna(df["water_level_ratio"])
+    df["rainfall_intensity_ratio"] = (
+        df["rainfall_mm"] / df["rainfall_roll3_mean"].clip(lower=0.1)
+    ).clip(upper=10.0).fillna(1.0)
 
     df["feature_provenance"] = "bootstrap_proxy"
 

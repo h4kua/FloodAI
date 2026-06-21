@@ -1,24 +1,24 @@
 {
-  "dataset_path": "D:\\Buat Lomba\\Buat Lomba\\data\\processed\\realtime_native_training_bootstrap.csv",
-  "feature_count": 16,
+  "dataset_path": "D:\\FloodAI - Copy\\data\\processed\\realtime_native_training_bootstrap.csv",
+  "feature_count": 20,
   "training_rows": 1990,
   "validation_rows": 352,
   "test_rows": 586,
   "performance": {
-    "optimal_threshold": 0.24204986294110617,
-    "train_accuracy": 0.9487437185929648,
-    "test_accuracy": 0.8822525597269625,
-    "test_precision": 0.3968253968253968,
-    "test_recall": 0.44642857142857145,
-    "test_f1": 0.42016806722689076,
-    "test_roc_auc": 0.8629043126684636,
-    "validation_recall_at_threshold": 0.5882352941176471,
-    "validation_precision_at_threshold": 0.5128205128205128
+    "optimal_threshold": 0.18999967475732168,
+    "train_accuracy": 0.8799688230709275,
+    "test_accuracy": 0.8003412969283277,
+    "test_precision": 0.2953020134228188,
+    "test_recall": 0.7857142857142857,
+    "test_f1": 0.4292682926829268,
+    "test_roc_auc": 0.8663241239892183,
+    "validation_recall_at_threshold": 0.7647058823529411,
+    "validation_precision_at_threshold": 0.325
   },
   "calibration": {
     "method": "isotonic",
-    "test_brier": 0.06609983965641626,
-    "test_ece": 0.004010795192033257
+    "test_brier": 0.08635097236878662,
+    "test_ece": 0.027999992134119866
   },
   "scientific_notes": {
     "training_mode": "bootstrap_proxy_until_realtime_history_available",

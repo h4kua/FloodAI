@@ -90,6 +90,7 @@ class DecisionAuthority(str, Enum):
     L1_9_OOD_FLOOR = "L1_9_OOD_FLOOR"
     L2_INTEGRITY = "L2_INTEGRITY"
     L3_ML = "L3_ML"
+    L3_1_PRECISION_GATE = "L3_1_PRECISION_GATE"
     L4_TREND = "L4_TREND"
 
 

@@ -14,6 +14,7 @@ Decision hierarchy (top wins, evaluated top-to-bottom):
   L1.5 MULTI          - >=2 of {rainfall>=60, water>=0.85, bmkg>=0.80} -> DANGER (COMPOUND_EVENT)
   L2   INTEGRITY      - severe failures (>=HIGH, risk_escalation) -> escalate one level
   L3   ML             - calibrated probability vs adaptive thresholds
+  L3.1 PRECISION_GATE - post-ML: suppress marginal PRE_ALERT when baseline disagrees
   L1.8 HYDRO_FLOOR    - post-ML: ratio>=0.75->WARNING, >=0.60->PRE_ALERT (one-way floor)
   L1.9 OOD_FLOOR      - post-ML: ood<-0.05->PRE_ALERT/70% cap, <-0.10->WARNING/55% cap
   L4   TREND          - sustained upward -> WARNING->DANGER (one-way, asymmetric)
@@ -62,6 +63,7 @@ class ReasoningInputs:
     confidence: float              # base confidence before penalties, [0, 1]
     model_variant: str
     ood_score: float = 0.0         # IsolationForest decision_function; <0 = OOD
+    baseline_probability: float = 0.0  # rule-based baseline for precision gate
 
 
 @dataclass(frozen=True)
@@ -137,6 +139,18 @@ _EARLY_WARN_STRENGTH_MIN = 0.35
 _EARLY_WARN_CONFIDENCE_MIN = 0.65
 _EARLY_WARN_RAIN_3H_MIN = 20.0
 _EARLY_WARN_WATER_DELTA_MIN = 0.06
+
+# ---------------------------------------------------------------------------
+# L3.1 PRECISION_GATE — suppress marginal ML alerts unsupported by baseline.
+# ---------------------------------------------------------------------------
+# When ML probability is in the "soft zone" (threshold ≤ p < soft_ceiling)
+# AND the rule-based baseline probability is below _PRECISION_GATE_BL_MAX,
+# the ML alert is treated as unconfirmed and suppressed from PRE_ALERT → SAFE.
+# Only applies to PRE_ALERT (lowest alert tier); WARNING/DANGER are never suppressed.
+_PRECISION_GATE_SOFT_MARGIN = 0.15     # soft zone = [threshold, threshold + margin)
+_PRECISION_GATE_BL_MAX = 0.12         # baseline below this = "no physical confirmation"
+_PRECISION_GATE_RAIN_MIN = 10.0       # mm/h — skip gate when rain is clearly active
+_PRECISION_GATE_WL_MIN = 0.40         # ratio — skip gate when water is elevated
 _EARLY_WARN_DATA_POINTS_MIN = 2
 
 # ---------------------------------------------------------------------------
@@ -221,6 +235,37 @@ _ESCALATE_NEXT = {
     RiskLevel.DANGER: RiskLevel.DANGER,
     RiskLevel.UNKNOWN: RiskLevel.UNKNOWN,
 }
+
+
+def _should_suppress_marginal_alert(
+    risk: RiskLevel,
+    reasoning: ReasoningInputs,
+    perception: PerceptionInputs,
+    thresholds: AdaptiveThresholds,
+) -> bool:
+    """
+    L3.1 precision gate: suppress PRE_ALERT when ML probability is marginal
+    and no independent physical signal confirms the alert.
+
+    Only fires when a baseline probability was actually computed (> 0);
+    the default 0.0 means "not available" and disables the gate.
+
+    Returns True when the alert should be downgraded to SAFE.
+    """
+    if risk != RiskLevel.PRE_ALERT:
+        return False
+    if reasoning.baseline_probability <= 0.0:
+        return False
+    soft_ceiling = thresholds.pre_alert + _PRECISION_GATE_SOFT_MARGIN
+    if reasoning.probability >= soft_ceiling:
+        return False
+    if perception.rainfall_1h_mm >= _PRECISION_GATE_RAIN_MIN:
+        return False
+    if perception.max_water_level_ratio >= _PRECISION_GATE_WL_MIN:
+        return False
+    if reasoning.baseline_probability >= _PRECISION_GATE_BL_MAX:
+        return False
+    return True
 
 
 def _ml_classify(reasoning: ReasoningInputs, thresholds: AdaptiveThresholds) -> RiskLevel:
@@ -630,6 +675,28 @@ def decide(
         reason = DecisionReason.RISK
     else:
         authority = DecisionAuthority.L3_ML
+        reason = DecisionReason.RISK
+
+    # ------------------------------------------------------------------ L3.1
+    # Only suppress ML-originated PRE_ALERT, not L2-escalated PRE_ALERT.
+    if not severe and _should_suppress_marginal_alert(base_risk, reasoning, perception, thresholds):
+        decision_trace.append(_trace(
+            DecisionAuthority.L3_1_PRECISION_GATE,
+            inputs={
+                "probability": reasoning.probability,
+                "baseline_probability": reasoning.baseline_probability,
+                "soft_ceiling": thresholds.pre_alert + _PRECISION_GATE_SOFT_MARGIN,
+                "rainfall_1h_mm": perception.rainfall_1h_mm,
+                "max_water_level_ratio": perception.max_water_level_ratio,
+            },
+            outputs={
+                "risk_before": base_risk.value,
+                "risk_after": RiskLevel.SAFE.value,
+                "suppressed": True,
+            },
+        ))
+        base_risk = RiskLevel.SAFE
+        authority = DecisionAuthority.L3_1_PRECISION_GATE
         reason = DecisionReason.RISK
 
     system_status = _resolve_system_status(failures, perception)

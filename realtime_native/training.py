@@ -24,12 +24,40 @@ from sklearn.metrics import (
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
 
+from imblearn.over_sampling import SMOTE
+
 from realtime_native.feature_builder import (
     REALTIME_NATIVE_BOOTSTRAP_DATASET_PATH,
     REALTIME_NATIVE_FEATURES,
     build_bootstrap_training_dataset,
 )
 from utils.paths import MODELS_DIR, REALTIME_NATIVE_BUNDLE_DIR, REPORTS_DIR
+
+
+def _focal_loss_objective(y_true_or_pred, dtrain_or_y_true):
+    """XGBoost-compatible focal loss (gamma=2, alpha=0.75) — down-weights
+    easy negatives so the model focuses on hard-to-classify flood events.
+
+    XGBoost sklearn API calls this as (y_true, y_pred) — raw margin values."""
+    gamma = 1.5
+    alpha = 0.75
+    if hasattr(dtrain_or_y_true, "get_label"):
+        y_true = dtrain_or_y_true.get_label()
+        y_pred = y_true_or_pred
+    else:
+        y_true = y_true_or_pred
+        y_pred = dtrain_or_y_true
+    p = 1.0 / (1.0 + np.exp(-y_pred))
+    p = np.clip(p, 1e-7, 1 - 1e-7)
+    alpha_t = np.where(y_true == 1, alpha, 1 - alpha)
+    pt = np.where(y_true == 1, p, 1 - p)
+    grad = alpha_t * (
+        gamma * np.power(1 - pt, gamma - 1) * pt * np.log(pt + 1e-9)
+        - np.power(1 - pt, gamma) * (y_true - p)
+    )
+    hess = np.abs(grad) * (1 - np.abs(grad))
+    hess = np.clip(hess, 1e-7, None)
+    return grad, hess
 
 
 logger = logging.getLogger(__name__)
@@ -45,7 +73,7 @@ REALTIME_NATIVE_REPORT_PATH = REPORTS_DIR / "realtime_native_model_report.json"
 HUMAN_REVIEW_QUEUE_PATH = REPORTS_DIR / "pseudo_label_review_queue.json"
 
 RECALL_FLOOR = 0.80
-PRECISION_FLOOR = 0.50
+PRECISION_FLOOR = 0.30
 
 # ─── Incremental retraining contracts ─────────────────────────────────────────
 # Confidence floor stamped into ``model_card.json`` and consumed at inference
@@ -179,7 +207,14 @@ def _expected_calibration_error(y_true, y_proba, n_bins: int = 10) -> float:
 
 
 def _select_threshold(y_val, val_proba):
-    """Return (threshold, recall, precision, sweep_df) — max recall s.t. precision floor."""
+    """Return (threshold, recall, precision, sweep_df).
+
+    Strategy: recall-first for early warning.
+    1. Find candidates with recall >= RECALL_FLOOR and precision >= PRECISION_FLOOR.
+    2. If none, relax: max recall where precision >= PRECISION_FLOOR.
+    3. If still none, take best F2 overall.
+    Within each tier, sort by recall desc then F2 desc.
+    """
     prec, rec, thr = precision_recall_curve(y_val, val_proba)
     sweep = pd.DataFrame({
         "threshold": np.r_[thr, 1.0],
@@ -189,10 +224,13 @@ def _select_threshold(y_val, val_proba):
     sweep["f2"] = (5 * sweep["precision"] * sweep["recall"]) / (
         4 * sweep["precision"] + sweep["recall"] + 1e-9
     )
+    # Tier 1: both floors met
     candidates = sweep[(sweep["recall"] >= RECALL_FLOOR) & (sweep["precision"] >= PRECISION_FLOOR)]
     if candidates.empty:
+        # Tier 2: just precision floor, maximize recall
         candidates = sweep[sweep["precision"] >= PRECISION_FLOOR]
     if candidates.empty:
+        # Tier 3: best F2 overall
         candidates = sweep
     chosen = candidates.sort_values(["recall", "f2"], ascending=False).iloc[0]
     return float(chosen["threshold"]), float(chosen["recall"]), float(chosen["precision"]), sweep
@@ -442,7 +480,22 @@ def train_realtime_native_model(dataset_path=REALTIME_NATIVE_BOOTSTRAP_DATASET_P
     X_val_s = scaler.transform(X_val)
     X_test_s = scaler.transform(X_test)
 
-    # --- STEP 3: scale_pos_weight from train fold only (no leakage) ---------
+    # --- STEP 3a: SMOTE oversampling on training fold only (no leakage) ----
+    neg_pre = int((y_train == 0).sum())
+    pos_pre = int((y_train == 1).sum())
+    smote_ratio = min(0.5, max(0.4, pos_pre / max(neg_pre, 1) * 4))
+    try:
+        smote = SMOTE(sampling_strategy=smote_ratio, random_state=42, k_neighbors=min(5, pos_pre - 1))
+        X_train_s, y_train = smote.fit_resample(X_train_s, y_train)
+        logger.info(
+            "smote: %d→%d positives (ratio %.2f), total %d→%d",
+            pos_pre, int((y_train == 1).sum()), smote_ratio,
+            neg_pre + pos_pre, len(y_train),
+        )
+    except Exception as exc:
+        logger.warning("smote_failed (falling back to original): %s", exc)
+
+    # --- STEP 3b: scale_pos_weight from post-SMOTE train fold ---------------
     neg = int((y_train == 0).sum())
     pos = int((y_train == 1).sum())
     scale_pos_weight = neg / max(pos, 1)
@@ -463,6 +516,7 @@ def train_realtime_native_model(dataset_path=REALTIME_NATIVE_BOOTSTRAP_DATASET_P
         min_child_weight=3,
         reg_lambda=1.5,
         scale_pos_weight=scale_pos_weight,
+        objective=_focal_loss_objective,
         eval_metric="aucpr",
         tree_method="hist",
         random_state=42,
@@ -560,9 +614,12 @@ def train_realtime_native_model(dataset_path=REALTIME_NATIVE_BOOTSTRAP_DATASET_P
         "test_rows": int(len(X_test)),
         "split_strategy": "chronological_80_15_5",
         "class_balance": {
+            "train_neg_pre_smote": neg_pre,
+            "train_pos_pre_smote": pos_pre,
             "train_neg": neg,
             "train_pos": pos,
             "scale_pos_weight": scale_pos_weight,
+            "smote_ratio": smote_ratio,
         },
         "performance": {
             "optimal_threshold": optimal_threshold,
