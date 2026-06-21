@@ -200,6 +200,12 @@ export function StationPanel({ stations, quality }) {
   const total = quality?.total ?? null;
   const scored = quality?.scored ?? stations.length;
 
+  // Fleet-wide distribution for the summary bar
+  const normalCt = stations.filter(s => s.ratio < 0.50).length;
+  const waspCt   = stations.filter(s => s.ratio >= 0.50 && s.ratio < 0.75).length;
+  const s2Ct     = stations.filter(s => s.ratio >= 0.75 && s.ratio < 1.0).length;
+  const s1Ct     = stations.filter(s => s.ratio >= 1.0).length;
+
   return (
     <div className="panel panel-body fade-in">
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "0.75rem", gap: "1rem" }}>
@@ -258,6 +264,45 @@ export function StationPanel({ stations, quality }) {
             : (isId ? `Lihat semua ${stations.length} pos pantau ↓` : `Show all ${stations.length} stations ↓`)}
         </button>
       )}
+
+      {/* Fleet-wide distribution — fills vertical space and gives a quick
+          overview of the entire calibrated station fleet at a glance */}
+      <div style={{ marginTop: "0.875rem", paddingTop: "0.75rem", borderTop: "1px solid var(--line)" }}>
+        <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", marginBottom: "0.5rem", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          {isId ? "Distribusi status — semua pos" : "Status distribution — all stations"}
+        </p>
+        {/* Stacked proportion bar */}
+        <div style={{ display: "flex", height: 6, borderRadius: 4, overflow: "hidden", gap: 2, marginBottom: "0.6rem" }}>
+          {normalCt > 0 && <div style={{ flex: normalCt, background: "var(--safe)", opacity: 0.65 }} />}
+          {waspCt  > 0 && <div style={{ flex: waspCt,  background: "var(--wsp)", opacity: 0.75 }} />}
+          {s2Ct    > 0 && <div style={{ flex: s2Ct,    background: "var(--s2)",  opacity: 0.85 }} />}
+          {s1Ct    > 0 && <div style={{ flex: s1Ct,    background: "var(--s1)"               }} />}
+        </div>
+        {/* Count chips */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+          {normalCt > 0 && (
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--safe)" }}>
+              ● {normalCt} {isId ? "Normal" : "Normal"}
+            </span>
+          )}
+          {waspCt > 0 && (
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--wsp)" }}>
+              ● {waspCt} Waspada
+            </span>
+          )}
+          {s2Ct > 0 && (
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--s2)" }}>
+              ● {s2Ct} Siaga 2
+            </span>
+          )}
+          {s1Ct > 0 && (
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--s1)" }}>
+              ● {s1Ct} Siaga 1
+            </span>
+          )}
+        </div>
+      </div>
+
       <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem", color: "var(--muted-2)" }}>
         {isId
           ? "● Sensor pintu air & pos pantau DSDADKI · Persentase = Tinggi Air ÷ Ambang Siaga 1 · Update tiap 15 menit"
