@@ -7,25 +7,16 @@ const TILE_DARK  = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.pn
 const TILE_LIGHT = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 const TILE_ATTR  = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
 
-// River-coded palette for historically flood-prone points. Mapped from the
-// "by_kelurahan" join in river_flood_zones.json so neighbouring points along
-// the same river share a colour and form a visual "spine" on the map.
-const RIVER_COLORS = {
-  "CILIWUNG":                          "#ef4444",
-  "CILIWUNG ARAH ISTANA NEGARA":       "#f97316",
-  "CILIWUNG ARAH KANAL BANJIR BARAT":  "#fb923c",
-  "SUNTER":                            "#3b82f6",
-  "KRUKUT":                            "#10b981",
-  "PESANGGRAHAN":                      "#a855f7",
-  "PESANGGRAHAN & ANGKE":              "#c084fc",
-  "ANGKE":                             "#f59e0b",
-  "CIPINANG":                          "#eab308",
-};
-const PRONE_DEFAULT_COLOR = "#64748b";
+// Single muted slate-blue for ALL historical BNPB flood-prone points so the
+// overlay reads as a uniform "background context" layer rather than a second
+// system of markers. River association is still surfaced in each point's
+// popup — colour just isn't doing duplicate work anymore. This was the fix
+// to the 10-hue overload that made the map feel cluttered.
+const PRONE_COLOR = "#6b8aa3";
 
-function proneColor(rivers) {
-  const r = rivers?.[0];
-  return RIVER_COLORS[r] ?? PRONE_DEFAULT_COLOR;
+function proneAccentColor(rivers) {
+  // Accent only used inside the popup (river name line) — not on the dot.
+  return rivers?.length > 0 ? "#8aa8c4" : "#8f96a9";
 }
 
 function titleCase(s) {
@@ -132,13 +123,12 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
           <CircleMarker
             key={`p-${i}`}
             center={[p.lat, p.lon]}
-            radius={4}
+            radius={2}
             pathOptions={{
-              fillColor: proneColor(p.rivers),
-              fillOpacity: 0.55,
-              color: proneColor(p.rivers),
-              weight: 0.8,
-              opacity: 0.75,
+              fillColor: PRONE_COLOR,
+              fillOpacity: 0.42,
+              weight: 0,        // no border — sensor markers have a white stroke, BNPB dots don't
+              opacity: 0,
             }}
           >
             <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>
@@ -150,7 +140,7 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
                   {titleCase(p.kecamatan)} · {titleCase((p.wilayah || "").replace("KOTA ADM. ", ""))}
                 </p>
                 {p.rivers?.length > 0 ? (
-                  <p style={{ fontSize: 11, color: proneColor(p.rivers), fontWeight: 600, marginBottom: 4 }}>
+                  <p style={{ fontSize: 11, color: proneAccentColor(p.rivers), fontWeight: 600, marginBottom: 4 }}>
                     {isId ? "Sungai" : "River"}: {p.rivers.map(titleCase).join(", ")}
                   </p>
                 ) : (
@@ -229,8 +219,8 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
           </span>
         </div>
 
-        {/* Flood-prone overlay toggle + per-river colour key */}
-        <div style={{ marginTop: 6, borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 6 }}>
+        {/* Flood-prone overlay toggle — single compact line, no second color key */}
+        <div style={{ marginTop: 5, borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 5 }}>
           <button
             type="button"
             onClick={() => setShowProne(v => !v)}
@@ -238,35 +228,24 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
               display: "flex", alignItems: "center", gap: 6, width: "100%",
               background: "transparent", border: "none", padding: 0, cursor: "pointer",
               color: "var(--muted-2)", fontFamily: "'JetBrains Mono',monospace",
-              fontSize: "0.62rem", letterSpacing: "0.04em",
+              fontSize: "0.6rem", letterSpacing: "0.04em",
             }}
-            title={isId ? "Toggle titik rawan historis" : "Toggle historical flood-prone points"}
+            title={isId
+              ? "Tampilkan/sembunyikan titik historis BNPB (klik titik untuk detail sungai)"
+              : "Toggle BNPB historical points (click a dot for river detail)"}
           >
             <span style={{
-              width: 10, height: 10, borderRadius: 2,
-              border: `1.5px solid ${showProne ? "var(--cyan, #38bdf8)" : "rgba(143,150,169,0.45)"}`,
-              background: showProne ? "var(--cyan, #38bdf8)" : "transparent",
+              width: 9, height: 9, borderRadius: 2,
+              border: `1.5px solid ${showProne ? PRONE_COLOR : "rgba(143,150,169,0.45)"}`,
+              background: showProne ? PRONE_COLOR : "transparent",
               flexShrink: 0,
             }} />
-            {isId ? `Titik rawan BNPB (${pronePoints.length})` : `BNPB flood-prone (${pronePoints.length})`}
+            <span style={{ flex: 1, textAlign: "left" }}>
+              {isId
+                ? `Titik historis BNPB (${pronePoints.length})`
+                : `BNPB historical points (${pronePoints.length})`}
+            </span>
           </button>
-          {showProne && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2px 8px", marginTop: 6 }}>
-              {[
-                ["Ciliwung",     RIVER_COLORS.CILIWUNG],
-                ["Sunter",       RIVER_COLORS.SUNTER],
-                ["Krukut",       RIVER_COLORS.KRUKUT],
-                ["Pesanggrahan", RIVER_COLORS.PESANGGRAHAN],
-                ["Angke",        RIVER_COLORS.ANGKE],
-                ["Cipinang",     RIVER_COLORS.CIPINANG],
-              ].map(([name, color]) => (
-                <div key={name} className="legend-row" style={{ fontSize: "0.58rem" }}>
-                  <span className="legend-dot" style={{ background: color, width: 6, height: 6 }} />
-                  {name}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>
