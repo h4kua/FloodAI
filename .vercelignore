@@ -1,21 +1,23 @@
 # Ignore Python backend — Vercel only builds the Vite/React frontend
-agents/
-api/
-config/
-contracts/
-core/
-data/
-db/
-domain/
-evaluation/
-monitoring/
-pipeline/
-poskobanjir/
-realtime_native/
-scripts/
-services/
-tests/
-utils/
+# Leading slash anchors each pattern to the repo root so nested frontend dirs
+# (e.g. frontend/src/data/) are NOT accidentally excluded.
+/agents/
+/api/
+/config/
+/contracts/
+/core/
+/data/
+/db/
+/domain/
+/evaluation/
+/monitoring/
+/pipeline/
+/poskobanjir/
+/realtime_native/
+/scripts/
+/services/
+/tests/
+/utils/
 *.py
 *.pyc
 __pycache__/
