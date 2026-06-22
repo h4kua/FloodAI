@@ -184,6 +184,7 @@ def _build_retrieved_context(req: ChatRequest) -> str:
             "Give next actions before explanation for emergency-sounding messages.",
             "When mentioning flood risk, reference historical_flood_data for depth estimates and affected areas.",
             "Be PROPORTIONAL: WASPADA means alert, NOT panic. Don't suggest evacuation for WASPADA status.",
+            "BREVITY: match answer length to question complexity. Simple question = 1-2 sentences. Do NOT pad with unrequested context.",
         ],
     }
     return json.dumps(context, ensure_ascii=False, separators=(",", ":"))[:_MAX_CONTEXT_CHARS]
@@ -215,7 +216,7 @@ async def chat_endpoint(req: ChatRequest) -> dict:
         response = client.chat.completions.create(
             model=model,
             messages=messages,
-            max_tokens=2000,
+            max_tokens=800,
             timeout=28.0,
         )
         return {"reply": response.choices[0].message.content}
