@@ -109,7 +109,7 @@ function AppShell() {
 
       <footer className="footer">
         <span>deFlood.ai — Jakarta Flood Intelligence System · Operator BPBD</span>
-        <span>XGBoost · 16 features · AUC-ROC 0.863 · ECE 0.004 · &lt;1s latency</span>
+        <span>XGBoost · 16 features · AUC-ROC 0.865 · Recall 75% · ECE 0.018 · &lt;1s latency</span>
       </footer>
 
       <OnboardingTour />

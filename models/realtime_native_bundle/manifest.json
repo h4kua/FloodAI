@@ -2,7 +2,7 @@
   "bundle_version": "2.0.0",
   "model_variant": "realtime_native",
   "schema_version": "2",
-  "created_at": "2026-06-21T11:56:52.075951+00:00",
+  "created_at": "2026-06-22T00:23:13.165862+00:00",
   "training_dataset_fingerprint": "sha256:7521e047ca692f7142a933e08ba3941da76f8ea88ba94614b6c0cbd80d1309dd",
   "feature_schema": {
     "feature_count": 16,
@@ -39,14 +39,14 @@
     "numpy": "1.26.4"
   },
   "sha256": {
-    "model.pkl": "6c5aa35e5f4c87aafeda8e187c75ee1aa4340448036cc722eb79e857b2c99635",
+    "model.pkl": "5fb551a156add3d0c9e2baa1f3b1ab487573daafa52722ede4285f1e893feab6",
     "scaler.pkl": "6c05af5cf61971dd05292f4a0b8212098e7af0397f44504b203c9a14291ce2f4",
-    "ood.pkl": "20f2c4e462699abfc369fbf550181f234a81554aec0e4ef2a27d50383066a857",
-    "threshold.json": "8f6ccc4f4127b42a4aebfa7b4a119b4196cb564151fa9132bc7e92dd154a21d9",
-    "calibration.json": "7632e28768b3ea188d0d3a2ce97778fe41ec45c9b0bf8defc2ea1d44394283e6",
+    "ood.pkl": "98cff5376d4adb37fff072cb87390e4a81e9c8da89f771fdb605231c7af8303e",
+    "threshold.json": "9d5f8a8a7fd1a47e4961ff8cd692c7f897fa8a716c0d91a758b77682a32e09e7",
+    "calibration.json": "54650f0f03a0fa7a0966e798000d44ee7f4816d57238bece96e429807e17fc54",
     "feature_list.json": "787c71cf19989965311138a4cbbc0325160ccd24cae94d0c75fab6de8eec4861",
-    "model_card.json": "1a324dc51c13038f43255b03bab64d7b21279aa968d63c9267729062521a3fb0",
-    "training_stats.json": "e714419bef85841450d0958d78b60a37806b408a8257aa014cc762c6df51b226",
-    "xgboost_model.json": "37931e45698a7c2daedb5d36bdbaedd2b490c39af110a679b913b1063e4588bc"
+    "model_card.json": "456ac4f0cc336befc5231259d6ded33628bfbb167d6868b9e0ba096c8d5182f7",
+    "training_stats.json": "bd32eea078cb16742e9f04a062d41b0a5a98f3827535145395ad6bf859bf3d8c",
+    "xgboost_model.json": "79080934af4f261404745051c7741d9da41e3b67096c6261ef4b5910c9198847"
   }
 }

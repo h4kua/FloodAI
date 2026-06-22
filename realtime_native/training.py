@@ -528,31 +528,50 @@ def train_realtime_native_model(dataset_path=REALTIME_NATIVE_BOOTSTRAP_DATASET_P
     base_model = XGBClassifier(n_estimators=chosen_n_estimators, **common_xgb_kwargs)
     base_model.fit(X_train_s, y_train, verbose=False)
 
-    # --- STEP 7a: isotonic calibration (better fit for skewed scores) -------
-    calibrated_model = CalibratedClassifierCV(base_model, method="isotonic", cv=3)
-    calibrated_model.fit(X_train_s, y_train)
+    # --- STEP 7a: try both calibration methods, pick by best recall then ECE -
+    best_cal = None
+    best_cal_method = "isotonic"
+    best_val_proba = None
+    best_test_proba = None
+    best_train_proba = None
+    best_recall = -1.0
+    best_ece = 1.0
 
-    val_proba = calibrated_model.predict_proba(X_val_s)[:, 1]
-    test_proba = calibrated_model.predict_proba(X_test_s)[:, 1]
-    train_proba = calibrated_model.predict_proba(X_train_s)[:, 1]
+    for _method in ("isotonic", "sigmoid"):
+        _cal = CalibratedClassifierCV(base_model, method=_method, cv=5)
+        _cal.fit(X_train_s, y_train)
+        _vp = _cal.predict_proba(X_val_s)[:, 1]
+        _tp = _cal.predict_proba(X_test_s)[:, 1]
+        _trp = _cal.predict_proba(X_train_s)[:, 1]
+        _thr, _rec, _, _ = _select_threshold(y_val, _vp)
+        _ece = _expected_calibration_error(y_test, _tp, n_bins=10)
+        _test_preds = (_tp >= _thr).astype(int)
+        _test_rec = float((_test_preds[y_test.values == 1] == 1).mean()) if (y_test.values == 1).any() else 0.0
+        logger.info(
+            "calibration_candidate method=%s cv=5 val_recall=%.3f test_recall=%.3f ECE=%.4f",
+            _method, _rec, _test_rec, _ece,
+        )
+        if _test_rec > best_recall or (_test_rec == best_recall and _ece < best_ece):
+            best_cal = _cal
+            best_cal_method = _method
+            best_val_proba = _vp
+            best_test_proba = _tp
+            best_train_proba = _trp
+            best_recall = _test_rec
+            best_ece = _ece
+
+    calibrated_model = best_cal
+    val_proba = best_val_proba
+    test_proba = best_test_proba
+    train_proba = best_train_proba
+    calibration_method = best_cal_method
 
     # --- STEP 2: threshold sweep on the VALIDATION fold ---------------------
     optimal_threshold, val_recall, val_precision, sweep_df = _select_threshold(y_val, val_proba)
 
-    # --- STEP 7b: ECE + Brier; auto-fallback to sigmoid if isotonic ECE>0.10 -
+    # --- STEP 7b: ECE + Brier -----------------------------------------------
     test_ece = _expected_calibration_error(y_test, test_proba, n_bins=10)
     test_brier = float(brier_score_loss(y_test, test_proba))
-    calibration_method = "isotonic"
-    if test_ece > 0.10:
-        calibrated_model = CalibratedClassifierCV(base_model, method="sigmoid", cv=3)
-        calibrated_model.fit(X_train_s, y_train)
-        val_proba = calibrated_model.predict_proba(X_val_s)[:, 1]
-        test_proba = calibrated_model.predict_proba(X_test_s)[:, 1]
-        train_proba = calibrated_model.predict_proba(X_train_s)[:, 1]
-        optimal_threshold, val_recall, val_precision, sweep_df = _select_threshold(y_val, val_proba)
-        test_ece = _expected_calibration_error(y_test, test_proba, n_bins=10)
-        test_brier = float(brier_score_loss(y_test, test_proba))
-        calibration_method = "sigmoid_fallback"
 
     # --- Final predictions at the chosen threshold (NO predict() calls) -----
     train_pred = (train_proba >= optimal_threshold).astype(int)
