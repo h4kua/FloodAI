@@ -57,34 +57,134 @@ def _apply_hydro_override(risk_level: str, probability: float, water_level_ratio
     return risk_level, probability
 
 
-def _risk_interpretation(risk_level, diagnostics):
+_STATION_KECAMATAN: dict[str, dict[str, str]] = {
+    "P.A. Marina Ancol (Laut)":  {"kecamatan": "Penjaringan", "area": "pesisir Ancol"},
+    "P.A. Marina Ancol (Kali)":  {"kecamatan": "Penjaringan", "area": "Ancol"},
+    "Pompa Pasar Ikan 1":        {"kecamatan": "Penjaringan", "area": "Pelabuhan Sunda Kelapa"},
+    "P.A. Karet 1":              {"kecamatan": "Tanah Abang", "area": "Karet-Kuningan"},
+    "Pompa Yos Sudarso 1":       {"kecamatan": "Tanjung Priok", "area": "Sunter Agung"},
+    "P.A. Hek":                  {"kecamatan": "Matraman", "area": "Cipinang Melayu"},
+    "P.A. Cengkareng Drain":     {"kecamatan": "Cengkareng", "area": "Cengkareng-Kapuk"},
+    "P.A. Manggarai 2":          {"kecamatan": "Tebet", "area": "Manggarai-Bukit Duri"},
+    "P.A. Pulo Gadung 2":        {"kecamatan": "Pulo Gadung", "area": "Sunter-Pulo Gadung"},
+    "Rumah Pompa Pluit 1":       {"kecamatan": "Penjaringan", "area": "Pluit"},
+    "P.A. Kaliduri 1":           {"kecamatan": "Tambora", "area": "Kali Duri-Tambora"},
+    "P.A. Ancol Flushing 1":     {"kecamatan": "Pademangan", "area": "Ancol-Pademangan"},
+    "P.A. Jembatan Merah 1":     {"kecamatan": "Menteng", "area": "Menteng-Cikini"},
+    "P.A. Istiqlal 1":           {"kecamatan": "Sawah Besar", "area": "Istiqlal-Sawah Besar"},
+    "Pompa Cideng 1":            {"kecamatan": "Gambir", "area": "Cideng-Gambir"},
+    "P.S. Krukut Hulu 2":        {"kecamatan": "Kebayoran Baru", "area": "Krukut-Kebayoran"},
+    "P.S. Sunter Hulu":          {"kecamatan": "Cakung", "area": "Sunter Hulu"},
+    "Waduk Kampung Rambutan 1":   {"kecamatan": "Ciracas", "area": "Kampung Rambutan"},
+    "Rumah Pompa Kemang 2":       {"kecamatan": "Mampang Prapatan", "area": "Kemang"},
+    "Rumah Pompa Atma Jaya":      {"kecamatan": "Mampang Prapatan", "area": "Kuningan"},
+    "Posko SDA Palmerah":         {"kecamatan": "Palmerah", "area": "Palmerah-Grogol"},
+    "Jembatan MT. Haryono":       {"kecamatan": "Jatinegara", "area": "MT Haryono-Cawang"},
+    "Rumah Pompa Tipala":         {"kecamatan": "Makasar", "area": "Cipinang-Makasar"},
+    "Bendung. Katulampa 2":       {"kecamatan": "Bogor Selatan", "area": "Katulampa (hulu Ciliwung)"},
+    "Pompa Kamal Muara (Bubble)": {"kecamatan": "Penjaringan", "area": "Kamal Muara"},
+    "Pompa Lagoa (Bubble)":       {"kecamatan": "Koja", "area": "Lagoa-Koja"},
+    "Pompa Cilincing (Bubble)":   {"kecamatan": "Cilincing", "area": "Cilincing"},
+}
+
+
+def _clean_siaga(raw: str) -> str:
+    s = raw.replace("Status :", "").replace("Status:", "").strip()
+    return s if s else raw
+
+
+def _station_location_label(station: dict) -> str:
+    nama = station.get("nama", "")
+    geo = _STATION_KECAMATAN.get(nama)
+    if geo:
+        return f"{nama} (Kec. {geo['kecamatan']}, {geo['area']})"
+    lokasi = station.get("lokasi") or ""
+    wilayah = station.get("wilayah") or ""
+    if lokasi and wilayah:
+        return f"{nama} ({lokasi}, {wilayah})"
+    if wilayah:
+        return f"{nama} ({wilayah})"
+    return nama
+
+
+def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None):
     bmkg_source = diagnostics.get("bmkg_source", "no_alert")
     temporal_ready = diagnostics.get("temporal_features_ready", False)
     water_level_records = diagnostics.get("water_level_records", 0)
+    stations = diagnostics.get("stations_summary") or []
+
+    elevated = [s for s in stations if "Siaga" in s.get("status_siaga", "")]
+    elevated.sort(key=lambda s: s.get("ratio", 0), reverse=True)
+    top_station = elevated[0] if elevated else None
+
+    normal_wilayah = []
+    alert_wilayah = []
+    if wilayah_summary:
+        for w in wilayah_summary:
+            if w.get("worst_rank", 0) >= 2:
+                alert_wilayah.append(w)
+            elif w.get("tma_count", 0) > 0:
+                normal_wilayah.append(w)
 
     if risk_level == "DANGER":
+        loc_context = ""
+        if top_station:
+            siaga = _clean_siaga(top_station["status_siaga"])
+            loc_context = (
+                f" Stasiun {_station_location_label(top_station)} mencatat {siaga} "
+                f"dengan TMA {top_station.get('tinggi_air', 0):.0f} cm."
+            )
         if bmkg_source == "observed_alerts" and water_level_records > 0:
             return (
-                "Risiko tinggi terdeteksi karena sinyal cuaca ekstrem sudah dikonfirmasi alert BMKG "
-                "dan diperkuat oleh kondisi tinggi muka air. Ini menunjukkan potensi banjir yang "
-                "bukan hanya prediksi statistik, tetapi juga konsisten dengan indikator lapangan."
+                f"Risiko tinggi terdeteksi - sinyal cuaca ekstrem dikonfirmasi alert BMKG "
+                f"dan diperkuat kondisi muka air.{loc_context} "
+                "Potensi banjir konsisten dengan indikator lapangan, bukan hanya prediksi statistik."
             )
         return (
-            "Risiko tinggi terdeteksi dari kombinasi hujan intens, akumulasi temporal, dan sinyal "
-            "hidrologi. Kondisi ini mengindikasikan potensi genangan atau banjir meningkat dalam waktu dekat."
+            f"Risiko tinggi dari kombinasi hujan intens, akumulasi temporal, dan sinyal hidrologi.{loc_context} "
+            "Potensi genangan atau banjir meningkat dalam waktu dekat."
         )
+
     if risk_level == "WARNING":
+        loc_context = ""
+        if top_station:
+            siaga = _clean_siaga(top_station["status_siaga"])
+            loc_context = (
+                f" {_station_location_label(top_station)} di {siaga} "
+                f"(TMA {top_station.get('tinggi_air', 0):.0f} cm, "
+                f"rasio {top_station.get('ratio', 0):.0%} ambang Siaga 1)."
+            )
+        elif alert_wilayah:
+            names = ", ".join(w["wilayah"] for w in alert_wilayah[:2])
+            loc_context = f" Area terdampak: {names}."
         if temporal_ready:
             return (
-                "Sistem melihat pola yang mulai mengarah ke banjir, terutama dari akumulasi hujan dan "
-                "perubahan kondisi air. Belum berada pada level kritis, tetapi perlu pemantauan lebih rapat."
+                f"Pola mulai mengarah ke banjir dari akumulasi hujan dan perubahan kondisi air.{loc_context} "
+                "Belum kritis, tetapi perlu pemantauan lebih rapat."
             )
         return (
-            "Ada sinyal kewaspadaan awal dari cuaca dan hidrologi, tetapi bukti temporal belum sepenuhnya kuat. "
-            "Status ini cocok untuk siaga operasional, bukan alarm penuh."
+            f"Sinyal kewaspadaan awal dari cuaca dan hidrologi, bukti temporal belum sepenuhnya kuat.{loc_context} "
+            "Cocok untuk siaga operasional, bukan alarm penuh."
+        )
+
+    monitored_areas = []
+    if normal_wilayah:
+        monitored_areas = [w["wilayah"] for w in normal_wilayah[:3]]
+    loc_context = ""
+    if monitored_areas:
+        loc_context = f" Sensor di {', '.join(monitored_areas)} terpantau normal."
+    elif water_level_records > 0:
+        loc_context = f" {water_level_records} stasiun TMA terpantau dalam batas aman."
+    elevated_note = ""
+    if top_station:
+        siaga = _clean_siaga(top_station["status_siaga"])
+        elevated_note = (
+            f" Catatan: {_station_location_label(top_station)} tercatat {siaga} "
+            f"(TMA {top_station.get('tinggi_air', 0):.0f} cm) - pantau perkembangan."
         )
     return (
-        "Belum ada indikasi kuat banjir dari kombinasi cuaca, alert resmi, dan kondisi air saat ini. "
+        f"Belum ada indikasi kuat banjir dari kombinasi cuaca, alert resmi, dan kondisi air saat ini.{loc_context}"
+        f"{elevated_note} "
         "Monitoring tetap diperlukan karena situasi dapat berubah cepat di wilayah urban padat seperti Jakarta."
     )
 
@@ -97,7 +197,7 @@ def _titlecase_name(name: str) -> str:
 def _kelurahan_targeted_actions(risk_level: str, wilayah_summary: list) -> list[str]:
     """
     Build kelurahan-specific action items by joining the live worst-affected
-    districts (from realtime TMA siaga ranks) with the BNPB 2014–2023
+    districts (from realtime TMA siaga ranks) with the BNPB 2014-2023
     historical top-kelurahan list. Returns [] when no district crosses the
     siaga threshold for the current risk_level or when bundled history is
     unavailable.
@@ -355,7 +455,7 @@ def predict_realtime_native(
         "model_variant": "realtime_native",
         "probability": probability,
         "risk_level": risk_level,
-        "risk_interpretation": _risk_interpretation(risk_level, engineered.diagnostics),
+        "risk_interpretation": _risk_interpretation(risk_level, engineered.diagnostics, wilayah_summary),
         "recommended_action": _recommended_action(risk_level, wilayah_summary),
         "risk_thresholds": thresholds,
         # ISO-8601 UTC timestamp when the sensor snapshot was built.

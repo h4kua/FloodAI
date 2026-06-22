@@ -199,7 +199,7 @@ export function ModelOutputCard({ riskData, score }) {
               {isId ? "ANALISIS MODEL" : "MODEL ANALYSIS"}
             </div>
             <div className="model-output-sub">
-              XGBoost · {isId ? "14 fitur · update 15 mnt" : "14 features · 15 min update"}
+              XGBoost · {isId ? "16 fitur · update 15 mnt" : "16 features · 15 min update"}
             </div>
           </div>
         </div>
