@@ -228,39 +228,40 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           {/* Search panel — above the map, NOT overlaid */}
           <div className="panel route-controls">
             <span className="route-label from">{t("evac.from")}</span>
-            <input
-              className="route-input"
-              type="text"
-              placeholder={t("evac.placeholder")}
-              value={addressInput}
-              onChange={handleInputChange}
-              onFocus={() => suggestions.length > 0 && setShowSugg(true)}
-              onBlur={() => setTimeout(() => setShowSugg(false), 180)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !geocoding) { setShowSugg(false); handleGeocode(); }
-                if (e.key === "Escape") setShowSugg(false);
-              }}
-              disabled={geocoding}
-            />
-            <button
-              className="route-search-btn"
-              onClick={() => { setShowSugg(false); handleGeocode(); }}
-              disabled={geocoding || !addressInput.trim()}
-            >
-              {geocoding ? t("evac.searching") : t("evac.search")}
-            </button>
-            <button
-              className="locate-me-btn"
-              onClick={handleLocateMe}
-              disabled={locating}
-              title={lang === "en" ? "Use my current location" : "Gunakan lokasi saya"}
-            >
-              {locating ? "…" : "⊕"}
-            </button>
+            <div className="route-input-row">
+              <input
+                className="route-input"
+                type="text"
+                placeholder={t("evac.placeholder")}
+                value={addressInput}
+                onChange={handleInputChange}
+                onFocus={() => suggestions.length > 0 && setShowSugg(true)}
+                onBlur={() => setTimeout(() => setShowSugg(false), 180)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !geocoding) { setShowSugg(false); handleGeocode(); }
+                  if (e.key === "Escape") setShowSugg(false);
+                }}
+                disabled={geocoding}
+              />
+              <button
+                className="route-search-btn"
+                onClick={() => { setShowSugg(false); handleGeocode(); }}
+                disabled={geocoding || !addressInput.trim()}
+              >
+                {geocoding ? t("evac.searching") : t("evac.search")}
+              </button>
+              <button
+                className="locate-me-btn"
+                onClick={handleLocateMe}
+                disabled={locating}
+                title={lang === "en" ? "Use my current location" : "Gunakan lokasi saya"}
+              >
+                {locating ? "…" : "⊕"}
+              </button>
+            </div>
 
             {userLocation && selectedDest && (
-              <>
-                <span className="route-sep">→</span>
+              <div className="route-dest-row">
                 <span className="route-label to">{t("evac.shelter")}</span>
                 <select
                   className="route-select"
@@ -271,7 +272,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
                     <option key={d.id} value={d.id}>{d.name}</option>
                   ))}
                 </select>
-              </>
+              </div>
             )}
 
             {showSugg && suggestions.length > 0 && (
