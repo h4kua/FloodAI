@@ -14,6 +14,7 @@ import {
   stationClass,
   cleanStationName,
   stationRiskLevel,
+  stationKecamatan,
 } from "../../lib/dashboardHelpers";
 import { WeatherGlyph, RiskBadge } from "./primitives";
 
@@ -353,14 +354,16 @@ export function KecamatanZones({ stations, wilayahSummary, globalProbability }) 
               <div className={`kec-rows-wrapper${isOpen ? " open" : ""}`}>
                 <div className="kec-rows">
                   {grpStns.map((s, i) => {
-                    const cls   = stationClass(s.ratio);
-                    const color = colorMap[cls] ?? "var(--safe)";
-                    const label = cleanStationName(s.nama);
+                    const cls    = stationClass(s.ratio);
+                    const color  = colorMap[cls] ?? "var(--safe)";
+                    const kec    = stationKecamatan(s.nama);
+                    const label  = kec ? `Kec. ${kec.kecamatan}` : cleanStationName(s.nama);
+                    const sublabel = kec ? kec.area : (s.lokasi || null);
                     return (
                       <div key={i} className="kec-row">
                         <div className="kec-row-identity">
                           <span className="kec-row-name">{label}</span>
-                          {s.lokasi && <span className="kec-row-area">{s.lokasi}</span>}
+                          {sublabel && <span className="kec-row-area">{sublabel}</span>}
                         </div>
                         <div className="kec-row-bar">
                           <div className="kec-row-fill" style={{ width: `${Math.min(s.ratio, 1) * 100}%`, background: color }} />

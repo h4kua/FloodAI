@@ -12,6 +12,44 @@ export function cleanStationName(nama) {
     .trim();
 }
 
+/* ── Station → Kecamatan/area lookup ───────────────────────
+   Used by KecamatanZones to show human-readable location
+   names instead of technical station identifiers.
+*/
+const _STATION_KEC = {
+  "P.A. Marina Ancol (Laut)":  { kecamatan: "Penjaringan",        area: "Pesisir Ancol" },
+  "Pompa Pasar Ikan 1":        { kecamatan: "Penjaringan",        area: "Pelabuhan Sunda Kelapa" },
+  "P.A. Cengkareng Drain":     { kecamatan: "Cengkareng",         area: "Cengkareng-Kapuk" },
+  "P.A. Manggarai 2":          { kecamatan: "Tebet",              area: "Manggarai-Bukit Duri" },
+  "P.A. Katulampa":            { kecamatan: "Bogor Timur",        area: "Katulampa, Bogor" },
+  "P.A. Depok":                { kecamatan: "Pancoran Mas",       area: "Depok" },
+  "P.A. Hek Kramat Jati 1":   { kecamatan: "Kramat Jati",        area: "Kali Baru Timur" },
+  "P.A. Kaliduri 1":           { kecamatan: "Kalideres",          area: "Kali Biru" },
+  "P.A. Ancol Flushing 1":     { kecamatan: "Cilincing",          area: "Saluran Ancol" },
+  "P.A. Marina Ancol (Kali)":  { kecamatan: "Penjaringan",        area: "Kali Ancol" },
+  "P.A. Manggarai":            { kecamatan: "Tebet",              area: "Manggarai" },
+  "P.A. Cipinang Melayu":      { kecamatan: "Makasar",            area: "Kali Cipinang" },
+  "P.A. Sunter Hulu":          { kecamatan: "Cilincing",          area: "Kali Sunter Hulu" },
+  "P.A. Karet":                { kecamatan: "Tanah Abang",        area: "Kali Krukut" },
+  "P.A. Pesanggrahan":         { kecamatan: "Pesanggrahan",       area: "Kali Pesanggrahan" },
+  "P.A. Krukut Hulu":          { kecamatan: "Mampang Prapatan",   area: "Kali Krukut Hulu" },
+  "P.A. Tomang Hulu":          { kecamatan: "Grogol Petamburan",  area: "Kali Angke Hulu" },
+  "P.A. Pasar Ikan":           { kecamatan: "Penjaringan",        area: "Muara Baru" },
+  "P.A. Waduk Pluit":          { kecamatan: "Penjaringan",        area: "Waduk Pluit" },
+  "P.A. Angke Hulu":           { kecamatan: "Cengkareng",         area: "Kali Angke Hulu" },
+  "P.A. Sunter Tengah":        { kecamatan: "Tanjung Priok",      area: "Kali Sunter Tengah" },
+  "P.A. Mookervart":           { kecamatan: "Kalideres",          area: "Kali Mookervart" },
+  "P.A. Pademangan":           { kecamatan: "Pademangan",         area: "Kali Sentiong" },
+  "P.A. Cipinang Hulu":        { kecamatan: "Pulogadung",         area: "Kali Cipinang Hulu" },
+  "P.A. Kalibaru Timur":       { kecamatan: "Cilincing",          area: "Kali Baru Timur" },
+  "P.A. Duri Kosambi":         { kecamatan: "Cengkareng",         area: "Duri Kosambi" },
+  "P.A. Jembatan Item":        { kecamatan: "Jatinegara",         area: "Kali Ciliwung" },
+};
+
+export function stationKecamatan(nama) {
+  return _STATION_KEC[nama?.trim()] ?? null;
+}
+
 /* ── Risk helpers ──────────────────────────────────────── */
 export function riskClass(rl) {
   if (rl === "SIAGA_1") return "s1";
