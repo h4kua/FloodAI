@@ -69,7 +69,7 @@ export function CrewAnalysisPanel() {
               {isId ? "ANALISIS MULTI-AGEN AI" : "MULTI-AGENT AI ANALYSIS"}
             </div>
             <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.57rem", color: "var(--muted-2)", marginTop: 2 }}>
-              CrewAI · {isId ? "3 agen spesialis · Groq LLaMA-3.3" : "3 specialist agents · Groq LLaMA-3.3"}
+              {isId ? "3 agen spesialis · Groq LLaMA-3.3" : "3 specialist agents · Groq LLaMA-3.3"}
             </div>
           </div>
         </div>
@@ -263,7 +263,7 @@ export function CrewAnalysisPanel() {
               {crew.tingkat_kepercayaan ? `Kepercayaan: ${crew.tingkat_kepercayaan} · ` : ""}
               {isFallback
                 ? (isId ? "Template deterministik (agen AI tidak tersedia)" : "Deterministic template (AI agents unavailable)")
-                : (isId ? "Groq LLaMA-3.3 · 3 agen aktif" : "Groq LLaMA-3.3 · 3 active agents")}
+                : (isId ? "3 agen aktif · Groq LLaMA-3.3" : "3 active agents · Groq LLaMA-3.3")}
               {tech?.pipeline_execution_ms > 0 ? ` · pipeline ${Math.round(tech.pipeline_execution_ms)}ms` : ""}
             </p>
             <button

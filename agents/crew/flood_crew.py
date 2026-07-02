@@ -1,5 +1,5 @@
 """
-FloodAnalysisCrew — Multi-agent CrewAI crew for flood risk analysis.
+FloodAnalysisCrew — Multi-agent flood risk analysis via sequential Groq calls.
 
 Three specialized agents collaborate sequentially to produce a Bahasa Indonesia
 flood risk report that is richer than the single-pass LLM in llm_orchestrator.py:
@@ -20,14 +20,10 @@ import os
 import re
 from typing import Any
 
-# Module-level import so _fallback_crew_output() doesn't hit the import lock
-# on every call (deferred imports inside hot fallback paths cause lock contention).
 from agents.llm_orchestrator import _fallback_explanation
 
 _log = logging.getLogger(__name__)
 
-# All keys that the coordinator MUST produce — including the expert summaries.
-# Absent keys trigger fallback; callers can depend on these always being present.
 _REQUIRED_KEYS = (
     "status_banjir",
     "penjelasan",
@@ -39,9 +35,15 @@ _REQUIRED_KEYS = (
     "analisis_hidrologi",
 )
 
+_MODEL = "llama-3.3-70b-versatile"
+_TEMPERATURE = 0.1
+_MAX_TOKENS_EXPERT = 200   # AhliCuaca / AhliHidrologi — short analysis only
+_MAX_TOKENS_COORD  = 512   # KoordinatorRisiko — JSON output
+_TIMEOUT = 20              # per-call HTTP timeout (seconds)
+
 
 # ---------------------------------------------------------------------------
-# Context builders — extract relevant fields for each agent's briefing
+# Context builders
 # ---------------------------------------------------------------------------
 
 
@@ -178,7 +180,6 @@ def _validate_crew_output(data: object) -> dict | None:
     tindakan = data.get("tindakan")
     if not isinstance(tindakan, list) or not tindakan:
         return None
-    # Work on a copy — never mutate the parsed JSON object in place.
     validated: dict = dict(data)
     validated["tindakan"] = [str(t) for t in tindakan]
     for k in ("status_banjir", "penjelasan", "tingkat_kepercayaan", "pesan_petugas",
@@ -199,27 +200,65 @@ def _fallback_crew_output(prediction: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Agent prompts
+# ---------------------------------------------------------------------------
+
+_WEATHER_SYSTEM = (
+    "Kamu adalah meteorolog senior BMKG dengan 15 tahun pengalaman memantau cuaca "
+    "ekstrem Jakarta. Ahli dalam membaca pola monsun, hujan lokal, dan menerjemahkan "
+    "alert BMKG ke implikasi risiko banjir nyata. Balas HANYA dalam Bahasa Indonesia."
+)
+
+_HYDRO_SYSTEM = (
+    "Kamu adalah ahli hidrologi Dinas SDA DKI Jakarta yang memantau lebih dari 100 "
+    "stasiun PDA setiap hari. Paham dinamika banjir kiriman, pasang laut, dan kapasitas "
+    "Ciliwung, Sunter, Banjir Kanal Barat-Timur. Balas HANYA dalam Bahasa Indonesia."
+)
+
+_COORD_SYSTEM = (
+    "Kamu adalah Koordinator Pusdalops BPBD DKI Jakarta yang mengoordinasikan respons "
+    "banjir besar 2020 dan 2022. Berpengalaman menerjemahkan data teknis menjadi "
+    "peringatan dini yang langsung bisa ditindaklanjuti. "
+    "Balas HANYA dengan JSON valid — tidak ada teks sebelum atau sesudah JSON."
+)
+
+_COORD_JSON_TEMPLATE = (
+    "{\n"
+    '  "status_banjir": "AMAN" atau "WASPADA" atau "BAHAYA",\n'
+    '  "penjelasan": "2-3 kalimat untuk warga — sebut nama wilayah & kelurahan spesifik, '
+    'sebutkan estimasi kedalaman air dari data historis jika relevan",\n'
+    '  "tindakan": ["aksi 1", "aksi 2", "aksi 3"],\n'
+    '  "populasi_terdampak": "estimasi jiwa atau null",\n'
+    '  "tingkat_kepercayaan": "misal 72%",\n'
+    '  "pesan_petugas": "1 kalimat perintah untuk petugas lapangan",\n'
+    '  "analisis_cuaca": "1 kalimat ringkasan analisis cuaca",\n'
+    '  "analisis_hidrologi": "1 kalimat ringkasan analisis hidrologi"\n'
+    "}"
+)
+
+
+# ---------------------------------------------------------------------------
 # Core synchronous crew execution
 # ---------------------------------------------------------------------------
 
 
 def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
     """
-    Run the 3-agent FloodAnalysisCrew synchronously.
+    Run the 3-agent flood analysis using sequential Groq API calls.
     Designed to be called via asyncio.to_thread from async endpoints.
 
     Returns a dict guaranteed to contain all _REQUIRED_KEYS.
     Never raises — falls back to deterministic template on any failure.
     """
-    try:
-        from crewai import Agent, Crew, LLM, Process, Task
-    except ImportError as exc:
-        _log.warning("crewai_import_failed: %s", exc)
-        return _fallback_crew_output(prediction)
-
     groq_api_key = os.getenv("GROQ_API_KEY")
     if not groq_api_key:
         _log.warning("crew_groq_key_missing — set GROQ_API_KEY to enable crew analysis")
+        return _fallback_crew_output(prediction)
+
+    try:
+        from groq import Groq
+    except ImportError as exc:
+        _log.warning("groq_import_failed: %s", exc)
         return _fallback_crew_output(prediction)
 
     location = (
@@ -229,173 +268,93 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
     )
 
     try:
-        # Use groq/ litellm prefix when available, fall back to openai-compatible path.
-        # Both point to the same Groq model — litellm is the preferred routing layer.
-        try:
-            import litellm  # noqa: F401
-            llm_model = "groq/llama-3.3-70b-versatile"
-            llm_base_url = None
-        except ImportError:
-            llm_model = "openai/llama-3.3-70b-versatile"
-            llm_base_url = "https://api.groq.com/openai/v1"
+        client = Groq(api_key=groq_api_key, timeout=_TIMEOUT)
 
-        llm_kwargs: dict = {
-            "model": llm_model,
-            "api_key": groq_api_key,
-            "temperature": 0.1,
-            "max_tokens": 512,
-            "timeout": 20,  # per-request HTTP timeout (seconds)
-        }
-        if llm_base_url:
-            llm_kwargs["base_url"] = llm_base_url
-
-        llm = LLM(**llm_kwargs)
-
-        # --- Agents ---
-
-        weather_agent = Agent(
-            role="Ahli Cuaca dan Meteorologi Jakarta",
-            goal=(
-                "Analisis kondisi cuaca, intensitas hujan, dan alert BMKG secara tepat "
-                "untuk mendukung keputusan kesiapsiagaan banjir Jakarta."
-            ),
-            backstory=(
-                "Meteorolog senior BMKG dengan 15 tahun pengalaman memantau cuaca "
-                "ekstrem Jakarta. Ahli dalam membaca pola monsun, hujan lokal, dan "
-                "menerjemahkan alert BMKG ke implikasi risiko banjir nyata."
-            ),
-            llm=llm,
-            verbose=False,
-            allow_delegation=False,
-        )
-
-        hydrology_agent = Agent(
-            role="Ahli Hidrologi Sungai dan Kanal Jakarta",
-            goal=(
-                "Analisis ketinggian air, status siaga stasiun PDA, dan tren hidrologi "
-                "untuk menilai risiko luapan sungai dan kanal di Jakarta."
-            ),
-            backstory=(
-                "Ahli hidrologi Dinas SDA DKI Jakarta yang memantau lebih dari 100 "
-                "stasiun PDA setiap hari. Paham dinamika banjir kiriman, pasang laut, "
-                "dan kapasitas Ciliwung, Sunter, Banjir Kanal Barat-Timur."
-            ),
-            llm=llm,
-            verbose=False,
-            allow_delegation=False,
-        )
-
-        risk_coordinator = Agent(
-            role="Koordinator Risiko Banjir Pusdalops BPBD DKI Jakarta",
-            goal=(
-                "Sintesis analisis cuaca dan hidrologi bersama prediksi model ML "
-                "menjadi laporan risiko banjir yang akurat dan actionable "
-                "dalam Bahasa Indonesia untuk warga dan petugas lapangan."
-            ),
-            backstory=(
-                "Koordinator Pusdalops BPBD DKI Jakarta yang mengoordinasikan respons "
-                "banjir besar 2020 dan 2022. Berpengalaman menerjemahkan data teknis "
-                "menjadi peringatan dini yang langsung bisa ditindaklanjuti."
-            ),
-            llm=llm,
-            verbose=False,
-            allow_delegation=False,
-        )
-
-        # --- Build context strings ---
         weather_ctx = _build_weather_context(snapshot, prediction)
         hydro_ctx = _build_hydrology_context(snapshot, prediction)
         ml_ctx = _build_ml_context(prediction)
         hist_ctx = _build_historical_context(location)
 
-        # --- Tasks ---
-
-        weather_task = Task(
-            description=(
-                f"Analisis kondisi atmosfer di {location} berdasarkan data berikut:\n\n"
-                f"{weather_ctx}\n\n"
-                "Tulis analisis SINGKAT (2-3 kalimat) dalam Bahasa Indonesia. "
-                "Sebutkan intensitas hujan, kondisi kelembaban, dan apakah alert BMKG "
-                "memperburuk risiko banjir. Gunakan kalimat aktif yang ringkas."
-            ),
-            expected_output=(
-                "Analisis cuaca 2-3 kalimat dalam Bahasa Indonesia tentang "
-                "intensitas hujan, kelembaban, dan penilaian alert BMKG."
-            ),
-            agent=weather_agent,
+        # --- Call 1: AhliCuaca ---
+        weather_resp = client.chat.completions.create(
+            model=_MODEL,
+            temperature=_TEMPERATURE,
+            max_tokens=_MAX_TOKENS_EXPERT,
+            messages=[
+                {"role": "system", "content": _WEATHER_SYSTEM},
+                {
+                    "role": "user",
+                    "content": (
+                        f"Analisis kondisi atmosfer di {location} berdasarkan data berikut:\n\n"
+                        f"{weather_ctx}\n\n"
+                        "Tulis analisis SINGKAT (2-3 kalimat) dalam Bahasa Indonesia. "
+                        "Sebutkan intensitas hujan, kondisi kelembaban, dan apakah alert BMKG "
+                        "memperburuk risiko banjir. Gunakan kalimat aktif yang ringkas."
+                    ),
+                },
+            ],
         )
+        analisis_cuaca = (weather_resp.choices[0].message.content or "").strip()
 
-        hydrology_task = Task(
-            description=(
-                f"Analisis kondisi hidrologi di {location} berdasarkan data berikut:\n\n"
-                f"{hydro_ctx}\n\n"
-                "Tulis analisis SINGKAT (2-3 kalimat) dalam Bahasa Indonesia. "
-                "Sebutkan water level ratio, status siaga stasiun-stasiun kritis, "
-                "dan tren kenaikan atau penurunan air. Gunakan kalimat aktif yang ringkas."
-            ),
-            expected_output=(
-                "Analisis hidrologi 2-3 kalimat dalam Bahasa Indonesia tentang "
-                "water level ratio, status siaga stasiun, dan tren air."
-            ),
-            agent=hydrology_agent,
-            context=[weather_task],
+        # --- Call 2: AhliHidrologi (receives AhliCuaca output as context) ---
+        hydro_resp = client.chat.completions.create(
+            model=_MODEL,
+            temperature=_TEMPERATURE,
+            max_tokens=_MAX_TOKENS_EXPERT,
+            messages=[
+                {"role": "system", "content": _HYDRO_SYSTEM},
+                {
+                    "role": "user",
+                    "content": (
+                        f"Analisis kondisi hidrologi di {location} berdasarkan data berikut:\n\n"
+                        f"{hydro_ctx}\n\n"
+                        f"Konteks cuaca dari Ahli Cuaca: {analisis_cuaca}\n\n"
+                        "Tulis analisis SINGKAT (2-3 kalimat) dalam Bahasa Indonesia. "
+                        "Sebutkan water level ratio, status siaga stasiun-stasiun kritis, "
+                        "dan tren kenaikan atau penurunan air. Gunakan kalimat aktif yang ringkas."
+                    ),
+                },
+            ],
         )
+        analisis_hidrologi = (hydro_resp.choices[0].message.content or "").strip()
 
-        hist_block = f"\n\n{hist_ctx}" if hist_ctx else ""
-        coordinator_task = Task(
-            description=(
-                f"Berdasarkan analisis cuaca dan hidrologi dari rekan-rekanmu, "
-                f"serta data prediksi model ML berikut:\n\n"
-                f"{ml_ctx}\n\n"
-                f"Lokasi: {location}\n"
-                f"{hist_block}\n\n"
-                "Buat laporan risiko banjir dalam format JSON. "
-                "PENTING: Balas HANYA dengan JSON valid — tidak ada teks sebelum atau sesudah.\n\n"
-                "{\n"
-                '  "status_banjir": "AMAN" atau "WASPADA" atau "BAHAYA",\n'
-                '  "penjelasan": "2-3 kalimat untuk warga — sebut nama wilayah & kelurahan spesifik, '
-                'sebutkan estimasi kedalaman air dari data historis jika relevan",\n'
-                '  "tindakan": ["aksi 1", "aksi 2", "aksi 3"],\n'
-                '  "populasi_terdampak": "estimasi jiwa atau null",\n'
-                '  "tingkat_kepercayaan": "misal 72%",\n'
-                '  "pesan_petugas": "1 kalimat perintah untuk petugas lapangan",\n'
-                '  "analisis_cuaca": "1 kalimat ringkasan analisis cuaca",\n'
-                '  "analisis_hidrologi": "1 kalimat ringkasan analisis hidrologi"\n'
-                "}\n\n"
-                "Aturan wajib:\n"
-                "- status_banjir harus sesuai risk_level: SAFE→AMAN, WARNING/PRE_ALERT→WASPADA, DANGER→BAHAYA\n"
-                "- Larang kata: berdasarkan, terdapat, diketahui, signifikan, komprehensif\n"
-                "- Kalimat maksimal 15 kata — langsung dan aktif\n"
-                "- tindakan pakai kata kerja: evakuasi, siapkan, hubungi, pantau, pindahkan\n"
-                "- Sebut nama wilayah/kelurahan yang spesifik, bukan hanya 'Jakarta'\n"
-                "- Kalau ada data historis, sebutkan estimasi kedalaman banjir (misal '50-100 cm')\n"
-                "- PROPORSIONAL — sesuaikan nada dengan tingkat risiko:\n"
-                "  • AMAN: tenang dan singkat. JANGAN sebut evakuasi atau dokumen darurat.\n"
-                "  • WASPADA: waspada tapi JANGAN panik. Belum banjir — beri langkah persiapan ringan "
-                "(cek drainase, pantau info, siapkan senter). JANGAN suruh evakuasi atau pindahkan barang "
-                "kecuali air sudah masuk halaman.\n"
-                "  • BAHAYA: setiap detik penting. Baru di sini boleh sebut evakuasi, tas darurat, "
-                "pindahkan dokumen.\n"
-            ),
-            expected_output=(
-                "JSON valid dengan kunci: status_banjir, penjelasan, tindakan (list 3 item), "
-                "populasi_terdampak, tingkat_kepercayaan, pesan_petugas, analisis_cuaca, analisis_hidrologi."
-            ),
-            agent=risk_coordinator,
-            context=[weather_task, hydrology_task],
+        # --- Call 3: KoordinatorRisiko (synthesizes both analyses + ML data) ---
+        hist_block = f"\nData historis:\n{hist_ctx}" if hist_ctx else ""
+        coord_resp = client.chat.completions.create(
+            model=_MODEL,
+            temperature=_TEMPERATURE,
+            max_tokens=_MAX_TOKENS_COORD,
+            messages=[
+                {"role": "system", "content": _COORD_SYSTEM},
+                {
+                    "role": "user",
+                    "content": (
+                        f"Berdasarkan analisis rekan-rekanmu dan data ML berikut:\n\n"
+                        f"Analisis Cuaca: {analisis_cuaca}\n\n"
+                        f"Analisis Hidrologi: {analisis_hidrologi}\n\n"
+                        f"Data ML:\n{ml_ctx}\n"
+                        f"Lokasi: {location}"
+                        f"{hist_block}\n\n"
+                        f"Buat laporan risiko banjir dalam format JSON berikut:\n{_COORD_JSON_TEMPLATE}\n\n"
+                        "Aturan wajib:\n"
+                        "- status_banjir harus sesuai risk_level: SAFE→AMAN, WARNING/PRE_ALERT→WASPADA, DANGER→BAHAYA\n"
+                        "- Larang kata: berdasarkan, terdapat, diketahui, signifikan, komprehensif\n"
+                        "- Kalimat maksimal 15 kata — langsung dan aktif\n"
+                        "- tindakan pakai kata kerja: evakuasi, siapkan, hubungi, pantau, pindahkan\n"
+                        "- Sebut nama wilayah/kelurahan yang spesifik, bukan hanya 'Jakarta'\n"
+                        "- Kalau ada data historis, sebutkan estimasi kedalaman banjir (misal '50-100 cm')\n"
+                        "- PROPORSIONAL — sesuaikan nada dengan tingkat risiko:\n"
+                        "  • AMAN: tenang dan singkat. JANGAN sebut evakuasi atau dokumen darurat.\n"
+                        "  • WASPADA: waspada tapi JANGAN panik. Belum banjir — beri langkah persiapan ringan "
+                        "(cek drainase, pantau info, siapkan senter). JANGAN suruh evakuasi atau pindahkan barang "
+                        "kecuali air sudah masuk halaman.\n"
+                        "  • BAHAYA: setiap detik penting. Baru di sini boleh sebut evakuasi, tas darurat, "
+                        "pindahkan dokumen.\n"
+                    ),
+                },
+            ],
         )
-
-        # --- Crew ---
-        crew = Crew(
-            agents=[weather_agent, hydrology_agent, risk_coordinator],
-            tasks=[weather_task, hydrology_task, coordinator_task],
-            process=Process.sequential,
-            verbose=False,
-            tracing=False,  # disable telemetry to avoid outbound connection noise
-        )
-
-        result = crew.kickoff()
-        raw_output = str(result.raw) if hasattr(result, "raw") else str(result)
+        raw_output = (coord_resp.choices[0].message.content or "").strip()
 
         parsed = _parse_crew_json(raw_output)
         validated = _validate_crew_output(parsed)
@@ -411,9 +370,8 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
         validated["_crew_used"] = True
         return validated
 
-    except Exception as exc:  # noqa: BLE001 — intentional broad catch; must not propagate
-        # Log only the error type — not str(exc), which may contain partial API
-        # key fragments in Groq/litellm authentication error messages.
+    except Exception as exc:  # noqa: BLE001
+        # Log only the error type — not str(exc), which may contain partial API key fragments.
         _log.warning("crew_failed error_type=%s", type(exc).__name__)
         if _log.isEnabledFor(logging.DEBUG):
             _log.debug("crew_failed detail", exc_info=True)

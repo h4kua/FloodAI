@@ -1,11 +1,11 @@
 """
-CrewAI multi-agent flood analysis endpoint.
+Multi-agent flood analysis endpoint.
 
 Runs the full 5-stage FloodDecisionPipeline, then passes the prediction to a
-3-agent CrewAI crew (AhliCuaca + AhliHidrologi + KoordinatorRisiko) for a
-richer multi-perspective Bahasa Indonesia analysis.
+3-agent sequential analysis (AhliCuaca + AhliHidrologi + KoordinatorRisiko)
+via direct Groq API calls for a richer multi-perspective Bahasa Indonesia report.
 
-Falls back to deterministic template if CrewAI or Groq is unavailable —
+Falls back to deterministic template if Groq is unavailable —
 the endpoint never returns 500 because of the LLM layer.
 """
 
