@@ -240,7 +240,7 @@ export function ForecastPanel({ forecast }) {
 }
 
 /* ── KecamatanZones — per-district grouped flood probability ──────────────── */
-export function KecamatanZones({ stations, wilayahSummary, globalProbability }) {
+export function KecamatanZones({ stations, wilayahSummary, globalProbability, districtRiskBreakdown }) {
   const { lang } = useApp();
   const isId = lang === "id";
 
@@ -359,6 +359,8 @@ export function KecamatanZones({ stations, wilayahSummary, globalProbability }) 
                     const kec    = stationKecamatan(s.nama);
                     const label  = kec ? `Kec. ${kec.kecamatan}` : cleanStationName(s.nama);
                     const sublabel = kec ? kec.area : (s.lokasi || null);
+                    const mlEntry = kec ? districtRiskBreakdown?.[kec.kecamatan] : null;
+                    const mlPct   = mlEntry ? Math.round(mlEntry.probability * 100) : null;
                     return (
                       <div key={i} className="kec-row">
                         <div className="kec-row-identity">
@@ -368,7 +370,20 @@ export function KecamatanZones({ stations, wilayahSummary, globalProbability }) 
                         <div className="kec-row-bar">
                           <div className="kec-row-fill" style={{ width: `${Math.min(s.ratio, 1) * 100}%`, background: color }} />
                         </div>
-                        <span className="kec-row-pct" style={{ color }}>{Math.round(s.ratio * 100)}%</span>
+                        <span className="kec-row-pct-group">
+                          <span className="kec-row-pct" style={{ color }} title={isId ? "Rasio sensor TMA terhadap ambang siaga" : "TMA sensor ratio vs. alert threshold"}>
+                            {Math.round(s.ratio * 100)}%
+                          </span>
+                          {mlPct != null && (
+                            <span
+                              className="kec-row-ml-pct"
+                              style={{ color: probColor(mlPct) }}
+                              title={isId ? "Probabilitas banjir model ML untuk kecamatan ini" : "ML model flood probability for this kecamatan"}
+                            >
+                              ML {mlPct}%
+                            </span>
+                          )}
+                        </span>
                         <RiskBadge level={stationRiskLevel(s.ratio)} />
                       </div>
                     );

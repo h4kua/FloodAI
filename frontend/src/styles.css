@@ -1258,7 +1258,7 @@ body {
 .kec-toggle-all-btn:active { transform: scale(0.95); }
 .kec-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(80px, 140px) 42px auto;
+  grid-template-columns: minmax(0, 1fr) minmax(80px, 140px) minmax(42px, auto) auto;
   align-items: center; gap: 0.625rem;
   padding: 0.28rem 0.5rem; border-radius: 8px;
   transition: background 0.15s;
@@ -1269,7 +1269,9 @@ body {
 .kec-row-area { font-family: 'JetBrains Mono', monospace; font-size: 0.56rem; color: var(--muted-2); display: block; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kec-row-bar  { height: 4px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; }
 .kec-row-fill { height: 100%; border-radius: 99px; transition: width 0.45s var(--ease-out-quart); }
+.kec-row-pct-group { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2; }
 .kec-row-pct  { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; text-align: right; white-space: nowrap; }
+.kec-row-ml-pct { font-family: 'JetBrains Mono', monospace; font-size: 0.56rem; font-weight: 600; text-align: right; white-space: nowrap; opacity: 0.85; }
 
 /* ── Wilayah flood probability display ───────────────────────── */
 .wilayah-flood-prob { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; flex-shrink: 0; padding-left: 0.5rem; }
@@ -1563,8 +1565,9 @@ body {
   .footer { flex-direction: column; gap: 0.25rem; font-size: 0.6rem; text-align: center; padding: 0.75rem; }
 
   /* KecamatanZones */
-  .kec-row { grid-template-columns: minmax(0, 1fr) 36px auto; gap: 0.5rem; }
+  .kec-row { grid-template-columns: minmax(0, 1fr) minmax(36px, auto) auto; gap: 0.5rem; }
   .kec-row-bar { display: none; }
+  .kec-row-ml-pct { font-size: 0.52rem; }
 
   /* Weather */
   .weather-chips-grid { grid-template-columns: repeat(3, 1fr); }

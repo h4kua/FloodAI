@@ -3,6 +3,7 @@ import pandas as pd
 from realtime_native.feature_builder import (
     REALTIME_NATIVE_FEATURES,
     build_realtime_native_features_from_snapshot,
+    kecamatan_historical_flood_freq,
 )
 
 
@@ -131,3 +132,49 @@ def test_snapshot_history_trend_state_respects_as_of_cutoff(monkeypatch):
 
     assert engineered.diagnostics["history_rows_used"] == 1
     assert engineered.diagnostics["trend_state"]["data_points"] == 1
+
+
+def test_kecamatan_historical_flood_freq_known_kecamatan_in_range():
+    freq = kecamatan_historical_flood_freq("Tanah Abang")
+    assert 0.0 <= freq <= 1.0
+
+
+def test_kecamatan_historical_flood_freq_tolerates_prefix_and_case():
+    assert kecamatan_historical_flood_freq("Kec. Cakung") == kecamatan_historical_flood_freq("CAKUNG")
+
+
+def test_kecamatan_historical_flood_freq_unknown_is_zero():
+    assert kecamatan_historical_flood_freq("Atlantis") == 0.0
+    assert kecamatan_historical_flood_freq("") == 0.0
+
+
+def test_snapshot_feature_includes_kecamatan_historical_flood_freq():
+    snapshot = {
+        "fetched_at_utc": "2026-04-18T10:00:00+00:00",
+        "openweather": {"main": {"temp": 29.0, "humidity": 80}, "rain": {"1h": 5.0}},
+        "bmkg_alerts": [],
+        "poskobanjir": [
+            {
+                "nama_pintu_air": "P.A. Karet 1",
+                "tinggi_air": "50",
+                "siaga1": "100",
+                "siaga2": "150",
+                "siaga3": "200",
+                "siaga4": "250",
+            }
+        ],
+    }
+    engineered = build_realtime_native_features_from_snapshot(snapshot, persist_history=False)
+    freq = engineered.frame.iloc[0]["kecamatan_historical_flood_freq"]
+    assert freq == kecamatan_historical_flood_freq("Tanah Abang")
+
+
+def test_snapshot_feature_zero_when_no_mapped_stations():
+    snapshot = {
+        "fetched_at_utc": "2026-04-18T10:00:00+00:00",
+        "openweather": {"main": {"temp": 29.0, "humidity": 80}, "rain": {"1h": 5.0}},
+        "bmkg_alerts": [],
+        "poskobanjir": [],
+    }
+    engineered = build_realtime_native_features_from_snapshot(snapshot, persist_history=False)
+    assert engineered.frame.iloc[0]["kecamatan_historical_flood_freq"] == 0.0

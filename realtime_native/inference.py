@@ -9,7 +9,9 @@ from realtime_native.bundle import load_runtime_bundle
 from realtime_native.feature_builder import (
     REALTIME_NATIVE_FEATURES,
     build_realtime_native_features_from_file,
+    build_realtime_native_features_per_kecamatan,
 )
+from realtime_native.station_kecamatan import STATION_KECAMATAN
 from utils.paths import DEFAULT_REALTIME_SNAPSHOT, REPORTS_DIR
 
 _JAKARTA_TZ = timezone(timedelta(hours=7))
@@ -57,35 +59,7 @@ def _apply_hydro_override(risk_level: str, probability: float, water_level_ratio
     return risk_level, probability
 
 
-_STATION_KECAMATAN: dict[str, dict[str, str]] = {
-    "P.A. Marina Ancol (Laut)":  {"kecamatan": "Penjaringan", "area": "pesisir Ancol"},
-    "P.A. Marina Ancol (Kali)":  {"kecamatan": "Penjaringan", "area": "Ancol"},
-    "Pompa Pasar Ikan 1":        {"kecamatan": "Penjaringan", "area": "Pelabuhan Sunda Kelapa"},
-    "P.A. Karet 1":              {"kecamatan": "Tanah Abang", "area": "Karet-Kuningan"},
-    "Pompa Yos Sudarso 1":       {"kecamatan": "Tanjung Priok", "area": "Sunter Agung"},
-    "P.A. Hek":                  {"kecamatan": "Matraman", "area": "Cipinang Melayu"},
-    "P.A. Cengkareng Drain":     {"kecamatan": "Cengkareng", "area": "Cengkareng-Kapuk"},
-    "P.A. Manggarai 2":          {"kecamatan": "Tebet", "area": "Manggarai-Bukit Duri"},
-    "P.A. Pulo Gadung 2":        {"kecamatan": "Pulo Gadung", "area": "Sunter-Pulo Gadung"},
-    "Rumah Pompa Pluit 1":       {"kecamatan": "Penjaringan", "area": "Pluit"},
-    "P.A. Kaliduri 1":           {"kecamatan": "Tambora", "area": "Kali Duri-Tambora"},
-    "P.A. Ancol Flushing 1":     {"kecamatan": "Pademangan", "area": "Ancol-Pademangan"},
-    "P.A. Jembatan Merah 1":     {"kecamatan": "Menteng", "area": "Menteng-Cikini"},
-    "P.A. Istiqlal 1":           {"kecamatan": "Sawah Besar", "area": "Istiqlal-Sawah Besar"},
-    "Pompa Cideng 1":            {"kecamatan": "Gambir", "area": "Cideng-Gambir"},
-    "P.S. Krukut Hulu 2":        {"kecamatan": "Kebayoran Baru", "area": "Krukut-Kebayoran"},
-    "P.S. Sunter Hulu":          {"kecamatan": "Cakung", "area": "Sunter Hulu"},
-    "Waduk Kampung Rambutan 1":   {"kecamatan": "Ciracas", "area": "Kampung Rambutan"},
-    "Rumah Pompa Kemang 2":       {"kecamatan": "Mampang Prapatan", "area": "Kemang"},
-    "Rumah Pompa Atma Jaya":      {"kecamatan": "Mampang Prapatan", "area": "Kuningan"},
-    "Posko SDA Palmerah":         {"kecamatan": "Palmerah", "area": "Palmerah-Grogol"},
-    "Jembatan MT. Haryono":       {"kecamatan": "Jatinegara", "area": "MT Haryono-Cawang"},
-    "Rumah Pompa Tipala":         {"kecamatan": "Makasar", "area": "Cipinang-Makasar"},
-    "Bendung. Katulampa 2":       {"kecamatan": "Bogor Selatan", "area": "Katulampa (hulu Ciliwung)"},
-    "Pompa Kamal Muara (Bubble)": {"kecamatan": "Penjaringan", "area": "Kamal Muara"},
-    "Pompa Lagoa (Bubble)":       {"kecamatan": "Koja", "area": "Lagoa-Koja"},
-    "Pompa Cilincing (Bubble)":   {"kecamatan": "Cilincing", "area": "Cilincing"},
-}
+_STATION_KECAMATAN = STATION_KECAMATAN
 
 
 def _clean_siaga(raw: str) -> str:
@@ -394,6 +368,7 @@ def predict_realtime_native(
     # Load snapshot to extract forecast and freshness timestamp.
     # Neither is used for ML; both are passed through to the response so the
     # frontend can show when sensor data was actually collected.
+    snapshot_raw: dict = {}
     try:
         with open(snapshot_path, "r", encoding="utf-8") as f:
             snapshot_raw = json.load(f)
@@ -430,6 +405,14 @@ def predict_realtime_native(
     except Exception:
         pass
     wilayah_summary = _build_wilayah_summary(poskobanjir_records, bmkg_per_wilayah)
+
+    # Additive per-kecamatan breakdown — does NOT influence the citywide
+    # probability/risk_level above. Fail-open: a broken breakdown must never
+    # take down the primary prediction.
+    try:
+        district_risk_breakdown = predict_per_kecamatan(snapshot_raw) if snapshot_raw else {}
+    except Exception:
+        district_risk_breakdown = {}
 
     engineered = build_realtime_native_features_from_file(
         snapshot_path=snapshot_path, persist_history=persist_history, as_of=as_of,
@@ -477,6 +460,9 @@ def predict_realtime_native(
         "wilayah_summary": wilayah_summary,
         "openweather_current": openweather_current,
         "openweather_wilayah": openweather_wilayah,
+        # Per-kecamatan ML probability — additive, does not affect risk_level/
+        # probability above. {} when no station maps to any active kecamatan.
+        "district_risk_breakdown": district_risk_breakdown,
     }
 
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -494,3 +480,32 @@ def predict_realtime_native(
     os.replace(_tmp_path, _report_path)
 
     return json.loads(json.dumps(result, default=lambda value: float(value) if isinstance(value, np.generic) else value))
+
+
+def predict_per_kecamatan(snapshot: dict) -> dict[str, dict]:
+    """
+    Score every kecamatan that has at least one active, mapped water-level
+    station in this snapshot, using the same trained model/threshold bundle as
+    the citywide prediction — additive capability, does not touch or replace
+    predict_realtime_native()'s citywide risk_level/probability.
+
+    Kecamatan with zero mapped/active stations are omitted (never fabricated).
+    """
+    model, scaler, _ood_detector, _model_card, thresholds = _load_assets()
+
+    results: dict[str, dict] = {}
+    kecamatan_names = sorted({geo["kecamatan"] for geo in STATION_KECAMATAN.values()})
+    for kecamatan in kecamatan_names:
+        engineered = build_realtime_native_features_per_kecamatan(snapshot, kecamatan)
+        if engineered is None:
+            continue
+        features = engineered.frame[REALTIME_NATIVE_FEATURES]
+        scaled = scaler.transform(features)
+        probability = float(model.predict_proba(scaled)[0, 1])
+        risk_level = _classify(probability, thresholds)
+        results[kecamatan] = {
+            "probability": round(probability, 4),
+            "risk_level": risk_level,
+            "stations_used": engineered.diagnostics["stations_used"],
+        }
+    return results

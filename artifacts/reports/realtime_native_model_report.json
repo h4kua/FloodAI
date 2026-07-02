@@ -1,6 +1,6 @@
 {
   "dataset_path": "D:\\FloodAI - Copy\\data\\processed\\realtime_native_training_bootstrap.csv",
-  "feature_count": 16,
+  "feature_count": 17,
   "training_rows": 1990,
   "validation_rows": 352,
   "test_rows": 586,
@@ -14,20 +14,20 @@
     "smote_ratio": 0.4271412680756396
   },
   "performance": {
-    "optimal_threshold": 0.23103205263614654,
-    "train_accuracy": 0.8752922837100545,
-    "test_accuracy": 0.8037542662116041,
-    "test_precision": 0.2937062937062937,
-    "test_recall": 0.75,
-    "test_f1": 0.4221105527638191,
-    "test_roc_auc": 0.8647742587601077,
-    "validation_recall_at_threshold": 0.7647058823529411,
-    "validation_precision_at_threshold": 0.33766233766233766
+    "optimal_threshold": 0.03556898795068264,
+    "train_accuracy": 0.8698363211223694,
+    "test_accuracy": 0.7593856655290102,
+    "test_precision": 0.26256983240223464,
+    "test_recall": 0.8392857142857143,
+    "test_f1": 0.4,
+    "test_roc_auc": 0.9013982479784367,
+    "validation_recall_at_threshold": 0.9117647058823529,
+    "validation_precision_at_threshold": 0.30392156862745096
   },
   "calibration": {
     "method": "isotonic",
-    "test_brier": 0.08832718669715368,
-    "test_ece": 0.017923516194546716
+    "test_brier": 0.07214336081810739,
+    "test_ece": 0.013840897073481172
   },
   "confusion_matrix": {
     "labels": [
@@ -36,12 +36,12 @@
     ],
     "matrix": [
       [
-        429,
-        101
+        398,
+        132
       ],
       [
-        14,
-        42
+        9,
+        47
       ]
     ]
   },
@@ -53,28 +53,28 @@
       "f2": 0.3484
     },
     {
-      "threshold": 0.0169,
-      "precision": 0.1719,
+      "threshold": 0.0135,
+      "precision": 0.2519,
       "recall": 0.9706,
-      "f2": 0.503
+      "f2": 0.618
     },
     {
-      "threshold": 0.0162,
-      "precision": 0.171,
+      "threshold": 0.0125,
+      "precision": 0.25,
       "recall": 0.9706,
-      "f2": 0.5015
+      "f2": 0.6157
     },
     {
-      "threshold": 0.0156,
-      "precision": 0.1701,
+      "threshold": 0.0109,
+      "precision": 0.2481,
       "recall": 0.9706,
-      "f2": 0.5
+      "f2": 0.6134
     },
     {
-      "threshold": 0.0147,
-      "precision": 0.1626,
+      "threshold": 0.0106,
+      "precision": 0.234,
       "recall": 0.9706,
-      "f2": 0.4867
+      "f2": 0.5957
     }
   ],
   "scientific_notes": {

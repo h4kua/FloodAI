@@ -166,6 +166,7 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
           stations={stations}
           wilayahSummary={riskData?.wilayahSummary}
           globalProbability={score}
+          districtRiskBreakdown={riskData?.districtRiskBreakdown}
         />
       </div>
 

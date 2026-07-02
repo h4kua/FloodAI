@@ -78,6 +78,9 @@ export function useFloodRisk() {
         stationQuality: json.diagnostics?.station_quality ?? null,
         // Per-wilayah TMA + BMKG forecast summary
         wilayahSummary: json.wilayah_summary ?? [],
+        // Real per-kecamatan ML probability (additive — does not affect the
+        // citywide risk_level/probability above). { kecamatan: { probability, risk_level, stations_used } }
+        districtRiskBreakdown: json.district_risk_breakdown ?? {},
         // OpenWeather current conditions — pusat Jakarta
         openweather: json.openweather_current ?? null,
         // OpenWeather per kota administrasi Jakarta (5 wilayah)

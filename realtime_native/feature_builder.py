@@ -1,8 +1,10 @@
 import json
 import logging
 import os
+import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 
 import pandas as pd
@@ -18,6 +20,7 @@ from services.constants import (
     BMKG_SEVERITY_WEIGHTS,
     BMKG_URGENCY_WEIGHTS,
 )
+from realtime_native.station_kecamatan import STATION_KECAMATAN
 from utils.paths import DEFAULT_REALTIME_SNAPSHOT, PROCESSED_DATA_DIR
 from db.psycopg2_connection import pooled_connection
 
@@ -45,7 +48,44 @@ REALTIME_NATIVE_FEATURES = [
     "wlr_acceleration",
     "wlr_roll3_max",
     "rainfall_intensity_ratio",
+    # v3 — static geographic covariate, NOT a per-event outcome (see
+    # scripts/build_kelurahan_flood_history.py). Long-run normalised event
+    # frequency for the station's kecamatan; 0.0 for unmapped kecamatan.
+    "kecamatan_historical_flood_freq",
 ]
+
+_KECAMATAN_HISTORY_PATH = Path(__file__).resolve().parents[1] / "data" / "bundled" / "kelurahan_flood_history.json"
+
+
+def _slug_kecamatan(text: str) -> str:
+    """Same normalisation as scripts/build_kelurahan_flood_history.py's _slug,
+    duplicated locally so this module has no import-time dependency on scripts/."""
+    cleaned = re.sub(r"^(kec\.?|kecamatan)\s+", "", (text or "").strip().lower())
+    return re.sub(r"[^a-z0-9]", "", cleaned)
+
+
+@lru_cache(maxsize=1)
+def _kecamatan_historical_freq_map() -> dict[str, float]:
+    """{kecamatan_slug: historical_flood_frequency}. {} on any failure (fail-open)."""
+    try:
+        if not _KECAMATAN_HISTORY_PATH.exists():
+            return {}
+        payload = json.loads(_KECAMATAN_HISTORY_PATH.read_text(encoding="utf-8"))
+        by_kec = payload.get("by_kecamatan") or {}
+        return {
+            slug: float(rec.get("historical_flood_frequency", 0.0))
+            for slug, rec in by_kec.items()
+            if isinstance(rec, dict)
+        }
+    except (OSError, ValueError, TypeError) as exc:
+        logger.warning("kecamatan_historical_freq_load_failed: %s", exc)
+        return {}
+
+
+def kecamatan_historical_flood_freq(kecamatan: str) -> float:
+    """Public lookup: normalised (0-1) long-run flood frequency for a kecamatan
+    name (any casing/prefix). Returns 0.0 when unknown — never raises."""
+    return _kecamatan_historical_freq_map().get(_slug_kecamatan(kecamatan), 0.0)
 
 
 @dataclass(frozen=True)
@@ -238,6 +278,21 @@ def _water_level_ratio_from_records(records):
         ratio = current_level / max(thresholds)
         best_ratio = max(best_ratio, ratio)
     return min(best_ratio, 1.5)
+
+
+def _citywide_kecamatan_historical_freq(records) -> float:
+    """Mean historical_flood_freq across the kecamatan of every station with a
+    known mapping in this snapshot. This is a coarse citywide stand-in used by
+    the single-row aggregate inference path — build_realtime_native_features_per_kecamatan
+    (per-district scoring) uses the exact per-kecamatan value instead."""
+    freqs: list[float] = []
+    for record in (records or []):
+        nama = str(record.get("nama_pintu_air") or "")
+        geo = STATION_KECAMATAN.get(nama)
+        if not geo:
+            continue
+        freqs.append(kecamatan_historical_flood_freq(geo["kecamatan"]))
+    return round(sum(freqs) / len(freqs), 4) if freqs else 0.0
 
 
 def _get_excluded_stations(records) -> list[dict]:
@@ -643,6 +698,7 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
         "temperature_c": temperature_c,
         "water_level_ratio": water_level_ratio,
         "monsoon_season": int(timestamp.month in [11, 12, 1, 2, 3]),
+        "kecamatan_historical_flood_freq": _citywide_kecamatan_historical_freq(scored_records),
         **bmkg_scores,
     }
 
@@ -770,6 +826,83 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
     return RealtimeNativeFeatures(frame=pd.DataFrame([feature_row]), diagnostics=diagnostics)
 
 
+def stations_for_kecamatan(kecamatan: str) -> set[str]:
+    """Station names (nama_pintu_air) mapped to the given kecamatan (case-insensitive)."""
+    target = (kecamatan or "").strip().lower()
+    return {nama for nama, geo in STATION_KECAMATAN.items() if geo["kecamatan"].strip().lower() == target}
+
+
+def build_realtime_native_features_per_kecamatan(snapshot, kecamatan, *, as_of=None):
+    """
+    Build a feature row scoped to a single kecamatan's water-level stations,
+    for per-district scoring (see realtime_native.inference.predict_per_kecamatan).
+
+    Rainfall/BMKG signals are citywide in this system (OpenWeather/BMKG don't
+    report per-station), so they're reused as-is from the citywide snapshot.
+    Only water_level_ratio and kecamatan_historical_flood_freq are district-scoped.
+
+    No persistent per-kecamatan history exists yet, so lag/rolling features
+    cold-start at the current value — the same NaN-fallback convention already
+    used by build_bootstrap_training_dataset() for the first observation of a
+    series. Returns None when no station in the snapshot maps to this kecamatan
+    (nothing to score — never fabricates a reading).
+    """
+    matching_stations = stations_for_kecamatan(kecamatan)
+    records = [
+        r for r in (snapshot.get("poskobanjir") or [])
+        if str(r.get("nama_pintu_air") or "") in matching_stations
+    ]
+    if not records:
+        return None
+
+    timestamp = _parse_timestamp(snapshot.get("fetched_at_utc"))
+    weather = snapshot.get("openweather", {})
+    main_weather = weather.get("main", {})
+    rain_data = weather.get("rain", {})
+    raw_alerts = snapshot.get("bmkg_alerts") or []
+    alerts = filter_jakarta_bmkg_alerts(raw_alerts)
+
+    rainfall_mm = max(
+        _safe_float(rain_data.get("1h")),
+        _safe_float(rain_data.get("3h")) / 3 if rain_data.get("3h") is not None else 0.0,
+    )
+    humidity_pct = _safe_float(main_weather.get("humidity"), 75.0)
+    temperature_c = _safe_float(main_weather.get("temp"), 30.0)
+    bmkg_scores = _bmkg_category_scores_from_alerts(alerts)
+
+    records = [_validate_step_delta(dict(r)) for r in records]
+    water_level_ratio = _water_level_ratio_from_records(records)
+    hydro_meteorological_index = rainfall_mm * (humidity_pct / 100.0) * (1 + water_level_ratio)
+
+    current_row = {
+        "rainfall_mm": rainfall_mm,
+        "rainfall_lag_1": rainfall_mm,
+        "rainfall_lag_2": rainfall_mm,
+        "rainfall_roll3_mean": rainfall_mm,
+        "humidity_pct": humidity_pct,
+        "temperature_c": temperature_c,
+        "water_level_lag_1": water_level_ratio,
+        "water_level_delta": 0.0,
+        "hydro_meteorological_index": hydro_meteorological_index,
+        "monsoon_season": int(timestamp.month in [11, 12, 1, 2, 3]),
+        "rainfall_wlr_interaction": rainfall_mm * water_level_ratio,
+        "wlr_acceleration": 0.0,
+        "wlr_roll3_max": water_level_ratio,
+        "rainfall_intensity_ratio": 1.0,
+        "kecamatan_historical_flood_freq": kecamatan_historical_flood_freq(kecamatan),
+        **bmkg_scores,
+    }
+
+    feature_row = {name: current_row[name] for name in REALTIME_NATIVE_FEATURES}
+    diagnostics = {
+        "kecamatan": kecamatan,
+        "stations_used": sorted(str(r.get("nama_pintu_air")) for r in records),
+        "water_level_ratio": water_level_ratio,
+        "cold_start_lags": True,
+    }
+    return RealtimeNativeFeatures(frame=pd.DataFrame([feature_row]), diagnostics=diagnostics)
+
+
 def build_realtime_native_features_from_file(
     snapshot_path=DEFAULT_REALTIME_SNAPSHOT,
     persist_history=True,
@@ -878,6 +1011,11 @@ def build_bootstrap_training_dataset(
     df["rainfall_intensity_ratio"] = (
         df["rainfall_mm"] / df["rainfall_roll3_mean"].clip(lower=0.1)
     ).clip(upper=10.0).fillna(1.0)
+
+    # v3 — static per-kecamatan historical flood frequency, joined by name_3
+    # (already a kecamatan slug, e.g. "tanahabang"; see _slug_kecamatan).
+    freq_map = _kecamatan_historical_freq_map()
+    df["kecamatan_historical_flood_freq"] = df["name_3"].map(freq_map).fillna(0.0)
 
     df["feature_provenance"] = "bootstrap_proxy"
 

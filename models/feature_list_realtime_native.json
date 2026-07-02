@@ -14,5 +14,6 @@
   "rainfall_wlr_interaction",
   "wlr_acceleration",
   "wlr_roll3_max",
-  "rainfall_intensity_ratio"
+  "rainfall_intensity_ratio",
+  "kecamatan_historical_flood_freq"
 ]
