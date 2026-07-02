@@ -8,17 +8,10 @@ Refreshes the live Jakarta water data the prediction pipeline reads:
 
 Both come from public Jakarta Satu ArcGIS FeatureServers (clean JSON, no
 browser). This replaced the brittle Selenium dashboard scrape, whose panels
-render inside iframes the scraper could not reach. The legacy Selenium ingest
-is still available behind ``--selenium`` for diagnostics.
-
-This sets ``FLOOD_ALLOW_RUNTIME_SCRAPE=1`` in-process *before* importing the
-optional Selenium scraper, so the runtime-scrape guard only opens inside this
-scheduled job and never in the production API (per project constraint).
+render inside iframes the scraper could not reach.
 
 Usage:
     python scripts/run_tma_scraper.py
-    python scripts/run_tma_scraper.py --selenium        # also run legacy DOM scrape + DB write
-    python scripts/run_tma_scraper.py --selenium --dry-run
 
 Windows Task Scheduler (hourly):
     Program:   python
@@ -36,7 +29,6 @@ Exit codes:
 from __future__ import annotations
 
 import logging
-import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -46,10 +38,6 @@ from pathlib import Path
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
-
-# Open the runtime-scrape guard for this scheduled job ONLY, before the optional
-# Selenium scraper module is imported anywhere downstream.
-os.environ["FLOOD_ALLOW_RUNTIME_SCRAPE"] = "1"
 
 try:
     from api.observability import ensure_utf8_console
@@ -101,27 +89,11 @@ def _refresh_pintu_air() -> bool:
     return False
 
 
-def _run_legacy_selenium() -> int:
-    """Optional legacy Selenium dashboard scrape + DB persist. Never crashes."""
-    try:
-        from scripts.run_jakarta_satu_ingest import main as ingest_main
-
-        return ingest_main()
-    except Exception as exc:  # noqa: BLE001
-        logger.error("Legacy Selenium ingest failed: %s", exc)
-        return 2
-
-
 def main() -> int:
     logger.info("TMA refresh starting at %s", datetime.now(timezone.utc).isoformat())
 
     awlr_ok = _refresh_awlr()
     pintu_ok = _refresh_pintu_air()
-
-    if "--selenium" in sys.argv:
-        sys.argv.remove("--selenium")
-        logger.info("Running legacy Selenium ingest (diagnostic).")
-        _run_legacy_selenium()  # advisory only; does not gate the exit code
 
     if awlr_ok or pintu_ok:
         logger.info("TMA refresh complete (awlr_ok=%s, pintu_air_ok=%s)", awlr_ok, pintu_ok)

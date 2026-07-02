@@ -726,39 +726,6 @@ def _format_adaptive_threshold(adaptive_cls: dict | None) -> dict:
     }
 
 
-def _build_hydrology_narrative(
-    overall_explanation: str,
-    stations: list,
-    trend_state: dict,
-) -> str:
-    if not overall_explanation:
-        return (
-            "Hydrology data unavailable — physical conditions "
-            "cannot be independently assessed."
-        )
-    parts = [overall_explanation]
-
-    wl_trend = trend_state.get("water_level_trend", "stable")
-    if wl_trend == "rising":
-        parts.append("Water levels are trending upward across recent observations.")
-    elif wl_trend == "falling":
-        parts.append(
-            "Water levels are declining, suggesting improving hydrological conditions."
-        )
-
-    near_stations = [s for s in stations if getattr(s, "near_threshold", False)]
-    if near_stations:
-        names = ", ".join(
-            getattr(s, "station_name", "unknown") for s in near_stations[:2]
-        )
-        parts.append(
-            f"Alert: {names} approaching next alert threshold — "
-            "escalation possible within the current prediction window."
-        )
-
-    return " ".join(parts)
-
-
 def _optional_float(value: object) -> float | None:
     if value in ("", None):
         return None
@@ -847,36 +814,6 @@ def _escalate_risk_level(risk_level: str) -> str:
     if normalized == "WARNING":
         return "DANGER"
     return "DANGER" if normalized == "DANGER" else risk_level
-
-
-def _build_scenario_comparison(
-    final_confidence: float,
-    raw_model_confidence: float,
-    baseline_result: dict,
-) -> dict:
-    """
-    Quantify what each pipeline layer contributes versus simpler baselines.
-
-    agentic_system_score : full pipeline after all adjustments
-    model_only_score     : raw ML confidence before agentic penalties
-    baseline_only_score  : rule-based estimate credibility (1 − disagreement)
-    """
-    baseline_disagreement = float(baseline_result.get("baseline_disagreement") or 0.0)
-    baseline_score        = round(max(0.0, 1.0 - min(baseline_disagreement, 1.0)), 4)
-    improvement           = round(final_confidence - raw_model_confidence, 4)
-
-    return {
-        "agentic_system_score": round(final_confidence, 4),
-        "model_only_score": round(raw_model_confidence, 4),
-        "baseline_only_score": baseline_score,
-        "agentic_improvement_over_model": improvement,
-        "interpretation": (
-            "agentic_system_score reflects all pipeline adjustments "
-            "(failure penalties, calibration, trust); "
-            "model_only_score is raw ML confidence before agentic layers; "
-            "baseline_only_score is rule-based estimate agreement (1 − disagreement)."
-        ),
-    }
 
 
 def _build_final_reason(
@@ -998,71 +935,6 @@ def failsafe_decision(
         hydrology_narrative="",
         scenario_comparison={},
     )
-
-
-# ─── Shadow threshold evaluation (DATA-2) ────────────────────────────────────
-
-_SHADOW_WARNING_THRESHOLD: float = 0.12
-_SHADOW_DANGER_THRESHOLD: float = 0.22
-_SHADOW_PROFILE_NAME: str = "conservative"
-
-# Production baselines used only for computing threshold_delta in the log.
-_PROD_WARNING_THRESHOLD: float = 0.26
-_PROD_DANGER_THRESHOLD: float = 0.36
-
-
-def compute_shadow_evaluation(
-    probability: float,
-    *,
-    production_risk_level: str,
-    evaluated_at: str | None = None,
-) -> dict:
-    """
-    Compute shadow threshold evaluation using conservative thresholds.
-
-    Pure function — never reads or modifies any production decision field.
-    Returns a dict for inclusion in the pipeline output payload under
-    "shadow_evaluation". Pass evaluated_at for deterministic replay; when
-    omitted, the current UTC time is used.
-    """
-    p = float(probability)
-    shadow_danger = p >= _SHADOW_DANGER_THRESHOLD
-    shadow_warning = p >= _SHADOW_WARNING_THRESHOLD
-
-    if shadow_danger:
-        shadow_risk = "DANGER"
-    elif shadow_warning:
-        shadow_risk = "WARNING"
-    else:
-        shadow_risk = "SAFE"
-
-    ts = evaluated_at or datetime.now(timezone.utc).isoformat()
-    delta_warning = round(_PROD_WARNING_THRESHOLD - _SHADOW_WARNING_THRESHOLD, 4)
-    delta_danger = round(_PROD_DANGER_THRESHOLD - _SHADOW_DANGER_THRESHOLD, 4)
-
-    _log.info(
-        "shadow_eval current_decision=%s shadow_decision=%s probability=%.4f "
-        "threshold_delta_warning=%.4f threshold_delta_danger=%.4f",
-        production_risk_level,
-        shadow_risk,
-        p,
-        delta_warning,
-        delta_danger,
-    )
-
-    return {
-        "shadow_warning_triggered": shadow_warning,
-        "shadow_danger_triggered": shadow_danger,
-        "shadow_probability": round(p, 4),
-        "shadow_risk_level": shadow_risk,
-        "shadow_threshold_profile": _SHADOW_PROFILE_NAME,
-        "shadow_warning_threshold": _SHADOW_WARNING_THRESHOLD,
-        "shadow_danger_threshold": _SHADOW_DANGER_THRESHOLD,
-        "production_risk_level": production_risk_level,
-        "threshold_delta_warning": delta_warning,
-        "threshold_delta_danger": delta_danger,
-        "evaluated_at": ts,
-    }
 
 
 # ─── Hydrology-only shadow evaluation ────────────────────────────────────────

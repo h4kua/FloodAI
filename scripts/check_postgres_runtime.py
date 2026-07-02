@@ -337,7 +337,6 @@ def main() -> int:
         ("db.migration_runner",          "YES", "YES",  "schema_migrations tracking"),
         ("db.pipeline_writer",           "YES", "YES",  "atomic 6-stage; retry on transient"),
         ("db.trend_repository",          "YES", "YES",  "ring-buffer; auto-commit per write"),
-        ("db.repositories.jakarta_satu", "NO ", "YES",  "append-only; caller owns transaction"),
         ("services.trend_analysis",  "YES", "YES",  "fail-open writes; fail-closed reads"),
         ("pipeline.flood_pipeline",  "NO ", "YES",  "best-effort via pipeline_writer"),
         ("api.main (FastAPI)",        "NO ", "NO ",  "delegates entirely to services"),

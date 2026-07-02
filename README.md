@@ -172,7 +172,6 @@ Salin `.env.example` ke `.env` lalu isi nilai-nilainya:
 | `OPENWEATHER_API_KEY`                     | Snapshot ingestion cuaca                          |
 | `GOOGLE_MAPS_API_KEY`                     | Generasi safe-route                               |
 | `BNPB_DEFAULT_VINTAGE_DAYS`               | Fallback vintage saat InaRISK tidak tersedia      |
-| `FLOOD_ALLOW_RUNTIME_SCRAPE`              | Set `1` untuk enable on-demand scraping           |
 | `MODEL_PATH` / `SCALER_PATH`              | Path ke file model ML                             |
 | `THRESHOLD_PATH`                          | Path ke file optimal threshold                    |
 
