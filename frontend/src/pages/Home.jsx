@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFloodRisk } from "../hooks/useFloodRisk";
 import FloodMap from "../components/FloodMap";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -27,6 +27,25 @@ import {
 import { WeatherCurrentCard } from "../components/dashboard/WeatherSection";
 import { CrewAnalysisPanel } from "../components/dashboard/CrewAnalysisPanel";
 
+/* Collapsed-by-default teaser for secondary panels (progressive disclosure) —
+   avoids showing two full cards' worth of detail before the user asks for it. */
+function SectionTeaser({ icon, iconBg, iconColor, title, subtitle, onExpand }) {
+  return (
+    <button className="panel panel-body section-teaser" onClick={onExpand}>
+      <div className="section-teaser-icon" style={{ background: iconBg, color: iconColor }}>{icon}</div>
+      <div style={{ textAlign: "left", minWidth: 0 }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.63rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: iconColor }}>
+          {title}
+        </div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", marginTop: 2 }}>
+          {subtitle}
+        </div>
+      </div>
+      <span className="section-teaser-chevron" style={{ color: iconColor }}>▾</span>
+    </button>
+  );
+}
+
 /* ── Page ──────────────────────────────────────────────────────────────────
    Home composes the dashboard from the feature sections under
    components/dashboard/*. All presentational components and pure helpers were
@@ -51,6 +70,10 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
   const realSiaga1  = useMemo(() => stations.filter(s => s.ratio >= 1.0).length,  [stations]);
   const realSiaga2  = useMemo(() => stations.filter(s => s.ratio >= 0.75 && s.ratio < 1.0).length, [stations]);
   const totalStations = riskData?.tmaStationsActive ?? (stations.length || null);
+
+  // Progressive disclosure — secondary/duplicate-adjacent panels start collapsed.
+  const [showDeepAnalysis, setShowDeepAnalysis] = useState(false);
+  const [showDistrictBreakdown, setShowDistrictBreakdown] = useState(false);
 
 
   if (loading) return <LoadingSpinner message="Mengambil data realtime..." />;
@@ -146,11 +169,20 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
         </div>
       </div>
 
-      {/* ══ ZONE: Analisis AI — ML + multi-agen, dipasangkan ═════════ */}
+      {/* ══ ZONE: Analisis AI — ML selalu tampil, multi-agen di balik teaser ═ */}
       <SectionDivider label={isId ? "Analisis Kecerdasan Buatan" : "AI Analysis"} />
       <div className="bento-2">
         <ModelOutputCard riskData={riskData} score={score} />
-        <CrewAnalysisPanel />
+        {showDeepAnalysis ? (
+          <CrewAnalysisPanel />
+        ) : (
+          <SectionTeaser
+            icon="◈" iconBg="rgba(168,85,247,0.08)" iconColor="#a855f7"
+            title={isId ? "Analisis Multi-Agen AI" : "Multi-Agent AI Analysis"}
+            subtitle={isId ? "3 agen spesialis · klik untuk analisis mendalam" : "3 specialist agents · click for deep analysis"}
+            onExpand={() => setShowDeepAnalysis(true)}
+          />
+        )}
       </div>
 
       {/* ══ ZONE: Sensor & wilayah ══════════════════════════════════ */}
@@ -159,15 +191,25 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
         count={stations.length > 0 ? (isId ? `${stations.length} pos pantau` : `${stations.length} stations`) : null}
       />
       <div id="station-panel-anchor" />
-      {/* Paired views: flat sorted sensor table ‖ per-district grouped probability */}
+      {/* Paired views: flat sorted sensor table ‖ per-district grouped probability
+          (the latter starts collapsed — it re-derives from the same station data). */}
       <div className="bento-2">
         <StationPanel stations={stations} quality={riskData?.stationQuality} />
-        <KecamatanZones
-          stations={stations}
-          wilayahSummary={riskData?.wilayahSummary}
-          globalProbability={score}
-          districtRiskBreakdown={riskData?.districtRiskBreakdown}
-        />
+        {showDistrictBreakdown ? (
+          <KecamatanZones
+            stations={stations}
+            wilayahSummary={riskData?.wilayahSummary}
+            globalProbability={score}
+            districtRiskBreakdown={riskData?.districtRiskBreakdown}
+          />
+        ) : (
+          <SectionTeaser
+            icon="◇" iconBg="var(--cyan-soft)" iconColor="var(--cyan)"
+            title={isId ? "Kemungkinan Banjir per Wilayah" : "Flood Probability by District"}
+            subtitle={isId ? "Rincian per kecamatan · klik untuk buka" : "Per-district breakdown · click to open"}
+            onExpand={() => setShowDistrictBreakdown(true)}
+          />
+        )}
       </div>
 
       {/* ══ ZONE: Cuaca & prakiraan ═════════════════════════════════ */}

@@ -50,7 +50,7 @@ function TeamCard({ role, roleType, name, linkedin }) {
   return (
     <div ref={tiltRef} className="team-card card-3d">
       <div className="card-3d-content" style={{ display: "flex", flex: 1, flexDirection: "column", justifyContent: "space-between", height: "100%", width: "100%" }}>
-        <div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           <span className={`team-role ${roleType}`}>{role}</span>
           <p className="team-name">{name}</p>
         </div>
@@ -131,10 +131,10 @@ export default function About({ riskContext = {} }) {
               </p>
             </div>
             <div className="stat-grid" style={{ minWidth: 200 }}>
-              <Stat value="0.865" label="AUC-ROC" />
-              <Stat value="75.0%" label="Recall" />
+              <Stat value="0.901" label="AUC-ROC" />
+              <Stat value="83.9%" label="Recall" />
               <Stat value="38" label={id ? "Stasiun TMA" : "TMA Stations"} />
-              <Stat value="16" label={id ? "Fitur ML" : "ML Features"} />
+              <Stat value="17" label={id ? "Fitur ML" : "ML Features"} />
             </div>
           </div>
         </div>
@@ -149,20 +149,20 @@ export default function About({ riskContext = {} }) {
           <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
             <MetricBar label="AUC-ROC"
               hint={id ? "(↑ lebih baik)" : "(↑ higher is better)"}
-              value={0.865} max={1} color="var(--safe)"
+              value={0.901} max={1} color="var(--safe)"
               format={v => v.toFixed(3)} />
             <MetricBar label={id ? "Recall @ Siaga" : "Recall @ Alert"}
               hint={id ? "(↑ lebih baik)" : "(↑ higher is better)"}
-              value={0.750} max={1} color="var(--s2)"
+              value={0.839} max={1} color="var(--s2)"
               format={v => (v * 100).toFixed(1) + "%"} />
             <MetricBar label="Brier Score"
               hint={id ? "(↓ lebih baik)" : "(↓ lower is better)"}
-              value={0.088} max={0.25} color="var(--cyan)"
-              lowerIsBetter format={() => "0.088"} />
+              value={0.072} max={0.25} color="var(--cyan)"
+              lowerIsBetter format={() => "0.072"} />
             <MetricBar label={id ? "ECE (Kalibrasi)" : "ECE (Calibration)"}
               hint={id ? "(↓ lebih baik)" : "(↓ lower is better)"}
-              value={0.018} max={0.25} color="var(--wsp)"
-              lowerIsBetter format={() => "0.018"} />
+              value={0.014} max={0.25} color="var(--wsp)"
+              lowerIsBetter format={() => "0.014"} />
           </div>
           <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", lineHeight: 1.5 }}>
             {id
@@ -178,8 +178,8 @@ export default function About({ riskContext = {} }) {
               label={id ? "Pengumpulan Data Realtime" : "Realtime Data Collection"}
               desc={id ? "Scraper otomatis tiap 15 menit mengambil data TMA dari 38 pos DSDADKI, cuaca OpenWeather, dan peringatan BMKG." : "Automated scraper every 15 min fetches TMA data from 38 DSDADKI posts, OpenWeather conditions, and BMKG alerts."} />
             <PipelineStep num="2" color="var(--wsp)"
-              label={id ? "Feature Engineering (16 Fitur)" : "Feature Engineering (16 Features)"}
-              desc={id ? "Membangun 16 fitur: curah hujan (realtime, lag, rolling), interaksi curah hujan×muka air, akselerasi & rolling-max muka air, intensitas hujan, indeks hidro-meteorologi, skor BMKG, dan flag musim." : "Builds 16 features: rainfall (realtime, lags, rolling), rainfall×water-level interaction, water-level acceleration & rolling-max, rainfall intensity ratio, hydro-met index, BMKG scores, and monsoon flag."} />
+              label={id ? "Feature Engineering (17 Fitur)" : "Feature Engineering (17 Features)"}
+              desc={id ? "Membangun 17 fitur: curah hujan (realtime, lag, rolling), interaksi curah hujan×muka air, akselerasi & rolling-max muka air, intensitas hujan, indeks hidro-meteorologi, skor BMKG, flag musim, dan frekuensi historis banjir per kecamatan." : "Builds 17 features: rainfall (realtime, lags, rolling), rainfall×water-level interaction, water-level acceleration & rolling-max, rainfall intensity ratio, hydro-met index, BMKG scores, monsoon flag, and per-district historical flood frequency."} />
             <PipelineStep num="3" color="var(--s2)"
               label={id ? "Inferensi ML (XGBoost)" : "ML Inference (XGBoost)"}
               desc={id ? "Model menghasilkan probabilitas banjir 0–1. Hydro override rule-based menaikkan level jika TMA ≥75% threshold." : "Model outputs flood probability 0–1. Rule-based hydro override elevates level if TMA ≥ 75% threshold."} />
@@ -205,28 +205,28 @@ export default function About({ riskContext = {} }) {
               : "Realtime weather data (temperature, humidity, 1h/3h rainfall) from the nearest Jakarta station. Used as primary meteorological feature input for the ML model."} />
           <Row tag="HST" title={id ? "Data Historis Banjir (BPBD)" : "Historical Flood Data (BPBD)"}
             desc={id
-              ? "Dataset kejadian banjir Jakarta sejak 2010 dari BPBD untuk pelatihan model. 16 fitur meteorologi dan hidrologi. Bootstrap awal sebelum data TMA realtime tersedia."
-              : "Jakarta flood event dataset since 2010 from BPBD for model training. 16 meteorological and hydrological features. Initial bootstrap before realtime TMA data was available."} />
+              ? "Dataset kejadian banjir Jakarta sejak 2010 dari BPBD untuk pelatihan model. 17 fitur meteorologi, hidrologi, dan geografis. Bootstrap awal sebelum data TMA realtime tersedia."
+              : "Jakarta flood event dataset since 2010 from BPBD for model training. 17 meteorological, hydrological, and geographic features. Initial bootstrap before realtime TMA data was available."} />
         </Section>
 
         {/* ML Model */}
         <Section title={id ? "Model Machine Learning" : "Machine Learning Model"}>
           <Row tag="XGB" accent title="XGBoost 3.2.0 Classifier"
             desc={id
-              ? "Model gradient boosting dengan focal loss (gamma=1.5) dan SMOTE oversampling. Mengklasifikasikan risiko ke 4 level: AMAN, WASPADA, SIAGA, BAHAYA. Recall 75% — dirancang untuk meminimalkan banjir yang terlewat."
-              : "Gradient boosting model with focal loss (gamma=1.5) and SMOTE oversampling. Classifies risk into 4 levels: SAFE, WATCH, ALERT, DANGER. 75% recall — designed to minimize missed floods."} />
-          <Row tag="16F" title={id ? "16 Fitur Input" : "16 Input Features"}
+              ? "Model gradient boosting dengan focal loss (gamma=1.5) dan SMOTE oversampling. Mengklasifikasikan risiko ke 4 level: AMAN, WASPADA, SIAGA, BAHAYA. Recall 83.9% — dirancang untuk meminimalkan banjir yang terlewat."
+              : "Gradient boosting model with focal loss (gamma=1.5) and SMOTE oversampling. Classifies risk into 4 levels: SAFE, WATCH, ALERT, DANGER. 83.9% recall — designed to minimize missed floods."} />
+          <Row tag="17F" title={id ? "17 Fitur Input" : "17 Input Features"}
             desc={id
-              ? "Curah hujan (realtime, lag, rolling, intensitas), interaksi curah hujan×muka air, akselerasi & rolling-max muka air, suhu, kelembapan, skor BMKG (certainty/weighted), indeks hidro-meteorologi, dan flag musim."
-              : "Rainfall (realtime, lags, rolling, intensity ratio), rainfall×water-level interaction, water-level acceleration & rolling-max, temperature, humidity, BMKG scores (certainty/weighted), hydro-meteorological index, and monsoon flag."} />
+              ? "Curah hujan (realtime, lag, rolling, intensitas), interaksi curah hujan×muka air, akselerasi & rolling-max muka air, suhu, kelembapan, skor BMKG (certainty/weighted), indeks hidro-meteorologi, flag musim, dan frekuensi historis banjir per kecamatan (fitur geografis statis, bukan outcome kejadian)."
+              : "Rainfall (realtime, lags, rolling, intensity ratio), rainfall×water-level interaction, water-level acceleration & rolling-max, temperature, humidity, BMKG scores (certainty/weighted), hydro-meteorological index, monsoon flag, and per-district historical flood frequency (a static geographic covariate, not an event outcome)."} />
           <Row tag="OOD" title={id ? "IsolationForest — Deteksi Anomali Data" : "IsolationForest — Out-of-Distribution Detection"}
             desc={id
-              ? "Model sekunder IsolationForest (16 fitur) mendeteksi kondisi di luar distribusi data training. Flag OOD hanya tampil ketika muka air rendah (<75%) karena muka air ≥75% sudah ditangani hydro override secara eksplisit."
-              : "Secondary IsolationForest model (16 features) detects conditions outside the training distribution. OOD flag only appears at low water levels (<75%) since levels ≥75% are handled explicitly by the hydro override."} />
-          <Row tag="ECE" title={id ? "Kalibrasi (ECE 0.018)" : "Calibration (ECE 0.018)"}
+              ? "Model sekunder IsolationForest (17 fitur) mendeteksi kondisi di luar distribusi data training. Flag OOD hanya tampil ketika muka air rendah (<75%) karena muka air ≥75% sudah ditangani hydro override secara eksplisit."
+              : "Secondary IsolationForest model (17 features) detects conditions outside the training distribution. OOD flag only appears at low water levels (<75%) since levels ≥75% are handled explicitly by the hydro override."} />
+          <Row tag="ECE" title={id ? "Kalibrasi (ECE 0.014)" : "Calibration (ECE 0.014)"}
             desc={id
-              ? "Expected Calibration Error 0.018 (n=586 test rows, 1.990 training rows). Brier score 0.088. Model dilatih dengan chronological 80/15/5 split, SMOTE oversampling (192→768 positives), focal loss, dan isotonic calibration (cv=5)."
-              : "ECE 0.018 (n=586 test rows, 1,990 training rows). Brier score 0.088. Trained with chronological 80/15/5 split, SMOTE oversampling (192→768 positives), focal loss, and isotonic calibration (cv=5)."} />
+              ? "Expected Calibration Error 0.014 (n=586 test rows, 1.990 training rows). Brier score 0.072. Model dilatih dengan chronological 80/15/5 split, SMOTE oversampling (192→768 positives), focal loss, dan isotonic calibration (cv=5)."
+              : "ECE 0.014 (n=586 test rows, 1,990 training rows). Brier score 0.072. Trained with chronological 80/15/5 split, SMOTE oversampling (192→768 positives), focal loss, and isotonic calibration (cv=5)."} />
         </Section>
 
         {/* AI Chat & Agents */}
@@ -235,10 +235,10 @@ export default function About({ riskContext = {} }) {
             desc={id
               ? "Model bahasa besar dari Meta via Groq API untuk latensi rendah. Merespons pertanyaan seputar banjir, evakuasi, dan keselamatan dalam Bahasa Indonesia maupun Inggris. Fallback offline berbasis knowledge base tersedia."
               : "Meta's large language model via Groq API for low latency. Answers questions about flooding, evacuation, and safety in Indonesian and English. Offline knowledge-base fallback available."} />
-          <Row tag="CREW" title="CrewAI 1.14.0 — 3-Agent Crew"
+          <Row tag="CREW" title={id ? "3 Agen AI Sekuensial" : "3-Agent Sequential Analysis"}
             desc={id
-              ? "3 agen AI berjalan sekuensial: AhliCuaca (analisis BMKG & OpenWeather), AhliHidrologi (analisis TMA 37 stasiun), dan KoordinatorRisiko (sintesis keputusan akhir). Tersedia via endpoint /predict/crew-analysis."
-              : "3 AI agents run sequentially: WeatherExpert (BMKG & OpenWeather analysis), HydrologyExpert (37-station TMA analysis), and RiskCoordinator (final decision synthesis). Available via /predict/crew-analysis endpoint."} />
+              ? "3 agen AI berjalan sekuensial via panggilan Groq langsung: AhliCuaca (analisis BMKG & OpenWeather), AhliHidrologi (analisis TMA 37 stasiun), dan KoordinatorRisiko (sintesis keputusan akhir). Tersedia via endpoint /predict/crew-analysis."
+              : "3 AI agents run sequentially via direct Groq calls: WeatherExpert (BMKG & OpenWeather analysis), HydrologyExpert (37-station TMA analysis), and RiskCoordinator (final decision synthesis). Available via /predict/crew-analysis endpoint."} />
           <Row tag="CTX" title={id ? "Konteks Risiko Realtime" : "Realtime Risk Context"}
             desc={id
               ? "Setiap percakapan menyertakan level risiko, muka air, curah hujan, dan prakiraan BMKG terkini sehingga AI memberikan jawaban yang relevan dengan kondisi aktual Jakarta."
@@ -256,7 +256,7 @@ export default function About({ riskContext = {} }) {
             {[
               "Python 3.12", "FastAPI", "Uvicorn",
               "XGBoost 3.2.0", "scikit-learn 1.8.0",
-              "CrewAI 1.14.0", "LiteLLM 1.87.0", "Groq SDK", "Anthropic SDK",
+              "Groq SDK", "Anthropic SDK",
               "React 18", "Vite 5", "React-Leaflet 4",
               "Supabase / PostgreSQL", "psycopg2",
               "Fly.io", "Vercel",

@@ -50,6 +50,11 @@
   --safe-border: rgba(52, 211, 153, 0.20);
   --safe-glow:   0 0 16px rgba(52, 211, 153, 0.32);
 
+  /* Pin: violet — most spatially-relevant community report */
+  --pin:        #a78bfa;
+  --pin-soft:   rgba(167, 139, 250, 0.09);
+  --pin-border: rgba(167, 139, 250, 0.28);
+
   /* Border radius */
   --r-sm: 8px;
   --r:    12px;
@@ -109,6 +114,10 @@
   --safe-soft:   rgba(6, 95, 70, 0.08);
   --safe-border: rgba(6, 95, 70, 0.20);
   --safe-glow:   0 0 16px rgba(6, 95, 70, 0.14);
+
+  --pin:        #7c3aed;
+  --pin-soft:   rgba(124, 58, 237, 0.08);
+  --pin-border: rgba(124, 58, 237, 0.22);
 
   --shadow:    0 2px 16px rgba(40, 30, 10, 0.10);
   --shadow-sm: 0 1px 6px  rgba(40, 30, 10, 0.07);
@@ -560,6 +569,38 @@ body {
 .alert-zone-name { font-size: 0.875rem; font-weight: 700; }
 .alert-zone-sub  { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
 
+/* Community report items — reuses .alert-item shape, adds a pinned variant */
+.report-item {
+  padding: 0.72rem 0.875rem; border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: 0.4rem;
+  transition: border-color 0.15s var(--ease-out);
+}
+.report-pinned {
+  background: var(--pin-soft);
+  border-left: 3px solid var(--pin);
+}
+.report-meta {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  color: var(--muted-2); letter-spacing: 0.04em;
+}
+
+/* Family member items — 3px colored left border, not full background */
+.family-member-item {
+  padding: 0.72rem 0.875rem; border-radius: var(--r-sm);
+  border: 1px solid var(--line); border-left: 3px solid var(--line-2);
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+}
+.family-member-item.safe       { border-left-color: var(--safe); }
+.family-member-item.in_transit { border-left-color: var(--wsp); }
+.family-member-item.missing    { border-left-color: var(--s1); }
+.family-member-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.family-member-item.missing .family-member-dot { animation: blink 1.2s infinite; background: var(--s1); }
+.family-member-item.safe .family-member-dot       { background: var(--safe); }
+.family-member-item.in_transit .family-member-dot { background: var(--wsp); }
+
 /* Action buttons — Emil: scale(0.97) on :active, no transition: all */
 .action-btn {
   width: 100%; text-align: left;
@@ -618,6 +659,76 @@ body {
 @media (hover: hover) and (pointer: fine) {
   .btn-ghost:hover:not(:disabled) { background: rgba(255,255,255,0.1); color: var(--text); }
 }
+
+/* ── Section teaser — collapsed-by-default secondary panel ──── */
+.section-teaser {
+  display: flex; align-items: center; gap: 0.75rem;
+  width: 100%; text-align: left; cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s var(--ease-out), transform 0.12s var(--ease-out);
+}
+.section-teaser:active { transform: scale(0.98); }
+@media (hover: hover) and (pointer: fine) {
+  .section-teaser:hover { border-color: var(--line-2); }
+}
+.section-teaser-icon {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: grid; place-items: center; font-size: 1rem;
+}
+.section-teaser-chevron { margin-left: auto; font-size: 0.85rem; flex-shrink: 0; }
+
+/* ── SOS hold-to-confirm button ─────────────────────────────── */
+.sos-button-wrap {
+  position: relative;
+  width: 220px; height: 220px;
+  display: grid; place-items: center;
+  margin: 0 auto;
+}
+.sos-ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid var(--s1);
+  animation: sos-ring-pulse 2.2s var(--ease-out) infinite;
+  pointer-events: none;
+}
+.sos-ring.r2 { animation-delay: 0.7s; }
+.sos-ring.r3 { animation-delay: 1.4s; }
+@keyframes sos-ring-pulse {
+  0%   { transform: scale(0.72); opacity: 0.65; }
+  100% { transform: scale(1.15); opacity: 0; }
+}
+.sos-button {
+  position: relative; z-index: 1;
+  width: 168px; height: 168px; border-radius: 50%;
+  border: none; cursor: pointer;
+  background: radial-gradient(circle at 50% 40%, rgba(244,63,94,0.28), rgba(244,63,94,0.08));
+  color: #ff9dac; font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.35rem; font-weight: 800; letter-spacing: 0.04em;
+  display: grid; place-items: center;
+  box-shadow: var(--s1-glow);
+  transition: transform 0.12s var(--ease-out);
+  user-select: none; touch-action: none;
+}
+.sos-button:active { transform: scale(0.96); }
+.sos-progress-ring { position: absolute; inset: -6px; transform: rotate(-90deg); pointer-events: none; }
+.sos-progress-ring circle {
+  fill: none; stroke: var(--s1); stroke-width: 4; stroke-linecap: round;
+  transition: stroke-dashoffset 0.05s linear;
+}
+
+/* ── Safe Arrival confirmation glow ──────────────────────────── */
+.safe-arrival-check {
+  animation: safe-arrival-glow 1.8s var(--ease-out-quart) infinite;
+}
+@keyframes safe-arrival-glow {
+  0%, 100% { box-shadow: var(--safe-glow); }
+  50%      { box-shadow: 0 0 34px rgba(52,211,153,0.5); }
+}
+.safe-arrival-checkmark path {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: safe-arrival-draw 0.6s var(--ease-out-quart) 0.2s forwards;
+}
+@keyframes safe-arrival-draw { to { stroke-dashoffset: 0; } }
 
 /* ── Floating ChatBot ────────────────────────────────────────── */
 .chatbot-fab { position: fixed; bottom: 1.5rem; right: 1.75rem; z-index: var(--z-modal); }
@@ -998,7 +1109,7 @@ body {
 .team-card {
   background: var(--panel-2); border: 1px solid var(--line);
   border-radius: var(--r); padding: 1.25rem;
-  display: flex; flex-direction: column; gap: 0.625rem;
+  display: flex; flex-direction: column; gap: 1rem;
   transition: border-color 0.15s var(--ease-out);
 }
 .team-card:hover { border-color: var(--line-2); }

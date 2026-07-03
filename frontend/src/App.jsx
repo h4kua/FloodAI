@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import Home from "./pages/Home";
 import Alert from "./pages/Alert";
+import CommunityReports from "./pages/CommunityReports";
 import About from "./pages/About";
 import OnboardingTour from "./components/OnboardingTour";
 import { AppContext, useT } from "./lib/appContext";
@@ -58,9 +59,10 @@ function AppShell() {
 
         <nav className="nav">
           {[
-            { id: "home",  label: t("nav.home") },
-            { id: "alert", label: t("nav.evac") },
-            { id: "about", label: t("nav.about") },
+            { id: "home",     label: t("nav.home") },
+            { id: "alert",    label: t("nav.evac") },
+            { id: "reports",  label: t("nav.reports") },
+            { id: "about",    label: t("nav.about") },
           ].map((item) => (
             <button
               key={item.id}
@@ -102,14 +104,15 @@ function AppShell() {
       </header>
 
       <main className="main">
-        {page === "home"  && <Home setRiskContext={setRiskContext} riskLevel={riskContext.level} onNavigate={setPage} />}
-        {page === "alert" && <Alert riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
-        {page === "about" && <About riskContext={riskContext} />}
+        {page === "home"    && <Home setRiskContext={setRiskContext} riskLevel={riskContext.level} onNavigate={setPage} />}
+        {page === "alert"   && <Alert riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
+        {page === "reports" && <CommunityReports riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
+        {page === "about"   && <About riskContext={riskContext} />}
       </main>
 
       <footer className="footer">
         <span>deFlood.ai — Jakarta Flood Intelligence System · Operator BPBD</span>
-        <span>XGBoost · 16 features · AUC-ROC 0.865 · Recall 75% · ECE 0.018 · &lt;1s latency</span>
+        <span>XGBoost · 17 features · AUC-ROC 0.901 · Recall 84% · ECE 0.014 · &lt;1s latency</span>
       </footer>
 
       <OnboardingTour />
