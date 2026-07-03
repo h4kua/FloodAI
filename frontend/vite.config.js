@@ -18,9 +18,13 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       proxy: {
-        "/predict": { target: backendUrl, changeOrigin: true },
-        "/api":     { target: backendUrl, changeOrigin: true },
-        "/healthz": { target: backendUrl, changeOrigin: true },
+        "/predict":  { target: backendUrl, changeOrigin: true },
+        "/api":      { target: backendUrl, changeOrigin: true },
+        "/healthz":  { target: backendUrl, changeOrigin: true },
+        "/family":   { target: backendUrl, changeOrigin: true },
+        "/sos":      { target: backendUrl, changeOrigin: true },
+        "/reports":  { target: backendUrl, changeOrigin: true },
+        "/shelters": { target: backendUrl, changeOrigin: true },
       },
     },
   };

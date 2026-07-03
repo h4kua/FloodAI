@@ -1,10 +1,15 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { humanizeRiskLevel } from "../lib/humanize";
 import EvacuationMap, { DESTINATIONS, findNearestShelter } from "../components/EvacuationMap";
 import EmergencyContacts from "../components/EmergencyContacts";
 import ChatBot from "../components/ChatBot";
+import SafeArrival from "./SafeArrival";
 import { useT, useApp } from "../lib/appContext";
 import { use3DTilt } from "../hooks/use3DTilt";
+import { useShelterGeofence } from "../hooks/useShelterGeofence";
+import { getDeviceId, getFamilyCode } from "../lib/deviceIdentity";
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 const STEP_KEYS = ["1","2","3","4","5"];
 
@@ -65,6 +70,48 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
 
   const config       = humanizeRiskLevel(riskLevel, lang);
   const selectedDest = destId ? DESTINATIONS.find((d) => d.id === destId) ?? null : null;
+
+  const [safeArrivalShelter, setSafeArrivalShelter] = useState(null);
+  const [checkingIn, setCheckingIn] = useState(false);
+
+  const confirmArrival = useCallback(async (position, shelter, auto) => {
+    if (!shelter) return;
+    setCheckingIn(true);
+    try {
+      const res = await fetch(`${API_BASE}/shelters/checkin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          device_id: getDeviceId(),
+          shelter_id: shelter.id,
+          shelter_name: shelter.name,
+          shelter_lat: shelter.lat,
+          shelter_lon: shelter.lng,
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+          auto,
+          family_code: getFamilyCode() || null,
+        }),
+      });
+      if (res.ok) setSafeArrivalShelter(shelter.name);
+    } catch {
+      // Best-effort — arrival confirmation is not on the critical path.
+    } finally {
+      setCheckingIn(false);
+    }
+  }, []);
+
+  useShelterGeofence(selectedDest, (position) => confirmArrival(position, selectedDest, true));
+
+  const handleManualArrival = () => {
+    if (!selectedDest || !navigator.geolocation) return;
+    setCheckingIn(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => confirmArrival(pos, selectedDest, false),
+      () => setCheckingIn(false),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
 
   const fetchSuggestions = async (query) => {
     const q = encodeURIComponent(query + " Jakarta");
@@ -375,6 +422,14 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
                 <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.57rem", color: "var(--muted-2)" }}>
                   ● {lang === "en" ? "Tap phone to call · Route shown on map" : "Tap telepon untuk hubungi · Rute ditampilkan di peta"}
                 </p>
+                <button
+                  className="btn"
+                  style={{ marginTop: "0.75rem", width: "100%", justifyContent: "center", background: "var(--safe-soft)", color: "var(--safe)", border: "1px solid var(--safe-border)" }}
+                  onClick={handleManualArrival}
+                  disabled={checkingIn}
+                >
+                  {checkingIn ? t("evac.checkingIn") : t("evac.iveArrived")}
+                </button>
               </div>
             </div>
           )}
@@ -425,6 +480,10 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
       </div>
 
       <ChatBot riskContext={{ level: riskLevel, rainfall }} />
+
+      {safeArrivalShelter && (
+        <SafeArrival shelterName={safeArrivalShelter} onClose={() => setSafeArrivalShelter(null)} />
+      )}
     </>
   );
 }

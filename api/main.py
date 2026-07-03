@@ -31,7 +31,11 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from api.dashboard import build_demo_page
 from api.routes.agentic_llm import router as agentic_llm_router
 from api.routes.chat import router as chat_router
+from api.routes.community_reports import router as community_reports_router
 from api.routes.crew_analysis import router as crew_analysis_router
+from api.routes.family import router as family_router
+from api.routes.safe_arrival import router as safe_arrival_router
+from api.routes.sos import router as sos_router
 from api.observability import (
     RequestIdMiddleware,
     SecurityHeadersMiddleware,
@@ -585,7 +589,11 @@ _register_middleware(app, RawCORSMiddleware)
 
 app.include_router(agentic_llm_router)
 app.include_router(chat_router)
+app.include_router(community_reports_router)
 app.include_router(crew_analysis_router)
+app.include_router(family_router)
+app.include_router(safe_arrival_router)
+app.include_router(sos_router)
 
 
 @app.api_route("/healthz", methods=["GET", "HEAD"])
