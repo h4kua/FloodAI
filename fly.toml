@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for floodai on 2026-05-31T10:20:25Z
+# fly.toml app configuration file generated for floodai-8eclra on 2026-07-06T17:01:27Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'floodai'
-primary_region = 'sin'
+app = 'floodai-8eclra'
+primary_region = 'ams'
 
 [build]
 
@@ -16,11 +16,11 @@ primary_region = 'sin'
   min_machines_running = 0
 
   [[http_service.checks]]
-    grace_period = "30s"
-    interval = "30s"
-    method = "GET"
-    path = "/healthz"
-    timeout = "10s"
+    interval = '30s'
+    timeout = '10s'
+    grace_period = '30s'
+    method = 'GET'
+    path = '/healthz'
 
 [[vm]]
   memory = '512mb'
