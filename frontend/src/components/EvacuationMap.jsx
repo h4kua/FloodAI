@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMap, useMapEvents } from "react-leaflet";
 import { useApp, useT } from "../lib/appContext";
+import InvalidateMapSize from "./InvalidateMapSize";
 
 const TILE_DARK  = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 const TILE_LIGHT = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
@@ -153,6 +154,7 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
         style={{ height: "100%", width: "100%", minHeight: "420px", flex: 1 }}
       >
         <TileLayer url={tileUrl} attribution={TILE_ATTR} />
+        <InvalidateMapSize />
         <FitJakartaDefault />
         {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
         {flyTarget && <FlyTo lat={flyTarget.lat} lng={flyTarget.lng} />}

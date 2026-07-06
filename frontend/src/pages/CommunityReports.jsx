@@ -113,10 +113,32 @@ export default function CommunityReports({ riskLevel = "waspada", rainfall = 0 }
         <div>
           <h1 className="page-title">{t("reports.title")}</h1>
         </div>
-        <button className="btn btn-ghost" onClick={() => setShowForm((v) => !v)}>
-          {showForm ? t("reports.cancel") : t("reports.new")}
-        </button>
       </div>
+
+      {/* Primary action first — single prominent CTA per the FloodGuard spec */}
+      <button
+        className="evac-primary-cta fade-in"
+        style={showForm
+          ? { background: "rgba(255,255,255,0.03)", borderColor: "var(--line)", color: "var(--muted)" }
+          : { background: "var(--cyan-soft)", borderColor: "var(--cyan-border)", color: "var(--cyan)" }}
+        onClick={() => setShowForm((v) => !v)}
+      >
+        <span
+          className="evac-primary-cta-icon"
+          aria-hidden="true"
+          style={{ background: showForm ? "rgba(255,255,255,0.05)" : "rgba(56,189,248,0.14)" }}
+        >
+          {showForm ? (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+          )}
+        </span>
+        <span className="evac-primary-cta-text">
+          <strong>{showForm ? t("reports.cancel") : t("reports.ctaNew")}</strong>
+          {!showForm && <small>{t("reports.ctaNewSub")}</small>}
+        </span>
+      </button>
 
       {showForm && (
         <div className="panel panel-body fade-in" style={{ marginBottom: "0.875rem" }}>
@@ -164,7 +186,7 @@ export default function CommunityReports({ riskLevel = "waspada", rainfall = 0 }
         </div>
       )}
 
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.875rem", flexWrap: "wrap" }}>
+      <div className="reports-filter-row">
         {FILTERS.map((f) => (
           <button
             key={f}

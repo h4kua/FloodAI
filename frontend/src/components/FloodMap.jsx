@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
 import { useApp, useT } from "../lib/appContext";
+import InvalidateMapSize from "./InvalidateMapSize";
 import floodProneZones from "../data/floodProneZones.json";
 
 const TILE_DARK  = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
@@ -71,7 +72,7 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
   const pronePoints = floodProneZones.points ?? [];
 
   return (
-    <div style={{ position: "relative", flex: 1, minHeight: "320px" }}>
+    <div style={{ position: "relative", flex: 1, minHeight: "clamp(280px, 45vh, 460px)" }}>
       <MapContainer
         center={[-6.23, 106.85]}
         zoom={12}
@@ -81,10 +82,11 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
         maxBoundsViscosity={1.0}
         zoomControl={true}
         scrollWheelZoom={true}
-        style={{ height: "100%", width: "100%", minHeight: "320px" }}
+        style={{ height: "100%", width: "100%", minHeight: "clamp(280px, 45vh, 460px)" }}
       >
         <TileLayer url={tileUrl} attribution={TILE_ATTR} />
         <FitJakarta />
+        <InvalidateMapSize />
 
         {/* District reference circles — shown faintly as geographic labels only.
             When real sensor stations are on the map these are barely visible.

@@ -1,93 +1,14 @@
 /* ── Station section ──────────────────────────────────────────────────────
-   Everything driven by the DSDADKI water-level sensors: the alert ribbon,
-   the headline metric row, the alert panel, the full station table, the
-   transparent 18-vs-38 exclusion breakdown, and the sensor detail strip.
+   Everything driven by the DSDADKI water-level sensors: the full station
+   table, the transparent 18-vs-38 exclusion breakdown, and the sensor
+   detail strip. (The old AlertRibbon/MetricsRow/AlertPanel were retired by
+   the citizen-first rebuild — DecisionHero + GlanceChips replaced them.)
 */
 import { useState } from "react";
 import { useT, useApp } from "../../lib/appContext";
 import { use3DTilt } from "../../hooks/use3DTilt";
 import { stationClass, stationRiskLevel } from "../../lib/dashboardHelpers";
-import { RiskBadge, ProbBar, MetricCard } from "./primitives";
-
-// AlertRibbon uses REAL station counts from DSDADKI sensors.
-export function AlertRibbon({ siaga1Count, siaga2Count, lastSync }) {
-  const t = useT();
-  const ts = lastSync?.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-  if (siaga1Count > 0) return (
-    <div className="alert-ribbon siaga1">
-      <span className="ribbon-dot" />
-      <span>{t("ribbon.s1", { n: siaga1Count })}</span>
-      {ts && <span className="ribbon-ts">{ts} WIB</span>}
-    </div>
-  );
-  if (siaga2Count > 0) return (
-    <div className="alert-ribbon siaga2">
-      <span className="ribbon-dot" />
-      <span>{t("ribbon.s2", { n: siaga2Count })}</span>
-      {ts && <span className="ribbon-ts">{ts} WIB</span>}
-    </div>
-  );
-  return null;
-}
-
-export function MetricsRow({ siaga1, siaga2, totalStations, calibratedStations, score }) {
-  const t = useT();
-  const noteStyle = { fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em", opacity: 0.85 };
-  const cards = [
-    { label: t("metric.alertZones"), value: siaga1 + siaga2, sub: t("metric.alertSub", { s1: siaga1, s2: siaga2 }), color: siaga1 > 0 ? "red" : siaga2 > 0 ? "orange" : "green" },
-    { label: t("metric.activeStations"), value: totalStations ?? "—", sub: t("metric.activeStationsSub", { cal: calibratedStations ?? "—" }), color: "green" },
-    { label: t("metric.riskScore"), value: score, sub: t("metric.riskSub"), color: score >= 70 ? "red" : score >= 45 ? "orange" : "green" },
-  ];
-
-  return (
-    <div className="cmd-metrics">
-      {cards.map((c) => (
-        <MetricCard key={c.label} c={c} noteStyle={noteStyle} />
-      ))}
-    </div>
-  );
-}
-
-// AlertPanel: shows REAL DSDADKI stations in alert state (ratio >= 0.75).
-// Previously showed fake zone derivations — now 100% from sensor readings.
-export function AlertPanel({ stations }) {
-  const t = useT();
-  const tiltRef = use3DTilt({ maxTilt: 6 });
-  const alertStations = (stations || []).filter(s => s.ratio >= 0.75).slice(0, 5);
-
-  if (alertStations.length === 0) return (
-    <div ref={tiltRef} className="panel panel-body card-3d">
-      <div className="card-3d-content">
-        <p className="panel-title">{t("alert.title")}</p>
-        <p style={{ fontSize: "0.8rem", color: "var(--muted)", fontFamily: "'JetBrains Mono',monospace" }}>
-          {t("alert.none")}
-        </p>
-      </div>
-    </div>
-  );
-  return (
-    <div ref={tiltRef} className="panel panel-body card-3d">
-      <div className="card-3d-content">
-        <p className="panel-title">{t("alert.title")}</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          {alertStations.map((s, i) => (
-            <div key={i} className={`alert-item ${stationClass(s.ratio)}`}>
-              <span className="alert-dot" />
-              <div style={{ minWidth: 0 }}>
-                <p className="alert-zone-name" style={{ fontSize: "0.78rem" }}>{s.nama}</p>
-                <p className="alert-zone-sub">TMA {s.tinggi_air} cm · {Math.round(s.ratio * 100)}% siaga</p>
-              </div>
-              <RiskBadge level={stationRiskLevel(s.ratio)} />
-            </div>
-          ))}
-        </div>
-        <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)" }}>
-          ● Sensor DSDADKI realtime
-        </p>
-      </div>
-    </div>
-  );
-}
+import { RiskBadge, ProbBar } from "./primitives";
 
 /* ── ExcludedStationsBreakdown — transparent "why fewer than the source" list ──
    Explains the 18-vs-38 gap: lists the stations excluded from scoring,

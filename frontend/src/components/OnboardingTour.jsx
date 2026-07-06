@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useLayoutEffect } from "react";
 import { useApp } from "../lib/appContext";
 
-const TOUR_KEY = "deflood_tour_v6_done";
+const TOUR_KEY = "deflood_tour_v7_done";
 
 /* ── SVG icons ──────────────────────────────────────────── */
 const Icons = {
@@ -12,6 +12,7 @@ const Icons = {
   globe:  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
   sun:    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>,
   bot:    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><circle cx="8.5" cy="16" r="1" fill="currentColor"/><circle cx="15.5" cy="16" r="1" fill="currentColor"/></svg>,
+  chat:   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>,
   check:  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
 };
 
@@ -25,35 +26,42 @@ const STEPS = (id) => [
       : "Jakarta's AI-powered flood monitoring platform combining 38 TMA sensors, XGBoost ML model, and live BMKG forecasts. This guide walks you through the key features.",
   },
   {
-    key: "nav-home", selector: ".nav-btn:first-child", icon: Icons.map, accent: "var(--cyan)",
-    title: id ? "Command Center" : "Command Center",
+    key: "nav-home", selector: "[data-tour='nav-home']", icon: Icons.map, accent: "var(--cyan)",
+    title: id ? "Beranda" : "Home",
     desc: id
-      ? "Halaman utama. Menampilkan peta banjir Jakarta realtime, level risiko dari model AI, dan status tiap stasiun TMA (Siaga 1–4) yang diperbarui setiap 15 menit."
-      : "Main dashboard showing the live Jakarta flood map, AI risk level, and per-station TMA water-level status (Siaga 1–4) updated every 15 minutes.",
+      ? "Halaman utama. Status banjir Jakarta dalam satu lirikan: apakah aman, apa yang harus dilakukan, dan peta kondisi realtime — diperbarui setiap 15 menit."
+      : "The main page. Jakarta's flood status at a glance: whether you're safe, what to do, and a live condition map — updated every 15 minutes.",
   },
   {
-    key: "nav-evac", selector: ".nav-btn:nth-child(2)", icon: Icons.shield, accent: "var(--s1)",
+    key: "nav-evac", selector: "[data-tour='nav-evac']", icon: Icons.shield, accent: "var(--s1)",
     title: id ? "Evakuasi & Rute Aman" : "Evacuation & Safe Routes",
     desc: id
       ? "Cari rute yang menghindari zona banjir aktif. Masukkan titik asal dan tujuan untuk mendapatkan panduan navigasi ke shelter terdekat."
       : "Find routes avoiding active flood zones. Enter origin and destination to get turn-by-turn guidance to the nearest shelter.",
   },
   {
-    key: "nav-about", selector: ".nav-btn:nth-child(3)", icon: Icons.info, accent: "var(--muted)",
+    key: "nav-reports", selector: "[data-tour='nav-reports']", icon: Icons.chat, accent: "var(--wsp)",
+    title: id ? "Laporan Warga" : "Community Reports",
+    desc: id
+      ? "Laporan kondisi banjir langsung dari warga di lapangan — lengkap dengan lokasi dan tingkat keparahan. Kamu juga bisa mengirim laporan sendiri."
+      : "Flood condition reports straight from residents on the ground — with location and severity. You can submit your own report too.",
+  },
+  {
+    key: "nav-about", selector: "[data-tour='nav-about']", icon: Icons.info, accent: "var(--muted)",
     title: id ? "Tentang Sistem" : "About the System",
     desc: id
       ? "Dokumentasi lengkap tentang sumber data, arsitektur model ML, metrik performa, tim pengembang, dan batasan sistem."
       : "Full documentation on data sources, ML model architecture, performance metrics, the development team, and system limitations.",
   },
   {
-    key: "lang", selector: "button[title='Switch language']", icon: Icons.globe, accent: "var(--muted)",
+    key: "lang", selector: "[data-tour='lang']", icon: Icons.globe, accent: "var(--muted)",
     title: id ? "Ganti Bahasa" : "Language Toggle",
     desc: id
       ? "Ketuk untuk beralih antara Bahasa Indonesia dan English. Seluruh antarmuka dan respons AI akan menyesuaikan secara otomatis."
       : "Tap to switch between Bahasa Indonesia and English. The entire interface and AI responses adapt automatically.",
   },
   {
-    key: "theme", selector: "button[title='Toggle theme']", icon: Icons.sun, accent: "var(--muted)",
+    key: "theme", selector: "[data-tour='theme']", icon: Icons.sun, accent: "var(--muted)",
     title: id ? "Mode Tampilan" : "Display Mode",
     desc: id
       ? "Pilih antara mode gelap atau mode terang sesuai kondisi pencahayaan dan preferensi kamu."
@@ -81,7 +89,13 @@ function useTargetRect(selector, active, dep) {
   useLayoutEffect(() => {
     if (!active || !selector) { setRect(null); return; }
     const run = () => {
-      const el = document.querySelector(selector);
+      // TopBar and BottomNav both carry the same data-tour attribute — pick
+      // whichever is actually visible at this viewport (non-zero box).
+      const el = [...document.querySelectorAll(selector)]
+        .find((candidate) => {
+          const r = candidate.getBoundingClientRect();
+          return r.width > 0 && r.height > 0;
+        });
       if (!el) { setRect(null); return; }
       const r = el.getBoundingClientRect();
       setRect({ top: r.top, left: r.left, right: r.right, bottom: r.bottom, width: r.width, height: r.height });
@@ -112,8 +126,8 @@ function getCardPos(rect, isMobile) {
     if (fromTop) {
       return { style: { position: "fixed", top: 64, left: x, width: W }, fromTop: true };
     }
-    // bottom: 108 clears home indicator (34px) + chatbot FAB (54px+40px)
-    return { style: { position: "fixed", bottom: 108, left: x, width: W }, fromTop: false };
+    // 148 clears the fixed bottom nav (64px) + lifted chatbot FAB (54px) + gap
+    return { style: { position: "fixed", bottom: 148, left: x, width: W }, fromTop: false };
   }
 
   // Desktop: prefer below

@@ -4,6 +4,7 @@ import EvacuationMap, { DESTINATIONS, findNearestShelter } from "../components/E
 import EmergencyContacts from "../components/EmergencyContacts";
 import ChatBot from "../components/ChatBot";
 import SafeArrival from "./SafeArrival";
+import CollapsibleSection from "../components/shell/CollapsibleSection";
 import { useT, useApp } from "../lib/appContext";
 import { use3DTilt } from "../hooks/use3DTilt";
 import { useShelterGeofence } from "../hooks/useShelterGeofence";
@@ -54,8 +55,6 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const { lang } = useApp();
   const statusTiltRef = use3DTilt({ maxTilt: 5 });
   const shelterTiltRef = use3DTilt({ maxTilt: 6 });
-  const stepsTiltRef = use3DTilt({ maxTilt: 4 });
-  const checklistTiltRef = use3DTilt({ maxTilt: 4 });
 
   const [addressInput, setAddressInput] = useState("");
   const [userLocation, setUserLocation] = useState(null);
@@ -269,10 +268,26 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
       </div>
 
       <div className="evac-grid fade-in">
-        {/* Left: search + map — evac-col-left stretches to match right column height */}
+        {/* Left: primary CTA + search + map */}
         <div className="evac-col-left">
 
-          {/* Search panel — above the map, NOT overlaid */}
+          {/* Primary CTA — one tap: GPS → nearest shelter → route (decision-first).
+              Hidden once a location is set; the search panel takes over. */}
+          {!userLocation && (
+            <button className="evac-primary-cta" onClick={handleLocateMe} disabled={locating}>
+              <span className="evac-primary-cta-icon" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="3 11 22 2 13 21 11 13 3 11" />
+                </svg>
+              </span>
+              <span className="evac-primary-cta-text">
+                <strong>{locating ? t("evac.locatingYou") : t("evac.ctaNearest")}</strong>
+                <small>{t("evac.ctaNearestSub")}</small>
+              </span>
+            </button>
+          )}
+
+          {/* Search panel — manual fallback, above the map, NOT overlaid */}
           <div className="panel route-controls">
             <span className="route-label from">{t("evac.from")}</span>
             <div className="route-input-row">
@@ -434,10 +449,18 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
             </div>
           )}
 
-          {/* Evacuation steps */}
-          <div ref={stepsTiltRef} className="panel panel-body card-3d">
-            <div className="card-3d-content">
-              <p className="panel-title">{t("evac.steps")}</p>
+          {/* Emergency contacts — always one tap away, above the fold */}
+          <EmergencyContacts />
+
+          {/* Secondary guidance — progressive disclosure */}
+          <CollapsibleSection
+            icon="☰"
+            iconBg="var(--cyan-soft)"
+            iconColor="var(--cyan)"
+            title={t("evac.steps")}
+            subtitle={lang === "en" ? "5 steps before you leave" : "5 langkah sebelum berangkat"}
+          >
+            <div className="panel panel-body">
               <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 {STEP_KEYS.map((k) => (
                   <div key={k} className="step">
@@ -450,13 +473,17 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
                 ))}
               </div>
             </div>
-          </div>
+          </CollapsibleSection>
 
-          {/* Emergency bag checklist */}
-          <div ref={checklistTiltRef} className="panel panel-body card-3d">
-            <div className="card-3d-content">
-              <p className="panel-title">{lang === "en" ? "Emergency Kit Checklist" : "Isi Tas Darurat"}</p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.35rem" }}>
+          <CollapsibleSection
+            icon="◧"
+            iconBg="var(--safe-soft)"
+            iconColor="var(--safe)"
+            title={lang === "en" ? "Emergency Kit Checklist" : "Isi Tas Darurat"}
+            subtitle={lang === "en" ? "10 essentials" : "10 barang penting"}
+          >
+            <div className="panel panel-body">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
                 {(lang === "en" ? [
                   "ID & documents", "Medicines (3+ days)", "Clothes (3 days)", "Flashlight + batteries",
                   "Power bank", "Drinking water", "Non-perishable food", "Phone + charger",
@@ -466,16 +493,14 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
                   "Power bank", "Air minum", "Makanan tahan lama", "HP + charger",
                   "Uang tunai", "P3K",
                 ]).map((item, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.75rem", color: "var(--muted)", lineHeight: 1.4 }}>
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.8rem", color: "var(--muted)", lineHeight: 1.4 }}>
                     <span style={{ flexShrink: 0 }}>›</span>
                     <span>{item}</span>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-
-          <EmergencyContacts />
+          </CollapsibleSection>
         </div>
       </div>
 

@@ -1,10 +1,9 @@
 /* ── Dashboard primitives ─────────────────────────────────────────────────
    Small, shared leaf components used across the dashboard sections:
-   badges, bars, the monochrome weather/phone glyphs, the metric card, and
-   the labelled section divider. Extracted from the former Home.jsx.
+   badges, bars, and the monochrome weather/phone glyphs. (MetricCard and
+   SectionDivider were retired by the citizen-first rebuild.)
 */
 import { useT } from "../../lib/appContext";
-import { use3DTilt } from "../../hooks/use3DTilt";
 import { riskClass } from "../../lib/dashboardHelpers";
 
 export function RiskBadge({ level }) {
@@ -72,31 +71,3 @@ export function PhoneGlyph({ size = 16 }) {
   );
 }
 
-export function MetricCard({ c, noteStyle }) {
-  const tiltRef = use3DTilt({ maxTilt: 10 });
-  return (
-    <div ref={tiltRef} className={`metric-card card-3d ${c.color}`}>
-      <div className="card-3d-content" style={{ display: "flex", flex: 1, flexDirection: "column", justifyContent: "space-between", height: "100%" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-          <span className="metric-label">{c.label}</span>
-          <span className="metric-real-badge" style={noteStyle}>● real</span>
-        </div>
-        <div>
-          <div className={`metric-value ${c.color}`}>{c.value}</div>
-          <div className="metric-sub">{c.sub}</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── SectionDivider — labelled zone separator for the dashboard ────────── */
-export function SectionDivider({ label, count }) {
-  return (
-    <div className="dash-section">
-      <span className="dash-section-label">{label}</span>
-      {count != null && <span className="dash-section-count">{count}</span>}
-      <span className="dash-section-line" />
-    </div>
-  );
-}
