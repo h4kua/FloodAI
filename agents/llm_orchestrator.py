@@ -392,7 +392,7 @@ def _call_claude_sync(
 ) -> str:
     from anthropic import Anthropic
 
-    cfg    = get_llm_config(require=["anthropic"])
+    cfg    = get_llm_config()
     client = Anthropic(
         api_key=cfg.require_anthropic(),
         timeout=DEFAULT_TIMEOUT_S,

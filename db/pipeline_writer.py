@@ -8,7 +8,6 @@ import hashlib
 import json
 import logging
 import math
-import random
 import time
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
@@ -20,6 +19,7 @@ from uuid import UUID
 import psycopg2
 from psycopg2.extras import Json, register_uuid
 from psycopg2.extensions import connection as PgConnection
+from tenacity import Retrying, retry_if_exception_type, stop_after_attempt, wait_random_exponential
 
 from db.psycopg2_connection import (
     Psycopg2ConnectionConfig,
@@ -49,43 +49,44 @@ class DatabaseError(PipelineError):
 _RETRYABLE_DB_ERRORS = (psycopg2.OperationalError, psycopg2.InterfaceError)
 
 
+def _log_db_retry(retry_state) -> None:
+    exc = retry_state.outcome.exception()
+    DB_RETRY_TOTAL.labels("retry").inc()
+    logger.warning(
+        "stage=db.retry attempt=%d error_type=%s error=%s",
+        retry_state.attempt_number,
+        type(exc).__name__,
+        exc,
+    )
+
+
 def with_retry(
     fn: Callable[[], _T],
     max_attempts: int = 3,
     backoff: float = 0.5,
 ) -> _T:
     """
-    Execute ``fn`` and retry on transient psycopg2 connectivity failures.
-
-    Retries only on ``OperationalError`` and ``InterfaceError`` (e.g. dropped
-    connections). Uses exponential backoff: ``sleep = backoff * (2 ** attempt)``.
-    On exhaustion, raises ``DatabaseError`` chained from the last exception.
+    Execute ``fn`` and retry on transient psycopg2 connectivity failures
+    (``OperationalError``, ``InterfaceError``) with exponential backoff + jitter,
+    capped at 8s. On exhaustion, raises ``DatabaseError`` chained from the last
+    exception.
     """
     if max_attempts < 1:
         raise ValidationError("max_attempts must be >= 1")
-    last_exc: Optional[BaseException] = None
-    for attempt in range(max_attempts):
-        try:
-            return fn()
-        except _RETRYABLE_DB_ERRORS as exc:
-            last_exc = exc
-            if attempt + 1 >= max_attempts:
-                break
-            sleep_for = min(8.0, backoff * (2 ** attempt) * random.uniform(0.7, 1.3))
-            DB_RETRY_TOTAL.labels("retry").inc()
-            logger.warning(
-                "stage=db.retry attempt=%d/%d backoff=%.2fs error_type=%s error=%s",
-                attempt + 1,
-                max_attempts,
-                sleep_for,
-                type(exc).__name__,
-                exc,
-            )
-            time.sleep(sleep_for)
-    DB_RETRY_TOTAL.labels("exhausted").inc()
-    raise DatabaseError(
-        "DB operation failed after {0} attempts".format(max_attempts)
-    ) from last_exc
+    retryer = Retrying(
+        stop=stop_after_attempt(max_attempts),
+        wait=wait_random_exponential(min=backoff, max=8.0),
+        retry=retry_if_exception_type(_RETRYABLE_DB_ERRORS),
+        before_sleep=_log_db_retry,
+        reraise=True,
+    )
+    try:
+        return retryer(fn)
+    except _RETRYABLE_DB_ERRORS as exc:
+        DB_RETRY_TOTAL.labels("exhausted").inc()
+        raise DatabaseError(
+            "DB operation failed after {0} attempts".format(max_attempts)
+        ) from exc
 
 # IMPORTANT: SystemStatus and RiskLevel values MUST match the PostgreSQL CHECK
 # constraints on the corresponding columns (system_status, risk_level) in

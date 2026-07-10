@@ -82,7 +82,7 @@ def get_anthropic_client(*, timeout: float | None = None):
             "anthropic package not installed - run: pip install anthropic"
         ) from exc
 
-    cfg = get_llm_config(require=["anthropic"])
+    cfg = get_llm_config()
     key = cfg.require_anthropic()
     return Anthropic(
         api_key=key,

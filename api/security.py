@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import os
-import time
 from collections import defaultdict, deque
 from typing import Deque
 
 from fastapi import Header, HTTPException, Request
 
-_WINDOW_SECONDS = 60.0
+from api.rate_limit import enforce_rate_limit
+
 _DEFAULT_LIMIT = 30
 _buckets: dict[str, Deque[float]] = defaultdict(deque)
 
@@ -40,15 +40,5 @@ def require_api_key(request: Request, x_api_key: str = Header(default="")) -> st
     if x_api_key not in keys:
         raise HTTPException(status_code=401, detail="invalid_api_key")
 
-    now = time.monotonic()
-    bucket = _buckets[x_api_key]
-    while bucket and now - bucket[0] > _WINDOW_SECONDS:
-        bucket.popleft()
-    # Prune exhausted buckets so inactive keys don't grow _buckets unboundedly.
-    if not bucket:
-        _buckets.pop(x_api_key, None)
-        bucket = _buckets[x_api_key]
-    if len(bucket) >= _rate_limit():
-        raise HTTPException(status_code=429, detail="rate_limit_exceeded")
-    bucket.append(now)
+    enforce_rate_limit(_buckets, x_api_key, _rate_limit())
     return x_api_key

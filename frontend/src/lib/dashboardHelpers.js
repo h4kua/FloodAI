@@ -3,6 +3,26 @@
    former 2000-line Home.jsx. No React, no JSX — safe to import anywhere.
 */
 
+/* ── WIB (Jakarta) time formatter ───────────────────────────
+   Formats an ISO timestamp as "HH:MM" in Asia/Jakarta (UTC+7, no DST) —
+   replaces the manual getTime()+7h/padStart arithmetic that used to be
+   duplicated across dashboard components.
+*/
+/* en-GB (not id-ID) deliberately — id-ID renders "09.05" (period separator),
+   the rest of the app's "HH:MM" convention uses a colon. Locale only affects
+   punctuation here; the timeZone below still does the actual UTC+7 conversion. */
+const _wibFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Jakarta",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+
+export function formatWib(isoString) {
+  if (!isoString) return null;
+  return _wibFormatter.format(new Date(isoString));
+}
+
 /* ── Station name cleaner ───────────────────────────────── */
 export function cleanStationName(nama) {
   return (nama || "")

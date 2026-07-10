@@ -1,6 +1,6 @@
 import { useApp } from "../../lib/appContext";
 import { use3DTilt } from "../../hooks/use3DTilt";
-import { buildStatusDesc } from "../../lib/dashboardHelpers";
+import { buildStatusDesc, formatWib } from "../../lib/dashboardHelpers";
 
 /* ── DecisionHero — the first thing a citizen sees ─────────────────────────
    Answers "is my area at risk right now?" in one glance: a giant level word,
@@ -29,11 +29,7 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
   const cfg = cfgMap[level] ?? cfgMap.waspada;
   const dynamicDesc = buildStatusDesc(riskData, isId);
 
-  let snapTimeStr = null;
-  if (snapshotFetchedAt) {
-    const wib = new Date(new Date(snapshotFetchedAt).getTime() + 7 * 3_600_000);
-    snapTimeStr = `${String(wib.getUTCHours()).padStart(2, "0")}:${String(wib.getUTCMinutes()).padStart(2, "0")}`;
-  }
+  const snapTimeStr = formatWib(snapshotFetchedAt);
 
   const trendCfg = riskTrend === "increasing"
     ? { text: isId ? "↑ Risiko Naik" : "↑ Risk Rising", color: "var(--wsp)", bg: "var(--wsp-soft)", border: "var(--wsp-border)" }

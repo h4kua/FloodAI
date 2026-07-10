@@ -19,18 +19,20 @@ def fetch_text(url):
     return response.text
 
 
-def fetch_poskobanjir_json() -> list:
-    """Fetch TMA data from the JSON endpoint (primary, more reliable than XML)."""
-    response = requests.get(POSKOBANJIR_JSON_URL, timeout=TIMEOUT)
+def fetch_json(url):
+    response = requests.get(url, timeout=TIMEOUT)
     response.raise_for_status()
     return response.json()
+
+
+def fetch_poskobanjir_json() -> list:
+    """Fetch TMA data from the JSON endpoint (primary, more reliable than XML)."""
+    return fetch_json(POSKOBANJIR_JSON_URL)
 
 
 def fetch_bmkg_cuaca() -> dict:
     """Fetch BMKG 10-day weather forecast for DKI Jakarta."""
-    response = requests.get(BMKG_CUACA_URL, timeout=TIMEOUT)
-    response.raise_for_status()
-    return response.json()
+    return fetch_json(BMKG_CUACA_URL)
 
 
 def fetch_poskobanjir_xml():

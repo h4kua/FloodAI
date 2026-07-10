@@ -27,10 +27,10 @@ from __future__ import annotations
 
 from typing import Final, FrozenSet
 
-# Phase 6: derive the legacy frozensets from the canonical vocabulary so a
-# future addition to app/contracts/vocabulary.py auto-propagates here without
-# manual edit. Scalar string constants below are kept inline for back-compat
-# with consumers that import them by name (e.g. RISK_LEVEL_DANGER).
+# Every value below is DERIVED from contracts/vocabulary.py's canonical Enums
+# — never retyped as a literal — so this module can no longer drift from the
+# single source of truth (a previous version retyped literals here and had
+# silently fallen out of sync with the canonical DecisionReason members).
 from contracts.vocabulary import (
     DecisionReason as _CanonicalDecisionReason,
     RiskLevel as _CanonicalRiskLevel,
@@ -38,21 +38,21 @@ from contracts.vocabulary import (
 )
 
 # ─── risk_level ───────────────────────────────────────────────────────────────
-RISK_LEVEL_SAFE:      Final[str] = "SAFE"
-RISK_LEVEL_PRE_ALERT: Final[str] = "PRE_ALERT"
-RISK_LEVEL_WARNING:   Final[str] = "WARNING"
-RISK_LEVEL_DANGER:    Final[str] = "DANGER"
-RISK_LEVEL_UNKNOWN:   Final[str] = "UNKNOWN"
+RISK_LEVEL_SAFE:      Final[str] = _CanonicalRiskLevel.SAFE.value
+RISK_LEVEL_PRE_ALERT: Final[str] = _CanonicalRiskLevel.PRE_ALERT.value
+RISK_LEVEL_WARNING:   Final[str] = _CanonicalRiskLevel.WARNING.value
+RISK_LEVEL_DANGER:    Final[str] = _CanonicalRiskLevel.DANGER.value
+RISK_LEVEL_UNKNOWN:   Final[str] = _CanonicalRiskLevel.UNKNOWN.value
 
 RISK_LEVELS: Final[FrozenSet[str]] = frozenset(r.value for r in _CanonicalRiskLevel)
 
 # ─── system_status ────────────────────────────────────────────────────────────
-SYSTEM_STATUS_OK:               Final[str] = "OK"
-SYSTEM_STATUS_DEGRADED:         Final[str] = "DEGRADED"
-SYSTEM_STATUS_LOW_TRUST:        Final[str] = "LOW_TRUST"
-SYSTEM_STATUS_CONFLICT:         Final[str] = "CONFLICT"
-SYSTEM_STATUS_FAIL:             Final[str] = "FAIL"
-SYSTEM_STATUS_PIPELINE_FAILURE: Final[str] = "PIPELINE_FAILURE"
+SYSTEM_STATUS_OK:               Final[str] = _CanonicalSystemStatus.OK.value
+SYSTEM_STATUS_DEGRADED:         Final[str] = _CanonicalSystemStatus.DEGRADED.value
+SYSTEM_STATUS_LOW_TRUST:        Final[str] = _CanonicalSystemStatus.LOW_TRUST.value
+SYSTEM_STATUS_CONFLICT:         Final[str] = _CanonicalSystemStatus.CONFLICT.value
+SYSTEM_STATUS_FAIL:             Final[str] = _CanonicalSystemStatus.FAIL.value
+SYSTEM_STATUS_PIPELINE_FAILURE: Final[str] = _CanonicalSystemStatus.PIPELINE_FAILURE.value
 
 SYSTEM_STATUSES: Final[FrozenSet[str]] = frozenset(s.value for s in _CanonicalSystemStatus)
 
@@ -65,15 +65,12 @@ SYSTEM_STATUSES_AUTOMATION_ELIGIBLE: Final[FrozenSet[str]] = frozenset({
 })
 
 # ─── decision_reason ──────────────────────────────────────────────────────────
-# Scalar constants kept inline for back-compat (consumers do
-# `from core.enums import DECISION_REASON_FALLBACK`). The frozenset is
-# derived from canonical so it auto-tracks future additions.
-DECISION_REASON_RISK:            Final[str] = "RISK"
-DECISION_REASON_INVALID_INPUT:   Final[str] = "INVALID_INPUT"
-DECISION_REASON_FALLBACK:        Final[str] = "FALLBACK"
-DECISION_REASON_PHYSICAL_GATE:   Final[str] = "PHYSICAL_GATE"
-DECISION_REASON_MULTI_SIGNAL:    Final[str] = "MULTI_SIGNAL"
-DECISION_REASON_TREND_EXTENSION: Final[str] = "TREND_EXTENSION"
+DECISION_REASON_RISK:            Final[str] = _CanonicalDecisionReason.RISK.value
+DECISION_REASON_INVALID_INPUT:   Final[str] = _CanonicalDecisionReason.INVALID_INPUT.value
+DECISION_REASON_FALLBACK:        Final[str] = _CanonicalDecisionReason.FALLBACK.value
+DECISION_REASON_PHYSICAL_GATE:   Final[str] = _CanonicalDecisionReason.PHYSICAL_GATE.value
+DECISION_REASON_MULTI_SIGNAL:    Final[str] = _CanonicalDecisionReason.MULTI_SIGNAL.value
+DECISION_REASON_TREND_EXTENSION: Final[str] = _CanonicalDecisionReason.TREND_EXTENSION.value
 
 DECISION_REASONS: Final[FrozenSet[str]] = frozenset(
     r.value for r in _CanonicalDecisionReason

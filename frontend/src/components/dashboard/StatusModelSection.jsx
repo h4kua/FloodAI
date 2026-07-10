@@ -5,6 +5,7 @@
    logic lives on in lib/recommendations.js.)
 */
 import { useApp } from "../../lib/appContext";
+import { formatWib } from "../../lib/dashboardHelpers";
 
 /* ── Model Output Card — realtime ML analysis with signal chips ─────────── */
 export function ModelOutputCard({ riskData, score }) {
@@ -17,11 +18,7 @@ export function ModelOutputCard({ riskData, score }) {
   const riskTrend  = riskData.trendState?.risk_trend;
   const level      = riskData.level ?? "waspada";
 
-  let snapTimeStr = null;
-  if (riskData.snapshotFetchedAt) {
-    const wib = new Date(new Date(riskData.snapshotFetchedAt).getTime() + 7 * 3_600_000);
-    snapTimeStr = `${String(wib.getUTCHours()).padStart(2,"0")}:${String(wib.getUTCMinutes()).padStart(2,"0")}`;
-  }
+  const snapTimeStr = formatWib(riskData.snapshotFetchedAt);
 
   const trendText = riskTrend === "increasing"
     ? (isId ? "↑ Naik" : "↑ Rising")

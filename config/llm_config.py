@@ -50,21 +50,13 @@ class LLMConfig:
         return self.anthropic_api_key
 
 
-def get_llm_config(*, require: list[str] | None = None) -> LLMConfig:
+def get_llm_config() -> LLMConfig:
     """
     Load LLM API keys from environment variables.
 
-    Args:
-        require: Optional list of key names to validate at call time.
-                 Accepted values: "anthropic".
-                 Raises LLMConfigError for any missing key — use at startup.
-
     Returns:
-        LLMConfig with anthropic_api_key (may be None when not required
-        and not present in the environment).
-
-    Raises:
-        LLMConfigError: When a key listed in `require` is absent.
+        LLMConfig with anthropic_api_key (may be None if not present in the
+        environment) — call cfg.require_anthropic() to validate and raise.
     """
     anthropic_key = os.getenv("ANTHROPIC_API_KEY") or None
 
@@ -73,15 +65,7 @@ def get_llm_config(*, require: list[str] | None = None) -> LLMConfig:
         "present" if anthropic_key else "absent",
     )
 
-    cfg = LLMConfig(anthropic_api_key=anthropic_key)
-
-    for name in (require or []):
-        if name == "anthropic":
-            cfg.require_anthropic()
-        else:
-            raise ValueError(f"Unknown key name in require list: {name!r}")
-
-    return cfg
+    return LLMConfig(anthropic_api_key=anthropic_key)
 
 
 # ─── Provider configuration (module-level constants) ───────────────────────────

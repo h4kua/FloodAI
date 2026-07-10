@@ -53,22 +53,6 @@ def _create_checkin_sync(
         return None
 
 
-def _list_checkins_for_device_sync(device_id: str) -> list[dict]:
-    try:
-        client = get_supabase_client()
-        result = (
-            client.table(_TABLE)
-            .select("*")
-            .eq("device_id", device_id)
-            .order("created_at", desc=True)
-            .execute()
-        )
-        return result.data or []
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("checkin_list_failed error_type=%s error=%s", type(exc).__name__, exc)
-        return []
-
-
 async def create_checkin(
     *,
     device_id: str,
@@ -91,7 +75,3 @@ async def create_checkin(
         auto=auto,
         family_id=family_id,
     )
-
-
-async def list_checkins_for_device(device_id: str) -> list[dict]:
-    return await asyncio.to_thread(_list_checkins_for_device_sync, device_id)
