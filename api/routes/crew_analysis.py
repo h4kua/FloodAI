@@ -65,6 +65,31 @@ _EXAMPLE_PAYLOAD = {
 }
 
 
+def _observed_features(prediction: dict) -> dict:
+    """
+    The pipeline result has no flat `features` dict, but the crew prompts and
+    the deterministic fallback both read one. Rebuild the observed rain and
+    water-level scalars from the result so the agents see real values instead
+    of zeros. Missing values are left out rather than defaulted to 0.
+    """
+    elevation   = prediction.get("elevation") or {}
+    diagnostics = prediction.get("diagnostics") or {}
+    trend_state = diagnostics.get("trend_state") or {}
+    stations    = (prediction.get("hydrology_assessment") or {}).get("stations") or []
+    ratios = [
+        float(s["water_level_ratio"])
+        for s in stations
+        if isinstance(s, dict) and s.get("water_level_ratio") is not None
+    ]
+    features = {
+        "rainfall_mm":          elevation.get("rainfall_1h_mm"),
+        "rainfall_3h_proxy_mm": elevation.get("rainfall_3h_mm"),
+        "water_level_ratio":    max(ratios) if ratios else None,
+        "water_level_delta":    trend_state.get("water_level_delta_cur"),
+    }
+    return {k: v for k, v in features.items() if v is not None}
+
+
 async def _run_crew_on_snapshot(
     request: Request,
     snapshot: dict,
@@ -90,6 +115,9 @@ async def _run_crew_on_snapshot(
     except Exception as exc:  # noqa: BLE001
         _log.error("crew_pipeline_failed type=%s", type(exc).__name__, exc_info=True)
         raise HTTPException(status_code=500, detail="pipeline_failed") from exc
+
+    if not prediction.get("features"):
+        prediction = {**prediction, "features": _observed_features(prediction)}
 
     try:
         crew_output = await asyncio.wait_for(
