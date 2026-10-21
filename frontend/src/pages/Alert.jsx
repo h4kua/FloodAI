@@ -6,7 +6,6 @@ import ChatBot from "../components/ChatBot";
 import SafeArrival from "./SafeArrival";
 import CollapsibleSection from "../components/shell/CollapsibleSection";
 import { useT, useApp } from "../lib/appContext";
-import { use3DTilt } from "../hooks/use3DTilt";
 import { useShelterGeofence } from "../hooks/useShelterGeofence";
 import { getDeviceId, getFamilyCode } from "../lib/deviceIdentity";
 
@@ -53,8 +52,6 @@ function formatSuggestion(s) {
 export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const t = useT();
   const { lang } = useApp();
-  const statusTiltRef = use3DTilt({ maxTilt: 5 });
-  const shelterTiltRef = use3DTilt({ maxTilt: 6 });
 
   const [addressInput, setAddressInput] = useState("");
   const [userLocation, setUserLocation] = useState(null);
@@ -260,9 +257,9 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           <h1 className="page-title">{t("evac.title")}</h1>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 0.875rem", borderRadius: "999px", border: `1px solid ${config.color}33`, background: `${config.color}0d` }}>
-          <span style={{ width: 7, height: 7, borderRadius: "50%", background: config.color, animation: "blink 1.2s infinite", flexShrink: 0 }} />
-          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", fontWeight: 700, color: config.color, letterSpacing: "0.1em" }}>
-            {config.label}
+          <span style={{ width: 8, height: 8, borderRadius: "50%", background: config.color, flexShrink: 0 }} />
+          <span style={{ fontSize: "0.85rem", fontWeight: 600, color: config.color }}>
+            Status: {config.label}
           </span>
         </div>
       </div>
@@ -365,81 +362,49 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
               onLocateMe={handleLocateMe}
             />
           </div>
-          {!userLocation && (
-            <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)", textAlign: "center" }}>
-              {lang === "en" ? "Tip: Type address above or click directly on the map" : "Tip: Ketik alamat di atas atau klik langsung di peta"}
-            </p>
+          {/* Once a route is shown: what the map colours mean */}
+          {userLocation && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem", padding: "0 0.25rem" }}>
+              {[["#ff3d5a","evac.leg.from"],["#00cfff","evac.leg.route"],["#00e5a0","evac.leg.shelter"]].map(([c, k]) => (
+                <div key={k} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: c, flexShrink: 0 }} />
+                  <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>{t(k)}</span>
+                </div>
+              ))}
+            </div>
           )}
-
-          {/* Legend */}
-          <div style={{ display: "flex", gap: "1.5rem", padding: "0.1rem 0.25rem" }}>
-            {[["#ff3d5a","evac.leg.from"],["#00cfff","evac.leg.route"],["#00e5a0","evac.leg.shelter"]].map(([c, k]) => (
-              <div key={k} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                <span style={{ width: 8, height: 8, borderRadius: "50%", background: c, boxShadow: `0 0 6px ${c}88`, flexShrink: 0 }} />
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--muted-2)" }}>{t(k)}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* Right: status + shelter detail + steps + contacts */}
+        {/* Right: chosen shelter + contacts + guidance */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-          {/* Status card */}
-          <div ref={statusTiltRef} className="panel panel-body card-3d" style={{ background: `linear-gradient(160deg,${config.color}0d,${config.color}06)`, border: `1px solid ${config.color}22`, textAlign: "center" }}>
-            <div className="card-3d-content">
-              <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.66rem", color: config.color, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.5rem" }}>{t("evac.status")}</p>
-              <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "2.25rem", fontWeight: 800, letterSpacing: "-0.03em", color: config.color, lineHeight: 1, marginBottom: "0.5rem" }}>
-                {config.label}
-              </p>
-              <p style={{ fontSize: "0.83rem", color: "var(--muted)", lineHeight: 1.5 }}>{config.desc}</p>
-            </div>
-          </div>
-
-          {/* Shelter detail card — shown when a shelter is selected */}
+          {/* Shelter card — shown once a shelter is selected */}
           {selectedDest && (
-            <div ref={shelterTiltRef} className="panel panel-body shelter-detail-card card-3d">
-              <div className="card-3d-content">
-                <p className="panel-title" style={{ marginBottom: "0.625rem" }}>
-                  {lang === "en" ? "Selected Shelter" : "Shelter Dipilih"}
+            <div className="panel panel-body shelter-detail-card">
+              <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: 0 }}>
+                {lang === "en" ? "Nearest shelter" : "Tempat pengungsian terdekat"}
+              </p>
+              <p className="station-title" style={{ margin: "0.2rem 0 0.4rem" }}>{selectedDest.name}</p>
+              {(selectedDest.address || selectedDest.area) && (
+                <p style={{ fontSize: "0.875rem", color: "var(--muted)", lineHeight: 1.5, margin: 0 }}>
+                  {selectedDest.address || selectedDest.area}
                 </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-                  <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "1rem", fontWeight: 700, color: "var(--text)" }}>
-                    {selectedDest.name}
-                  </div>
-                  {selectedDest.area && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
-                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.56rem", color: "var(--muted-2)", letterSpacing: "0.06em", textTransform: "uppercase", flexShrink: 0 }}>{lang === "en" ? "Area" : "Wilayah"}</span>
-                      <span style={{ fontSize: "0.78rem", color: "var(--muted)" }}>{selectedDest.area}</span>
-                    </div>
-                  )}
-                  {selectedDest.address && (
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: "0.45rem" }}>
-                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.56rem", color: "var(--muted-2)", letterSpacing: "0.06em", textTransform: "uppercase", marginTop: "0.15rem", flexShrink: 0 }}>{lang === "en" ? "Addr" : "Alamat"}</span>
-                      <span style={{ fontSize: "0.78rem", color: "var(--muted)", lineHeight: 1.4 }}>{selectedDest.address}</span>
-                    </div>
-                  )}
-                  <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.25rem", flexWrap: "wrap" }}>
-                    {selectedDest.capacity && (
-                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", color: "var(--safe)" }}>
-                        {selectedDest.capacity.toLocaleString()} {lang === "en" ? "cap." : "kapasitas"}
-                      </span>
-                    )}
-                    {selectedDest.phone && (
-                      <a href={`tel:${selectedDest.phone}`} style={{ display: "flex", alignItems: "center", gap: "0.3rem", textDecoration: "none" }}>
-                        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.56rem", color: "var(--muted-2)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{lang === "en" ? "Tel" : "Telp"}</span>
-                        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", color: "var(--cyan)" }}>
-                          {selectedDest.phone}
-                        </span>
-                      </a>
-                    )}
-                  </div>
-                </div>
-                <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.57rem", color: "var(--muted-2)" }}>
-                  ● {lang === "en" ? "Tap phone to call · Route shown on map" : "Tap telepon untuk hubungi · Rute ditampilkan di peta"}
+              )}
+              {selectedDest.capacity && (
+                <p style={{ fontSize: "0.875rem", color: "var(--muted)", margin: "0.25rem 0 0" }}>
+                  {lang === "en"
+                    ? `Room for about ${selectedDest.capacity.toLocaleString()} people`
+                    : `Muat sekitar ${selectedDest.capacity.toLocaleString("id-ID")} orang`}
                 </p>
+              )}
+              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.875rem", flexWrap: "wrap" }}>
+                {selectedDest.phone && (
+                  <a className="btn btn-ghost" href={`tel:${selectedDest.phone}`} style={{ flex: 1, justifyContent: "center", textDecoration: "none" }}>
+                    {lang === "en" ? "Call shelter" : "Telepon"}
+                  </a>
+                )}
                 <button
                   className="btn"
-                  style={{ marginTop: "0.75rem", width: "100%", justifyContent: "center", background: "var(--safe-soft)", color: "var(--safe)", border: "1px solid var(--safe-border)" }}
+                  style={{ flex: 1, justifyContent: "center", background: "var(--safe-soft)", color: "var(--safe)", border: "1px solid var(--safe-border)" }}
                   onClick={handleManualArrival}
                   disabled={checkingIn}
                 >

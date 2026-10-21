@@ -1,140 +1,104 @@
 /* ── Status / model section ───────────────────────────────────────────────
-   The stale-data banner and the XGBoost model-output card. (The old
-   StatusHero and RecommendationsPanel were retired by the citizen-first
-   rebuild — DecisionHero + ActionCard replaced them; the action-derivation
-   logic lives on in lib/recommendations.js.)
+   The stale-data banner and the AI summary card. (The old StatusHero and
+   RecommendationsPanel were retired by the citizen-first rebuild —
+   DecisionHero + ActionCard replaced them; the action-derivation logic lives
+   on in lib/recommendations.js.)
 */
+import { useState } from "react";
 import { useApp } from "../../lib/appContext";
 import { formatWib } from "../../lib/dashboardHelpers";
 
-/* ── Model Output Card — realtime ML analysis with signal chips ─────────── */
-export function ModelOutputCard({ riskData, score }) {
+/* Split the model's interpretation into a one-sentence lead + the remainder.
+   Only the FIRST boundary matters; the rest is shown verbatim on demand. */
+function splitLead(text) {
+  const m = /[.!?]\s+(?=[A-Z0-9])/.exec(text);
+  if (!m) return [text, ""];
+  const cut = m.index + 1;
+  return [text.slice(0, cut), text.slice(cut).trim()];
+}
+
+/* ── AI summary card — plain-language summary, deep analysis tucked inside ──
+   Shows ONE sentence + two pills (status, trend). The rest of the model's
+   explanation and the multi-agent analysis (passed as children) are opt-in.
+*/
+export function ModelOutputCard({ riskData, children }) {
   const { lang } = useApp();
   const isId = lang === "id";
-  if (!riskData?.interpretation) return null;
+  const [expanded, setExpanded] = useState(false);
 
-  const rainfall   = riskData.rainfall ?? 0;
-  const wlr        = riskData.waterLevelRatio ?? 0;
-  const riskTrend  = riskData.trendState?.risk_trend;
-  const level      = riskData.level ?? "waspada";
+  const interpretation = riskData?.interpretation;
+  const riskTrend = riskData?.trendState?.risk_trend;
+  const level     = riskData?.level ?? "waspada";
+  const snapTimeStr = formatWib(riskData?.snapshotFetchedAt);
 
-  const snapTimeStr = formatWib(riskData.snapshotFetchedAt);
-
-  const trendText = riskTrend === "increasing"
-    ? (isId ? "↑ Naik" : "↑ Rising")
-    : riskTrend === "decreasing"
-    ? (isId ? "↓ Turun" : "↓ Falling")
-    : (isId ? "→ Stabil" : "→ Stable");
-  const trendColor = riskTrend === "increasing" ? "var(--wsp)" : riskTrend === "decreasing" ? "var(--safe)" : "var(--muted)";
-
-  const scoreColor = score >= 70 ? "var(--s1)" : score >= 45 ? "var(--wsp)" : "var(--safe)";
   const levelColor = { aman: "var(--safe)", waspada: "var(--wsp)", siaga: "var(--s2)", bahaya: "var(--s1)" }[level] ?? "var(--wsp)";
   const levelLabel = { aman: isId ? "Aman" : "Safe", waspada: isId ? "Waspada" : "Watch",
     siaga: isId ? "Siaga" : "Alert", bahaya: isId ? "Bahaya" : "Danger" }[level] ?? "—";
 
+  const trend = riskTrend === "increasing"
+    ? { text: isId ? "↑ Risiko naik" : "↑ Risk rising", color: "var(--wsp)" }
+    : riskTrend === "decreasing"
+    ? { text: isId ? "↓ Risiko turun" : "↓ Risk falling", color: "var(--safe)" }
+    : riskTrend
+    ? { text: isId ? "→ Stabil" : "→ Stable", color: "var(--muted)" }
+    : null;
+
+  const [lead, rest] = interpretation ? splitLead(interpretation) : ["", ""];
+
   return (
-    <div className="model-output-card fade-in">
-      {/* Header row */}
-      <div className="model-output-header">
-        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-          <div className="model-output-icon">⬡</div>
-          <div>
-            <div className="model-output-title">
-              {isId ? "ANALISIS MODEL" : "MODEL ANALYSIS"}
-            </div>
-            <div className="model-output-sub">
-              XGBoost · {isId ? "17 fitur · update 15 mnt" : "17 features · 15 min update"}
-            </div>
+    <div className="panel panel-body ai-card fade-in">
+      <div className="ai-card-head">
+        <span className="ai-card-label">✦ {isId ? "Ringkasan AI" : "AI Summary"}</span>
+        {snapTimeStr && <span className="ai-card-time">{snapTimeStr} WIB</span>}
+      </div>
+
+      {interpretation && (
+        <>
+          <p className="ai-card-lead">{lead}</p>
+
+          <div className="ai-card-pills">
+            <span className="ai-pill" style={{ color: levelColor, borderColor: levelColor }}>{levelLabel}</span>
+            {trend && <span className="ai-pill" style={{ color: trend.color }}>{trend.text}</span>}
           </div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
-          {snapTimeStr && (
-            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)" }}>
-              {snapTimeStr} WIB
-            </span>
+
+          {rest && (
+            <>
+              {expanded && <p className="ai-card-rest">{rest}</p>}
+              <button className="ai-card-more" onClick={() => setExpanded((v) => !v)}>
+                {expanded ? (isId ? "Sembunyikan ▴" : "Hide ▴") : (isId ? "Selengkapnya ▾" : "Read more ▾")}
+              </button>
+            </>
           )}
-          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em" }}>● real</span>
-        </div>
-      </div>
+        </>
+      )}
 
-      {/* Interpretation text */}
-      <p className="model-output-text">{riskData.interpretation}</p>
-
-      {/* Signal chips — key inputs the model is reading */}
-      <div className="model-signal-chips">
-        <div className="model-signal-chip">
-          <span>{isId ? "Skor" : "Score"}</span>
-          <strong style={{ color: scoreColor }}>{score}</strong>
-        </div>
-        <div className="model-signal-chip">
-          <span>{isId ? "Status" : "Status"}</span>
-          <strong style={{ color: levelColor }}>{levelLabel}</strong>
-        </div>
-        {wlr > 0 && (
-          <div className="model-signal-chip">
-            <span>{isId ? "Muka Air" : "Water Lvl"}</span>
-            <strong style={{ color: wlr >= 0.75 ? "var(--wsp)" : "var(--text)" }}>{Math.round(wlr * 100)}%</strong>
-          </div>
-        )}
-        {rainfall > 0 && (
-          <div className="model-signal-chip">
-            <span>{isId ? "Hujan" : "Rain"}</span>
-            <strong style={{ color: "var(--cyan)" }}>{Math.round(rainfall)} mm/j</strong>
-          </div>
-        )}
-        {riskTrend && (
-          <div className="model-signal-chip">
-            <span>{isId ? "Tren" : "Trend"}</span>
-            <strong style={{ color: trendColor }}>{trendText}</strong>
-          </div>
-        )}
-      </div>
+      {children && <div className="ai-card-deep">{children}</div>}
     </div>
   );
 }
 
 /* ── Stale data warning — tampil kalau snapshot > 30 menit ─────────────── */
-export function StaleDataBanner({ snapshotFetchedAt, onRefresh, refreshing }) {
+export function StaleDataBanner({ snapshotFetchedAt }) {
   const { lang } = useApp();
   const isId = lang === "id";
   if (!snapshotFetchedAt) return null;
   const ageMin = Math.round((Date.now() - new Date(snapshotFetchedAt).getTime()) / 60000);
   if (ageMin < 30) return null;
 
-  const ageLabel = ageMin >= 60
-    ? (isId ? `${Math.floor(ageMin / 60)} jam ${ageMin % 60} mnt` : `${Math.floor(ageMin / 60)}h ${ageMin % 60}m`)
-    : (isId ? `${ageMin} menit` : `${ageMin} min`);
+  const ageLabel = ageMin >= 1440
+    ? (isId ? `${Math.floor(ageMin / 1440)} hari` : `${Math.floor(ageMin / 1440)} days`)
+    : ageMin >= 60
+    ? (isId ? `${Math.floor(ageMin / 60)} jam` : `${Math.floor(ageMin / 60)} hours`)
+    : (isId ? `${ageMin} menit` : `${ageMin} minutes`);
 
   return (
-    <div style={{
-      background: "rgba(245,166,35,0.08)", border: "1px solid rgba(245,166,35,0.30)",
-      borderRadius: "10px", padding: "0.625rem 1rem",
-      display: "flex", alignItems: "center", gap: "0.75rem",
-      fontSize: "0.78rem", color: "var(--wsp)",
-    }}>
-      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.95rem", fontWeight: 800, flexShrink: 0, lineHeight: 1 }}>!</span>
-      <span style={{ flex: 1, lineHeight: 1.5 }}>
+    <div className="stale-banner">
+      <span aria-hidden="true">!</span>
+      <span>
         {isId
-          ? `Sensor DSDADKI belum mengirim data baru sejak ${ageLabel} lalu. Sistem refresh kami tetap berjalan tiap 15 menit — yang stale adalah pengukuran di hulu, bukan koneksi kami.`
-          : `DSDADKI sensors haven't pushed new readings for ${ageLabel}. Our refresh job keeps running every 15 min — the upstream measurements are stale, not our connection.`}
+          ? `Data terakhir masuk ${ageLabel} lalu, jadi kondisi sebenarnya bisa berbeda.`
+          : `The last data came in ${ageLabel} ago, so actual conditions may differ.`}
       </span>
-      {onRefresh && (
-        <button
-          onClick={onRefresh}
-          disabled={refreshing}
-          style={{
-            flexShrink: 0, background: "rgba(245,166,35,0.15)",
-            border: "1px solid rgba(245,166,35,0.40)", borderRadius: "8px",
-            padding: "0.35rem 0.75rem", color: "var(--wsp)",
-            fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem",
-            fontWeight: 700, cursor: refreshing ? "wait" : "pointer",
-            letterSpacing: "0.04em", opacity: refreshing ? 0.5 : 1,
-          }}
-        >
-          {refreshing ? "…" : (isId ? "↻ Refresh" : "↻ Refresh")}
-        </button>
-      )}
     </div>
   );
 }
-

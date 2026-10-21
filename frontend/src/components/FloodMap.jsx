@@ -180,17 +180,13 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
               <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>
                 <div style={{ fontFamily: "'Inter', sans-serif", minWidth: 180 }}>
                   <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{s.nama}</p>
-                  <p style={{ fontSize: 12, color, fontWeight: 700, marginBottom: 6 }}>
-                    {s.status_siaga} — {Math.round(s.ratio * 100)}% siaga
+                  <p style={{ fontSize: 12, color, fontWeight: 700, marginBottom: 4 }}>
+                    {s.status_siaga}
                   </p>
-                  <p style={{ fontSize: 11, color: "#8f96a9", marginBottom: 2 }}>
-                    TMA: <strong style={{ color: "var(--text, #e2e8f0)" }}>{s.tinggi_air} cm</strong>
-                  </p>
-                  <p style={{ fontSize: 11, color: "#8f96a9", marginBottom: 2 }}>
-                    {t("map.popupThreshold")}: {s.siaga1} cm
-                  </p>
-                  <p style={{ fontSize: 10, color: "#6b7280", margin: 0, marginTop: 4 }}>
-                    ● {t("map.popupSensorNote")}
+                  <p style={{ fontSize: 12, color: "#8f96a9", margin: 0 }}>
+                    {isId
+                      ? `Air ${Math.round(s.ratio * 100)}% dari batas siaga (${s.tinggi_air} cm)`
+                      : `Water at ${Math.round(s.ratio * 100)}% of the alert limit (${s.tinggi_air} cm)`}
                   </p>
                 </div>
               </Popup>
@@ -200,7 +196,7 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
       </MapContainer>
 
       <div className="map-legend">
-        <p style={{ fontSize: "0.65rem", color: "var(--muted-2)", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
+        <p style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text)", marginBottom: 4 }}>
           {t("legend.title")}
         </p>
         {[
@@ -214,13 +210,6 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
             {t(key)}
           </div>
         ))}
-        <div className="legend-row" style={{ marginTop: 4, borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 4 }}>
-          <span className="legend-dot" style={{ background: "#8f96a9", opacity: 0.45 }} />
-          <span style={{ color: "var(--muted-2)", fontSize: "0.62rem" }}>
-            {hasRealStations ? t("legend.sensorMarkers") : t("legend.mlEstimate")}
-          </span>
-        </div>
-
         {/* Flood-prone overlay toggle — single compact line, no second color key */}
         <div style={{ marginTop: 5, borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 5 }}>
           <button
@@ -229,12 +218,11 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
             style={{
               display: "flex", alignItems: "center", gap: 6, width: "100%",
               background: "transparent", border: "none", padding: 0, cursor: "pointer",
-              color: "var(--muted-2)", fontFamily: "'JetBrains Mono',monospace",
-              fontSize: "0.6rem", letterSpacing: "0.04em",
+              color: "var(--muted)", fontSize: "0.78rem",
             }}
             title={isId
-              ? "Tampilkan/sembunyikan titik historis BNPB (klik titik untuk detail sungai)"
-              : "Toggle BNPB historical points (click a dot for river detail)"}
+              ? "Tampilkan/sembunyikan daerah yang pernah banjir (data BNPB)"
+              : "Show/hide areas that have flooded before (BNPB data)"}
           >
             <span style={{
               width: 9, height: 9, borderRadius: 2,
@@ -243,9 +231,7 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
               flexShrink: 0,
             }} />
             <span style={{ flex: 1, textAlign: "left" }}>
-              {isId
-                ? `Titik historis BNPB (${pronePoints.length})`
-                : `BNPB historical points (${pronePoints.length})`}
+              {isId ? "Daerah pernah banjir" : "Previously flooded areas"}
             </span>
           </button>
         </div>

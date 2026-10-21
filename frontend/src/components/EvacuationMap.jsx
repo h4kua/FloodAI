@@ -242,7 +242,7 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
       {!origin && (
         <div style={{ position: "absolute", inset: 0, zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
           <div style={{ background: "rgba(9,9,13,0.82)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "1rem 1.5rem", textAlign: "center" }}>
-            <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.72rem", color: "var(--cyan)", letterSpacing: "0.08em", marginBottom: "0.3rem" }}>
+            <p style={{ fontSize: "0.72rem", color: "var(--cyan)", marginBottom: "0.3rem" }}>
               {t("evac.hint.title")}
             </p>
             <p style={{ fontSize: "0.8rem", color: "var(--muted)", margin: 0 }}>{t("evac.hint.desc")}</p>
@@ -252,7 +252,7 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
 
       {/* Route info overlay */}
       {(loading || error || routeInfo) && (
-        <div style={{ position: "absolute", bottom: 12, right: 12, zIndex: 1000, background: "rgba(13,13,15,0.9)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "0.75rem 1rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.72rem" }}>
+        <div style={{ position: "absolute", bottom: 12, right: 12, zIndex: 1000, background: "rgba(13,13,15,0.9)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "0.75rem 1rem", fontSize: "0.72rem" }}>
           {loading && <span style={{ color: "#8f96a9" }}>{t("evac.calc")}</span>}
           {error   && <span style={{ color: "#ff9dac" }}>{error}</span>}
           {routeInfo && !loading && (

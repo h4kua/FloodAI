@@ -183,7 +183,7 @@ export default function FamilyStatus({ riskLevel = "waspada", rainfall = 0 }) {
             {mode === "join" && (
               <input type="text" placeholder={t("family.codePlaceholder")} value={joinCodeInput}
                 onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())} maxLength={6}
-                className="route-input" style={{ width: "100%", textTransform: "uppercase", letterSpacing: "0.1em" }} />
+                className="route-input" style={{ width: "100%", letterSpacing: "0.1em" }} />
             )}
             <input type="text" placeholder={t("family.nameLabel")} value={name} onChange={(e) => setName(e.target.value)} className="route-input" style={{ width: "100%" }} />
             <input type="tel" placeholder={t("family.phoneLabel")} value={phone} onChange={(e) => setPhone(e.target.value)} className="route-input" style={{ width: "100%" }} />
@@ -203,7 +203,7 @@ export default function FamilyStatus({ riskLevel = "waspada", rainfall = 0 }) {
       <div className="page-header fade-in">
         <div>
           <h1 className="page-title">{t("family.title")}</h1>
-          <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", color: "var(--muted-2)", marginTop: "0.25rem" }}>
+          <p style={{ fontSize: "0.7rem", color: "var(--muted-2)", marginTop: "0.25rem" }}>
             {t("family.yourCode")}: <strong style={{ color: "var(--cyan)", letterSpacing: "0.1em" }}>{familyCode}</strong>
           </p>
         </div>
@@ -232,9 +232,9 @@ export default function FamilyStatus({ riskLevel = "waspada", rainfall = 0 }) {
                 <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
                   <span className="family-member-dot" />
                   <span style={{ fontWeight: 700, fontSize: "0.85rem" }}>{m.display_name}</span>
-                  {m.device_id === deviceId && <span style={{ fontSize: "0.65rem", color: "var(--muted-2)" }}>({t("family.you")})</span>}
+                  {m.device_id === deviceId && <span style={{ fontSize: "0.76rem", color: "var(--muted-2)" }}>({t("family.you")})</span>}
                 </div>
-                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.63rem", color: "var(--muted-2)", marginTop: "0.2rem" }}>
+                <div style={{ fontSize: "0.76rem", color: "var(--muted-2)", marginTop: "0.2rem" }}>
                   {t(STATUS_LABEL_KEY[m.status])} · {m.location_label || t("family.noLocation")} · {timeAgo(m.last_seen_at, lang)}
                   {m.is_stale ? ` · ${t("family.stale")}` : ""}
                 </div>

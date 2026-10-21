@@ -23,7 +23,6 @@ export default defineConfig(({ mode }) => {
         "/healthz":  { target: backendUrl, changeOrigin: true },
         "/family":   { target: backendUrl, changeOrigin: true },
         "/sos":      { target: backendUrl, changeOrigin: true },
-        "/reports":  { target: backendUrl, changeOrigin: true },
         "/shelters": { target: backendUrl, changeOrigin: true },
       },
     },

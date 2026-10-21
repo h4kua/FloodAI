@@ -92,11 +92,6 @@ export default function TopBar({ page, onNavigate }) {
             </svg>
           )}
         </button>
-        <div className="chip live">
-          <span className="live-dot" />
-          {t("topbar.online")}
-        </div>
-        <div className="chip">Jakarta, DKI</div>
       </div>
     </header>
   );

@@ -1,6 +1,6 @@
 import { useApp } from "../lib/appContext";
 import ChatBot from "../components/ChatBot";
-import { use3DTilt } from "../hooks/use3DTilt";
+import CollapsibleSection from "../components/shell/CollapsibleSection";
 
 const isId = (lang) => lang === "id";
 
@@ -11,23 +11,18 @@ const LinkedInSVG = () => (
 );
 
 function Section({ title, children }) {
-  const tiltRef = use3DTilt({ maxTilt: 5 });
   return (
-    <div ref={tiltRef} className="panel panel-body card-3d">
-      <div className="card-3d-content">
-        <p className="about-section-title">{title}</p>
-        {children}
-      </div>
+    <div className="panel panel-body">
+      <p className="about-section-title">{title}</p>
+      {children}
     </div>
   );
 }
 
-function Row({ tag, title, desc, accent = false }) {
+function Row({ tag, title, desc }) {
   return (
     <div className="about-row">
-      <span className="about-tag" style={accent ? { color: "var(--cyan)", borderColor: "var(--cyan-border)" } : {}}>
-        {tag}
-      </span>
+      <span className="about-tag">{tag}</span>
       <div>
         <p className="about-row-title">{title}</p>
         <p className="about-row-desc">{desc}</p>
@@ -36,20 +31,10 @@ function Row({ tag, title, desc, accent = false }) {
   );
 }
 
-function Stat({ value, label }) {
-  return (
-    <div className="stat-item">
-      <div className="stat-value">{value}</div>
-      <div className="stat-label">{label}</div>
-    </div>
-  );
-}
-
 function TeamCard({ role, roleType, name, linkedin }) {
-  const tiltRef = use3DTilt({ maxTilt: 12 });
   return (
-    <div ref={tiltRef} className="team-card card-3d">
-      <div className="card-3d-content" style={{ display: "flex", flex: 1, flexDirection: "column", justifyContent: "space-between", height: "100%", width: "100%" }}>
+    <div className="team-card">
+      <div style={{ display: "flex", flex: 1, flexDirection: "column", justifyContent: "space-between", height: "100%", width: "100%" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           <span className={`team-role ${roleType}`}>{role}</span>
           <p className="team-name">{name}</p>
@@ -72,31 +57,25 @@ function MetricBar({ label, value, max = 1, color = "var(--cyan)", format, hint,
     <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.5rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", minWidth: 0 }}>
-          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem", color: "var(--muted)", letterSpacing: "0.04em" }}>{label}</span>
-          {hint && (
-            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.54rem", color: "var(--muted-2)", letterSpacing: "0.02em" }}>
-              {hint}
-            </span>
-          )}
+          <span style={{ fontSize: "0.85rem", color: "var(--text)" }}>{label}</span>
+          {hint && <span style={{ fontSize: "0.78rem", color: "var(--muted-2)" }}>{hint}</span>}
         </div>
-        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.78rem", fontWeight: 700, color, flexShrink: 0 }}>{display}</span>
+        <span style={{ fontSize: "0.85rem", fontWeight: 700, color, flexShrink: 0 }}>{display}</span>
       </div>
-      <div style={{ height: "4px", background: "rgba(255,255,255,0.07)", borderRadius: "99px", overflow: "hidden" }}>
+      <div style={{ height: "5px", background: "var(--line)", borderRadius: "99px", overflow: "hidden" }}>
         <div style={{ width: `${barPct}%`, height: "100%", background: color, borderRadius: "99px", transition: "width 0.6s ease" }} />
       </div>
     </div>
   );
 }
 
-function PipelineStep({ num, label, desc, color = "var(--cyan)" }) {
+function Step({ num, label, desc }) {
   return (
-    <div style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
-      <div style={{ flexShrink: 0, width: 28, height: 28, borderRadius: "50%", background: `${color}22`, border: `1.5px solid ${color}44`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.7rem", fontWeight: 700, color }}>
-        {num}
-      </div>
+    <div style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
+      <span className="step-num">{num}</span>
       <div>
-        <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text)", lineHeight: 1.3 }}>{label}</div>
-        <div style={{ fontSize: "0.74rem", color: "var(--muted)", lineHeight: 1.5, marginTop: "0.1rem" }}>{desc}</div>
+        <p className="step-title">{label}</p>
+        <p className="step-desc">{desc}</p>
       </div>
     </div>
   );
@@ -105,237 +84,132 @@ function PipelineStep({ num, label, desc, color = "var(--cyan)" }) {
 export default function About({ riskContext = {} }) {
   const { lang } = useApp();
   const id = isId(lang);
-  const heroTiltRef = use3DTilt({ maxTilt: 4 });
 
   return (
     <>
       <div className="page-header fade-in">
-        <h1 className="page-title">
-          {id ? "Tentang deFlood.ai" : "About deFlood.ai"}
-        </h1>
+        <h1 className="page-title">{id ? "Tentang deFlood.ai" : "About deFlood.ai"}</h1>
       </div>
 
       <div className="about-grid fade-in">
-
-        {/* Hero banner */}
-        <div ref={heroTiltRef} className="about-hero card-3d">
-          <div className="card-3d-content" style={{ display: "flex", flex: 1, flexWrap: "wrap", gap: "1.5rem", alignItems: "center", width: "100%" }}>
-            <div style={{ flex: 1, minWidth: 220 }}>
-              <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "1.75rem", fontWeight: 800, letterSpacing: "-0.03em", color: "var(--cyan)", marginBottom: "0.5rem" }}>
-                deFlood<span style={{ color: "var(--s1)" }}>.ai</span>
-              </p>
-              <p style={{ fontSize: "0.88rem", color: "var(--text)", lineHeight: 1.7, maxWidth: 480 }}>
-                {id
-                  ? "Sistem kecerdasan banjir berbasis AI untuk Jakarta. Menggabungkan data sensor realtime dari 38 stasiun TMA, model machine learning XGBoost, prakiraan BMKG, dan AI generatif untuk membantu operator dan warga memantau serta merespons risiko banjir."
-                  : "An AI-powered flood intelligence system for Jakarta. Combines realtime sensor data from 38 TMA stations, XGBoost machine learning, BMKG forecasts, and generative AI to help operators and residents monitor and respond to flood risks."}
-              </p>
-            </div>
-            <div className="stat-grid" style={{ minWidth: 200 }}>
-              <Stat value="0.901" label="AUC-ROC" />
-              <Stat value="83.9%" label="Recall" />
-              <Stat value="38" label={id ? "Stasiun TMA" : "TMA Stations"} />
-              <Stat value="17" label={id ? "Fitur ML" : "ML Features"} />
-            </div>
+        {/* What it is — one paragraph, no jargon */}
+        <div className="about-hero">
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "1.75rem", fontWeight: 800, letterSpacing: "-0.03em", color: "var(--cyan)", marginBottom: "0.5rem" }}>
+              deFlood<span style={{ color: "var(--s1)" }}>.ai</span>
+            </p>
+            <p style={{ fontSize: "1rem", color: "var(--text)", lineHeight: 1.7, maxWidth: 560 }}>
+              {id
+                ? "deFlood.ai membantu warga Jakarta tahu apakah daerahnya aman dari banjir, dan apa yang perlu dilakukan kalau tidak. Kami membaca data ketinggian air sungai dan cuaca, lalu menyampaikannya dalam bahasa yang mudah dipahami."
+                : "deFlood.ai helps Jakarta residents know whether their area is safe from flooding, and what to do if it isn't. We read river water levels and weather data, then explain them in plain language."}
+            </p>
           </div>
         </div>
 
-        {/* Model Performance Visual */}
-        <Section title={id ? "Performa Model" : "Model Performance"}>
-          <p style={{ fontSize: "0.78rem", color: "var(--muted)", marginBottom: "1rem", lineHeight: 1.6 }}>
-            {id
-              ? "Model dilatih dengan 1,990 baris data historis (chronological 80/15/5 split). Menggunakan SMOTE oversampling dan focal loss untuk menangani class imbalance banjir."
-              : "Model trained on 1,990 historical rows (chronological 80/15/5 split). Uses SMOTE oversampling and focal loss to handle flood class imbalance."}
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-            <MetricBar label="AUC-ROC"
-              hint={id ? "(↑ lebih baik)" : "(↑ higher is better)"}
-              value={0.901} max={1} color="var(--safe)"
-              format={v => v.toFixed(3)} />
-            <MetricBar label={id ? "Recall @ Siaga" : "Recall @ Alert"}
-              hint={id ? "(↑ lebih baik)" : "(↑ higher is better)"}
-              value={0.839} max={1} color="var(--s2)"
-              format={v => (v * 100).toFixed(1) + "%"} />
-            <MetricBar label="Brier Score"
-              hint={id ? "(↓ lebih baik)" : "(↓ lower is better)"}
-              value={0.072} max={0.25} color="var(--cyan)"
-              lowerIsBetter format={() => "0.072"} />
-            <MetricBar label={id ? "ECE (Kalibrasi)" : "ECE (Calibration)"}
-              hint={id ? "(↓ lebih baik)" : "(↓ lower is better)"}
-              value={0.014} max={0.25} color="var(--wsp)"
-              lowerIsBetter format={() => "0.014"} />
-          </div>
-          <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", lineHeight: 1.5 }}>
-            {id
-              ? "● AUC mendekati 1 = klasifikasi lebih baik · ECE mendekati 0 = probabilitas lebih terkalibrasi · Recall tinggi = lebih sedikit banjir terlewat"
-              : "● AUC → 1 = better discrimination · ECE → 0 = better calibration · High recall = fewer missed floods"}
-          </p>
-        </Section>
-
-        {/* System Pipeline */}
-        <Section title={id ? "Cara Kerja Sistem" : "How It Works"}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-            <PipelineStep num="1" color="var(--cyan)"
-              label={id ? "Pengumpulan Data Realtime" : "Realtime Data Collection"}
-              desc={id ? "Scraper otomatis tiap 15 menit mengambil data TMA dari 38 pos DSDADKI, cuaca OpenWeather, dan peringatan BMKG." : "Automated scraper every 15 min fetches TMA data from 38 DSDADKI posts, OpenWeather conditions, and BMKG alerts."} />
-            <PipelineStep num="2" color="var(--wsp)"
-              label={id ? "Feature Engineering (17 Fitur)" : "Feature Engineering (17 Features)"}
-              desc={id ? "Membangun 17 fitur: curah hujan (realtime, lag, rolling), interaksi curah hujan×muka air, akselerasi & rolling-max muka air, intensitas hujan, indeks hidro-meteorologi, skor BMKG, flag musim, dan frekuensi historis banjir per kecamatan." : "Builds 17 features: rainfall (realtime, lags, rolling), rainfall×water-level interaction, water-level acceleration & rolling-max, rainfall intensity ratio, hydro-met index, BMKG scores, monsoon flag, and per-district historical flood frequency."} />
-            <PipelineStep num="3" color="var(--s2)"
-              label={id ? "Inferensi ML (XGBoost)" : "ML Inference (XGBoost)"}
-              desc={id ? "Model menghasilkan probabilitas banjir 0–1. Hydro override rule-based menaikkan level jika TMA ≥75% threshold." : "Model outputs flood probability 0–1. Rule-based hydro override elevates level if TMA ≥ 75% threshold."} />
-            <PipelineStep num="4" color="var(--safe)"
-              label={id ? "AI Explanation & Chatbot" : "AI Explanation & Chatbot"}
-              desc={id ? "Groq Llama-3.3-70B menghasilkan narasi risiko dan merespons pertanyaan warga dalam Bahasa Indonesia dan Inggris." : "Groq Llama-3.3-70B generates risk narrative and answers resident questions in Indonesian and English."} />
+        <Section title={id ? "Cara kerjanya" : "How it works"}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <Step num="1"
+              label={id ? "Mengumpulkan data" : "Collecting data"}
+              desc={id ? "Setiap 15 menit kami mengambil ketinggian air dari pos pantau sungai, kondisi cuaca, dan peringatan BMKG." : "Every 15 minutes we collect water levels from river monitoring posts, weather conditions, and BMKG warnings."} />
+            <Step num="2"
+              label={id ? "Menghitung risiko" : "Estimating the risk"}
+              desc={id ? "Model komputer yang dilatih dengan data banjir Jakarta sejak 2010 memperkirakan seberapa besar kemungkinan banjir." : "A computer model trained on Jakarta flood records since 2010 estimates how likely a flood is."} />
+            <Step num="3"
+              label={id ? "Memberi tahu Anda" : "Telling you"}
+              desc={id ? "Hasilnya ditampilkan sebagai status sederhana — Aman, Waspada, Siaga, atau Bahaya — beserta langkah yang disarankan." : "The result is shown as a simple status — Safe, Watch, Alert, or Danger — with suggested next steps."} />
           </div>
         </Section>
 
-        {/* Data Sources */}
-        <Section title={id ? "Sumber Data" : "Data Sources"}>
-          <Row tag="BMKG" accent title="Badan Meteorologi, Klimatologi & Geofisika"
-            desc={id
-              ? "Dua feed data BMKG: nowcast alerts (peringatan ekstrem realtime) dan cuaca.json (prakiraan 10 hari untuk DKI Jakarta). Tersedia via poskobanjir.dsdadki.web.id."
-              : "Two BMKG data feeds: nowcast alerts (realtime extreme weather warnings) and cuaca.json (10-day forecast for DKI Jakarta). Available via poskobanjir.dsdadki.web.id."} />
-          <Row tag="DSDADKI" accent title={id ? "Posko Banjir — DSDADKI" : "Flood Post — DSDADKI"}
-            desc={id
-              ? "38 stasiun pemantauan tinggi muka air (TMA) sungai Jakarta via datatmalaststatus.json dari Dinas Sumber Daya Air DKI. Data realtime setiap 15 menit dengan threshold Siaga 1–4 per stasiun."
-              : "38 Jakarta river water-level monitoring stations via datatmalaststatus.json from Jakarta Water Resources Agency. Realtime data every 15 minutes with Siaga 1–4 thresholds per station."} />
-          <Row tag="OWM" title="OpenWeatherMap"
-            desc={id
-              ? "Data cuaca realtime (suhu, kelembapan, curah hujan 1j/3j) dari stasiun terdekat Jakarta. Digunakan sebagai input utama fitur meteorologi model ML."
-              : "Realtime weather data (temperature, humidity, 1h/3h rainfall) from the nearest Jakarta station. Used as primary meteorological feature input for the ML model."} />
-          <Row tag="HST" title={id ? "Data Historis Banjir (BPBD)" : "Historical Flood Data (BPBD)"}
-            desc={id
-              ? "Dataset kejadian banjir Jakarta sejak 2010 dari BPBD untuk pelatihan model. 17 fitur meteorologi, hidrologi, dan geografis. Bootstrap awal sebelum data TMA realtime tersedia."
-              : "Jakarta flood event dataset since 2010 from BPBD for model training. 17 meteorological, hydrological, and geographic features. Initial bootstrap before realtime TMA data was available."} />
-        </Section>
-
-        {/* ML Model */}
-        <Section title={id ? "Model Machine Learning" : "Machine Learning Model"}>
-          <Row tag="XGB" accent title="XGBoost 3.2.0 Classifier"
-            desc={id
-              ? "Model gradient boosting dengan focal loss (gamma=1.5) dan SMOTE oversampling. Mengklasifikasikan risiko ke 4 level: AMAN, WASPADA, SIAGA, BAHAYA. Recall 83.9% — dirancang untuk meminimalkan banjir yang terlewat."
-              : "Gradient boosting model with focal loss (gamma=1.5) and SMOTE oversampling. Classifies risk into 4 levels: SAFE, WATCH, ALERT, DANGER. 83.9% recall — designed to minimize missed floods."} />
-          <Row tag="17F" title={id ? "17 Fitur Input" : "17 Input Features"}
-            desc={id
-              ? "Curah hujan (realtime, lag, rolling, intensitas), interaksi curah hujan×muka air, akselerasi & rolling-max muka air, suhu, kelembapan, skor BMKG (certainty/weighted), indeks hidro-meteorologi, flag musim, dan frekuensi historis banjir per kecamatan (fitur geografis statis, bukan outcome kejadian)."
-              : "Rainfall (realtime, lags, rolling, intensity ratio), rainfall×water-level interaction, water-level acceleration & rolling-max, temperature, humidity, BMKG scores (certainty/weighted), hydro-meteorological index, monsoon flag, and per-district historical flood frequency (a static geographic covariate, not an event outcome)."} />
-          <Row tag="OOD" title={id ? "IsolationForest — Deteksi Anomali Data" : "IsolationForest — Out-of-Distribution Detection"}
-            desc={id
-              ? "Model sekunder IsolationForest (17 fitur) mendeteksi kondisi di luar distribusi data training. Flag OOD hanya tampil ketika muka air rendah (<75%) karena muka air ≥75% sudah ditangani hydro override secara eksplisit."
-              : "Secondary IsolationForest model (17 features) detects conditions outside the training distribution. OOD flag only appears at low water levels (<75%) since levels ≥75% are handled explicitly by the hydro override."} />
-          <Row tag="ECE" title={id ? "Kalibrasi (ECE 0.014)" : "Calibration (ECE 0.014)"}
-            desc={id
-              ? "Expected Calibration Error 0.014 (n=586 test rows, 1.990 training rows). Brier score 0.072. Model dilatih dengan chronological 80/15/5 split, SMOTE oversampling (192→768 positives), focal loss, dan isotonic calibration (cv=5)."
-              : "ECE 0.014 (n=586 test rows, 1,990 training rows). Brier score 0.072. Trained with chronological 80/15/5 split, SMOTE oversampling (192→768 positives), focal loss, and isotonic calibration (cv=5)."} />
-        </Section>
-
-        {/* AI Chat & Agents */}
-        <Section title={id ? "AI Chat & Analisis" : "AI Chat & Analysis"}>
-          <Row tag="LLM" accent title="Groq SDK — Llama 3.3 70B Versatile"
-            desc={id
-              ? "Model bahasa besar dari Meta via Groq API untuk latensi rendah. Merespons pertanyaan seputar banjir, evakuasi, dan keselamatan dalam Bahasa Indonesia maupun Inggris. Fallback offline berbasis knowledge base tersedia."
-              : "Meta's large language model via Groq API for low latency. Answers questions about flooding, evacuation, and safety in Indonesian and English. Offline knowledge-base fallback available."} />
-          <Row tag="CREW" title={id ? "3 Agen AI Sekuensial" : "3-Agent Sequential Analysis"}
-            desc={id
-              ? "3 agen AI berjalan sekuensial via panggilan Groq langsung: AhliCuaca (analisis BMKG & OpenWeather), AhliHidrologi (analisis TMA 37 stasiun), dan KoordinatorRisiko (sintesis keputusan akhir). Tersedia via endpoint /predict/crew-analysis."
-              : "3 AI agents run sequentially via direct Groq calls: WeatherExpert (BMKG & OpenWeather analysis), HydrologyExpert (37-station TMA analysis), and RiskCoordinator (final decision synthesis). Available via /predict/crew-analysis endpoint."} />
-          <Row tag="CTX" title={id ? "Konteks Risiko Realtime" : "Realtime Risk Context"}
-            desc={id
-              ? "Setiap percakapan menyertakan level risiko, muka air, curah hujan, dan prakiraan BMKG terkini sehingga AI memberikan jawaban yang relevan dengan kondisi aktual Jakarta."
-              : "Each conversation includes current risk level, water level, rainfall, and BMKG forecast so the AI gives answers relevant to Jakarta's actual conditions."} />
-        </Section>
-
-        {/* Tech Stack */}
-        <Section title={id ? "Teknologi" : "Tech Stack"}>
-          <p style={{ fontSize: "0.8rem", color: "var(--muted)", marginBottom: "0.875rem", lineHeight: 1.6 }}>
-            {id
-              ? "Dibangun dengan stack modern, di-deploy di Fly.io (backend) dan Vercel (frontend)."
-              : "Built with a lightweight modern stack, deployed on Fly.io (backend) and Vercel (frontend)."}
-          </p>
-          <div style={{ display: "flex", flexWrap: "wrap" }}>
-            {[
-              "Python 3.12", "FastAPI", "Uvicorn",
-              "XGBoost 3.2.0", "scikit-learn 1.8.0",
-              "Groq SDK", "Anthropic SDK",
-              "React 18", "Vite 5", "React-Leaflet 4",
-              "Supabase / PostgreSQL", "psycopg2",
-              "Fly.io", "Vercel",
-            ].map(tag => (
-              <span key={tag} className="tech-tag">{tag}</span>
-            ))}
-          </div>
-        </Section>
-
-        {/* Disclaimer */}
-        <Section title={id ? "Peringatan & Batasan" : "Disclaimer & Limitations"}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+        <Section title={id ? "Penting diketahui" : "Good to know"}>
+          <ul style={{ margin: 0, paddingLeft: "1.1rem", display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.9rem", color: "var(--muted)", lineHeight: 1.6 }}>
             {(id ? [
-              "Data zona per wilayah adalah estimasi dari skor risiko keseluruhan dengan bias historis — bukan sensor individual per kecamatan.",
-              "Model ML dilatih sebelum data TMA realtime tersedia sehingga probabilitas bisa underestimate saat muka air tinggi. Hydro override menangani kondisi ini secara rule-based.",
-              "Aplikasi ini adalah alat bantu keputusan, bukan pengganti informasi resmi dari BPBD, BMKG, atau BNPB.",
-              "Dalam kondisi darurat, selalu ikuti instruksi petugas BPBD dan Basarnas.",
+              "Aplikasi ini alat bantu, bukan pengganti informasi resmi dari BPBD, BMKG, atau BNPB.",
+              "Saat darurat, selalu ikuti arahan petugas BPBD dan Basarnas.",
+              "Data bisa terlambat jika pos pantau belum mengirim pembaruan.",
             ] : [
-              "Per-district zone data is estimated from the overall risk score with historical bias — not individual sub-district sensor data.",
-              "The ML model was trained before realtime TMA data was available, so it may underestimate probability at high water levels. The hydro override handles this rule-based.",
-              "This app is a decision support tool, not a replacement for official information from BPBD, BMKG, or BNPB.",
-              "In emergencies, always follow instructions from BPBD and Basarnas officers.",
-            ]).map((text, i) => (
-              <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--wsp)", fontWeight: 700, flexShrink: 0, marginTop: "0.2rem", letterSpacing: "0.06em" }}>WARN</span>
-                <p style={{ fontSize: "0.8rem", color: "var(--muted)", lineHeight: 1.55, margin: 0 }}>{text}</p>
-              </div>
-            ))}
-          </div>
+              "This app is an aid, not a replacement for official information from BPBD, BMKG, or BNPB.",
+              "In an emergency, always follow instructions from BPBD and Basarnas officers.",
+              "Data can be late if monitoring posts haven't sent an update.",
+            ]).map((text) => <li key={text}>{text}</li>)}
+          </ul>
         </Section>
 
-        {/* Team */}
-        <Section title={id ? "Tim Pengembang" : "Development Team"}>
-          <p className="team-intro">
-            {id
-              ? "deFlood.ai dikembangkan oleh mahasiswa sebagai kontribusi terhadap sistem peringatan dini banjir Jakarta menggunakan kecerdasan buatan."
-              : "deFlood.ai was built by students as a contribution to Jakarta's AI-powered early flood warning system."}
-          </p>
-          <div className="team-grid">
-            <TeamCard
-              role={id ? "Ketua Project" : "Project Lead"}
-              roleType="lead"
-              name="Juan Javier SZ"
-              linkedin="https://www.linkedin.com/in/juanjaviersz/"
-            />
-            <TeamCard
-              role={id ? "Anggota Tim" : "Team Member"}
-              roleType="member"
-              name="Jessen Wijaya Agussalim"
-              linkedin="https://www.linkedin.com/in/jessen-wijaya-agussalim"
-            />
-            <TeamCard
-              role={id ? "Anggota Tim" : "Team Member"}
-              roleType="member"
-              name="Chahniyan Regina Kasih"
-              linkedin="https://www.linkedin.com/in/chahniyan-regina-kasih-227808280"
-            />
-            <TeamCard
-              role={id ? "Anggota Tim" : "Team Member"}
-              roleType="member"
-              name="Christopher Patrick"
-              linkedin="https://www.linkedin.com/in/christopherpatrick-gunawan"
-            />
-            <TeamCard
-              role={id ? "Mentor" : "Mentor"}
-              roleType="mentor"
-              name="Haikal Helmy"
-              linkedin="https://www.linkedin.com/in/haikal-helmy-875787305"
-            />
-            <TeamCard
-              role={id ? "Mentor" : "Mentor"}
-              roleType="mentor"
-              name="Oriza Mumtaz"
-              linkedin="https://www.linkedin.com/in/oriza-mumtaz-b9290b260"
-            />
-          </div>
-        </Section>
-
+        <div style={{ gridColumn: "1 / -1" }}>
+          <Section title={id ? "Tim pengembang" : "The team"}>
+            <p className="team-intro">
+              {id
+                ? "deFlood.ai dibuat oleh mahasiswa sebagai kontribusi untuk peringatan dini banjir di Jakarta."
+                : "deFlood.ai was built by students as a contribution to early flood warning in Jakarta."}
+            </p>
+            <div className="team-grid">
+              <TeamCard role={id ? "Ketua Project" : "Project Lead"} roleType="lead" name="Juan Javier SZ" linkedin="https://www.linkedin.com/in/juanjaviersz/" />
+              <TeamCard role={id ? "Anggota Tim" : "Team Member"} roleType="member" name="Jessen Wijaya Agussalim" linkedin="https://www.linkedin.com/in/jessen-wijaya-agussalim" />
+              <TeamCard role={id ? "Anggota Tim" : "Team Member"} roleType="member" name="Chahniyan Regina Kasih" linkedin="https://www.linkedin.com/in/chahniyan-regina-kasih-227808280" />
+              <TeamCard role={id ? "Anggota Tim" : "Team Member"} roleType="member" name="Christopher Patrick" linkedin="https://www.linkedin.com/in/christopherpatrick-gunawan" />
+              <TeamCard role="Mentor" roleType="mentor" name="Haikal Helmy" linkedin="https://www.linkedin.com/in/haikal-helmy-875787305" />
+              <TeamCard role="Mentor" roleType="mentor" name="Oriza Mumtaz" linkedin="https://www.linkedin.com/in/oriza-mumtaz-b9290b260" />
+            </div>
+          </Section>
+        </div>
       </div>
+
+      {/* Technical depth — for reviewers and developers, closed by default */}
+      <CollapsibleSection
+        icon="⚙"
+        iconBg="var(--cyan-soft)"
+        iconColor="var(--cyan)"
+        title={id ? "Detail teknis" : "Technical details"}
+        subtitle={id ? "Performa model, sumber data, dan teknologi" : "Model performance, data sources, and stack"}
+      >
+        <div className="about-grid">
+          <Section title={id ? "Performa model" : "Model performance"}>
+            <p style={{ fontSize: "0.85rem", color: "var(--muted)", marginBottom: "1rem", lineHeight: 1.6 }}>
+              {id
+                ? "XGBoost dilatih dengan 1.990 baris data historis (split kronologis 80/15/5), SMOTE, dan focal loss."
+                : "XGBoost trained on 1,990 historical rows (chronological 80/15/5 split), SMOTE, and focal loss."}
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+              <MetricBar label="AUC-ROC" hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}
+                value={0.901} color="var(--safe)" format={v => v.toFixed(3)} />
+              <MetricBar label={id ? "Recall @ Siaga" : "Recall @ Alert"} hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}
+                value={0.839} color="var(--s2)" format={v => (v * 100).toFixed(1) + "%"} />
+              <MetricBar label="Brier Score" hint={id ? "(makin rendah makin baik)" : "(lower is better)"}
+                value={0.072} max={0.25} color="var(--cyan)" lowerIsBetter format={() => "0.072"} />
+              <MetricBar label="ECE" hint={id ? "(makin rendah makin baik)" : "(lower is better)"}
+                value={0.014} max={0.25} color="var(--wsp)" lowerIsBetter format={() => "0.014"} />
+            </div>
+          </Section>
+
+          <Section title={id ? "Sumber data" : "Data sources"}>
+            <Row tag="DSDADKI" title={id ? "Pos pantau ketinggian air" : "Water-level monitoring posts"}
+              desc={id ? "38 pos pantau sungai Jakarta dari Dinas Sumber Daya Air DKI, diperbarui tiap 15 menit." : "38 Jakarta river posts from the DKI Water Resources Agency, updated every 15 minutes."} />
+            <Row tag="BMKG" title={id ? "Peringatan & prakiraan cuaca" : "Weather warnings & forecasts"}
+              desc={id ? "Peringatan cuaca ekstrem dan prakiraan per wilayah." : "Extreme-weather warnings and per-area forecasts."} />
+            <Row tag="OWM" title="OpenWeatherMap"
+              desc={id ? "Suhu, kelembapan, dan curah hujan realtime." : "Realtime temperature, humidity, and rainfall."} />
+            <Row tag="BPBD" title={id ? "Data historis banjir" : "Historical flood data"}
+              desc={id ? "Kejadian banjir Jakarta sejak 2010, dipakai untuk melatih model." : "Jakarta flood events since 2010, used to train the model."} />
+          </Section>
+
+          <Section title={id ? "Model & AI" : "Model & AI"}>
+            <Row tag="XGB" title="XGBoost Classifier"
+              desc={id ? "17 fitur cuaca, hidrologi, dan geografis → 4 level risiko. Aturan hidrologi menaikkan level jika air ≥75% ambang siaga." : "17 weather, hydrology, and geographic features → 4 risk levels. A hydrology rule raises the level when water is ≥75% of the alert threshold."} />
+            <Row tag="OOD" title="IsolationForest"
+              desc={id ? "Menandai kondisi data yang tidak biasa dibanding data latih." : "Flags data conditions that look unusual compared with the training data."} />
+            <Row tag="LLM" title="Groq — Llama 3.3 70B"
+              desc={id ? "Menulis penjelasan dan menjawab chat. Tidak ikut menentukan status; jika gagal, dipakai template tetap." : "Writes explanations and answers chat. It does not decide the status; a fixed template is used if it fails."} />
+          </Section>
+
+          <Section title={id ? "Teknologi" : "Tech stack"}>
+            <div style={{ display: "flex", flexWrap: "wrap" }}>
+              {[
+                "Python 3.12", "FastAPI", "XGBoost 3.2.0", "scikit-learn 1.8.0", "Groq SDK",
+                "React 18", "Vite 5", "React-Leaflet 4", "Supabase / PostgreSQL", "Fly.io", "Vercel",
+              ].map(tag => <span key={tag} className="tech-tag">{tag}</span>)}
+            </div>
+          </Section>
+        </div>
+      </CollapsibleSection>
 
       <ChatBot riskContext={riskContext} />
     </>

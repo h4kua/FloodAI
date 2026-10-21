@@ -66,9 +66,8 @@ export default function ChatBot({ riskContext = {} }) {
                     <span style={{
                       display: "block",
                       marginTop: "0.3rem",
-                      fontSize: "0.6rem",
+                      fontSize: "0.76rem",
                       opacity: 0.5,
-                      fontFamily: "'JetBrains Mono', monospace",
                       letterSpacing: "0.05em",
                     }}>
                       {lang === "en" ? "offline KB" : "offline KB"}

@@ -1,5 +1,4 @@
 import { useApp } from "../../lib/appContext";
-import { use3DTilt } from "../../hooks/use3DTilt";
 import { buildStatusDesc, formatWib } from "../../lib/dashboardHelpers";
 
 /* ── DecisionHero — the first thing a citizen sees ─────────────────────────
@@ -14,7 +13,6 @@ import { buildStatusDesc, formatWib } from "../../lib/dashboardHelpers";
 export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 0 }) {
   const { lang } = useApp();
   const isId = lang === "id";
-  const tiltRef = use3DTilt({ maxTilt: 4 });
 
   const level = riskData?.level ?? "waspada";
   const riskTrend = riskData?.trendState?.risk_trend;
@@ -40,23 +38,23 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
   // AlertRibbon folded in: one red line with real station counts, Siaga only.
   const alertLine = siaga1Count > 0
     ? (isId
-        ? `SIAGA 1 AKTIF — ${siaga1Count} stasiun melebihi ambang batas. Hubungi BPBD 117.`
-        : `ALERT 1 ACTIVE — ${siaga1Count} stations above threshold. Contact BPBD 117.`)
+        ? `Siaga 1 — ${siaga1Count} pos pantau melewati batas aman. Hubungi BPBD 117.`
+        : `Alert 1 — ${siaga1Count} posts above the safe limit. Contact BPBD 117.`)
     : siaga2Count > 0
     ? (isId
-        ? `Siaga 2 — ${siaga2Count} stasiun mendekati ambang batas. Pantau perkembangan.`
-        : `Alert 2 — ${siaga2Count} stations approaching threshold. Monitor updates.`)
+        ? `Siaga 2 — ${siaga2Count} pos pantau mendekati batas aman. Pantau terus.`
+        : `Alert 2 — ${siaga2Count} posts nearing the safe limit. Keep watching.`)
     : null;
   const alertColor = siaga1Count > 0 ? "var(--s1)" : "var(--s2)";
 
   return (
-    <div ref={tiltRef} className={`status-hero card-3d fade-in level-${level}`}>
-      <div className="status-hero-main card-3d-content">
+    <div className={`status-hero fade-in level-${level}`}>
+      <div className="status-hero-main">
         <div className="decision-hero-eyebrow" style={{ color: cfg.color }}>
-          {isId ? "STATUS JAKARTA" : "JAKARTA STATUS"}
+          {isId ? "Status Jakarta saat ini" : "Jakarta right now"}
           {snapTimeStr && (
-            <span style={{ opacity: 0.65, marginLeft: "0.5rem" }}>
-              · {isId ? "Diperbarui" : "Updated"} {snapTimeStr} WIB
+            <span style={{ color: "var(--muted)", marginLeft: "0.5rem", fontWeight: 500 }}>
+              · {isId ? "data" : "data from"} {snapTimeStr} WIB
             </span>
           )}
         </div>

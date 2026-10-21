@@ -1,6 +1,6 @@
 /* ── Dashboard primitives ─────────────────────────────────────────────────
    Small, shared leaf components used across the dashboard sections:
-   badges, bars, and the monochrome weather/phone glyphs. (MetricCard and
+   the status badge and the monochrome weather/phone glyphs. (MetricCard and
    SectionDivider were retired by the citizen-first rebuild.)
 */
 import { useT } from "../../lib/appContext";
@@ -14,21 +14,6 @@ export function RiskBadge({ level }) {
       <span style={{ width: 5, height: 5, borderRadius: "50%", background: "currentColor", display: "inline-block" }} />
       {t(`risk.${level}`) || level.replace("_", " ")}
     </span>
-  );
-}
-
-export function ProbBar({ value }) {
-  let color = "#00e5a0";
-  if (value >= 0.80) color = "#ff3d5a";
-  else if (value >= 0.55) color = "#f97316";
-  else if (value >= 0.30) color = "#f5a623";
-  return (
-    <div className="prob-wrap">
-      <div className="prob-track">
-        <div className="prob-fill" style={{ width: `${value * 100}%`, background: color }} />
-      </div>
-      <span className="prob-text">{Math.round(value * 100)}%</span>
-    </div>
   );
 }
 

@@ -41,7 +41,7 @@ export default function SafeArrival({ shelterName, onClose }) {
         <p style={{ color: "var(--muted)", fontSize: "0.85rem", lineHeight: 1.55, marginBottom: "0.375rem" }}>
           {t("safeArrival.subtitle", { shelter: shelterName })}
         </p>
-        <p style={{ color: "var(--muted-2)", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem", marginBottom: "1.5rem" }}>
+        <p style={{ color: "var(--muted-2)", fontSize: "0.76rem", marginBottom: "1.5rem" }}>
           {t("safeArrival.notified")}
         </p>
         <button className="btn btn-ghost" onClick={onClose}>{t("safeArrival.close")}</button>

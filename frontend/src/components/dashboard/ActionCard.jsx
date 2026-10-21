@@ -1,5 +1,4 @@
 import { useT, useApp } from "../../lib/appContext";
-import { use3DTilt } from "../../hooks/use3DTilt";
 import { deriveActions } from "../../lib/recommendations";
 import { PhoneGlyph } from "./primitives";
 
@@ -12,7 +11,6 @@ export default function ActionCard({ riskData, stations = [], onNavigate }) {
   const t = useT();
   const { lang } = useApp();
   const isId = lang === "id";
-  const tiltRef = use3DTilt({ maxTilt: 5 });
 
   const level = riskData?.level ?? "waspada";
   const { actions, s1, topW } = deriveActions(riskData, stations, isId);
@@ -40,8 +38,8 @@ export default function ActionCard({ riskData, stations = [], onNavigate }) {
     : t("home.ctaMonitor");
 
   return (
-    <div ref={tiltRef} className="panel panel-body card-3d action-card">
-      <div className="card-3d-content">
+    <div className="panel panel-body action-card">
+      <div>
         <p className="action-card-title">{t("home.actionTitle")}</p>
 
         <div className="action-card-list">
@@ -73,10 +71,6 @@ export default function ActionCard({ riskData, stations = [], onNavigate }) {
             {t("home.callBpbd")}
           </button>
         </div>
-
-        <p className="action-card-note">
-          ● {isId ? "Berdasarkan sensor DSDADKI + BMKG realtime" : "Based on realtime DSDADKI sensors + BMKG data"}
-        </p>
       </div>
     </div>
   );

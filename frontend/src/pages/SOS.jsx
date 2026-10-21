@@ -131,7 +131,7 @@ export default function SOS({ riskLevel = "waspada", rainfall = 0 }) {
                 SOS
               </button>
             </div>
-            <p style={{ color: "var(--muted-2)", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", marginTop: "1.5rem" }}>
+            <p style={{ color: "var(--muted-2)", fontSize: "0.76rem", marginTop: "1.5rem" }}>
               {t("sos.holdHint")}
             </p>
           </>

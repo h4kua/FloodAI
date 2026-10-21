@@ -1,370 +1,60 @@
 /* ── Station section ──────────────────────────────────────────────────────
-   Everything driven by the DSDADKI water-level sensors: the full station
-   table, the transparent 18-vs-38 exclusion breakdown, and the sensor
-   detail strip. (The old AlertRibbon/MetricsRow/AlertPanel were retired by
-   the citizen-first rebuild — DecisionHero + GlanceChips replaced them.)
+   A plain list of the DSDADKI water-level posts: name, area, how full the
+   river is relative to its alert threshold, and a status badge. Highest
+   first, so the posts that matter are always on top.
 */
 import { useState } from "react";
-import { useT, useApp } from "../../lib/appContext";
-import { use3DTilt } from "../../hooks/use3DTilt";
-import { stationClass, stationRiskLevel } from "../../lib/dashboardHelpers";
-import { RiskBadge, ProbBar } from "./primitives";
+import { useApp } from "../../lib/appContext";
+import { stationClass, stationRiskLevel, cleanStationName, stationKecamatan } from "../../lib/dashboardHelpers";
+import { RiskBadge } from "./primitives";
 
-/* ── ExcludedStationsBreakdown — transparent "why fewer than the source" list ──
-   Explains the 18-vs-38 gap: lists the stations excluded from scoring,
-   grouped by reason (uncalibrated / pump / non-standard datum).
-*/
-export function ExcludedStationsBreakdown({ quality }) {
-  const { lang } = useApp();
-  const isId = lang === "id";
-  const [open, setOpen] = useState(false);
-  if (!quality) return null;
+const BAR_COLOR = { s1: "var(--s1)", s2: "var(--s2)", wsp: "var(--wsp)", ok: "var(--safe)" };
+const PREVIEW = 6;
 
-  const groups = [
-    {
-      key: "uncal",
-      items: quality.excluded_uncalibrated || [],
-      label: isId ? "Belum terkalibrasi" : "Uncalibrated",
-      reason: isId
-        ? "Ambang siaga placeholder (Siaga 1 = 2 = 3) — belum disetel di sumber DSDADKI, jadi rasio TMA tidak bermakna."
-        : "Placeholder thresholds (Alert 1 = 2 = 3) — never set at the DSDADKI source, so the TMA ratio is meaningless.",
-      color: "var(--muted)",
-    },
-    {
-      key: "pump",
-      items: quality.excluded_pump || [],
-      label: isId ? "Stasiun pompa" : "Pump stations",
-      reason: isId
-        ? "Ambangnya batas operasional mesin pompa, bukan ambang peringatan banjir."
-        : "Thresholds are pump-machinery operational limits, not flood-warning thresholds.",
-      color: "var(--cyan)",
-    },
-    {
-      key: "datum",
-      items: quality.excluded_bad_datum || [],
-      label: isId ? "Datum non-standar" : "Non-standard datum",
-      reason: isId
-        ? "Tinggi air di luar rentang data latih model (mis. nilai negatif)."
-        : "Water level outside the model's training range (e.g. negative values).",
-      color: "var(--wsp)",
-    },
-  ].filter((g) => g.items.length > 0);
-
-  const totalExcluded = groups.reduce((n, g) => n + g.items.length, 0);
-  if (totalExcluded === 0) return null;
-
-  return (
-    <div style={{ marginTop: "0.75rem", borderTop: "1px solid var(--line)", paddingTop: "0.75rem" }}>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        style={{
-          width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-          background: "none", border: "1px solid var(--line)", borderRadius: 8,
-          padding: "0.5rem 0.75rem", cursor: "pointer",
-          fontFamily: "'JetBrains Mono',monospace", fontSize: "0.64rem",
-          color: "var(--muted)", letterSpacing: "0.03em",
-        }}
-      >
-        <span>
-          {isId
-            ? `${totalExcluded} pos pantau dikecualikan dari skoring`
-            : `${totalExcluded} stations excluded from scoring`}
-        </span>
-        <span style={{ color: "var(--muted-2)" }}>{open ? "↑" : "↓"}</span>
-      </button>
-
-      {open && (
-        <div style={{ marginTop: "0.625rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          {groups.map((g) => (
-            <div key={g.key}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.2rem" }}>
-                <span style={{ width: 6, height: 6, borderRadius: 2, background: g.color, flexShrink: 0 }} />
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", fontWeight: 700, color: "var(--text)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-                  {g.label} · {g.items.length}
-                </span>
-              </div>
-              <p style={{ fontSize: "0.68rem", color: "var(--muted-2)", lineHeight: 1.5, margin: "0 0 0.375rem 0.85rem" }}>
-                {g.reason}
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem", marginLeft: "0.85rem" }}>
-                {g.items.map((it, i) => (
-                  <span key={i} style={{
-                    fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem",
-                    color: "var(--muted)", background: "var(--panel-2)",
-                    border: "1px solid var(--line)", borderRadius: 5, padding: "0.18rem 0.45rem",
-                  }}>
-                    {it.nama}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// StationPanel: full table of ALL real DSDADKI stations with live readings.
-// Shows top 6 by default; user can expand to see all.
-export function StationPanel({ stations, quality }) {
+export function StationPanel({ stations }) {
   const { lang } = useApp();
   const isId = lang === "id";
   const [showAll, setShowAll] = useState(false);
 
   if (!stations || stations.length === 0) return null;
 
-  const PREVIEW = 6;
-  const displayed = showAll ? stations : stations.slice(0, PREVIEW);
-  const hasMore = stations.length > PREVIEW;
-  const total = quality?.total ?? null;
-  const scored = quality?.scored ?? stations.length;
-
-  // Fleet-wide distribution for the summary bar
-  const normalCt = stations.filter(s => s.ratio < 0.50).length;
-  const waspCt   = stations.filter(s => s.ratio >= 0.50 && s.ratio < 0.75).length;
-  const s2Ct     = stations.filter(s => s.ratio >= 0.75 && s.ratio < 1.0).length;
-  const s1Ct     = stations.filter(s => s.ratio >= 1.0).length;
+  const sorted = [...stations].sort((a, b) => b.ratio - a.ratio);
+  const displayed = showAll ? sorted : sorted.slice(0, PREVIEW);
 
   return (
     <div className="panel panel-body fade-in">
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "0.75rem", gap: "1rem" }}>
-        <div>
-          <p className="panel-title" style={{ marginBottom: "0.15rem" }}>
-            {isId ? "Sensor Ketinggian Air — DSDADKI" : "Water Level Sensors — DSDADKI"}
-          </p>
-          <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", margin: 0, letterSpacing: "0.02em" }}>
-            {total != null
-              ? (isId
-                ? `Menampilkan ${scored} pos terkalibrasi dari ${total} total di sumber`
-                : `Showing ${scored} calibrated of ${total} total at the source`)
-              : (isId ? "Pos pantau terkalibrasi" : "Calibrated monitoring stations")}
-          </p>
-        </div>
-        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.58rem", color: "var(--safe)", letterSpacing: "0.06em", flexShrink: 0, whiteSpace: "nowrap" }}>● real</span>
-      </div>
-      <div className="zone-table-wrap">
-        <table className="zone-table">
-          <thead>
-            <tr>
-              <th>{isId ? "Pos Pantau" : "Station"}</th>
-              <th>{isId ? "Tinggi Air" : "Water Level"}</th>
-              <th>{isId ? "Ambang" : "Threshold"}</th>
-              <th>{isId ? "Persentase" : "Percent"}</th>
-              <th>{isId ? "Status" : "Status"}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {displayed.map((s, i) => (
-              <tr key={i}>
-                <td>
-                  <span className="zone-name" style={{ fontSize: "0.72rem" }}>{s.nama}</span>
-                </td>
-                <td style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem", color: s.ratio >= 0.75 ? "var(--wsp)" : "var(--text)" }}>
-                  {s.tinggi_air} cm
-                </td>
-                <td style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem", color: "var(--muted)" }}>
-                  {s.siaga1} cm
-                </td>
-                <td><ProbBar value={Math.min(s.ratio, 1.0)} /></td>
-                <td><RiskBadge level={stationRiskLevel(s.ratio)} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {hasMore && (
-        <button
-          className="btn btn-ghost"
-          onClick={() => setShowAll(v => !v)}
-          style={{ marginTop: "0.75rem", width: "100%", justifyContent: "center" }}
-        >
-          {showAll
-            ? (isId ? "Tampilkan lebih sedikit ↑" : "Show less ↑")
-            : (isId ? `Lihat semua ${stations.length} pos pantau ↓` : `Show all ${stations.length} stations ↓`)}
-        </button>
-      )}
-
-      {/* Fleet-wide distribution — fills vertical space and gives a quick
-          overview of the entire calibrated station fleet at a glance */}
-      <div style={{ marginTop: "0.875rem", paddingTop: "0.75rem", borderTop: "1px solid var(--line)" }}>
-        <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.6rem", color: "var(--muted-2)", marginBottom: "0.5rem", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-          {isId ? "Distribusi status — semua pos" : "Status distribution — all stations"}
-        </p>
-        {/* Stacked proportion bar */}
-        <div style={{ display: "flex", height: 6, borderRadius: 4, overflow: "hidden", gap: 2, marginBottom: "0.6rem" }}>
-          {normalCt > 0 && <div style={{ flex: normalCt, background: "var(--safe)", opacity: 0.65 }} />}
-          {waspCt  > 0 && <div style={{ flex: waspCt,  background: "var(--wsp)", opacity: 0.75 }} />}
-          {s2Ct    > 0 && <div style={{ flex: s2Ct,    background: "var(--s2)",  opacity: 0.85 }} />}
-          {s1Ct    > 0 && <div style={{ flex: s1Ct,    background: "var(--s1)"               }} />}
-        </div>
-        {/* Count chips */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-          {normalCt > 0 && (
-            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--safe)" }}>
-              ● {normalCt} {isId ? "Normal" : "Normal"}
-            </span>
-          )}
-          {waspCt > 0 && (
-            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--wsp)" }}>
-              ● {waspCt} Waspada
-            </span>
-          )}
-          {s2Ct > 0 && (
-            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--s2)" }}>
-              ● {s2Ct} Siaga 2
-            </span>
-          )}
-          {s1Ct > 0 && (
-            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "0.65rem", color: "var(--s1)" }}>
-              ● {s1Ct} Siaga 1
-            </span>
-          )}
-        </div>
-      </div>
-
-      <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.62rem", color: "var(--muted-2)" }}>
+      <p className="station-title">{isId ? "Ketinggian air di pos pantau" : "Water level at monitoring posts"}</p>
+      <p className="station-sub">
         {isId
-          ? "● Sensor pintu air & pos pantau DSDADKI · Persentase = Tinggi Air ÷ Ambang Siaga 1 · Update tiap 15 menit"
-          : "● DSDADKI water gate & monitoring station sensors · Percent = Water Level ÷ Siaga-1 Threshold · Updates every 15 min"}
+          ? "Paling tinggi di atas. 100% berarti air sudah sampai batas siaga."
+          : "Highest first. 100% means the water has reached the alert limit."}
       </p>
 
-      {/* Transparent 18-vs-38: which source stations were excluded and why */}
-      <ExcludedStationsBreakdown quality={quality} />
-    </div>
-  );
-}
+      <ul className="station-list">
+        {displayed.map((s) => {
+          const kec   = stationKecamatan(s.nama);
+          const color = BAR_COLOR[stationClass(s.ratio)];
+          const pct   = Math.round(s.ratio * 100);
+          return (
+            <li key={s.nama} className="station-row">
+              <div className="station-name">
+                <span>{cleanStationName(s.nama)}</span>
+                {kec && <small>Kec. {kec.kecamatan}</small>}
+              </div>
+              <div className="station-bar"><i style={{ width: `${Math.min(pct, 100)}%`, background: color }} /></div>
+              <span className="station-pct" style={{ color }}>{pct}%</span>
+              <RiskBadge level={stationRiskLevel(s.ratio)} />
+            </li>
+          );
+        })}
+      </ul>
 
-export function SensorStrip({ riskData }) {
-  const { lang } = useApp();
-  const isId = lang === "id";
-  if (!riskData) return null;
-
-  const wlr   = riskData.waterLevelRatio;
-  const delta = riskData.waterLevelDelta;   // real per-15-min change in WLR
-  const wlColor  = wlr >= 0.90 ? "var(--s1)" : wlr >= 0.75 ? "var(--wsp)" : "var(--safe)";
-  const riskTrend = riskData.trendState?.risk_trend;
-  const trendLabel = riskTrend === "increasing"
-    ? (isId ? "↑ Naik" : "↑ Rising")
-    : riskTrend === "decreasing"
-    ? (isId ? "↓ Turun" : "↓ Falling")
-    : (isId ? "→ Stabil" : "→ Stable");
-  const trendColor = riskTrend === "increasing" ? "var(--wsp)" : riskTrend === "decreasing" ? "var(--safe)" : "var(--muted)";
-
-  // Water level delta direction (real 15-min sensor change, not ML trend)
-  const wldSign  = delta != null ? (delta > 0.015 ? "↑" : delta < -0.015 ? "↓" : "→") : null;
-  const wldColor = delta != null
-    ? (delta > 0.015 ? "var(--wsp)" : delta < -0.015 ? "var(--safe)" : "var(--muted)")
-    : "var(--muted)";
-
-  // 3h rainfall accumulation (complementary to 6h already shown)
-  const acc3h = riskData.rainfallAcc3h;
-  // Rainfall trend mm/h (positive = intensifying, negative = easing)
-  const rfTrend = riskData.rainfallTrendMmH;
-
-  return (
-    <div className="sensor-strip fade-in">
-      {/* Water level — real ratio + direction arrow from sensor delta */}
-      {wlr !== null && (
-        <div className="sensor-chip">
-          <span className="sensor-chip-label">{isId ? "Muka Air" : "Water Level"}</span>
-          <span className="sensor-chip-value" style={{ color: wlColor }}>
-            {Math.round(wlr * 100)}%
-            {wldSign && (
-              <span style={{ marginLeft: 3, fontSize: "0.7rem", color: wldColor }}>{wldSign}</span>
-            )}
-          </span>
-        </div>
-      )}
-
-      {riskData.temperature !== null && (
-        <div className="sensor-chip secondary">
-          <span className="sensor-chip-label">{isId ? "Suhu" : "Temp"}</span>
-          <span className="sensor-chip-value">{riskData.temperature?.toFixed(1)}°C</span>
-        </div>
-      )}
-      {riskData.humidity !== null && (
-        <div className="sensor-chip secondary">
-          <span className="sensor-chip-label">{isId ? "Kelembapan" : "Humidity"}</span>
-          <span className="sensor-chip-value">{Math.round(riskData.humidity)}%</span>
-        </div>
-      )}
-
-      {/* 3h accumulation */}
-      {acc3h != null && acc3h > 0 && (
-        <div className="sensor-chip secondary">
-          <span className="sensor-chip-label">{isId ? "Akum. 3j" : "3h Accum"}</span>
-          <span className="sensor-chip-value" style={{ color: acc3h >= 15 ? "var(--wsp)" : undefined }}>
-            {acc3h.toFixed(1)} mm
-          </span>
-        </div>
-      )}
-      {riskData.rainfallAcc6h != null && riskData.rainfallAcc6h > 0 && (
-        <div className="sensor-chip secondary">
-          <span className="sensor-chip-label">{isId ? "Akum. 6j" : "6h Accum"}</span>
-          <span className="sensor-chip-value" style={{ color: riskData.rainfallAcc6h >= 20 ? "var(--wsp)" : undefined }}>
-            {riskData.rainfallAcc6h} mm
-          </span>
-        </div>
-      )}
-
-      {/* Rainfall trend */}
-      {rfTrend != null && Math.abs(rfTrend) >= 1 && (
-        <div className="sensor-chip secondary">
-          <span className="sensor-chip-label">{isId ? "Tren Hujan" : "Rain Trend"}</span>
-          <span className="sensor-chip-value" style={{ color: rfTrend > 0 ? "var(--wsp)" : "var(--safe)" }}>
-            {rfTrend > 0 ? `↑ +${rfTrend.toFixed(1)}` : `↓ ${rfTrend.toFixed(1)}`} mm/j
-          </span>
-        </div>
-      )}
-
-      {riskData.bmkgAlerts > 0 && (
-        <div className="sensor-chip sensor-chip-warn">
-          <span className="sensor-chip-label">BMKG</span>
-          <span className="sensor-chip-value" style={{ color: "var(--wsp)" }}>
-            {riskData.bmkgAlerts} alert
-          </span>
-        </div>
-      )}
-
-      {riskTrend && (
-        <div className="sensor-chip">
-          <span className="sensor-chip-label">{isId ? "Tren Risiko" : "Risk Trend"}</span>
-          <span className="sensor-chip-value" style={{ color: trendColor }}>{trendLabel}</span>
-        </div>
-      )}
-
-      {/* Monsoon season context */}
-      {riskData.monsoonSeason === 1 && (
-        <div className="sensor-chip secondary">
-          <span className="sensor-chip-label">{isId ? "Musim" : "Season"}</span>
-          <span className="sensor-chip-value" style={{ color: "var(--wsp)" }}>
-            {isId ? "Hujan" : "Wet"}
-          </span>
-        </div>
-      )}
-
-      {/* Anomaly spike — from sensor spike-detection, separate from OOD */}
-      {riskData.anomalyDetected && (
-        <div className="sensor-chip sensor-chip-warn">
-          <span className="sensor-chip-label">{isId ? "Anomali" : "Anomaly"}</span>
-          <span className="sensor-chip-value" style={{ color: "var(--wsp)" }}>
-            {riskData.anomalyType === "spike"
-              ? (isId ? "Spike" : "Spike")
-              : (isId ? "Akumulasi" : "Buildup")}
-          </span>
-        </div>
-      )}
-
-      {/* OOD badge — only when WLR < 0.75 (high WLR suppressed at backend) */}
-      {riskData.isOutlier && (riskData.waterLevelRatio ?? 0) < 0.75 && (
-        <div className="sensor-chip sensor-chip-warn secondary">
-          <span className="sensor-chip-label">OOD</span>
-          <span className="sensor-chip-value" style={{ color: "var(--wsp)" }}>
-            {isId ? "Anomali" : "Anomaly"}
-          </span>
-        </div>
+      {sorted.length > PREVIEW && (
+        <button className="ai-card-more" onClick={() => setShowAll((v) => !v)}>
+          {showAll
+            ? (isId ? "Tampilkan lebih sedikit ▴" : "Show less ▴")
+            : (isId ? `Lihat semua ${sorted.length} pos ▾` : `Show all ${sorted.length} posts ▾`)}
+        </button>
       )}
     </div>
   );

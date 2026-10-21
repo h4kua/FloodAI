@@ -130,62 +130,58 @@ export function buildStatusDesc(riskData, isId) {
 
   if (level === "bahaya") {
     const stNote = s1.length > 0
-      ? (isId ? `${s1.length} sensor melewati ambang Siaga 1 — terparah: ${s1[0].nama}` : `${s1.length} sensor(s) past Alert-1 threshold — worst: ${s1[0].nama}`)
+      ? (isId ? ` ${s1.length} pos pantau sudah melewati batas siaga, terparah di ${cleanStationName(s1[0].nama)}.` : ` ${s1.length} post(s) are past the alert limit, worst at ${cleanStationName(s1[0].nama)}.`)
       : "";
-    const rfNote = rainfall > 0 ? (isId ? `, hujan ${Math.round(rainfall)} mm/jam` : `, rain ${Math.round(rainfall)} mm/h`) : "";
     return isId
-      ? `KONDISI KRITIS! ${stNote}${rfNote}. Ikuti instruksi BPBD segera — hubungi 117. Bersiap evakuasi sekarang.`
-      : `CRITICAL! ${stNote}${rfNote}. Follow BPBD instructions immediately — call 117. Prepare to evacuate now.`;
+      ? `Kondisi berbahaya.${stNote} Ikuti arahan BPBD dan bersiap mengungsi. Telepon 117 jika butuh bantuan.`
+      : `Dangerous conditions.${stNote} Follow BPBD instructions and get ready to evacuate. Call 117 if you need help.`;
   }
 
   if (level === "siaga") {
     const wlrPct = Math.round(wlr * 100);
-    const sNote  = s2.length > 0
-      ? (isId ? ` ${s2.length} sensor Siaga 2${s1.length > 0 ? `, ${s1.length} Siaga 1` : ""}.` : ` ${s2.length} Alert-2 sensor(s)${s1.length > 0 ? `, ${s1.length} Alert-1` : ""}.`)
+    const sNote  = s1.length + s2.length > 0
+      ? (isId ? ` ${s1.length + s2.length} pos pantau mendekati atau melewati batas siaga.` : ` ${s1.length + s2.length} post(s) are near or past the alert limit.`)
       : "";
     const wNote  = topW
-      ? (isId ? ` ${topW.wilayah} status ${topW.worst_status}.` : ` ${topW.wilayah} at ${topW.worst_status}.`)
+      ? (isId ? ` Paling perlu diwaspadai: ${topW.wilayah}.` : ` Watch ${topW.wilayah} most closely.`)
       : "";
     return isId
-      ? `Ketinggian air ${wlrPct}% dari ambang siaga.${sNote}${wNote} Siapkan tas darurat dan pantau setiap 15 menit.`
-      : `Water level at ${wlrPct}% of alert threshold.${sNote}${wNote} Prepare emergency bag and monitor every 15 min.`;
+      ? `Air sudah ${wlrPct}% dari batas siaga.${sNote}${wNote} Siapkan tas darurat dan pantau terus.`
+      : `Water is at ${wlrPct}% of the alert limit.${sNote}${wNote} Pack an emergency bag and keep watching.`;
   }
 
   if (level === "waspada") {
     const tNote = riskTrend === "increasing"
-      ? (isId ? " Tren risiko sedang naik." : " Risk trend is rising.")
+      ? (isId ? " Risikonya sedang naik." : " The risk is rising.")
       : riskTrend === "decreasing"
-      ? (isId ? " Situasi mulai membaik." : " Situation improving.")
+      ? (isId ? " Kondisinya mulai membaik." : " Things are improving.")
       : "";
     const alertCount = s1.length + s2.length;
     const sNote = alertCount > 0
-      ? (isId ? ` ${alertCount} sensor dalam kondisi siaga.` : ` ${alertCount} sensor(s) in alert state.`)
+      ? (isId ? ` ${alertCount} pos pantau berstatus siaga.` : ` ${alertCount} post(s) are on alert.`)
       : "";
     const rfNote = rainfall > 5
-      ? (isId ? ` Curah hujan ${Math.round(rainfall)} mm/jam.` : ` Rainfall ${Math.round(rainfall)} mm/h.`)
+      ? (isId ? ` Sedang hujan ${Math.round(rainfall)} mm/jam.` : ` It's raining ${Math.round(rainfall)} mm/h.`)
       : "";
     return isId
-      ? `Ada tanda awal yang perlu dipantau.${sNote}${tNote}${rfNote} Cek ketinggian air berkala.`
-      : `Early warning signs detected.${sNote}${tNote}${rfNote} Check water levels regularly.`;
+      ? `Ada tanda awal yang perlu diperhatikan.${sNote}${tNote}${rfNote} Pantau terus kondisinya.`
+      : `There are early warning signs.${sNote}${tNote}${rfNote} Keep an eye on conditions.`;
   }
 
   // aman
   const totalSt = stations.length;
   const sNote = totalSt > 0
-    ? (isId ? ` Semua ${totalSt} stasiun terkalibrasi dalam batas normal.` : ` All ${totalSt} calibrated stations within normal range.`)
+    ? (isId ? ` Semua ${totalSt} pos pantau dalam batas normal.` : ` All ${totalSt} monitoring posts are normal.`)
     : "";
-  // Mirror the OOD badge gate (isOutlier && WLR < 0.75): when the input is
-  // statistically unusual, don't claim "nothing concerning" — that contradicts
-  // the visible Anomali chip. Frame it as honest uncertainty instead.
+  // When the model input is statistically unusual (isOutlier && WLR < 0.75),
+  // don't claim "nothing concerning" — frame it as honest uncertainty.
   const oodActive = riskData?.isOutlier && wlr < 0.75;
   const closing = oodActive
-    ? (isId
-      ? " Data sensor sedikit tidak biasa — verdict aman ini perlu dipantau berkala."
-      : " Sensor input is slightly unusual — keep monitoring this 'safe' verdict.")
-    : (isId ? " Tidak ada tanda-tanda mengkhawatirkan." : " No concerning signs detected.");
+    ? (isId ? " Ada data yang sedikit tidak biasa, jadi tetap pantau sesekali." : " Some data looks a little unusual, so check back now and then.")
+    : "";
   return isId
-    ? `Jakarta saat ini aman dari risiko banjir.${sNote}${closing}`
-    : `Jakarta is currently safe from flood risk.${sNote}${closing}`;
+    ? `Jakarta saat ini aman dari banjir.${sNote}${closing}`
+    : `Jakarta is currently safe from flooding.${sNote}${closing}`;
 }
 
 /* ── Wilayah status styling ────────────────────────────── */
