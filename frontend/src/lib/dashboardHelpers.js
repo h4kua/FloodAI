@@ -23,6 +23,49 @@ export function formatWib(isoString) {
   return _wibFormatter.format(new Date(isoString));
 }
 
+/* ── Data freshness ─────────────────────────────────────────
+   The scraper runs every 15 min. Past STALE_STATUS_MIN the status is no
+   longer "right now": the UI shows the date and greys the status out.
+*/
+export const STALE_STATUS_MIN = 180;
+
+export function dataAgeMinutes(isoString) {
+  if (!isoString) return null;
+  return Math.round((Date.now() - new Date(isoString).getTime()) / 60000);
+}
+
+/* "23:29 WIB" while fresh, "12 Jul 2026, 23:29 WIB" once stale. */
+export function formatDataTime(isoString, isId) {
+  if (!isoString) return null;
+  const time = `${formatWib(isoString)} WIB`;
+  if (dataAgeMinutes(isoString) < STALE_STATUS_MIN) return time;
+  const date = new Intl.DateTimeFormat(isId ? "id-ID" : "en-GB", {
+    timeZone: "Asia/Jakarta", day: "numeric", month: "short", year: "numeric",
+  }).format(new Date(isoString));
+  return `${date}, ${time}`;
+}
+
+/* ── Risk trend label — its tone follows the status ─────────
+   A rising trend under "Aman" is a nudge, not an alarm: neutral wording and
+   colour so it never contradicts a calm status.
+*/
+export const TREND_TONE = {
+  warn:    { color: "var(--wsp)",   bg: "var(--wsp-soft)",        border: "var(--wsp-border)"  },
+  good:    { color: "var(--safe)",  bg: "var(--safe-soft)",       border: "var(--safe-border)" },
+  neutral: { color: "var(--muted)", bg: "rgba(255,255,255,0.04)", border: "var(--line)"        },
+};
+
+export function trendDisplay(riskTrend, level, isId) {
+  if (!riskTrend) return null;
+  if (riskTrend === "increasing") {
+    return level === "aman"
+      ? { text: isId ? "↑ Sedikit naik, masih aman" : "↑ Slightly up, still safe", ...TREND_TONE.neutral }
+      : { text: isId ? "↑ Risiko naik" : "↑ Risk rising", ...TREND_TONE.warn };
+  }
+  if (riskTrend === "decreasing") return { text: isId ? "↓ Risiko turun" : "↓ Risk falling", ...TREND_TONE.good };
+  return { text: isId ? "→ Stabil" : "→ Stable", ...TREND_TONE.neutral };
+}
+
 /* ── Station name cleaner ───────────────────────────────── */
 export function cleanStationName(nama) {
   return (nama || "")

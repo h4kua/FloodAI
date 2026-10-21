@@ -165,19 +165,33 @@ export default function About({ riskContext = {} }) {
           <Section title={id ? "Performa model" : "Model performance"}>
             <p style={{ fontSize: "0.85rem", color: "var(--muted)", marginBottom: "1rem", lineHeight: 1.6 }}>
               {id
-                ? "XGBoost dilatih dengan 1.990 baris data historis (split kronologis 80/15/5), SMOTE, dan focal loss."
-                : "XGBoost trained on 1,990 historical rows (chronological 80/15/5 split), SMOTE, and focal loss."}
+                ? "Diukur sekali pada data uji (586 baris) saat pelatihan. Data latihnya sebagian masih proksi, jadi angka ini batas atas — kinerja di lapangan bisa lebih rendah."
+                : "Measured once on the test set (586 rows) at training time. Part of the training data is still a proxy, so these are upper bounds — real-world performance may be lower."}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
               <MetricBar label="AUC-ROC" hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}
                 value={0.901} color="var(--safe)" format={v => v.toFixed(3)} />
               <MetricBar label={id ? "Recall @ Siaga" : "Recall @ Alert"} hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}
                 value={0.839} color="var(--s2)" format={v => (v * 100).toFixed(1) + "%"} />
+              <MetricBar label={id ? "Presisi" : "Precision"} hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}
+                value={0.263} color="var(--wsp)" format={v => (v * 100).toFixed(1) + "%"} />
               <MetricBar label="Brier Score" hint={id ? "(makin rendah makin baik)" : "(lower is better)"}
                 value={0.072} max={0.25} color="var(--cyan)" lowerIsBetter format={() => "0.072"} />
-              <MetricBar label="ECE" hint={id ? "(makin rendah makin baik)" : "(lower is better)"}
-                value={0.014} max={0.25} color="var(--wsp)" lowerIsBetter format={() => "0.014"} />
+              <MetricBar label={id ? "ECE (data uji)" : "ECE (test set)"} hint={id ? "(makin rendah makin baik)" : "(lower is better)"}
+                value={0.014} max={0.25} color="var(--cyan)" lowerIsBetter format={() => "0.014"} />
             </div>
+            <ul style={{ margin: "1rem 0 0", paddingLeft: "1.1rem", display: "flex", flexDirection: "column", gap: "0.4rem", fontSize: "0.85rem", color: "var(--muted)", lineHeight: 1.55 }}>
+              <li>
+                {id
+                  ? "Presisi 26% berarti sekitar 3 dari 4 peringatan model adalah alarm palsu. Model sengaja dibuat sensitif supaya banjir jarang terlewat (recall 84%)."
+                  : "26% precision means about 3 in 4 model warnings are false alarms. The model is deliberately sensitive so floods are rarely missed (84% recall)."}
+              </li>
+              <li>
+                {id
+                  ? "Pada validasi skenario, ECE tercatat 0,378 — jauh di atas batas 0,10. Karena itu langkah kalibrasi saat aplikasi berjalan sedang dinonaktifkan."
+                  : "In scenario validation, ECE measured 0.378 — well above the 0.10 limit. The live calibration step is therefore switched off."}
+              </li>
+            </ul>
           </Section>
 
           <Section title={id ? "Sumber data" : "Data sources"}>

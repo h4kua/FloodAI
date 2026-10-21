@@ -330,6 +330,9 @@ body {
 /* ── DecisionHero — citizen-first status verdict ─────────────── */
 /* Pre-attentive: only Bahaya earns a glow; Aman stays calm.       */
 .status-hero.level-bahaya { box-shadow: var(--s1-glow); }
+/* Stale data — neutral card so an old status never reads as "now" */
+.status-hero.is-stale { background: var(--panel); border-color: var(--line-2); box-shadow: none; }
+.status-hero.is-stale::before { background: var(--muted-2); }
 .decision-hero-eyebrow {
   font-family: inherit;
   font-size: 0.85rem; font-weight: 600;

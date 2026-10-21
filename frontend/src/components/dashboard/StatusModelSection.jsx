@@ -6,7 +6,7 @@
 */
 import { useState } from "react";
 import { useApp } from "../../lib/appContext";
-import { formatWib } from "../../lib/dashboardHelpers";
+import { formatDataTime, dataAgeMinutes, trendDisplay, STALE_STATUS_MIN } from "../../lib/dashboardHelpers";
 
 /* Split the model's interpretation into a one-sentence lead + the remainder.
    Only the FIRST boundary matters; the rest is shown verbatim on demand. */
@@ -29,19 +29,16 @@ export function ModelOutputCard({ riskData, children }) {
   const interpretation = riskData?.interpretation;
   const riskTrend = riskData?.trendState?.risk_trend;
   const level     = riskData?.level ?? "waspada";
-  const snapTimeStr = formatWib(riskData?.snapshotFetchedAt);
+  const snapTimeStr = formatDataTime(riskData?.snapshotFetchedAt, isId);
+  const isStale = (dataAgeMinutes(riskData?.snapshotFetchedAt) ?? 0) >= STALE_STATUS_MIN;
 
-  const levelColor = { aman: "var(--safe)", waspada: "var(--wsp)", siaga: "var(--s2)", bahaya: "var(--s1)" }[level] ?? "var(--wsp)";
+  const levelColor = isStale
+    ? "var(--muted)"
+    : { aman: "var(--safe)", waspada: "var(--wsp)", siaga: "var(--s2)", bahaya: "var(--s1)" }[level] ?? "var(--wsp)";
   const levelLabel = { aman: isId ? "Aman" : "Safe", waspada: isId ? "Waspada" : "Watch",
     siaga: isId ? "Siaga" : "Alert", bahaya: isId ? "Bahaya" : "Danger" }[level] ?? "—";
 
-  const trend = riskTrend === "increasing"
-    ? { text: isId ? "↑ Risiko naik" : "↑ Risk rising", color: "var(--wsp)" }
-    : riskTrend === "decreasing"
-    ? { text: isId ? "↓ Risiko turun" : "↓ Risk falling", color: "var(--safe)" }
-    : riskTrend
-    ? { text: isId ? "→ Stabil" : "→ Stable", color: "var(--muted)" }
-    : null;
+  const trend = isStale ? null : trendDisplay(riskTrend, level, isId);
 
   const [lead, rest] = interpretation ? splitLead(interpretation) : ["", ""];
 
@@ -49,7 +46,7 @@ export function ModelOutputCard({ riskData, children }) {
     <div className="panel panel-body ai-card fade-in">
       <div className="ai-card-head">
         <span className="ai-card-label">✦ {isId ? "Ringkasan AI" : "AI Summary"}</span>
-        {snapTimeStr && <span className="ai-card-time">{snapTimeStr} WIB</span>}
+        {snapTimeStr && <span className="ai-card-time">{snapTimeStr}</span>}
       </div>
 
       {interpretation && (
@@ -81,9 +78,8 @@ export function ModelOutputCard({ riskData, children }) {
 export function StaleDataBanner({ snapshotFetchedAt }) {
   const { lang } = useApp();
   const isId = lang === "id";
-  if (!snapshotFetchedAt) return null;
-  const ageMin = Math.round((Date.now() - new Date(snapshotFetchedAt).getTime()) / 60000);
-  if (ageMin < 30) return null;
+  const ageMin = dataAgeMinutes(snapshotFetchedAt);
+  if (ageMin == null || ageMin < 30) return null;
 
   const ageLabel = ageMin >= 1440
     ? (isId ? `${Math.floor(ageMin / 1440)} hari` : `${Math.floor(ageMin / 1440)} days`)

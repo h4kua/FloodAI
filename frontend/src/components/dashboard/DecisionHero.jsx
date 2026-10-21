@@ -1,5 +1,7 @@
 import { useApp } from "../../lib/appContext";
-import { buildStatusDesc, formatWib } from "../../lib/dashboardHelpers";
+import {
+  buildStatusDesc, formatDataTime, dataAgeMinutes, trendDisplay, STALE_STATUS_MIN,
+} from "../../lib/dashboardHelpers";
 
 /* ── DecisionHero — the first thing a citizen sees ─────────────────────────
    Answers "is my area at risk right now?" in one glance: a giant level word,
@@ -24,16 +26,16 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
     siaga:   { label: isId ? "Siaga"   : "Alert",   color: "var(--s2)"   },
     bahaya:  { label: isId ? "Bahaya!" : "Danger!", color: "var(--s1)"   },
   };
-  const cfg = cfgMap[level] ?? cfgMap.waspada;
   const dynamicDesc = buildStatusDesc(riskData, isId);
 
-  const snapTimeStr = formatWib(snapshotFetchedAt);
+  // Old data must not look like "right now": grey the status, show the date.
+  const isStale = (dataAgeMinutes(snapshotFetchedAt) ?? 0) >= STALE_STATUS_MIN;
+  const cfg = isStale
+    ? { ...(cfgMap[level] ?? cfgMap.waspada), color: "var(--muted)" }
+    : (cfgMap[level] ?? cfgMap.waspada);
+  const snapTimeStr = formatDataTime(snapshotFetchedAt, isId);
 
-  const trendCfg = riskTrend === "increasing"
-    ? { text: isId ? "↑ Risiko Naik" : "↑ Risk Rising", color: "var(--wsp)", bg: "var(--wsp-soft)", border: "var(--wsp-border)" }
-    : riskTrend === "decreasing"
-    ? { text: isId ? "↓ Risiko Turun" : "↓ Risk Falling", color: "var(--safe)", bg: "var(--safe-soft)", border: "var(--safe-border)" }
-    : { text: isId ? "→ Stabil" : "→ Stable", color: "var(--muted)", bg: "rgba(255,255,255,0.04)", border: "var(--line)" };
+  const trendCfg = trendDisplay(riskTrend, level, isId);
 
   // AlertRibbon folded in: one red line with real station counts, Siaga only.
   const alertLine = siaga1Count > 0
@@ -48,13 +50,15 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
   const alertColor = siaga1Count > 0 ? "var(--s1)" : "var(--s2)";
 
   return (
-    <div className={`status-hero fade-in level-${level}`}>
+    <div className={`status-hero fade-in level-${level}${isStale ? " is-stale" : ""}`}>
       <div className="status-hero-main">
         <div className="decision-hero-eyebrow" style={{ color: cfg.color }}>
-          {isId ? "Status Jakarta saat ini" : "Jakarta right now"}
+          {isStale
+            ? (isId ? "Status terakhir yang diketahui" : "Last known status")
+            : (isId ? "Status Jakarta saat ini" : "Jakarta right now")}
           {snapTimeStr && (
             <span style={{ color: "var(--muted)", marginLeft: "0.5rem", fontWeight: 500 }}>
-              · {isId ? "data" : "data from"} {snapTimeStr} WIB
+              · {isId ? "data" : "data from"} {snapTimeStr}
             </span>
           )}
         </div>
@@ -63,14 +67,17 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
         </div>
         <p className="status-hero-desc decision-hero-desc">{dynamicDesc}</p>
 
-        <div className="decision-hero-meta">
-          <span
-            className="decision-hero-trend"
-            style={{ background: trendCfg.bg, border: `1px solid ${trendCfg.border}`, color: trendCfg.color }}
-          >
-            {trendCfg.text}
-          </span>
-        </div>
+        {/* A trend from old data says nothing about now — hide it when stale */}
+        {trendCfg && !isStale && (
+          <div className="decision-hero-meta">
+            <span
+              className="decision-hero-trend"
+              style={{ background: trendCfg.bg, border: `1px solid ${trendCfg.border}`, color: trendCfg.color }}
+            >
+              {trendCfg.text}
+            </span>
+          </div>
+        )}
 
         {alertLine && (
           <div className="decision-hero-alert" style={{ color: alertColor }}>

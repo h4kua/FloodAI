@@ -5,6 +5,8 @@
    that CTA buttons are built from.
 */
 
+import { dataAgeMinutes, STALE_STATUS_MIN } from "./dashboardHelpers";
+
 const WORST_RANK = { "Siaga 1": 3, "Siaga 2": 2, "Siaga 3": 1 };
 
 export function deriveActions(riskData, stations = [], isId = true) {
@@ -62,10 +64,24 @@ export function deriveActions(riskData, stations = [], isId = true) {
       : `Light rain ${Math.round(rainfall)} mm/h — monitor if intensity rises over the next 30 minutes.`
     );
   }
-  if (riskTrend === "increasing" && actions.length < 3) {
-    actions.push(isId
-      ? `Tren risiko sedang naik — persiapkan evakuasi mandiri dan koordinasi dengan RT/RW setempat.`
-      : `Risk trend rising — prepare self-evacuation plan and coordinate with local RT/RW.`
+  // The trend advice scales with the status, so a rising trend under "Aman"
+  // never tells people to evacuate while the headline says they're safe.
+  // A trend from stale data says nothing about now, so it gives no advice.
+  const isStale = (dataAgeMinutes(riskData?.snapshotFetchedAt) ?? 0) >= STALE_STATUS_MIN;
+  if (riskTrend === "increasing" && !isStale && actions.length < 3) {
+    const level = riskData?.level ?? "waspada";
+    actions.push(
+      level === "aman"
+        ? (isId
+            ? "Risiko sedikit naik, tapi masih aman. Cek lagi aplikasi ini beberapa jam ke depan."
+            : "Risk is slightly up but still safe. Check back in a few hours.")
+        : level === "waspada"
+        ? (isId
+            ? "Risiko sedang naik — siapkan tas darurat dan rencana mengungsi bila diperlukan."
+            : "Risk is rising — pack an emergency bag and plan where you'd go if needed.")
+        : (isId
+            ? "Risiko sedang naik — persiapkan evakuasi mandiri dan koordinasi dengan RT/RW setempat."
+            : "Risk is rising — prepare to evacuate and coordinate with your local RT/RW.")
     );
   }
   if (actions.length === 0) {

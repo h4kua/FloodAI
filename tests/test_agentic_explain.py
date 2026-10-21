@@ -99,6 +99,33 @@ def test_fallback_explanation_warning_status():
     assert out["status_banjir"] == "WASPADA"
 
 
+def test_fallback_explanation_does_not_claim_rain_when_dry():
+    out = _fallback_explanation({
+        "risk_level": "WARNING",
+        "features": {"rainfall_mm": 0.0, "water_level_ratio": 0.45, "water_level_delta": 0.0},
+    })
+    text = out["penjelasan"].lower()
+    assert "hujan deras" not in text
+    assert "tidak hujan" in text
+    assert "45% dari batas siaga" in text
+    assert "naik" not in text.split("batas siaga")[1]
+
+
+def test_fallback_explanation_reports_heavy_rain_and_rising_water():
+    out = _fallback_explanation({
+        "risk_level": "WARNING",
+        "features": {"rainfall_mm": 25.0, "water_level_ratio": 0.8, "water_level_delta": 0.05},
+    })
+    text = out["penjelasan"].lower()
+    assert "hujan deras (25 mm/jam)" in text
+    assert "sedang naik" in text
+
+
+def test_fallback_explanation_without_features_makes_no_weather_claim():
+    out = _fallback_explanation({"risk_level": "SAFE"})
+    assert "hujan" not in out["penjelasan"].lower()
+
+
 def test_explain_uses_fallback_when_claude_unavailable():
     with patch(
         "agents.llm_orchestrator._call_llm_sync",

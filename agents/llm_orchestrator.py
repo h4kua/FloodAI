@@ -209,6 +209,51 @@ def _extract_population(prediction: dict) -> str | None:
     return None
 
 
+def _feature_float(features: dict, key: str) -> float | None:
+    try:
+        value = features.get(key)
+        return None if value is None else float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _describe_observed_conditions(prediction: dict) -> str:
+    """
+    One factual sentence about rain and river level, built only from the
+    prediction's own features. Returns "" when the data is missing, so the
+    fallback text never claims rain or rising water the sensors don't show.
+    """
+    features = prediction.get("features") or {}
+    if not isinstance(features, dict):
+        return ""
+    rain  = _feature_float(features, "rainfall_mm")
+    ratio = _feature_float(features, "water_level_ratio")
+    delta = _feature_float(features, "water_level_delta")
+
+    parts: list[str] = []
+    if rain is not None:
+        if rain >= 20:
+            parts.append(f"hujan deras ({rain:.0f} mm/jam)")
+        elif rain >= 5:
+            parts.append(f"hujan sedang ({rain:.0f} mm/jam)")
+        elif rain > 0:
+            parts.append("hujan ringan")
+        else:
+            parts.append("saat ini tidak hujan")
+    if ratio is not None:
+        water = f"air sungai {ratio * 100:.0f}% dari batas siaga"
+        if delta is not None and delta > 0.015:
+            water += " dan sedang naik"
+        elif delta is not None and delta < -0.015:
+            water += " dan mulai turun"
+        parts.append(water)
+
+    if not parts:
+        return ""
+    sentence = ", ".join(parts)
+    return sentence[0].upper() + sentence[1:] + "."
+
+
 # ---------------------------------------------------------------------------
 # Deterministic fallback — never calls Claude
 # ---------------------------------------------------------------------------
@@ -225,6 +270,8 @@ def _fallback_explanation(prediction: dict) -> dict:
     confidence = _format_confidence(prediction.get("confidence_score"))
     district   = _extract_district(prediction)
     population = _extract_population(prediction)
+    observed   = _describe_observed_conditions(prediction)
+    observed   = f" {observed}" if observed else ""
 
     hist_depth = ""
     try:
@@ -239,7 +286,7 @@ def _fallback_explanation(prediction: dict) -> dict:
 
     if status == "BAHAYA":
         penjelasan = (
-            f"Air sudah melewati batas bahaya di {district}. "
+            f"Risiko banjir di {district} sangat tinggi.{observed} "
             f"Tinggalkan rumah sekarang — jangan tunggu air masuk.{hist_depth} "
             "Pergi ke titik evakuasi terdekat."
         )
@@ -254,7 +301,7 @@ def _fallback_explanation(prediction: dict) -> dict:
 
     elif status == "WASPADA":
         penjelasan = (
-            f"Hujan deras turun di {district} dan air mulai naik. "
+            f"Ada tanda risiko banjir di {district}.{observed} "
             "Belum berbahaya, tapi bisa berubah dalam 1–2 jam ke depan. "
             "Pantau terus info dari RT/RW — belum perlu evakuasi."
         )
@@ -269,8 +316,7 @@ def _fallback_explanation(prediction: dict) -> dict:
 
     else:  # AMAN
         penjelasan = (
-            f"Air sungai di {district} masih jauh di bawah batas aman. "
-            "Curah hujan rendah dan tidak ada tanda peningkatan risiko. "
+            f"Kondisi di {district} aman.{observed} "
             "Warga tidak perlu khawatir saat ini."
         )
         tindakan = [
