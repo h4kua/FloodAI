@@ -11,7 +11,7 @@
 | Backend | FastAPI + uvicorn, port 8080 |
 | Frontend | React 18 + Vite, port 5173 (dev) |
 | Database | Supabase / PostgreSQL (psycopg2) |
-| ML | XGBoost + scikit-learn 1.5.2 (AUC ~0.94, ECE 0.196) |
+| ML | XGBoost + scikit-learn 1.8.0 — realtime-native bundle; test split AUC 0.901 / recall 0.839 / ECE 0.014 (bootstrap-proxy data with feature leakage, optimistic; no field evaluation yet). AUC ~0.94 is the legacy Jakarta model on `/predict/realtime`. |
 | LLM | Groq llama-3.3-70b-versatile (chatbot + explain) |
 | Deploy | Railway (backend) · Vercel (frontend) |
 
@@ -205,7 +205,7 @@ Home()
 
 | UI | Note |
 |---|---|
-| Zone flood probability % | `40% ML score + status bonus + siaga bonus + BMKG rain + historical bias` |
+| ~~Zone flood probability %~~ | Removed with `KecamatanZones`. Status per wilayah now comes directly from the worst DSDADKI post in each wilayah (`groupStationsByWilayah`). |
 | Map district circles | Reference only, very faint |
 
 ---
@@ -312,7 +312,9 @@ L4 TREND       — sustained rising trend → WARNING → DANGER
 | Issue | Status | Dampak |
 |---|---|---|
 | DSDADKI stations without GPS | Active | Some stations lat/lon=null; appear in StationPanel/Alert but not map |
-| Calibration ECE 0.196 | Active | Confidence score less accurate (target <0.10); calibration step deactivated |
+| No valid field calibration | Active | ECE 0.014 is the bundle's bootstrap-proxy test split (optimistic). 0.196 (`calibration_cache.json`, synthetic labels from model ranking) and 0.378 (`scenario_validation.json`, n=7) are from older models. Calibration penalty is off (`services/decision_engine.py`). |
+| Feature leakage in test metrics | Active | `kecamatan_historical_flood_freq` counts BPBD events 2020–2026, including the 2024 test period |
+| No observed flood labels for evaluation | Active | `realtime_feature_history.csv` has no label column; `calibration_labeled.csv` labels are synthetic |
 | BNPB district mapping gap | Active | Some kecamatan not mapped to kabkot |
 | TMA scraper sometimes broken | Active | Snapshot may be stale; StaleDataBanner shows if >30 min old |
 | wilayah_summary only has BMKG forecast slots every ~6h | By design | WilayahForecastGrid time labels rounded to nearest 3/6h |

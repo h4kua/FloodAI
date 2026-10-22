@@ -36,7 +36,19 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Weather/alerts: OpenWeather + BMKG.
 
 ## Known issues
-- Calibration step deactivated (ECE 0.3784).
+- Calibration penalty deactivated (`services/decision_engine.py`). No valid field ECE exists for
+  the current realtime-native bundle: 0.0138 (`models/realtime_native_bundle/training_stats.json`)
+  is its bootstrap-proxy test split and optimistic; 0.1962 (`artifacts/configurations/calibration_cache.json`,
+  labels derived from the model's own ranking) and 0.3784 (`artifacts/reports/scenario_validation.json`,
+  n=7) come from older model versions.
+- Target leakage: `kecamatan_historical_flood_freq` is built from BPBD events 2020–2026
+  (`data/bundled/kelurahan_flood_history.json`), which includes the 2024 test period, so the
+  bundle's test metrics (AUC 0.901, recall 0.839) are inflated.
+- The split named `chronological_80_15_5` is actually 68/12/20 (train 1990 / val 352 / test 586).
+- No observed row-level flood labels for evaluation: `realtime_feature_history.csv` has no label
+  column; `calibration_labeled.csv` labels are synthetic.
+- AUC 0.9452 belongs to the legacy Jakarta model (`flood_model_jakarta.pkl`, random 80:20 split),
+  served only by `/predict/realtime`; the UI uses `/predict/realtime-native`.
 - BNPB district mapping gap (kecamatan write-back); InaRISK falls back to bundled static JSON.
 
 ## Resolved

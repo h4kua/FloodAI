@@ -113,7 +113,7 @@ export default function About({ riskContext = {} }) {
               desc={id ? "Setiap 15 menit kami mengambil ketinggian air dari pos pantau sungai, kondisi cuaca, dan peringatan BMKG." : "Every 15 minutes we collect water levels from river monitoring posts, weather conditions, and BMKG warnings."} />
             <Step num="2"
               label={id ? "Menghitung risiko" : "Estimating the risk"}
-              desc={id ? "Model komputer yang dilatih dengan data banjir Jakarta sejak 2010 memperkirakan seberapa besar kemungkinan banjir." : "A computer model trained on Jakarta flood records since 2010 estimates how likely a flood is."} />
+              desc={id ? "Model komputer yang dilatih dengan data banjir Jakarta 2020–2024 memperkirakan seberapa besar kemungkinan banjir." : "A computer model trained on Jakarta flood records from 2020–2024 estimates how likely a flood is."} />
             <Step num="3"
               label={id ? "Memberi tahu Anda" : "Telling you"}
               desc={id ? "Hasilnya ditampilkan sebagai status sederhana — Aman, Waspada, Siaga, atau Bahaya — beserta langkah yang disarankan." : "The result is shown as a simple status — Safe, Watch, Alert, or Danger — with suggested next steps."} />
@@ -165,8 +165,8 @@ export default function About({ riskContext = {} }) {
           <Section title={id ? "Performa model" : "Model performance"}>
             <p style={{ fontSize: "0.85rem", color: "var(--muted)", marginBottom: "1rem", lineHeight: 1.6 }}>
               {id
-                ? "Diukur sekali pada data uji (586 baris) saat pelatihan. Data latihnya sebagian masih proksi, jadi angka ini batas atas — kinerja di lapangan bisa lebih rendah."
-                : "Measured once on the test set (586 rows) at training time. Part of the training data is still a proxy, so these are upper bounds — real-world performance may be lower."}
+                ? "Diukur sekali saat pelatihan, pada data uji 586 baris bulanan (Jan–Des 2024). Data latihnya masih proksi, dan satu fitur (frekuensi banjir per kecamatan) dihitung dari kejadian 2020–2026 — termasuk periode uji. Jadi angka di bawah terlalu optimistis; model ini belum pernah diuji dengan data lapangan."
+                : "Measured once at training time on a test set of 586 monthly rows (Jan–Dec 2024). The training data is still a proxy, and one feature (per-kecamatan flood frequency) is computed from 2020–2026 events — including the test period. So the figures below are optimistic; the model has not yet been tested on field data."}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
               <MetricBar label="AUC-ROC" hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}
@@ -188,8 +188,8 @@ export default function About({ riskContext = {} }) {
               </li>
               <li>
                 {id
-                  ? "Pada validasi skenario, ECE tercatat 0,378 — jauh di atas batas 0,10. Karena itu langkah kalibrasi saat aplikasi berjalan sedang dinonaktifkan."
-                  : "In scenario validation, ECE measured 0.378 — well above the 0.10 limit. The live calibration step is therefore switched off."}
+                  ? "Belum ada pengukuran kalibrasi yang sahih untuk model ini di lapangan. Angka kalibrasi lain di proyek ini (ECE 0,196 dan 0,378) berasal dari versi model sebelumnya, dan penyesuaian kalibrasi saat aplikasi berjalan sedang dinonaktifkan."
+                  : "There is no valid field calibration measurement for this model yet. Other calibration figures in this project (ECE 0.196 and 0.378) come from earlier model versions, and the live calibration adjustment is switched off."}
               </li>
             </ul>
           </Section>
@@ -202,7 +202,7 @@ export default function About({ riskContext = {} }) {
             <Row tag="OWM" title="OpenWeatherMap"
               desc={id ? "Suhu, kelembapan, dan curah hujan realtime." : "Realtime temperature, humidity, and rainfall."} />
             <Row tag="BPBD" title={id ? "Data historis banjir" : "Historical flood data"}
-              desc={id ? "Kejadian banjir Jakarta sejak 2010, dipakai untuk melatih model." : "Jakarta flood events since 2010, used to train the model."} />
+              desc={id ? "Kejadian banjir Jakarta 2020–2024, dipakai untuk melatih model." : "Jakarta flood events from 2020–2024, used to train the model."} />
           </Section>
 
           <Section title={id ? "Model & AI" : "Model & AI"}>
