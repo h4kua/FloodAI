@@ -5,7 +5,7 @@ export default function EmergencyContacts() {
   const contacts = [
     { org: "BPBD Nasional", number: "117", roleKey: "contacts.bpbd"     },
     { org: "Basarnas",      number: "115", roleKey: "contacts.basarnas" },
-    { org: "Ambulans",      number: "118", roleKey: "contacts.ambulans" },
+    { org: "Ambulans",      number: "119", roleKey: "contacts.ambulans" },
     { org: "Pemadam",       number: "113", roleKey: "contacts.damkar"   },
   ];
 

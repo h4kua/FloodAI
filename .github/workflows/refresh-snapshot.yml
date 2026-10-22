@@ -1,12 +1,13 @@
 name: Refresh flood snapshot
 
-# Keeps the production snapshot fresh without paying for an always-on machine.
+# Backup refresh for the production snapshot.
 #
-# The snapshot is refreshed by an in-process APScheduler inside the FastAPI app,
-# but Fly.io stops the machine when idle (auto_stop_machines='stop',
-# min_machines_running=0), so the scheduler only runs while someone is browsing.
-# This cron pings the refresh endpoint on a schedule, which BOTH wakes the
-# machine (auto_start_machines=true) AND rebuilds the snapshot.
+# The snapshot is refreshed by an in-process APScheduler inside the FastAPI app.
+# Since 2477fcb, fly.toml keeps one machine always running
+# (min_machines_running=1), so that scheduler is the primary refresher. This
+# cron is a safety net: if the machine was stopped or the scheduler stalled, the
+# ping wakes it (auto_start_machines=true) and rebuilds the snapshot. When the
+# scheduler already refreshed recently the endpoint answers 429, which is fine.
 #
 # Required repository secrets (Settings → Secrets and variables → Actions):
 #   REFRESH_URL      Full URL, e.g. https://<your-app>.fly.dev/internal/refresh-snapshot

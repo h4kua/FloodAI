@@ -378,7 +378,7 @@ Nomor BPBD Jakarta: 117 (24 jam, tahu shelter aktif real time).`,
     kontak: `Nomor darurat Jakarta — simpan sekarang:
 • BPBD Jakarta (Badan Penanggulangan Bencana): 117
 • Basarnas (SAR nasional): 115
-• Ambulans: 118 / 119
+• Ambulans (Dinkes DKI): 119 — atau 112
 • Call Center DKI Jakarta: 112
 • Dinas SDA (pompa & pintu air): 021-3855555
 • PMI Jakarta: 021-3006767
@@ -677,7 +677,7 @@ BPBD Jakarta: 117 (24 hours, real-time shelter availability).`,
     kontak: `Emergency numbers for Jakarta — save these now:
 • BPBD Jakarta (Disaster Management): 117
 • Basarnas (National SAR): 115
-• Ambulance: 118 / 119
+• Ambulance (Jakarta Health Office): 119 — or 112
 • Jakarta Emergency Call Center: 112
 • DSDADKI (pumps & water gates): 021-3855555
 • Indonesian Red Cross (PMI Jakarta): 021-3006767

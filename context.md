@@ -254,8 +254,8 @@ The LLM never changes the decision; it only writes explanations, with a determin
 | Kecamatan table partly unverified | Active | `_STATION_KEC` entries other than the corrected Ancol/removed ones are unchecked |
 | Posts without GPS | Active | e.g. Bendung Katulampa (`lat=null`): listed, not mapped |
 | Unused public write APIs | Active | `/reports`, `/sos`, `/family/*` have no UI; remove or re-expose deliberately |
-| Emergency number mismatch | Active | Chatbot offline text says Ambulans 119, the contacts card says 118 |
-| `min_machines_running` mismatch | Active | `fly.toml` sets 1; the refresh workflow's comment assumes 0 |
+| Emergency numbers | Resolved 2026-10-22 | Ambulance is 119 (or 112) everywhere, per Dinkes DKI; 118 is the older number |
+| `min_machines_running` | Resolved 2026-10-22 | `fly.toml` keeps 1 machine on (2477fcb); the refresh workflow is a backup and its comment now says so |
 | BNPB district mapping gap | Active | Some kecamatan not mapped to kabkot; InaRISK falls back to bundled JSON |
 | Legacy TMA Selenium scraper | Disabled by design | No `TMA_PROXY_URL`; degrades to STALE |
 | BMKG slots every ~3–6 h | By design | Forecast title shows the real span (e.g. "2 hari ke depan") |
