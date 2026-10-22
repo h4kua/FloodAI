@@ -76,23 +76,22 @@ export function cleanStationName(nama) {
 }
 
 /* ── Station → Kecamatan/area lookup ───────────────────────
-   Used by KecamatanZones to show human-readable location
-   names instead of technical station identifiers.
+   Used by the water-level list (StationPanel) to show human-readable
+   kecamatan names. Entries that contradicted the station coordinates were
+   corrected or removed (no label beats a wrong one); the rest are unverified.
 */
 const _STATION_KEC = {
-  "P.A. Marina Ancol (Laut)":  { kecamatan: "Penjaringan",        area: "Pesisir Ancol" },
+  "P.A. Marina Ancol (Laut)":  { kecamatan: "Pademangan",         area: "Pesisir Ancol" },
   "Pompa Pasar Ikan 1":        { kecamatan: "Penjaringan",        area: "Pelabuhan Sunda Kelapa" },
   "P.A. Cengkareng Drain":     { kecamatan: "Cengkareng",         area: "Cengkareng-Kapuk" },
   "P.A. Manggarai 2":          { kecamatan: "Tebet",              area: "Manggarai-Bukit Duri" },
   "P.A. Katulampa":            { kecamatan: "Bogor Timur",        area: "Katulampa, Bogor" },
   "P.A. Depok":                { kecamatan: "Pancoran Mas",       area: "Depok" },
   "P.A. Hek Kramat Jati 1":   { kecamatan: "Kramat Jati",        area: "Kali Baru Timur" },
-  "P.A. Kaliduri 1":           { kecamatan: "Kalideres",          area: "Kali Biru" },
-  "P.A. Ancol Flushing 1":     { kecamatan: "Cilincing",          area: "Saluran Ancol" },
-  "P.A. Marina Ancol (Kali)":  { kecamatan: "Penjaringan",        area: "Kali Ancol" },
+  "P.A. Ancol Flushing 1":     { kecamatan: "Pademangan",         area: "Saluran Ancol" },
+  "P.A. Marina Ancol (Kali)":  { kecamatan: "Pademangan",         area: "Kali Ancol" },
   "P.A. Manggarai":            { kecamatan: "Tebet",              area: "Manggarai" },
   "P.A. Cipinang Melayu":      { kecamatan: "Makasar",            area: "Kali Cipinang" },
-  "P.A. Sunter Hulu":          { kecamatan: "Cilincing",          area: "Kali Sunter Hulu" },
   "P.A. Karet":                { kecamatan: "Tanah Abang",        area: "Kali Krukut" },
   "P.A. Pesanggrahan":         { kecamatan: "Pesanggrahan",       area: "Kali Pesanggrahan" },
   "P.A. Krukut Hulu":          { kecamatan: "Mampang Prapatan",   area: "Kali Krukut Hulu" },
@@ -303,7 +302,6 @@ export const UPSTREAM_GROUP = "upstream";
    put them in Kramat Jati (Timur) and the Kali Duri area (Barat). */
 const WILAYAH_OVERRIDE = {
   "P.A. Hek Kramat Jati 1": "Jakarta Timur",
-  "P.A. Kaliduri 1":        "Jakarta Barat",
 };
 
 export function stationWilayah(s) {

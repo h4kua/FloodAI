@@ -61,10 +61,11 @@ async def shelter_checkin(payload: ShelterCheckinIn) -> dict:
     shelter_name = payload.shelter_name
 
     family_id = None
+    family_notified = False
     if payload.family_code:
         family_id = await get_family_id(payload.family_code.upper())
         if family_id:
-            await checkin_member(
+            family_notified = await checkin_member(
                 family_code=payload.family_code.upper(),
                 device_id=payload.device_id,
                 status="safe",
@@ -93,4 +94,10 @@ async def shelter_checkin(payload: ShelterCheckinIn) -> dict:
         location_label=shelter_name,
     )
 
-    return {"checkin": checkin, "shelter_name": shelter_name, "distance_m": round(distance_m, 1)}
+    # family_notified lets the UI say "your family was told" only when it's true.
+    return {
+        "checkin": checkin,
+        "shelter_name": shelter_name,
+        "distance_m": round(distance_m, 1),
+        "family_notified": bool(family_notified),
+    }

@@ -104,3 +104,9 @@ data/raw/pintu_air_latest.json
 .env*
 _skills_tmp/
 
+
+# Runtime data — rebuilt by the snapshot scheduler on every backend start and
+# refresh (api/main.py), so tracking it only produces noise in every diff.
+poskobanjir/data/raw/*.json
+poskobanjir/data/clean/*
+artifacts/reports/latest_realtime_native_prediction.json

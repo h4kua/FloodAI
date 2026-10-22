@@ -6,7 +6,7 @@ import { useT } from "../lib/appContext";
  * "I've Arrived" button) from Alert.jsx's Shelter Finder flow, per the
  * paper's "zero manual input" intent.
  */
-export default function SafeArrival({ shelterName, onClose }) {
+export default function SafeArrival({ shelterName, familyNotified = false, onClose }) {
   const t = useT();
 
   return (
@@ -38,12 +38,15 @@ export default function SafeArrival({ shelterName, onClose }) {
         <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "1.2rem", fontWeight: 800, color: "var(--safe)", marginBottom: "0.5rem" }}>
           {t("safeArrival.title")}
         </p>
-        <p style={{ color: "var(--muted)", fontSize: "0.85rem", lineHeight: 1.55, marginBottom: "0.375rem" }}>
+        <p style={{ color: "var(--muted)", fontSize: "0.85rem", lineHeight: 1.55, marginBottom: familyNotified ? "0.375rem" : "1.5rem" }}>
           {t("safeArrival.subtitle", { shelter: shelterName })}
         </p>
-        <p style={{ color: "var(--muted-2)", fontSize: "0.76rem", marginBottom: "1.5rem" }}>
-          {t("safeArrival.notified")}
-        </p>
+        {/* Only claim the family was told when the backend says it was */}
+        {familyNotified && (
+          <p style={{ color: "var(--muted-2)", fontSize: "0.8rem", marginBottom: "1.5rem" }}>
+            {t("safeArrival.notified")}
+          </p>
+        )}
         <button className="btn btn-ghost" onClick={onClose}>{t("safeArrival.close")}</button>
       </div>
     </div>

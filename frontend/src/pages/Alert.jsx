@@ -67,7 +67,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const config       = humanizeRiskLevel(riskLevel, lang);
   const selectedDest = destId ? DESTINATIONS.find((d) => d.id === destId) ?? null : null;
 
-  const [safeArrivalShelter, setSafeArrivalShelter] = useState(null);
+  const [safeArrival, setSafeArrival] = useState(null); // { name, familyNotified }
   const [checkingIn, setCheckingIn] = useState(false);
 
   const confirmArrival = useCallback(async (position, shelter, auto) => {
@@ -89,7 +89,10 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           family_code: getFamilyCode() || null,
         }),
       });
-      if (res.ok) setSafeArrivalShelter(shelter.name);
+      if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setSafeArrival({ name: shelter.name, familyNotified: data.family_notified === true });
+      }
     } catch {
       // Best-effort — arrival confirmation is not on the critical path.
     } finally {
@@ -471,8 +474,12 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
 
       <ChatBot riskContext={{ level: riskLevel, rainfall }} />
 
-      {safeArrivalShelter && (
-        <SafeArrival shelterName={safeArrivalShelter} onClose={() => setSafeArrivalShelter(null)} />
+      {safeArrival && (
+        <SafeArrival
+          shelterName={safeArrival.name}
+          familyNotified={safeArrival.familyNotified}
+          onClose={() => setSafeArrival(null)}
+        />
       )}
     </>
   );

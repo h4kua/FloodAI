@@ -44,6 +44,7 @@ def test_checkin_within_geofence_succeeds():
     assert response.status_code == 200
     body = response.json()
     assert body["distance_m"] < 250
+    assert body["family_notified"] is False  # no family code → nobody was told
     mock_checkin.assert_called_once()
     mock_report.assert_called_once()
 
@@ -70,6 +71,7 @@ def test_checkin_with_family_code_notifies_family():
             headers=_HEADERS,
         )
     assert response.status_code == 200
+    assert response.json()["family_notified"] is True
     mock_get_id.assert_called_once_with("ABCDEF")
     mock_family_checkin.assert_called_once()
     assert mock_family_checkin.call_args.kwargs["status"] == "safe"
