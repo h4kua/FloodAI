@@ -7,6 +7,7 @@ import { useT } from "../lib/appContext";
 
 import CollapsibleSection from "../components/shell/CollapsibleSection";
 import DecisionHero from "../components/dashboard/DecisionHero";
+import WilayahStatus from "../components/dashboard/WilayahStatus";
 import ActionCard from "../components/dashboard/ActionCard";
 import GlanceChips from "../components/dashboard/GlanceChips";
 import { StationPanel } from "../components/dashboard/StationSection";
@@ -23,7 +24,7 @@ const DETAIL_TABS = [
 
 /* ── Beranda — citizen-first, decision-first ───────────────────────────────
    Per the FloodGuard HCI spec, the page answers three questions in order:
-   1. "Is my area at risk right now?"  → DecisionHero
+   1. "Is my area at risk right now?"  → DecisionHero + WilayahStatus (per wilayah)
    2. "What should I do?"              → ActionCard (≤3 actions, 1 primary CTA)
    3. "Show me the situation"          → GlanceChips + live map
    Everything technical (AI analysis, sensor tables, forecasts) sits behind
@@ -78,6 +79,9 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
 
       {/* 1 — Is my area at risk right now? */}
       <DecisionHero riskData={riskData} siaga1Count={realSiaga1} siaga2Count={realSiaga2} />
+
+      {/* 1b — …and in MY part of Jakarta? */}
+      <WilayahStatus riskData={riskData} />
 
       {/* 2 + 3 — What do I do? / Show me. Desktop: map left, action+chips right */}
       <div className="home-main fade-in">

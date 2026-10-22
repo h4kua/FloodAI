@@ -211,11 +211,18 @@ export function buildStatusDesc(riskData, isId) {
       : `There are early warning signs.${sNote}${tNote}${rfNote} Keep an eye on conditions.`;
   }
 
-  // aman
-  const totalSt = stations.length;
-  const sNote = totalSt > 0
-    ? (isId ? ` Semua ${totalSt} pos pantau dalam batas normal.` : ` All ${totalSt} monitoring posts are normal.`)
-    : "";
+  // aman — only claim "all normal" when every post really is below Waspada,
+  // so the sentence agrees with the per-wilayah badges right below it.
+  const totalSt   = stations.length;
+  const alertSt   = s1.length + s2.length;
+  const waspadaSt = stations.filter(s => s.ratio >= 0.5 && s.ratio < 0.75).length;
+  const sNote = totalSt === 0
+    ? ""
+    : alertSt > 0
+    ? (isId ? ` Tapi ${alertSt} pos pantau sudah mendekati batas siaga — pantau terus.` : ` But ${alertSt} post(s) are close to the alert limit — keep watching.`)
+    : waspadaSt > 0
+    ? (isId ? ` Air di ${waspadaSt} dari ${totalSt} pos pantau mulai tinggi (Waspada), tapi belum mendekati batas siaga.` : ` Water is getting high at ${waspadaSt} of ${totalSt} posts (Watch), but not near the alert limit.`)
+    : (isId ? ` Semua ${totalSt} pos pantau dalam batas normal.` : ` All ${totalSt} monitoring posts are normal.`);
   // When the model input is statistically unusual (isOutlier && WLR < 0.75),
   // don't claim "nothing concerning" — frame it as honest uncertainty.
   const oodActive = riskData?.isOutlier && wlr < 0.75;
@@ -282,6 +289,42 @@ export function inferWilayah(lat, lon) {
   if (lat < -6.25)                  return "Jakarta Selatan";
   if (lon < 106.825)                return "Jakarta Barat";
   return "Jakarta Pusat";
+}
+
+/* ── Stations grouped by wilayah ────────────────────────────
+   DSDADKI sends wilayah as "KOTA JAKARTA UTARA"; upstream posts come as
+   Depok / Bogor. Grouping is done here from the stations themselves — the
+   backend's wilayah_summary does not match these names and reports 0 posts.
+*/
+export const JAKARTA_WILAYAH = ["Jakarta Utara", "Jakarta Barat", "Jakarta Pusat", "Jakarta Selatan", "Jakarta Timur"];
+export const UPSTREAM_GROUP = "upstream";
+
+/* DSDADKI files these posts under KOTA JAKARTA UTARA, but their coordinates
+   put them in Kramat Jati (Timur) and the Kali Duri area (Barat). */
+const WILAYAH_OVERRIDE = {
+  "P.A. Hek Kramat Jati 1": "Jakarta Timur",
+  "P.A. Kaliduri 1":        "Jakarta Barat",
+};
+
+export function stationWilayah(s) {
+  if (WILAYAH_OVERRIDE[s.nama]) return WILAYAH_OVERRIDE[s.nama];
+  const raw = (s.wilayah || "").toUpperCase();
+  const named = JAKARTA_WILAYAH.find((w) => raw.includes(w.toUpperCase()));
+  if (named) return named;
+  if (raw) return UPSTREAM_GROUP;   // a named place outside Jakarta (Depok, Bogor…)
+  return inferWilayah(s.lat, s.lon) || UPSTREAM_GROUP;
+}
+
+/* All 5 Jakarta wilayah (even with no posts) plus the upstream group when it
+   has posts. Each group: { key, stations (highest first), maxRatio }. */
+export function groupStationsByWilayah(stations = []) {
+  const byKey = {};
+  for (const s of stations) (byKey[stationWilayah(s)] ??= []).push(s);
+  const keys = [...JAKARTA_WILAYAH, ...(byKey[UPSTREAM_GROUP] ? [UPSTREAM_GROUP] : [])];
+  return keys.map((key) => {
+    const list = [...(byKey[key] ?? [])].sort((a, b) => b.ratio - a.ratio);
+    return { key, stations: list, maxRatio: list.length ? list[0].ratio : null };
+  });
 }
 
 /* ── Wind direction (8-point compass, localized) ───────── */
