@@ -295,12 +295,37 @@ def _parse_bmkg_cuaca_per_wilayah(cuaca_path: Path) -> dict:
     return result
 
 
+# DSDADKI files these posts under KOTA JAKARTA UTARA, but their coordinates put
+# them in Kramat Jati (Timur) and the Kali Duri area (Barat). Mirrors the
+# frontend's WILAYAH_OVERRIDE so both sides agree on where a post belongs.
+_WILAYAH_OVERRIDE = {
+    "P.A. Hek Kramat Jati 1": "Jakarta Timur",
+    "P.A. Kaliduri 1":        "Jakarta Barat",
+}
+
+
+def _record_wilayah(rec: dict) -> str | None:
+    """Canonical Jakarta wilayah of a DSDADKI record, or None if outside Jakarta.
+
+    DSDADKI sends `file_export` as "KOTA JAKARTA UTARA"; match it
+    case-insensitively against the canonical "Jakarta Utara" names.
+    """
+    override = _WILAYAH_OVERRIDE.get(str(rec.get("nama_pintu_air") or ""))
+    if override:
+        return override
+    raw = str(rec.get("file_export") or "").upper()
+    for wilayah in _JAKARTA_WILAYAH:
+        if wilayah.upper() in raw:
+            return wilayah
+    return None
+
+
 def _build_wilayah_summary(poskobanjir_records: list, bmkg_per_wilayah: dict) -> list:
     """Aggregate TMA stations and BMKG forecast per Jakarta wilayah."""
     tma_by_wilayah: dict = {w: [] for w in _JAKARTA_WILAYAH}
     for rec in poskobanjir_records:
-        w = rec.get("file_export", "")
-        if w in tma_by_wilayah:
+        w = _record_wilayah(rec)
+        if w:
             tma_by_wilayah[w].append(rec)
 
     summary = []
