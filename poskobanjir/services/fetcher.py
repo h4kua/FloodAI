@@ -63,7 +63,7 @@ def fetch_openweather(params):
         **params,
         "appid": OPENWEATHER_API_KEY,
         "units": "metric",
-        "lang": "en",
+        "lang": "id",  # descriptions are shown to residents as-is
     }
     response = requests.get(OPENWEATHER_URL, params=query, timeout=TIMEOUT)
     response.raise_for_status()

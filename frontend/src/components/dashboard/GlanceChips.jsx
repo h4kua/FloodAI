@@ -1,4 +1,4 @@
-import { useT } from "../../lib/appContext";
+import { useT, useApp } from "../../lib/appContext";
 
 /* ── GlanceChips — the 3–4 numbers that matter, readable in one glance ─────
    Replaces the old MetricsRow + SensorStrip above the fold. Big value, plain
@@ -6,6 +6,8 @@ import { useT } from "../../lib/appContext";
 */
 export default function GlanceChips({ riskData, siaga1 = 0, siaga2 = 0, totalStations = null, calibratedStations = null }) {
   const t = useT();
+  const { lang } = useApp();
+  const isId = lang === "id";
 
   const wlr = riskData?.waterLevelRatio;
   const rainfall = riskData?.rainfall ?? 0;
@@ -25,18 +27,20 @@ export default function GlanceChips({ riskData, siaga1 = 0, siaga2 = 0, totalSta
       label: t("glance.rain"),
       value: `${Math.round(rainfall)}`,
       unit: "mm/j",
+      sub: rainfall >= 20 ? (isId ? "deras" : "heavy")
+         : rainfall >= 5 ? (isId ? "sedang" : "moderate")
+         : rainfall > 0  ? (isId ? "ringan" : "light")
+         : (isId ? "tidak hujan" : "no rain"),
       color: rainColor,
     },
     {
       label: t("glance.alerts"),
       value: `${alertCount}`,
-      sub: alertCount > 0 ? `${siaga1}×S1 · ${siaga2}×S2` : null,
       color: alertColor,
     },
     totalStations != null && {
       label: t("glance.stations"),
       value: `${calibratedStations ?? totalStations}`,
-      sub: `/ ${totalStations}`,
       color: "var(--cyan)",
     },
   ].filter(Boolean);
@@ -48,9 +52,8 @@ export default function GlanceChips({ riskData, siaga1 = 0, siaga2 = 0, totalSta
           <span className="glance-chip-value" style={{ color: chip.color }}>
             {chip.value}
             {chip.unit && <span className="glance-chip-unit">{chip.unit}</span>}
-            {chip.sub && <span className="glance-chip-unit">{chip.sub}</span>}
           </span>
-          <span className="glance-chip-label">{chip.label}</span>
+          <span className="glance-chip-label">{chip.label}{chip.sub && ` · ${chip.sub}`}</span>
         </div>
       ))}
     </div>

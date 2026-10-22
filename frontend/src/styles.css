@@ -1410,9 +1410,9 @@ body {
   .topbar .nav { display: none; }
   .bottom-nav  { display: grid; }
   .main {
-    padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px) + 1.25rem);
+    padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px) + 5rem); /* clears the floating AI + guide buttons */
   }
-  /* Dev-stats footer is operator noise for citizens on mobile */
+  /* Footer hidden on mobile — the disclaimer also lives on the About page */
   .footer { display: none; }
 
   .team-grid     { grid-template-columns: repeat(2, 1fr); }
@@ -1425,7 +1425,7 @@ body {
   /* Layout — bottom padding must clear the fixed bottom nav */
   .main {
     padding: 0.625rem 0.75rem
-      calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px) + 1.25rem);
+      calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px) + 5rem);
     gap: 0.75rem;
   }
 
@@ -1474,8 +1474,8 @@ body {
   .header-info-col { align-items: flex-start !important; }
   .header-sensor-time { display: none; }
 
-  /* Tour reopen button — bigger tap target on mobile */
-  .tour-reopen-btn { width: 40px; height: 40px; }
+  /* Tour reopen button — present but quiet, so it doesn't compete with content */
+  .tour-reopen-btn { width: 36px; height: 36px; opacity: 0.7; }
 
   /* Chatbot — fixed full-width on mobile, lifted above the bottom nav */
   .chatbot-fab {

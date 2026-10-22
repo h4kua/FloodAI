@@ -14,7 +14,7 @@ export function WilayahForecastGrid({ wilayahSummary }) {
   const isId = lang === "id";
   if (!wilayahSummary || wilayahSummary.length === 0) return null;
 
-  const title = isId ? "Prakiraan cuaca 12 jam ke depan" : "Weather for the next 12 hours";
+  const title = isId ? "Prakiraan cuaca" : "Weather forecast";
 
   // Stale-snapshot fallback: the backend keeps only FUTURE BMKG slots, so a
   // very old snapshot leaves nothing to show. Say so plainly instead.
@@ -33,22 +33,36 @@ export function WilayahForecastGrid({ wilayahSummary }) {
   }
 
   const now = new Date();
+  // Hours from now, rounded the same way for the column labels and the title.
+  const hoursAhead = (slot) => {
+    const diffH = Math.round((new Date(slot.local_datetime) - now) / 3_600_000);
+    return diffH <= 4 ? diffH : Math.round(diffH / 3) * 3;
+  };
   const getTimeLabel = (slot, i) => {
     if (!slot?.local_datetime) return i === 0 ? (isId ? "Skrg" : "Now") : `+${i * 6}j`;
-    const dt = new Date(slot.local_datetime);
-    const diffH = Math.round((dt - now) / 3_600_000);
-    if (diffH <= 1) return isId ? "Skrg" : "Now";
-    const rounded = diffH <= 4 ? diffH : Math.round(diffH / 3) * 3;
-    return isId ? `+${rounded} jam` : `+${rounded}h`;
+    const h = hoursAhead(slot);
+    if (h <= 1) return isId ? "Skrg" : "Now";
+    return isId ? `+${h} jam` : `+${h}h`;
   };
 
   // Most at-risk wilayah first
   const sorted = [...wilayahSummary].sort((a, b) => (b.worst_rank ?? 0) - (a.worst_rank ?? 0));
   const timeSlots = (sorted[0]?.forecast || []).slice(0, 4);
 
+  // Title follows the slots actually shown — BMKG slots are ~3-6 h apart and
+  // can start well after "now", so a fixed "12 jam" would be wrong.
+  const lastSlot = timeSlots[timeSlots.length - 1];
+  const spanH = lastSlot?.local_datetime ? hoursAhead(lastSlot) : null;
+  const spanDays = Math.round(spanH / 24);
+  const rangeTitle = !(spanH > 1)
+    ? title
+    : spanH >= 36
+    ? (isId ? `Prakiraan cuaca ${spanDays} hari ke depan` : `Weather for the next ${spanDays} days`)
+    : (isId ? `Prakiraan cuaca ${spanH} jam ke depan` : `Weather for the next ${spanH} hours`);
+
   return (
     <div className="panel panel-body fade-in">
-      <p className="station-title">{title}</p>
+      <p className="station-title">{rangeTitle}</p>
       <p className="station-sub">
         {isId ? "Sumber: BMKG. Ikon biru berarti hujan." : "Source: BMKG. Blue icons mean rain."}
       </p>
