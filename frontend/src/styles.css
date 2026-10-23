@@ -2,7 +2,9 @@
    deFlood.ai — Design System v3 "Papan info publik"
    Civic public-information board, modern: paper background, white
    surfaces with thin rules, one blue accent, status shown as solid
-   signage blocks. Public Sans throughout. No gradients, no glows.
+   signage blocks. Navy chrome with a signal-yellow marker, Barlow
+   Condensed (highway-sign lettering) for headings and numbers, Public
+   Sans for text. No gradients, no glows.
    ================================================================ */
 
 /* ── Design Tokens (light is the default) ─────────────────────── */
@@ -86,7 +88,15 @@
   --z-tooltip:  700;
   --z-tour:     9000;
 
+  /* Chrome — top bar + footer band */
+  --chrome:       #12233f;
+  --chrome-2:     #1c3156;
+  --chrome-text:  #ffffff;
+  --chrome-muted: #b9c4d8;
+  --signal:       #f2b705;
+
   --font: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
   color-scheme: light;
 }
 
@@ -129,6 +139,10 @@
 
   --shadow:    0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+
+  --chrome:       #0b0c0e;
+  --chrome-2:     #1a1c20;
+  --chrome-muted: #a6a9ae;
   color-scheme: dark;
 }
 
@@ -159,8 +173,8 @@ button, input, select, textarea { font-family: inherit; }
 .topbar {
   position: sticky; top: 0; z-index: var(--z-sticky);
   height: 60px; padding: 0 1.75rem;
-  background: var(--panel);
-  border-bottom: 1px solid var(--line);
+  background: var(--chrome); color: var(--chrome-text);
+  border-bottom: 4px solid var(--signal);
   display: flex; align-items: center; gap: 0;
 }
 
@@ -171,25 +185,25 @@ button, input, select, textarea { font-family: inherit; }
   line-height: 1; margin-right: 2rem;
   letter-spacing: -0.025em;
 }
-.logo svg { display: block; color: var(--cyan); }
+.logo svg { display: block; color: var(--signal); }
 .logo-text  { display: inline-flex; align-items: baseline; gap: 0; }
-.logo-de    { color: var(--text); }
-.logo-flood { color: var(--text); }
-.logo-ai    { color: var(--muted-2); font-weight: 600; }
+.logo-de    { color: var(--chrome-text); }
+.logo-flood { color: var(--chrome-text); }
+.logo-ai    { color: var(--chrome-muted); font-weight: 600; }
 
 .nav { display: flex; align-items: stretch; gap: 0.25rem; flex: 1; align-self: stretch; }
 .nav-btn {
   font-size: 0.875rem; font-weight: 600;
-  color: var(--muted); background: none; border: none;
+  color: var(--chrome-muted); background: none; border: none;
   padding: 0 0.875rem; border-radius: 0;
   cursor: pointer;
   box-shadow: inset 0 -3px 0 transparent;
   transition: color 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
-  .nav-btn:hover { color: var(--text); box-shadow: inset 0 -3px 0 var(--line-2); }
+  .nav-btn:hover { color: var(--chrome-text); background: var(--chrome-2); }
 }
-.nav-btn.active { color: var(--text); box-shadow: inset 0 -3px 0 var(--cyan); }
+.nav-btn.active { color: var(--chrome-text); box-shadow: inset 0 -4px 0 var(--signal); }
 
 .topbar-right {
   margin-left: auto;
@@ -199,13 +213,13 @@ button, input, select, textarea { font-family: inherit; }
 .topbar-toggle {
   min-width: 36px; height: 34px;
   font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em;
-  background: var(--panel); border: 1px solid var(--line);
-  border-radius: var(--r); color: var(--muted); padding: 0 0.6rem; cursor: pointer;
+  background: transparent; border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--r); color: var(--chrome-text); padding: 0 0.6rem; cursor: pointer;
   display: inline-grid; place-items: center;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 @media (hover: hover) and (pointer: fine) {
-  .topbar-toggle:hover { color: var(--text); border-color: var(--line-2); background: var(--panel-2); }
+  .topbar-toggle:hover { border-color: rgba(255, 255, 255, 0.5); background: var(--chrome-2); }
 }
 
 /* ── Bottom navigation (mobile ≤768px) ───────────────────────── */
@@ -230,7 +244,7 @@ button, input, select, textarea { font-family: inherit; }
 }
 .bottom-nav-btn svg { display: block; }
 .bottom-nav-label { font-size: 0.75rem; font-weight: 600; line-height: 1; }
-.bottom-nav-btn.active { color: var(--text); box-shadow: inset 0 3px 0 var(--cyan); }
+.bottom-nav-btn.active { color: var(--text); box-shadow: inset 0 4px 0 var(--signal); }
 
 /* ── Main ────────────────────────────────────────────────────── */
 .main {
@@ -246,8 +260,9 @@ button, input, select, textarea { font-family: inherit; }
   padding-bottom: 0.75rem; border-bottom: 1px solid var(--line);
 }
 .page-title {
-  font-size: clamp(1.5rem, 2.4vw, 2rem);
-  font-weight: 800; letter-spacing: -0.03em; line-height: 1.05;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+  font-weight: 800; letter-spacing: -0.005em; line-height: 1;
   text-wrap: balance;
 }
 .header-actions { display: flex; align-items: center; gap: 0.5rem; }
@@ -270,9 +285,11 @@ button, input, select, textarea { font-family: inherit; }
 
 .status-hero-main { flex: 1; min-width: 180px; }
 .status-hero-level {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 900; letter-spacing: -0.04em; line-height: 0.95;
-  margin-bottom: 0.625rem;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 3.75rem);
+  font-weight: 800; letter-spacing: 0.01em; line-height: 0.9;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
 }
 .status-hero-desc {
   font-size: 0.95rem; color: inherit;
@@ -286,7 +303,7 @@ button, input, select, textarea { font-family: inherit; }
   display: flex; flex-wrap: wrap; gap: 0.25rem 0.5rem; align-items: baseline;
 }
 .decision-hero-time { font-weight: 500; letter-spacing: 0.02em; text-transform: none; opacity: 0.8; }
-.decision-hero-level { font-size: clamp(2.75rem, 8vw, 4rem); }
+.decision-hero-level { font-size: clamp(3.75rem, 11vw, 6rem); }
 .decision-hero-meta  { display: flex; align-items: center; gap: 0.625rem; margin-top: 1rem; flex-wrap: wrap; }
 .decision-hero-trend {
   display: inline-flex; align-items: center;
@@ -309,6 +326,39 @@ button, input, select, textarea { font-family: inherit; }
   background: currentColor;
   animation: blink 1.2s infinite;
 }
+
+/* Post gauge inside the hero — a white sign panel mounted on the block */
+.hero-gauge {
+  width: min(100%, 340px); flex-shrink: 0;
+  background: var(--panel); color: var(--text);
+  border: 1px solid rgba(0, 0, 0, 0.08); border-radius: var(--r-lg);
+  padding: 1rem 1.125rem 1.125rem;
+}
+.is-stale .hero-gauge { border-color: var(--line); filter: grayscale(1); }
+.hero-gauge-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 0.625rem;
+}
+.hero-gauge-head strong {
+  font-family: var(--font-display); font-size: 2.25rem; font-weight: 700; line-height: 0.8;
+  letter-spacing: 0; color: var(--text);
+}
+.hero-gauge-bar { display: flex; gap: 3px; height: 30px; margin-bottom: 0.875rem; }
+.hero-gauge-bar i { flex: 1; min-width: 4px; border-radius: 2px; }
+.seg-s1  { background: var(--s1-solid); }
+.seg-s2  { background: var(--s2-solid); }
+.seg-wsp { background: var(--wsp-solid); }
+.seg-ok  { background: var(--safe-solid); }
+.hero-gauge-legend {
+  list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem 1rem;
+  font-size: 0.82rem;
+}
+.hero-gauge-legend li { display: flex; align-items: center; gap: 0.45rem; }
+.hero-gauge-legend li i { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.hero-gauge-legend li b { margin-left: auto; font-variant-numeric: tabular-nums; }
+.hero-gauge-legend li.is-zero { color: var(--muted-2); }
+.hero-gauge-legend li.is-zero i { opacity: 0.35; }
 
 /* ── Home layout — decision-first ────────────────────────────── */
 .home-main {
@@ -333,7 +383,8 @@ button, input, select, textarea { font-family: inherit; }
 
 /* ── ActionCard — "what should I do?" ────────────────────────── */
 .action-card-title {
-  font-size: 1.05rem; font-weight: 800; letter-spacing: -0.015em;
+  font-family: var(--font-display);
+  font-size: 1.45rem; font-weight: 700; line-height: 1.1;
   margin-bottom: 1rem;
 }
 .action-card-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.125rem; }
@@ -342,8 +393,8 @@ button, input, select, textarea { font-family: inherit; }
 .action-card-marker {
   flex-shrink: 0; width: 22px; height: 22px; border-radius: var(--r-sm);
   display: grid; place-items: center; margin-top: 1px;
-  background: var(--text); color: var(--panel);
-  font-size: 0.75rem; font-weight: 800;
+  background: var(--signal); color: #17150f;
+  font-size: 0.78rem; font-weight: 800;
 }
 .action-card-buttons { display: flex; flex-direction: column; gap: 0.5rem; }
 
@@ -363,7 +414,8 @@ button, input, select, textarea { font-family: inherit; }
   margin: 0 -1px -1px 0;
 }
 .glance-chip-value {
-  font-size: 1.75rem; font-weight: 800; letter-spacing: -0.035em; line-height: 1;
+  font-family: var(--font-display);
+  font-size: 2.6rem; font-weight: 700; letter-spacing: 0; line-height: 0.95;
   font-variant-numeric: tabular-nums;
   display: flex; align-items: baseline; gap: 0.3rem;
 }
@@ -376,7 +428,7 @@ button, input, select, textarea { font-family: inherit; }
   display: flex; flex-direction: column; gap: 1rem;
   margin-top: 1rem;
 }
-.section-teaser-title { font-size: 1rem; font-weight: 700; }
+.section-teaser-title { font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; line-height: 1.1; }
 .section-teaser-sub   { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
 .section-teaser-chevron { transition: transform 0.2s var(--ease-out); }
 
@@ -394,7 +446,7 @@ button, input, select, textarea { font-family: inherit; }
 }
 
 /* ── Station list (Detail → Ketinggian air) ──────────────────── */
-.station-title { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.015em; color: var(--text); margin: 0; }
+.station-title { font-family: var(--font-display); font-size: 1.45rem; font-weight: 700; line-height: 1.1; color: var(--text); margin: 0; }
 .station-sub   { font-size: 0.875rem; color: var(--muted); line-height: 1.5; margin: 0.25rem 0 1rem; }
 .station-list  { list-style: none; margin: 0 0 0.5rem; padding: 0; display: flex; flex-direction: column; }
 .station-row {
@@ -476,7 +528,8 @@ button, input, select, textarea { font-family: inherit; }
 }
 .panel-body { padding: 1.25rem 1.375rem; }
 .panel-title {
-  font-size: 1rem; font-weight: 800; letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-size: 1.45rem; font-weight: 700; line-height: 1.1;
   color: var(--text); margin-bottom: 1rem;
 }
 
@@ -723,11 +776,11 @@ button, input, select, textarea { font-family: inherit; }
 
 /* ── Footer ──────────────────────────────────────────────────── */
 .footer {
-  border-top: 1px solid var(--line);
-  background: var(--panel);
+  border-top: 4px solid var(--signal);
+  background: var(--chrome);
   padding: 1rem 1.75rem;
   display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
-  font-size: 0.8rem; color: var(--muted-2);
+  font-size: 0.8rem; color: var(--chrome-muted);
 }
 @media (min-width: 769px) {
   .footer { padding-left: 4.75rem; padding-right: 9rem; } /* clears the fixed tour + chat buttons */
@@ -845,7 +898,8 @@ button, input, select, textarea { font-family: inherit; }
 
 .emergency { border: 1px solid var(--line); border-radius: var(--r-lg); padding: 1.125rem; background: var(--panel); }
 .sect-label {
-  font-size: 1rem; font-weight: 800; letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-size: 1.45rem; font-weight: 700; line-height: 1.1;
   color: var(--text); margin-bottom: 0.75rem;
 }
 .emergency-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
@@ -858,7 +912,7 @@ button, input, select, textarea { font-family: inherit; }
 }
 .contact-link:hover { background: var(--panel-2); border-color: var(--text); }
 .contact-org  { font-size: 0.76rem; color: var(--muted-2); }
-.contact-num  { font-size: 1.25rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.contact-num  { font-family: var(--font-display); font-size: 1.9rem; font-weight: 700; line-height: 1; color: var(--text); margin: 0.15rem 0; }
 .contact-role { font-size: 0.76rem; color: var(--cyan); font-weight: 600; margin-top: 1px; }
 
 .shelter-detail-card { background: var(--safe-soft); border: 1px solid var(--safe-border); }
@@ -873,7 +927,8 @@ button, input, select, textarea { font-family: inherit; }
   padding: 2rem 2.5rem; display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
 }
 .about-section-title {
-  font-size: 1.05rem; font-weight: 800; letter-spacing: -0.015em;
+  font-family: var(--font-display);
+  font-size: 1.45rem; font-weight: 700; line-height: 1.1;
   color: var(--text); margin-bottom: 0.75rem;
 }
 .about-row { display: flex; align-items: flex-start; gap: 0.875rem; margin-bottom: 0.875rem; }
@@ -945,7 +1000,13 @@ button, input, select, textarea { font-family: inherit; }
   border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
   margin: 0 -1px -1px 0;
 }
-.wilayah-status-name { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+.wilayah-status-cell { box-shadow: inset 0 4px 0 var(--tone, var(--line-2)); padding-top: 1.125rem; }
+.tone-s1  { --tone: var(--s1-solid); }
+.tone-s2  { --tone: var(--s2-solid); }
+.tone-wsp { --tone: var(--wsp-solid); }
+.tone-ok  { --tone: var(--safe-solid); }
+.is-stale .wilayah-status-cell { --tone: var(--line-2); }
+.wilayah-status-name { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; line-height: 1; color: var(--text); }
 .wilayah-status-cell small { font-size: 0.78rem; color: var(--muted-2); }
 @media (max-width: 520px) {
   .wilayah-status-list { grid-template-columns: repeat(2, 1fr); }
@@ -1019,7 +1080,7 @@ button, input, select, textarea { font-family: inherit; }
 .ow-wilayah-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.625rem; }
 .ow-wilayah-name { font-size: 0.8rem; color: var(--muted); font-weight: 700; line-height: 1.15; padding-top: 0.1rem; }
 .ow-wilayah-icon { font-size: 2rem; line-height: 1; flex-shrink: 0; }
-.ow-wilayah-temp { font-size: 1.5rem; font-weight: 800; color: var(--text); letter-spacing: -0.03em; line-height: 1; margin-bottom: 0.25rem; font-variant-numeric: tabular-nums; }
+.ow-wilayah-temp { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 0.25rem; }
 .ow-wilayah-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.35; margin-bottom: 0.5rem; }
 .ow-wilayah-desc.rain { color: var(--cyan); font-weight: 600; }
 
@@ -1096,7 +1157,8 @@ button, input, select, textarea { font-family: inherit; }
 }
 .tour-pip.on { width: 18px; }
 .tour-title {
-  font-size: 1.1rem; font-weight: 800; color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1.5rem; font-weight: 700; color: var(--text);
   letter-spacing: -0.02em; line-height: 1.3; margin: 0 0 0.5rem;
   text-wrap: balance;
 }
@@ -1206,6 +1268,7 @@ button, input, select, textarea { font-family: inherit; }
   .team-grid      { grid-template-columns: repeat(2, 1fr); }
   .evac-map-panel { min-height: 300px; }
   .status-hero    { padding: 1.25rem; gap: 1rem; flex-direction: column; align-items: flex-start; }
+  .hero-gauge     { width: 100%; }
 }
 
 @media (max-width: 640px) {
@@ -1263,7 +1326,7 @@ button, input, select, textarea { font-family: inherit; }
     height: 72vh; max-height: 520px;
   }
 
-  .page-title { font-size: clamp(1.25rem, 5.5vw, 1.875rem); }
+  .page-title { font-size: clamp(1.9rem, 8.5vw, 2.4rem); }
   .panel-body { padding: 1rem; }
 
   .ow-wilayah-grid { grid-template-columns: repeat(3, 1fr); }

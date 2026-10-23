@@ -1,6 +1,6 @@
 import { useApp } from "../../lib/appContext";
 import {
-  JAKARTA_WILAYAH, groupStationsByWilayah, stationRiskLevel, dataAgeMinutes, STALE_STATUS_MIN,
+  JAKARTA_WILAYAH, groupStationsByWilayah, stationRiskLevel, stationClass, dataAgeMinutes, STALE_STATUS_MIN,
 } from "../../lib/dashboardHelpers";
 import { RiskBadge } from "./primitives";
 
@@ -26,7 +26,7 @@ export default function WilayahStatus({ riskData }) {
       </p>
       <ul className="wilayah-status-list">
         {groups.map((g) => (
-          <li key={g.key} className="wilayah-status-cell">
+          <li key={g.key} className={`wilayah-status-cell tone-${g.maxRatio != null ? stationClass(g.maxRatio) : "none"}`}>
             <span className="wilayah-status-name">{g.key.replace("Jakarta ", "")}</span>
             {g.maxRatio != null ? (
               <>

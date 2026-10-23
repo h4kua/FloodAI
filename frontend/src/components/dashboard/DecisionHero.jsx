@@ -1,7 +1,44 @@
-import { useApp } from "../../lib/appContext";
+import { useApp, useT } from "../../lib/appContext";
 import {
   buildStatusDesc, formatDataTime, dataAgeMinutes, trendDisplay, STALE_STATUS_MIN,
+  stationClass, cleanStationName,
 } from "../../lib/dashboardHelpers";
+
+const GAUGE_LEVELS = [["s1", "SIAGA_1"], ["s2", "SIAGA_2"], ["wsp", "WASPADA"], ["ok", "NORMAL"]];
+
+/* ── Post gauge — every monitoring post as one coloured segment ───────────
+   Worst first, so the eye lands on trouble; the legend gives exact counts.
+   Same thresholds as the post list (stationClass).
+*/
+function PostGauge({ stations, isId }) {
+  const t = useT();
+  if (!stations.length) return null;
+  const sorted = [...stations].sort((a, b) => (b.ratio ?? 0) - (a.ratio ?? 0));
+  const counts = { s1: 0, s2: 0, wsp: 0, ok: 0 };
+  sorted.forEach((s) => { counts[stationClass(s.ratio ?? 0)] += 1; });
+  return (
+    <aside className="hero-gauge" aria-label={isId ? "Ringkasan pos pantau air" : "Water-level post summary"}>
+      <div className="hero-gauge-head">
+        <span>{isId ? "Pos pantau air" : "Water-level posts"}</span>
+        <strong>{stations.length}</strong>
+      </div>
+      <div className="hero-gauge-bar" aria-hidden="true">
+        {sorted.map((s, i) => (
+          <i key={i} className={`seg-${stationClass(s.ratio ?? 0)}`} title={cleanStationName(s.nama)} />
+        ))}
+      </div>
+      <ul className="hero-gauge-legend">
+        {GAUGE_LEVELS.map(([cls, key]) => (
+          <li key={cls} className={counts[cls] ? "" : "is-zero"}>
+            <i className={`seg-${cls}`} />
+            <span>{t(`risk.${key}`)}</span>
+            <b>{counts[cls]}</b>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  );
+}
 
 /* ── DecisionHero — the first thing a citizen sees ─────────────────────────
    Answers "is my area at risk right now?" in one glance: a giant level word,
@@ -78,6 +115,7 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
           </div>
         )}
       </div>
+      <PostGauge stations={riskData?.stations ?? []} isId={isId} />
     </div>
   );
 }

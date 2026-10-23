@@ -2,12 +2,12 @@ import { useApp, useT } from "../../lib/appContext";
 import { NAV_ITEMS } from "./navConfig";
 
 /* ── deFlood.ai logo mark ───────────────────────────────── */
-/* A plain signage tile: solid accent square, two white water lines. */
+/* A plain signage tile: signal-yellow square, two water lines in the chrome colour. */
 function DeFloodLogo({ size = 22 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" style={{ flexShrink: 0, display: "block" }}>
       <rect width="24" height="24" rx="5" fill="currentColor" />
-      <g fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round">
+      <g fill="none" strokeWidth="2.2" strokeLinecap="round" style={{ stroke: "var(--chrome)" }}>
         <path d="M5 10.5c1.75-1.5 3.25-1.5 5 0s3.25 1.5 5 0 3.25-1.5 4 0" />
         <path d="M5 15.5c1.75-1.5 3.25-1.5 5 0s3.25 1.5 5 0 3.25-1.5 4 0" />
       </g>
