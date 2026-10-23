@@ -83,6 +83,30 @@ def _kecamatan_historical_freq_map() -> dict[str, float]:
         return {}
 
 
+def kecamatan_flood_freq_map_before(year: int) -> dict[str, float]:
+    """{kecamatan_slug: frequency} counting only events from years < `year`.
+
+    Same normalisation as the bundled map (event count / max over all
+    kecamatan), but restricted to the past so training never sees outcomes
+    from its own validation/test period. {} on any failure (fail-open).
+    """
+    try:
+        payload = json.loads(_KECAMATAN_HISTORY_PATH.read_text(encoding="utf-8"))
+        counts = {
+            slug: sum(
+                n for y, n in (rec.get("events_by_year") or {}).items()
+                if y.isdigit() and int(y) < year
+            )
+            for slug, rec in (payload.get("by_kecamatan") or {}).items()
+            if isinstance(rec, dict)
+        }
+    except (OSError, ValueError, TypeError) as exc:
+        logger.warning("kecamatan_flood_freq_before_failed: %s", exc)
+        return {}
+    max_events = max(counts.values(), default=0) or 1
+    return {slug: round(n / max_events, 4) for slug, n in counts.items()}
+
+
 def kecamatan_historical_flood_freq(kecamatan: str) -> float:
     """Public lookup: normalised (0-1) long-run flood frequency for a kecamatan
     name (any casing/prefix). Returns 0.0 when unknown — never raises."""

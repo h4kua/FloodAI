@@ -228,14 +228,20 @@ The LLM never changes the decision; it only writes explanations, with a determin
 
 | Figure | Source | Model | Caveat |
 |---|---|---|---|
-| AUC 0.901, recall 0.839, precision 0.263, Brier 0.072, ECE 0.014 | `models/realtime_native_bundle/training_stats.json` | Current bundle (created 2026-07-02) | Test split = 586 monthly rows, Jan–Dec 2024, `bootstrap_proxy` features; optimistic |
+| AUC 0.901, recall 0.839, precision 0.263, Brier 0.072, ECE 0.014 | `models/realtime_native_bundle/training_stats.json` | Current bundle (created 2026-07-02) | Random stratified split (586 test rows from 2020–2024, 56 positives), leaky feature, `bootstrap_proxy` data; optimistic |
 | ECE 0.1962 | `artifacts/configurations/calibration_cache.json` | Older model (Apr–May 2026 predictions) | Labels derived from the model's own ranking; still read at runtime, penalty off |
 | ECE 0.3784 | `artifacts/reports/scenario_validation.json` | Older model | n = 7 hand-made scenarios |
 | AUC 0.9452 | `artifacts/reports/model_training_report_jakarta.txt` | Legacy Jakarta model (`/predict/realtime`) | Random 80:20 split, train AUC 1.0 |
 
-- **Leakage:** `kecamatan_historical_flood_freq` comes from `data/bundled/kelurahan_flood_history.json`
-  (BPBD events 2020–2026, all years pooled), which includes the 2024 test period.
-- **Split:** named `chronological_80_15_5`, actually 68/12/20 (train 1990 / val 352 / test 586).
+- **Split:** the current bundle used a random stratified 68/12/20 split — the chronological
+  validation slice (May 2023–Jan 2024) has 0 positives, so training falls back to random. Its report
+  still says `chronological_80_15_5`; training now records the split actually used.
+- **Leakage:** the bundle's `kecamatan_historical_flood_freq` pools BPBD events from all years.
+  Training now computes it per row from earlier years only (`events_by_year` in
+  `data/bundled/kelurahan_flood_history.json`); the bundle is not retrained yet.
+- **Honest estimate (sandbox, by-year split train 2020–2022 / val 2023 / test 2024, 22 positives):**
+  leak-free AUC 0.81, without the frequency feature AUC 0.84, leaky AUC 0.89. Very few 2023–2024
+  positives (11 and 22), so these are rough.
 - **No observed row-level flood labels** for evaluation: `realtime_feature_history.csv` has no label
   column; `calibration_labeled.csv` labels are synthetic; `bpbd_flood_calendar.csv` is quarterly
   aggregates. Per-incident BPBD data (`data/raw/rekap_kejadian_2020_2025.csv`, git-ignored) has dates

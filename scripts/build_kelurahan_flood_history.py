@@ -110,6 +110,7 @@ def _agg_factory() -> dict:
         "event_count": 0.0, "total_jiwa_terdampak": 0.0, "total_meninggal": 0.0,
         "total_luka": 0.0, "total_pengungsi": 0.0, "years": set(),
         "_heights": [], "kota": None, "kecamatan": None,
+        "events_by_year": defaultdict(float),
     }
 
 
@@ -139,7 +140,9 @@ def _load_html_sources(per_kel: dict[str, dict]) -> None:
             if year in _REKAP_COVERED_YEARS:
                 continue  # superseded by the finer-grained REKAP CSV for this year
             a = per_kel[kel]
-            a["event_count"] += _num(cell(c, "jumlah_kejadian")) or 1
+            n_events = _num(cell(c, "jumlah_kejadian")) or 1
+            a["event_count"] += n_events
+            a["events_by_year"][year or "unknown"] += n_events
             a["total_jiwa_terdampak"] += _num(cell(c, "jumlah_jiwa_terdampak"))
             a["total_meninggal"] += _num(cell(c, "jumlah_korban_meninggal"))
             a["total_luka"] += _num(cell(c, "jumlah_korban_luka"))
@@ -168,6 +171,7 @@ def _load_rekap_csv(per_kel: dict[str, dict]) -> None:
                 continue
             a = per_kel[kel]
             a["event_count"] += 1
+            a["events_by_year"][(row.get("tahun") or "").strip() or "unknown"] += 1
             a["total_meninggal"] += _num(row.get("jumlah_meninggal"))
             a["total_luka"] += _num(row.get("jumlah_luka_ringan")) + _num(row.get("jumlah_luka_berat"))
             a["total_pengungsi"] += _num(row.get("jumlah_tempat_pengungsian"))
@@ -202,6 +206,9 @@ def build() -> dict:
             "total_luka": int(a["total_luka"]),
             "total_pengungsi": int(a["total_pengungsi"]),
             "years_covered": sorted(a["years"]),
+            # Per-year event counts so ML features can be computed from past years
+            # only (no leakage of validation/test-period outcomes).
+            "events_by_year": {y: int(n) for y, n in sorted(a["events_by_year"].items())},
             "max_ketinggian_cm": round(max(a["_heights"]), 1) if a["_heights"] else None,
             "kota": a["kota"],
             "kecamatan": a["kecamatan"],
@@ -251,7 +258,7 @@ def _build_kecamatan_rollup(kelurahan: dict[str, dict]) -> dict[str, dict]:
     matching _CANONICAL_KECAMATAN will actually join into ML training."""
     agg: dict[str, dict] = defaultdict(
         lambda: {"event_count": 0, "kelurahan_count": 0, "years": set(), "_heights": [],
-                  "display_name": None, "kota": None}
+                  "display_name": None, "kota": None, "events_by_year": defaultdict(int)}
     )
     for kel, rec in kelurahan.items():
         raw_kec = rec.get("kecamatan")
@@ -262,6 +269,8 @@ def _build_kecamatan_rollup(kelurahan: dict[str, dict]) -> dict[str, dict]:
         a["event_count"] += rec["event_count"]
         a["kelurahan_count"] += 1
         a["years"].update(rec["years_covered"])
+        for y, n in rec.get("events_by_year", {}).items():
+            a["events_by_year"][y] += n
         if rec["max_ketinggian_cm"] is not None:
             a["_heights"].append(rec["max_ketinggian_cm"])
         if a["display_name"] is None:
@@ -277,6 +286,7 @@ def _build_kecamatan_rollup(kelurahan: dict[str, dict]) -> dict[str, dict]:
             "kelurahan_count": a["kelurahan_count"],
             "event_count": a["event_count"],
             "years_covered": sorted(a["years"]),
+            "events_by_year": dict(sorted(a["events_by_year"].items())),
             "max_ketinggian_cm": round(max(a["_heights"]), 1) if a["_heights"] else None,
             "historical_flood_frequency": round(a["event_count"] / max_events, 4),
         }

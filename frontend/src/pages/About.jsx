@@ -165,8 +165,8 @@ export default function About({ riskContext = {} }) {
           <Section title={id ? "Performa model" : "Model performance"}>
             <p style={{ fontSize: "0.85rem", color: "var(--muted)", marginBottom: "1rem", lineHeight: 1.6 }}>
               {id
-                ? "Diukur sekali saat pelatihan, pada data uji 586 baris bulanan (Jan–Des 2024). Data latihnya masih proksi, dan satu fitur (frekuensi banjir per kecamatan) dihitung dari kejadian 2020–2026 — termasuk periode uji. Jadi angka di bawah terlalu optimistis; model ini belum pernah diuji dengan data lapangan."
-                : "Measured once at training time on a test set of 586 monthly rows (Jan–Dec 2024). The training data is still a proxy, and one feature (per-kecamatan flood frequency) is computed from 2020–2026 events — including the test period. So the figures below are optimistic; the model has not yet been tested on field data."}
+                ? "Diukur sekali saat pelatihan, pada 586 baris bulanan yang dipilih acak dari 2020–2024. Data latihnya masih proksi, dan satu fitur (frekuensi banjir per kecamatan) ikut menghitung kejadian di periode uji. Jadi angka di bawah terlalu optimistis: saat model serupa dilatih dengan 2020–2022 lalu diuji pada 2024, AUC-nya sekitar 0,81–0,84. Model ini belum pernah diuji dengan data lapangan."
+                : "Measured once at training time on 586 monthly rows picked at random from 2020–2024. The training data is still a proxy, and one feature (per-kecamatan flood frequency) also counts events from the test period. So the figures below are optimistic: when a similar model is trained on 2020–2022 and tested on 2024, its AUC is about 0.81–0.84. The model has not yet been tested on field data."}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
               <MetricBar label="AUC-ROC" hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}

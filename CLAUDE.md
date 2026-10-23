@@ -42,10 +42,16 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   is its bootstrap-proxy test split and optimistic; 0.1962 (`artifacts/configurations/calibration_cache.json`,
   labels derived from the model's own ranking) and 0.3784 (`artifacts/reports/scenario_validation.json`,
   n=7) come from older model versions.
-- Target leakage: `kecamatan_historical_flood_freq` is built from BPBD events 2020–2026
-  (`data/bundled/kelurahan_flood_history.json`), which includes the 2024 test period, so the
-  bundle's test metrics (AUC 0.901, recall 0.839) are inflated.
-- The split named `chronological_80_15_5` is actually 68/12/20 (train 1990 / val 352 / test 586).
+- The current bundle was trained on a RANDOM stratified 68/12/20 split (train 1990 / val 352 /
+  test 586, 56 test positives), not the chronological split its report claims: the chronological
+  validation slice (May 2023–Jan 2024) has 0 positives, so training falls back to random. Its
+  test rows are spread over 2020–2024, so its metrics (AUC 0.901, recall 0.839) are optimistic.
+- Target leakage in the current bundle: `kecamatan_historical_flood_freq` counts BPBD events from
+  all years 2020–2026, including its test rows' own periods. Training now computes it per row
+  from years before that row (`leak_free_kecamatan_freq=True`, default) and records the split
+  actually used; the bundle has NOT been retrained yet. Sandbox retrain (by-year split: train
+  2020–2022, val 2023, test 2024 with 22 positives): leak-free AUC 0.81, no-frequency AUC 0.84,
+  leaky AUC 0.89. Flood labels shrink sharply over time (117/78/54/11/22 for 2020–2024).
 - No observed row-level flood labels for evaluation: `realtime_feature_history.csv` has no label
   column; `calibration_labeled.csv` labels are synthetic.
 - AUC 0.9452 belongs to the legacy Jakarta model (`flood_model_jakarta.pkl`, random 80:20 split),

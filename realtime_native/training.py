@@ -30,6 +30,7 @@ from realtime_native.feature_builder import (
     REALTIME_NATIVE_BOOTSTRAP_DATASET_PATH,
     REALTIME_NATIVE_FEATURES,
     build_bootstrap_training_dataset,
+    kecamatan_flood_freq_map_before,
 )
 from utils.paths import MODELS_DIR, REALTIME_NATIVE_BUNDLE_DIR, REPORTS_DIR
 
@@ -414,23 +415,53 @@ def _safe_float(value) -> float | None:
 # ─── Original full-retrain entry point ────────────────────────────────────────
 
 
-def train_realtime_native_model(dataset_path=REALTIME_NATIVE_BOOTSTRAP_DATASET_PATH):
+def train_realtime_native_model(
+    dataset_path=REALTIME_NATIVE_BOOTSTRAP_DATASET_PATH,
+    leak_free_kecamatan_freq: bool = True,
+    year_split: tuple[int, int] | None = None,
+):
+    """Train and write the realtime-native bundle.
+
+    leak_free_kecamatan_freq: recompute the kecamatan flood-frequency feature per
+        row from BPBD events in years *before that row's year* (the dataset column
+        counts every year, so it leaks outcomes into the feature).
+    year_split: (val_year, test_year) → train < val_year ≤ val < test_year ≤ test.
+        None keeps the index-based 68/12/20 split, which falls back to a random
+        stratified split when the chronological slices lack positives.
+    """
     if not Path(dataset_path).exists():
         build_bootstrap_training_dataset(output_path=dataset_path)
 
-    # --- STEP 4: chronological split (was random train_test_split) ----------
     df = pd.read_csv(dataset_path, parse_dates=["timestamp"])
     df = df.sort_values("timestamp").reset_index(drop=True)
+    years = df["timestamp"].dt.year
+
+    if leak_free_kecamatan_freq:
+        freq_by_year = {int(yr): kecamatan_flood_freq_map_before(int(yr)) for yr in years.unique()}
+        df["kecamatan_historical_flood_freq"] = [
+            freq_by_year[int(yr)].get(slug, 0.0) for yr, slug in zip(years, df["name_3"])
+        ]
+
     X = df[REALTIME_NATIVE_FEATURES].apply(pd.to_numeric, errors="coerce").fillna(0.0)
     y = pd.to_numeric(df["banjir"], errors="coerce").fillna(0).astype(int)
 
-    test_split_idx = int(len(df) * 0.80)
-    X_dev, X_test = X.iloc[:test_split_idx], X.iloc[test_split_idx:]
-    y_dev, y_test = y.iloc[:test_split_idx], y.iloc[test_split_idx:]
-
-    val_split_idx = int(len(X_dev) * 0.85)
-    X_train, X_val = X_dev.iloc[:val_split_idx], X_dev.iloc[val_split_idx:]
-    y_train, y_val = y_dev.iloc[:val_split_idx], y_dev.iloc[val_split_idx:]
+    # --- STEP 4: split ---------------------------------------------------------
+    if year_split is not None:
+        val_year, test_year = year_split
+        train_m, test_m = years < val_year, years >= test_year
+        val_m = ~train_m & ~test_m
+        X_train, X_val, X_test = X.loc[train_m], X.loc[val_m], X.loc[test_m]
+        y_train, y_val, y_test = y.loc[train_m], y.loc[val_m], y.loc[test_m]
+        split_used = f"by_year (train<{val_year}, val {val_year}–{test_year - 1}, test>={test_year})"
+    else:
+        # Last 20% = test; last 15% of the remainder = validation (68/12/20 overall).
+        test_split_idx = int(len(df) * 0.80)
+        val_split_idx = int(test_split_idx * 0.85)
+        X_dev, X_test = X.iloc[:test_split_idx], X.iloc[test_split_idx:]
+        y_dev, y_test = y.iloc[:test_split_idx], y.iloc[test_split_idx:]
+        X_train, X_val = X_dev.iloc[:val_split_idx], X_dev.iloc[val_split_idx:]
+        y_train, y_val = y_dev.iloc[:val_split_idx], y_dev.iloc[val_split_idx:]
+        split_used = "chronological_68_12_20"
 
     val_positives = int(y_val.sum())
     test_positives = int(y_test.sum())
@@ -439,6 +470,7 @@ def train_realtime_native_model(dataset_path=REALTIME_NATIVE_BOOTSTRAP_DATASET_P
         val_positives < FLOOD_RETRAIN_MIN_POSITIVES
         or test_positives < FLOOD_RETRAIN_MIN_POSITIVES
     ):
+        split_used = f"random_stratified_68_12_20 (fallback: {split_used} had no positives)"
         logger.warning(
             "insufficient_positives_using_random_split "
             "(train=%d, val=%d, test=%d, min_required=%d)",
@@ -631,7 +663,13 @@ def train_realtime_native_model(dataset_path=REALTIME_NATIVE_BOOTSTRAP_DATASET_P
         "training_rows": int(len(X_train)),
         "validation_rows": int(len(X_val)),
         "test_rows": int(len(X_test)),
-        "split_strategy": "chronological_80_15_5",
+        # The split actually used — records the random fallback instead of
+        # claiming "chronological" when the chronological slices had no positives.
+        "split_strategy": split_used,
+        "kecamatan_freq_source": (
+            "events in years before each row's year" if leak_free_kecamatan_freq
+            else "all years (includes validation/test outcomes — leaky)"
+        ),
         "class_balance": {
             "train_neg_pre_smote": neg_pre,
             "train_pos_pre_smote": pos_pre,
