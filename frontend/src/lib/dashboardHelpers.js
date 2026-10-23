@@ -291,21 +291,16 @@ export function inferWilayah(lat, lon) {
 }
 
 /* ── Stations grouped by wilayah ────────────────────────────
-   DSDADKI sends wilayah as "KOTA JAKARTA UTARA"; upstream posts come as
-   Depok / Bogor. Grouping is done here from the stations themselves — the
-   backend's wilayah_summary does not match these names and reports 0 posts.
+   The backend sends each post's canonical wilayah as `wilayah_jakarta`
+   (null = upstream), including corrections for posts DSDADKI misfiles — see
+   realtime_native/wilayah.py, the single source of truth. The name match below
+   is only a fallback for a backend that predates that field.
 */
 export const JAKARTA_WILAYAH = ["Jakarta Utara", "Jakarta Barat", "Jakarta Pusat", "Jakarta Selatan", "Jakarta Timur"];
 export const UPSTREAM_GROUP = "upstream";
 
-/* DSDADKI files these posts under KOTA JAKARTA UTARA, but their coordinates
-   put them in Kramat Jati (Timur) and the Kali Duri area (Barat). */
-const WILAYAH_OVERRIDE = {
-  "P.A. Hek Kramat Jati 1": "Jakarta Timur",
-};
-
 export function stationWilayah(s) {
-  if (WILAYAH_OVERRIDE[s.nama]) return WILAYAH_OVERRIDE[s.nama];
+  if ("wilayah_jakarta" in s) return s.wilayah_jakarta ?? UPSTREAM_GROUP;
   const raw = (s.wilayah || "").toUpperCase();
   const named = JAKARTA_WILAYAH.find((w) => raw.includes(w.toUpperCase()));
   if (named) return named;

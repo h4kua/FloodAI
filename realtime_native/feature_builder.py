@@ -21,6 +21,7 @@ from services.constants import (
     BMKG_URGENCY_WEIGHTS,
 )
 from realtime_native.station_kecamatan import STATION_KECAMATAN
+from realtime_native.wilayah import record_wilayah
 from utils.paths import DEFAULT_REALTIME_SNAPSHOT, PROCESSED_DATA_DIR
 from db.psycopg2_connection import pooled_connection
 
@@ -778,6 +779,9 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
                     "nama": str(r.get("nama_pintu_air") or r.get("wilayah") or ""),
                     "lokasi": str(r.get("lokasi") or ""),
                     "wilayah": str(r.get("file_export") or ""),
+                    # Canonical Jakarta wilayah (None = upstream). Single source of
+                    # truth for grouping; see realtime_native/wilayah.py.
+                    "wilayah_jakarta": record_wilayah(r.get("nama_pintu_air"), r.get("file_export")),
                     "tinggi_air": _safe_float(r.get("tinggi_air")),
                     "siaga1": _safe_float(r.get("siaga1")),
                     "siaga2": _safe_float(r.get("siaga2")),

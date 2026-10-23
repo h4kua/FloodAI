@@ -21,3 +21,8 @@ os.environ["ALLOWED_HOSTS"] = "testserver,localhost,127.0.0.1"
 
 # CORS is irrelevant for in-process tests but keep parity with prod default.
 os.environ.setdefault("CORS_ORIGINS", "")
+
+# Never run the real snapshot scraper from a TestClient lifespan: it fetches
+# from the network, overwrites poskobanjir/data, and its subprocess pipes
+# outlive the test on Windows (pytest then fails on "I/O operation on closed pipe").
+os.environ["SNAPSHOT_SCHEDULER_ENABLED"] = "false"

@@ -127,6 +127,7 @@ first backend start.
 {
   "nama": "P.A. Karet 1",
   "wilayah": "KOTA JAKARTA SELATAN",   // DSDADKI file_export, as sent
+  "wilayah_jakarta": "Jakarta Selatan", // canonical (null = upstream), realtime_native/wilayah.py
   "lokasi": "Banjir Kanal Barat",       // river / channel
   "tinggi_air": 5036.0,                  // cm
   "siaga1": 6000.0, "siaga2": 5500.0, "siaga3": 5000.0,
@@ -173,7 +174,7 @@ Home
 | `buildStatusDesc()` | Status sentence from live posts; never says "all normal" when posts are at Waspada |
 | `STALE_STATUS_MIN` (180), `dataAgeMinutes()`, `formatDataTime()` | Stale-data handling; adds the date once data is old |
 | `trendDisplay()` | Trend label whose tone follows the status (a rise under "Aman" stays neutral) |
-| `groupStationsByWilayah()`, `stationWilayah()` | Groups posts by wilayah from DSDADKI names, with `WILAYAH_OVERRIDE` for misfiled posts |
+| `groupStationsByWilayah()`, `stationWilayah()` | Groups posts by the backend's `wilayah_jakarta` (corrections live in `realtime_native/wilayah.py`) |
 | `stationKecamatan()` | Kecamatan label; entries contradicting coordinates were removed |
 
 ### Evakuasi (`pages/Alert.jsx`)
@@ -249,7 +250,7 @@ The LLM never changes the decision; it only writes explanations, with a determin
 | No valid field calibration | Active | See *Model & evaluation*; calibration penalty is off |
 | Feature leakage in test metrics | Active | Bundle test metrics are inflated |
 | No observed flood labels for evaluation | Active | Model quality in the field is unknown |
-| Wilayah override duplicated | Active | `WILAYAH_OVERRIDE` exists in both `dashboardHelpers.js` and `realtime_native/inference.py`; change both together |
+| Wilayah override | Resolved 2026-10-23 | Single source in `realtime_native/wilayah.py`; stations carry `wilayah_jakarta` and the frontend groups by it |
 | DSDADKI misfiles posts | Active | Hek Kramat Jati 1 and Kaliduri 1 are filed under Jakarta Utara at the source (corrected by the override) |
 | Kecamatan table partly unverified | Active | `_STATION_KEC` entries other than the corrected Ancol/removed ones are unchecked |
 | Posts without GPS | Active | e.g. Bendung Katulampa (`lat=null`): listed, not mapped |
@@ -275,6 +276,7 @@ Names only — values live in `.env` (never committed; `.env.example` holds plac
 | `SUPABASE_URL`, `SUPABASE_KEY` | Supabase client |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_PERSISTENCE_ENABLED` | Direct/pooled Postgres |
 | `SNAPSHOT_REFRESH_INTERVAL_MINUTES` | Scheduler interval (default 15, valid 1–60) |
+| `SNAPSHOT_SCHEDULER_ENABLED` | `false` skips the background refresh (set by `tests/conftest.py`); default `true` |
 | `INTERNAL_SECRET` | `/internal/refresh-snapshot` |
 | `CREW_TIMEOUT_S` | 3-agent crew budget (default 45 s) |
 | `VITE_API_BASE_URL` (frontend) | Empty = Vite proxy (dev); backend URL in production |

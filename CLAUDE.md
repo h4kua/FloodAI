@@ -6,7 +6,8 @@ FastAPI backend + React frontend. Agentic flood prediction system for Jakarta.
 - Backend: FastAPI + uvicorn, port 8080
 - Frontend: React + Vite
 - DB: Supabase/PostgreSQL (RPC over HTTPS via `supabase` client; psycopg2 for direct/pooled access)
-- ML: XGBoost + scikit-learn 1.8.0; plus a Torch `realtime_native` model
+- ML: XGBoost + scikit-learn 1.8.0 — the `realtime_native` bundle (`models/realtime_native_bundle/`)
+  serves the UI; the legacy Jakarta model serves only `/predict/realtime`. No Torch.
 - LLM (non-critical path): Groq (LLaMA-3) primary, Anthropic Claude optional — explanation only
 - Deploy: Fly.io (backend, `fly.toml`) + Vercel (frontend, `vercel.json`)
 

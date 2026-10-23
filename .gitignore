@@ -35,8 +35,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Virtual environments
-.venv
+# Virtual environments (any .venv* copy, e.g. a renamed broken one)
+.venv*/
 
 # IDEs
 .vscode/

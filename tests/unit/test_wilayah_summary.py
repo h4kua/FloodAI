@@ -33,3 +33,12 @@ def test_misfiled_posts_are_moved_to_their_real_wilayah():
     assert summary["Jakarta Utara"]["tma_count"] == 0
     assert summary["Jakarta Timur"]["tma_count"] == 1
     assert summary["Jakarta Barat"]["tma_count"] == 1
+
+
+def test_record_wilayah_is_the_single_source():
+    from realtime_native.wilayah import record_wilayah
+
+    assert record_wilayah("P.A. Manggarai 2", "KOTA JAKARTA SELATAN") == "Jakarta Selatan"
+    assert record_wilayah("P.A. Kaliduri 1", "KOTA JAKARTA UTARA") == "Jakarta Barat"
+    assert record_wilayah("P.S. Depok 2", "KOTA DEPOK") is None
+    assert record_wilayah(None, None) is None

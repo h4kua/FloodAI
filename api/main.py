@@ -543,25 +543,32 @@ async def lifespan(app: FastAPI):
         )
         app.state.pipeline = None
 
-    interval_minutes = _refresh_interval_minutes()
-    scheduler.add_job(
-        _scheduled_refresh,
-        "interval",
-        minutes=interval_minutes,
-        id="snapshot_refresh",
-        replace_existing=True,
-        max_instances=1,
-    )
-    scheduler.start()
-    _log.info(f"snapshot_scheduler_started (interval_minutes={interval_minutes})")
-    # Immediate refresh so a fresh deploy updates the snapshot right away
-    # instead of waiting a full interval.
-    asyncio.create_task(_scheduled_refresh())
+    # SNAPSHOT_SCHEDULER_ENABLED=false skips the background refresh entirely —
+    # tests set it so a TestClient doesn't spawn the real scraper subprocess
+    # (network fetches, overwritten data files, leaked pipes on Windows).
+    if os.getenv("SNAPSHOT_SCHEDULER_ENABLED", "true").lower() == "true":
+        interval_minutes = _refresh_interval_minutes()
+        scheduler.add_job(
+            _scheduled_refresh,
+            "interval",
+            minutes=interval_minutes,
+            id="snapshot_refresh",
+            replace_existing=True,
+            max_instances=1,
+        )
+        scheduler.start()
+        _log.info(f"snapshot_scheduler_started (interval_minutes={interval_minutes})")
+        # Immediate refresh so a fresh deploy updates the snapshot right away
+        # instead of waiting a full interval.
+        asyncio.create_task(_scheduled_refresh())
+    else:
+        _log.info("snapshot_scheduler_disabled (SNAPSHOT_SCHEDULER_ENABLED=false)")
 
     try:
         yield
     finally:
-        scheduler.shutdown(wait=False)
+        if scheduler.running:
+            scheduler.shutdown(wait=False)
         close_pool()
 
 
