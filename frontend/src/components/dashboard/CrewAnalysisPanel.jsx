@@ -48,7 +48,7 @@ export function CrewAnalysisPanel() {
     <div className="crew-deep">
       {status === "idle" && (
         <button className="crew-run-btn" onClick={run}>
-          <span>✦ {isId ? "Analisis mendalam dengan AI" : "Deep analysis with AI"}</span>
+          <span>{isId ? "Analisis mendalam dengan AI" : "Deep analysis with AI"}</span>
           <small>{isId ? "10–30 dtk" : "10–30 s"}</small>
         </button>
       )}

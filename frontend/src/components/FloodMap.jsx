@@ -38,10 +38,10 @@ const DISTRICT_REFS = [
 ];
 
 function stationColor(ratio) {
-  if (ratio >= 1.0)  return "#ff3d5a";
-  if (ratio >= 0.75) return "#f97316";
-  if (ratio >= 0.50) return "#f5a623";
-  return "#00e5a0";
+  if (ratio >= 1.0)  return "#c8102e";
+  if (ratio >= 0.75) return "#d9530f";
+  if (ratio >= 0.50) return "#e0a400";
+  return "#15803d";
 }
 
 // Fits the map to DKI Jakarta on mount.
@@ -99,16 +99,16 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
             pathOptions={{
               fillColor: "#8f96a9",
               fillOpacity: hasRealStations ? 0.04 : 0.14,
-              color: "#8f96a9",
+              color: "var(--muted)",
               weight: 1,
               opacity: hasRealStations ? 0.15 : 0.40,
               dashArray: "4 4",
             }}
           >
             <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>
-              <div style={{ fontFamily: "'Inter', sans-serif", minWidth: 180 }}>
+              <div style={{ minWidth: 180 }}>
                 <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 14 }}>{d.name}</p>
-                <p style={{ fontSize: 11, color: "#8f96a9", margin: 0 }}>
+                <p style={{ fontSize: 11, color: "var(--muted)", margin: 0 }}>
                   {t("map.popupEstNote")}
                 </p>
               </div>
@@ -134,11 +134,11 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
             }}
           >
             <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>
-              <div style={{ fontFamily: "'Inter', sans-serif", minWidth: 180 }}>
+              <div style={{ minWidth: 180 }}>
                 <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>
                   {titleCase(p.kelurahan)}
                 </p>
-                <p style={{ fontSize: 11, color: "#8f96a9", marginBottom: 4 }}>
+                <p style={{ fontSize: 11, color: "var(--muted)", marginBottom: 4 }}>
                   {titleCase(p.kecamatan)} · {titleCase((p.wilayah || "").replace("KOTA ADM. ", ""))}
                 </p>
                 {p.rivers?.length > 0 ? (
@@ -146,11 +146,11 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
                     {isId ? "Sungai" : "River"}: {p.rivers.map(titleCase).join(", ")}
                   </p>
                 ) : (
-                  <p style={{ fontSize: 10, color: "#8f96a9", fontStyle: "italic", marginBottom: 4 }}>
+                  <p style={{ fontSize: 10, color: "var(--muted)", fontStyle: "italic", marginBottom: 4 }}>
                     {isId ? "Tidak terkait sungai utama" : "Not tied to a major river"}
                   </p>
                 )}
-                <p style={{ fontSize: 10, color: "#6b7280", margin: 0, marginTop: 4 }}>
+                <p style={{ fontSize: 10, color: "var(--muted-2)", margin: 0, marginTop: 4 }}>
                   ● {isId ? "Titik rawan historis (BNPB)" : "Historical flood-prone point (BNPB)"}
                 </p>
               </div>
@@ -178,12 +178,12 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
               }}
             >
               <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>
-                <div style={{ fontFamily: "'Inter', sans-serif", minWidth: 180 }}>
+                <div style={{ minWidth: 180 }}>
                   <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{s.nama}</p>
                   <p style={{ fontSize: 12, color, fontWeight: 700, marginBottom: 4 }}>
                     {s.status_siaga}
                   </p>
-                  <p style={{ fontSize: 12, color: "#8f96a9", margin: 0 }}>
+                  <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>
                     {isId
                       ? `Air ${Math.round(s.ratio * 100)}% dari batas siaga (${s.tinggi_air} cm)`
                       : `Water at ${Math.round(s.ratio * 100)}% of the alert limit (${s.tinggi_air} cm)`}
@@ -200,10 +200,10 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
           {t("legend.title")}
         </p>
         {[
-          ["legend.danger",  "#ff3d5a"],
-          ["legend.alert",   "#f97316"],
-          ["legend.warning", "#f5a623"],
-          ["legend.safe",    "#00e5a0"],
+          ["legend.danger",  "#c8102e"],
+          ["legend.alert",   "#d9530f"],
+          ["legend.warning", "#e0a400"],
+          ["legend.safe",    "#15803d"],
         ].map(([key, color]) => (
           <div className="legend-row" key={key}>
             <span className="legend-dot" style={{ background: color }} />
@@ -211,7 +211,7 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
           </div>
         ))}
         {/* Flood-prone overlay toggle — single compact line, no second color key */}
-        <div style={{ marginTop: 5, borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 5 }}>
+        <div style={{ marginTop: 5, borderTop: "1px solid var(--line)", paddingTop: 5 }}>
           <button
             type="button"
             onClick={() => setShowProne(v => !v)}
@@ -226,7 +226,7 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
           >
             <span style={{
               width: 9, height: 9, borderRadius: 2,
-              border: `1.5px solid ${showProne ? PRONE_COLOR : "rgba(143,150,169,0.45)"}`,
+              border: `1.5px solid ${showProne ? PRONE_COLOR : "var(--line-2)"}`,
               background: showProne ? PRONE_COLOR : "transparent",
               flexShrink: 0,
             }} />

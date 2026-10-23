@@ -123,7 +123,7 @@ export default function ChatBot({ riskContext = {} }) {
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Tutup chat" : "Buka chat AI"}
       >
-        {open ? "✕" : "AI"}
+        {open ? "✕" : (lang === "en" ? "Ask AI" : "Tanya AI")}
         {!open && hasUnread && <span className="chatbot-unread">1</span>}
       </button>
     </div>

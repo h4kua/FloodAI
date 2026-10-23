@@ -35,7 +35,7 @@ function AppShell() {
 
 export default function App() {
   const [lang,  setLang]  = useState(() => localStorage.getItem("deflood_lang")  || "id");
-  const [theme, setTheme] = useState(() => localStorage.getItem("deflood_theme") || "dark");
+  const [theme, setTheme] = useState(() => localStorage.getItem("deflood_theme") || "light");
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);

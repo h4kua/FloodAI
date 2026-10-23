@@ -52,7 +52,7 @@ export function formatDataTime(isoString, isId) {
 export const TREND_TONE = {
   warn:    { color: "var(--wsp)",   bg: "var(--wsp-soft)",        border: "var(--wsp-border)"  },
   good:    { color: "var(--safe)",  bg: "var(--safe-soft)",       border: "var(--safe-border)" },
-  neutral: { color: "var(--muted)", bg: "rgba(255,255,255,0.04)", border: "var(--line)"        },
+  neutral: { color: "var(--muted)", bg: "var(--panel-2)",           border: "var(--line)"        },
 };
 
 export function trendDisplay(riskTrend, level, isId) {
@@ -245,7 +245,7 @@ export const WILAYAH_STATUS_STYLE = {
 export function probColor(pct) {
   if (pct >= 75) return "var(--s1)";
   if (pct >= 55) return "var(--wsp)";
-  if (pct >= 30) return "#f5a623";
+  if (pct >= 30) return "var(--s2)";
   return "var(--safe)";
 }
 

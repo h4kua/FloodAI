@@ -161,7 +161,7 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
 
         {route && (
           <>
-            <Polyline positions={route} pathOptions={{ color: "var(--cyan,#00cfff)", weight: 5, opacity: 0.85, lineJoin: "round" }} />
+            <Polyline positions={route} pathOptions={{ color: "#1d4ed8", weight: 5, opacity: 0.85, lineJoin: "round" }} />
             <FitBounds positions={route} />
           </>
         )}
@@ -169,12 +169,12 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
         {/* Origin marker */}
         {origin && !origin.isGPS && (
           <CircleMarker center={[origin.lat, origin.lng]} radius={12}
-            pathOptions={{ fillColor: "#ff3d5a", fillOpacity: 0.9, color: "#ff3d5a", weight: 2 }}
+            pathOptions={{ fillColor: "#c8102e", fillOpacity: 0.9, color: "#c8102e", weight: 2 }}
           >
             <Popup>
-              <div style={{ fontFamily: "'Inter',sans-serif" }}>
+              <div>
                 <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{origin.name}</p>
-                <p style={{ fontSize: 11, color: "#ff9dac", margin: 0 }}>{t("evac.depart")}</p>
+                <p style={{ fontSize: 11, color: "var(--s1)", margin: 0 }}>{t("evac.depart")}</p>
               </div>
             </Popup>
           </CircleMarker>
@@ -190,9 +190,9 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
               pathOptions={{ fillColor: "#4285f4", fillOpacity: 0.95, color: "#fff", weight: 2.5 }}
             >
               <Popup>
-                <div style={{ fontFamily: "'Inter',sans-serif" }}>
+                <div>
                   <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{t("evac.yourLocation")}</p>
-                  <p style={{ fontSize: 11, color: "#4285f4", margin: 0 }}>{t("evac.gpsAccurate")}</p>
+                  <p style={{ fontSize: 11, color: "var(--cyan)", margin: 0 }}>{t("evac.gpsAccurate")}</p>
                 </div>
               </Popup>
             </CircleMarker>
@@ -202,14 +202,14 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
         {/* Destination / Shelter */}
         {dest && (
           <CircleMarker center={[dest.lat, dest.lng]} radius={12}
-            pathOptions={{ fillColor: "#00e5a0", fillOpacity: 0.9, color: "#00e5a0", weight: 2 }}
+            pathOptions={{ fillColor: "#15803d", fillOpacity: 0.9, color: "#15803d", weight: 2 }}
           >
             <Popup>
-              <div style={{ fontFamily: "'Inter',sans-serif" }}>
+              <div>
                 <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{dest.name}</p>
-                <p style={{ fontSize: 11, color: "#8cffd8", margin: 0 }}>{t("evac.dest")}</p>
+                <p style={{ fontSize: 11, color: "var(--safe)", margin: 0 }}>{t("evac.dest")}</p>
                 {routeInfo && (
-                  <p style={{ fontSize: 11, color: "#8f96a9", marginTop: 4 }}>
+                  <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>
                     {metersToKm(routeInfo.distance)} · {secToMin(routeInfo.duration)}
                   </p>
                 )}
@@ -241,7 +241,7 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
       {/* Placeholder overlay */}
       {!origin && (
         <div style={{ position: "absolute", inset: 0, zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-          <div style={{ background: "rgba(9,9,13,0.82)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "1rem 1.5rem", textAlign: "center" }}>
+          <div style={{ background: "var(--panel)", border: "1px solid var(--line-2)", borderRadius: 8, boxShadow: "var(--shadow)", padding: "1rem 1.5rem", textAlign: "center" }}>
             <p style={{ fontSize: "0.72rem", color: "var(--cyan)", marginBottom: "0.3rem" }}>
               {t("evac.hint.title")}
             </p>
@@ -252,13 +252,13 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
 
       {/* Route info overlay */}
       {(loading || error || routeInfo) && (
-        <div style={{ position: "absolute", bottom: 12, right: 12, zIndex: 1000, background: "rgba(13,13,15,0.9)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "0.75rem 1rem", fontSize: "0.72rem" }}>
-          {loading && <span style={{ color: "#8f96a9" }}>{t("evac.calc")}</span>}
-          {error   && <span style={{ color: "#ff9dac" }}>{error}</span>}
+        <div style={{ position: "absolute", bottom: 12, right: 12, zIndex: 1000, background: "var(--panel)", border: "1px solid var(--line-2)", borderRadius: 8, boxShadow: "var(--shadow-sm)", padding: "0.75rem 1rem", fontSize: "0.72rem" }}>
+          {loading && <span style={{ color: "var(--muted)" }}>{t("evac.calc")}</span>}
+          {error   && <span style={{ color: "var(--s1)" }}>{error}</span>}
           {routeInfo && !loading && (
             <div style={{ display: "flex", gap: "1rem" }}>
-              <span style={{ color: "var(--cyan,#00cfff)" }}>{metersToKm(routeInfo.distance)}</span>
-              <span style={{ color: "#8fe9ff" }}>{secToMin(routeInfo.duration)}</span>
+              <span style={{ color: "var(--cyan)", fontWeight: 700 }}>{metersToKm(routeInfo.distance)}</span>
+              <span style={{ color: "var(--muted)" }}>{secToMin(routeInfo.duration)}</span>
             </div>
           )}
         </div>

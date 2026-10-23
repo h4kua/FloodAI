@@ -62,8 +62,8 @@ function MetricBar({ label, value, max = 1, color = "var(--cyan)", format, hint,
         </div>
         <span style={{ fontSize: "0.85rem", fontWeight: 700, color, flexShrink: 0 }}>{display}</span>
       </div>
-      <div style={{ height: "5px", background: "var(--line)", borderRadius: "99px", overflow: "hidden" }}>
-        <div style={{ width: `${barPct}%`, height: "100%", background: color, borderRadius: "99px", transition: "width 0.6s ease" }} />
+      <div style={{ height: "5px", background: "var(--line)", borderRadius: "2px", overflow: "hidden" }}>
+        <div style={{ width: `${barPct}%`, height: "100%", background: color, borderRadius: "2px", transition: "width 0.6s ease" }} />
       </div>
     </div>
   );
@@ -95,7 +95,7 @@ export default function About({ riskContext = {} }) {
         {/* What it is — one paragraph, no jargon */}
         <div className="about-hero">
           <div style={{ flex: 1, minWidth: 220 }}>
-            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "1.75rem", fontWeight: 800, letterSpacing: "-0.03em", color: "var(--cyan)", marginBottom: "0.5rem" }}>
+            <p style={{ fontSize: "1.75rem", fontWeight: 800, letterSpacing: "-0.03em", color: "var(--cyan)", marginBottom: "0.5rem" }}>
               deFlood<span style={{ color: "var(--s1)" }}>.ai</span>
             </p>
             <p style={{ fontSize: "1rem", color: "var(--text)", lineHeight: 1.7, maxWidth: 560 }}>

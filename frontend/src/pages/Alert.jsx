@@ -259,12 +259,12 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
         <div>
           <h1 className="page-title">{t("evac.title")}</h1>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 0.875rem", borderRadius: "999px", border: `1px solid ${config.color}33`, background: `${config.color}0d` }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", background: config.color, flexShrink: 0 }} />
-          <span style={{ fontSize: "0.85rem", fontWeight: 600, color: config.color }}>
-            Status: {config.label}
-          </span>
-        </div>
+        <span
+          className={`risk-badge badge-${{ aman: "ok", waspada: "wsp", siaga: "s2", bahaya: "s1" }[riskLevel] ?? "wsp"}`}
+          style={{ fontSize: "0.85rem", padding: "0.35rem 0.7rem" }}
+        >
+          Status: {config.label}
+        </span>
       </div>
 
       <div className="evac-grid fade-in">
@@ -368,7 +368,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           {/* Once a route is shown: what the map colours mean */}
           {userLocation && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem", padding: "0 0.25rem" }}>
-              {[["#ff3d5a","evac.leg.from"],["#00cfff","evac.leg.route"],["#00e5a0","evac.leg.shelter"]].map(([c, k]) => (
+              {[["#c8102e","evac.leg.from"],["#1d4ed8","evac.leg.route"],["#15803d","evac.leg.shelter"]].map(([c, k]) => (
                 <div key={k} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                   <span style={{ width: 10, height: 10, borderRadius: "50%", background: c, flexShrink: 0 }} />
                   <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>{t(k)}</span>

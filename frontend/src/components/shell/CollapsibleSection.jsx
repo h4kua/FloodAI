@@ -36,7 +36,7 @@ export default function CollapsibleSection({
           {icon}
         </div>
         <div style={{ textAlign: "left", minWidth: 0 }}>
-          <div className="section-teaser-title" style={{ color: iconColor }}>{title}</div>
+          <div className="section-teaser-title">{title}</div>
           {subtitle && <div className="section-teaser-sub">{subtitle}</div>}
         </div>
         <span

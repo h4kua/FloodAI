@@ -126,9 +126,9 @@ export function ForecastPanel({ forecast }) {
           return (
             <div key={i} style={{
               flex: "1 1 120px",
-              background: isRain ? "rgba(0,120,255,0.06)" : "rgba(0,229,160,0.04)",
-              border: `1px solid ${isRain ? "rgba(0,120,255,0.15)" : "var(--line)"}`,
-              borderRadius: "10px", padding: "0.625rem 0.75rem",
+              background: isRain ? "var(--cyan-soft)" : "var(--panel)",
+              border: `1px solid ${isRain ? "var(--cyan-border)" : "var(--line)"}`,
+              borderRadius: "var(--r-lg)", padding: "0.625rem 0.75rem",
               display: "flex", flexDirection: "column", gap: "0.25rem", minWidth: 0,
             }}>
               <span style={{ fontSize: "0.76rem", color: "var(--muted-2)" }}>{dateStr} · {timeStr}</span>

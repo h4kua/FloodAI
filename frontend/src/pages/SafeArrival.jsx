@@ -13,7 +13,7 @@ export default function SafeArrival({ shelterName, familyNotified = false, onClo
     <div
       style={{
         position: "fixed", inset: 0, zIndex: "var(--z-modal)",
-        background: "rgba(4,10,8,0.72)", backdropFilter: "blur(4px)",
+        background: "rgba(10,10,12,0.6)",
         display: "grid", placeItems: "center", padding: "1.5rem",
       }}
       onClick={onClose}
@@ -35,7 +35,7 @@ export default function SafeArrival({ shelterName, familyNotified = false, onClo
             <path d="M4 12.5 L9.5 18 L20 6" stroke="var(--safe)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "1.2rem", fontWeight: 800, color: "var(--safe)", marginBottom: "0.5rem" }}>
+        <p style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--safe)", marginBottom: "0.5rem" }}>
           {t("safeArrival.title")}
         </p>
         <p style={{ color: "var(--muted)", fontSize: "0.85rem", lineHeight: 1.55, marginBottom: familyNotified ? "0.375rem" : "1.5rem" }}>

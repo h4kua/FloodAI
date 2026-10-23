@@ -2,33 +2,14 @@ import { useApp, useT } from "../../lib/appContext";
 import { NAV_ITEMS } from "./navConfig";
 
 /* ── deFlood.ai logo mark ───────────────────────────────── */
-/*
- * Abstract triskelion vortex — three identical curved arms at 120° intervals.
- * Reads as: rotating flow (water) + dynamic intelligence (AI).
- * No literal imagery — same design language as Claude, DeepSeek, ChatGPT.
- */
+/* A plain signage tile: solid accent square, two white water lines. */
 function DeFloodLogo({ size = 22 }) {
-  const id = `df${size}`;
-  /* Three-arm triskelion — no background box, pure abstract floating mark.
-     gradientUnits="userSpaceOnUse" so all three arms share one gradient space. */
-  const arm = "M 16 5.5 C 24 5.5 27.5 13 23 19 C 21.5 21.5 19 23 16 23";
   return (
-    <svg
-      width={size} height={size} viewBox="0 0 32 32"
-      fill="none" aria-hidden="true"
-      style={{ flexShrink: 0, display: "block" }}
-    >
-      <defs>
-        <linearGradient id={`${id}g`} x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"   stopColor="#22d3ee" />
-          <stop offset="55%"  stopColor="#3b82f6" />
-          <stop offset="100%" stopColor="#818cf8" />
-        </linearGradient>
-      </defs>
-      <g stroke={`url(#${id}g)`} strokeLinecap="round" fill="none" strokeWidth="3.5">
-        <path d={arm} />
-        <path d={arm} transform="rotate(120 16 16)" />
-        <path d={arm} transform="rotate(240 16 16)" />
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" style={{ flexShrink: 0, display: "block" }}>
+      <rect width="24" height="24" rx="5" fill="currentColor" />
+      <g fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round">
+        <path d="M5 10.5c1.75-1.5 3.25-1.5 5 0s3.25 1.5 5 0 3.25-1.5 4 0" />
+        <path d="M5 15.5c1.75-1.5 3.25-1.5 5 0s3.25 1.5 5 0 3.25-1.5 4 0" />
       </g>
     </svg>
   );

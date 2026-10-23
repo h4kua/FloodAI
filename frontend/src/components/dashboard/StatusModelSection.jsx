@@ -45,7 +45,7 @@ export function ModelOutputCard({ riskData, children }) {
   return (
     <div className="panel panel-body ai-card fade-in">
       <div className="ai-card-head">
-        <span className="ai-card-label">✦ {isId ? "Ringkasan AI" : "AI Summary"}</span>
+        <span className="ai-card-label">{isId ? "Ringkasan AI" : "AI Summary"}</span>
         {snapTimeStr && <span className="ai-card-time">{snapTimeStr}</span>}
       </div>
 
