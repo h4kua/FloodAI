@@ -72,6 +72,15 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
 
   const trendCfg = trendDisplay(riskTrend, level, isId);
 
+  // Rainfall (OpenWeather, mm/h) — the one number from the old glance chips
+  // that the hero didn't already show.
+  const rain = riskData?.rainfall;
+  const rainText = rain == null ? null
+    : rain >= 20 ? (isId ? `Hujan deras · ${Math.round(rain)} mm/jam` : `Heavy rain · ${Math.round(rain)} mm/h`)
+    : rain >= 5  ? (isId ? `Hujan sedang · ${Math.round(rain)} mm/jam` : `Moderate rain · ${Math.round(rain)} mm/h`)
+    : rain > 0   ? (isId ? `Hujan ringan · ${rain.toFixed(1)} mm/jam` : `Light rain · ${rain.toFixed(1)} mm/h`)
+    : (isId ? "Tidak hujan" : "No rain");
+
   // AlertRibbon folded in: one red line with real station counts, Siaga only.
   const alertLine = siaga1Count > 0
     ? (isId
@@ -101,10 +110,11 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
         </div>
         <p className="status-hero-desc decision-hero-desc">{dynamicDesc}</p>
 
-        {/* A trend from old data says nothing about now — hide it when stale */}
-        {trendCfg && !isStale && (
+        {/* Trend + rain from old data say nothing about now — hide them when stale */}
+        {!isStale && (trendCfg || rainText) && (
           <div className="decision-hero-meta">
-            <span className="decision-hero-trend">{trendCfg.text}</span>
+            {trendCfg && <span className="decision-hero-trend">{trendCfg.text}</span>}
+            {rainText && <span className="decision-hero-trend">{rainText}</span>}
           </div>
         )}
 

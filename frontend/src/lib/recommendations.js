@@ -5,7 +5,7 @@
    that CTA buttons are built from.
 */
 
-import { dataAgeMinutes, STALE_STATUS_MIN } from "./dashboardHelpers";
+import { dataAgeMinutes, STALE_STATUS_MIN, cleanStationName } from "./dashboardHelpers";
 
 const WORST_RANK = { "Siaga 1": 3, "Siaga 2": 2, "Siaga 3": 1 };
 
@@ -33,25 +33,31 @@ export function deriveActions(riskData, stations = [], isId = true) {
   if (s1.length > 0) {
     const st = s1[0];
     actions.push(isId
-      ? `${st.nama} sudah ${Math.round(st.ratio * 100)}% ambang Siaga 1 (TMA ${st.tinggi_air} cm). Warga bantaran terdekat: siapkan evakuasi segera.`
-      : `${st.nama} at ${Math.round(st.ratio * 100)}% of Alert-1 threshold (${st.tinggi_air} cm). Nearby residents: prepare immediate evacuation.`
+      ? `Air di ${cleanStationName(st.nama)} sudah ${Math.round(st.ratio * 100)}% dari batas Siaga 1 (${st.tinggi_air} cm). Warga bantaran terdekat: siapkan evakuasi sekarang.`
+      : `Water at ${cleanStationName(st.nama)} is ${Math.round(st.ratio * 100)}% of the Alert 1 limit (${st.tinggi_air} cm). Riverbank residents nearby: get ready to evacuate now.`
     );
   }
   if (s2.length > 0) {
     const st = s2[0];
     actions.push(isId
-      ? `${st.nama} Siaga 2 (${Math.round(st.ratio * 100)}%, TMA ${st.tinggi_air} cm) — pantau setiap 15 mnt, siapkan tas darurat.`
-      : `${st.nama} at Alert 2 (${Math.round(st.ratio * 100)}%, ${st.tinggi_air} cm) — monitor every 15 min, prepare emergency bag.`
+      ? `${cleanStationName(st.nama)} berstatus Siaga 2 (${Math.round(st.ratio * 100)}% dari batas, ${st.tinggi_air} cm). Cek lagi tiap 15 menit dan siapkan tas darurat.`
+      : `${cleanStationName(st.nama)} is at Alert 2 (${Math.round(st.ratio * 100)}% of the limit, ${st.tinggi_air} cm). Check again every 15 minutes and pack an emergency bag.`
     );
   }
+  // Wilayah line uses the app's own words: DSDA "Siaga 3" is shown as Waspada.
   if (topW) {
-    const sensorsNote = topW.siaga1_count > 0
-      ? (isId ? `${topW.siaga1_count} sensor Siaga 1 aktif` : `${topW.siaga1_count} active Alert-1 sensors`)
-      : (isId ? `${topW.siaga2_count} sensor Siaga 2` : `${topW.siaga2_count} Alert-2 sensors`);
-    actions.push(isId
-      ? `${topW.wilayah} — ${topW.worst_status}, ${sensorsNote}. Kurangi aktivitas di luar ruangan di wilayah ini.`
-      : `${topW.wilayah} — ${topW.worst_status}, ${sensorsNote}. Reduce outdoor activities in this district.`
-    );
+    const line = topW.siaga1_count > 0
+      ? (isId
+          ? `${topW.wilayah}: ${topW.siaga1_count} pos pantau sudah Siaga 1. Kurangi aktivitas di luar ruangan di wilayah ini.`
+          : `${topW.wilayah}: ${topW.siaga1_count} post(s) at Alert 1. Limit time outdoors in this area.`)
+      : topW.siaga2_count > 0
+      ? (isId
+          ? `${topW.wilayah}: ${topW.siaga2_count} pos pantau Siaga 2, air mendekati batas. Jauhi bantaran kali.`
+          : `${topW.wilayah}: ${topW.siaga2_count} post(s) at Alert 2, water nearing the limit. Stay away from riverbanks.`)
+      : (isId
+          ? `${topW.wilayah}: air di beberapa pos mulai naik (Waspada). Belum perlu mengungsi, tapi jauhi bantaran kali.`
+          : `${topW.wilayah}: water is rising at some posts (Watch). No need to evacuate, but stay away from riverbanks.`);
+    actions.push(line);
   }
   if (rainfall > 20) {
     actions.push(isId

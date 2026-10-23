@@ -37,7 +37,7 @@ const DISTRICT_REFS = [
 
 function stationColor(ratio) {
   if (ratio >= 1.0)  return "#c8102e";
-  if (ratio >= 0.75) return "#d9530f";
+  if (ratio >= 0.75) return "#c2410c";
   if (ratio >= 0.50) return "#e0a400";
   return "#15803d";
 }
@@ -58,7 +58,7 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
   const t = useT();
   const { theme, lang } = useApp();
   const isId = lang === "id";
-  const [showProne, setShowProne] = useState(true);
+  const [showProne, setShowProne] = useState(false); // off by default — it buries the post markers
 
   // Only plot stations that have validated Jakarta coordinates.
   const mappedStations = useMemo(
@@ -69,7 +69,7 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
   const pronePoints = floodProneZones.points ?? [];
 
   return (
-    <div style={{ position: "relative", flex: 1, minHeight: "clamp(280px, 45vh, 460px)" }}>
+    <div style={{ position: "relative", flex: 1, minHeight: "clamp(340px, 58vh, 600px)" }}>
       <MapContainer
         center={[-6.23, 106.85]}
         zoom={12}
@@ -79,7 +79,7 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
         maxBoundsViscosity={1.0}
         zoomControl={true}
         scrollWheelZoom={true}
-        style={{ height: "100%", width: "100%", minHeight: "clamp(280px, 45vh, 460px)" }}
+        style={{ height: "100%", width: "100%", minHeight: "clamp(340px, 58vh, 600px)" }}
       >
         <BaseTiles theme={theme} />
         <FitJakarta />
@@ -168,8 +168,10 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
               radius={radius}
               pathOptions={{
                 fillColor: color,
-                fillOpacity: 0.92,
-                color: "#fff",
+                fillOpacity: 0.95,
+                // Dark outline on the light basemap (pale amber vanishes on grey
+                // otherwise); white outline on the dark basemap.
+                color: theme === "dark" ? "#ffffff" : "#15171a",
                 weight: 1.5,
                 opacity: 0.9,
               }}
@@ -198,7 +200,7 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
         </p>
         {[
           ["legend.danger",  "#c8102e"],
-          ["legend.alert",   "#d9530f"],
+          ["legend.alert",   "#c2410c"],
           ["legend.warning", "#e0a400"],
           ["legend.safe",    "#15803d"],
         ].map(([key, color]) => (

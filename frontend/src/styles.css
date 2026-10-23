@@ -2,9 +2,10 @@
    deFlood.ai — Design System v3 "Papan info publik"
    Civic public-information board, modern: paper background, white
    surfaces with thin rules, one blue accent, status shown as solid
-   signage blocks. Navy chrome with a signal-yellow marker, Barlow
+   signage blocks. Navy chrome with a light water-blue marker, Barlow
    Condensed (highway-sign lettering) for headings and numbers, Public
-   Sans for text. No gradients, no glows.
+   Sans for text. Status colours are reserved for status — nothing
+   decorative uses them. No gradients, no glows.
    ================================================================ */
 
 /* ── Design Tokens (light is the default) ─────────────────────── */
@@ -46,7 +47,7 @@
   --s2:        #b4440c;
   --s2-soft:   #fdf0e7;
   --s2-border: #f2c7aa;
-  --s2-solid:  #d9530f;
+  --s2-solid:  #c2410c;
   --s2-ink:    #ffffff;
 
   /* Status: WASPADA — amber */
@@ -93,7 +94,9 @@
   --chrome-2:     #1c3156;
   --chrome-text:  #ffffff;
   --chrome-muted: #b9c4d8;
-  --signal:       #f2b705;
+  --chrome-accent: #8fc3ff;   /* water blue — never a status colour */
+
+  --marker-edge: #15171a;     /* map marker outline */
 
   --font: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
@@ -143,6 +146,8 @@
   --chrome:       #0b0c0e;
   --chrome-2:     #1a1c20;
   --chrome-muted: #a6a9ae;
+  --chrome-accent: #8eaaff;
+  --marker-edge: #ffffff;
   color-scheme: dark;
 }
 
@@ -174,7 +179,7 @@ button, input, select, textarea { font-family: inherit; }
   position: sticky; top: 0; z-index: var(--z-sticky);
   height: 60px; padding: 0 1.75rem;
   background: var(--chrome); color: var(--chrome-text);
-  border-bottom: 4px solid var(--signal);
+  border-bottom: 4px solid var(--chrome-accent);
   display: flex; align-items: center; gap: 0;
 }
 
@@ -185,7 +190,7 @@ button, input, select, textarea { font-family: inherit; }
   line-height: 1; margin-right: 2rem;
   letter-spacing: -0.025em;
 }
-.logo svg { display: block; color: var(--signal); }
+.logo svg { display: block; color: var(--chrome-accent); }
 .logo-text  { display: inline-flex; align-items: baseline; gap: 0; }
 .logo-de    { color: var(--chrome-text); }
 .logo-flood { color: var(--chrome-text); }
@@ -203,7 +208,7 @@ button, input, select, textarea { font-family: inherit; }
 @media (hover: hover) and (pointer: fine) {
   .nav-btn:hover { color: var(--chrome-text); background: var(--chrome-2); }
 }
-.nav-btn.active { color: var(--chrome-text); box-shadow: inset 0 -4px 0 var(--signal); }
+.nav-btn.active { color: var(--chrome-text); box-shadow: inset 0 -4px 0 var(--chrome-accent); }
 
 .topbar-right {
   margin-left: auto;
@@ -244,7 +249,7 @@ button, input, select, textarea { font-family: inherit; }
 }
 .bottom-nav-btn svg { display: block; }
 .bottom-nav-label { font-size: 0.75rem; font-weight: 600; line-height: 1; }
-.bottom-nav-btn.active { color: var(--text); box-shadow: inset 0 4px 0 var(--signal); }
+.bottom-nav-btn.active { color: var(--cyan); box-shadow: inset 0 4px 0 var(--cyan); }
 
 /* ── Main ────────────────────────────────────────────────────── */
 .main {
@@ -345,7 +350,7 @@ button, input, select, textarea { font-family: inherit; }
   letter-spacing: 0; color: var(--text);
 }
 .hero-gauge-bar { display: flex; gap: 3px; height: 30px; margin-bottom: 0.875rem; }
-.hero-gauge-bar i { flex: 1; min-width: 4px; border-radius: 2px; }
+.hero-gauge-bar i { flex: 1; min-width: 4px; border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.28); }
 .seg-s1  { background: var(--s1-solid); }
 .seg-s2  { background: var(--s2-solid); }
 .seg-wsp { background: var(--wsp-solid); }
@@ -355,7 +360,7 @@ button, input, select, textarea { font-family: inherit; }
   font-size: 0.82rem;
 }
 .hero-gauge-legend li { display: flex; align-items: center; gap: 0.45rem; }
-.hero-gauge-legend li i { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.hero-gauge-legend li i { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.28); }
 .hero-gauge-legend li b { margin-left: auto; font-variant-numeric: tabular-nums; }
 .hero-gauge-legend li.is-zero { color: var(--muted-2); }
 .hero-gauge-legend li.is-zero i { opacity: 0.35; }
@@ -364,21 +369,19 @@ button, input, select, textarea { font-family: inherit; }
 .home-main {
   display: grid; gap: 1rem;
   grid-template-columns: 1fr;
-  grid-template-areas: "action" "glance" "map";
+  grid-template-areas: "action" "map";
 }
 .home-action { grid-area: action; display: flex; flex-direction: column; }
-.home-glance { grid-area: glance; }
 .home-map    { grid-area: map; display: flex; flex-direction: column; }
 .home-map .map-panel { flex: 1; display: flex; flex-direction: column; }
-@media (min-width: 1101px) {
+/* Two columns from tablet width up: map left, what-to-do right */
+@media (min-width: 769px) {
   .home-main {
-    grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
-    grid-template-areas:
-      "map action"
-      "map glance";
-    align-items: start;
+    grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr);
+    grid-template-areas: "map action";
+    align-items: stretch;
   }
-  .home-map { height: 100%; }
+  .home-action .action-card { position: sticky; top: 76px; }
 }
 
 /* ── ActionCard — "what should I do?" ────────────────────────── */
@@ -393,34 +396,10 @@ button, input, select, textarea { font-family: inherit; }
 .action-card-marker {
   flex-shrink: 0; width: 22px; height: 22px; border-radius: var(--r-sm);
   display: grid; place-items: center; margin-top: 1px;
-  background: var(--signal); color: #17150f;
+  background: var(--cyan); color: var(--on-accent);
   font-size: 0.78rem; font-weight: 800;
 }
 .action-card-buttons { display: flex; flex-direction: column; gap: 0.5rem; }
-
-/* ── GlanceChips — key numbers at a glance ───────────────────── */
-.glance-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 0;
-  background: var(--panel);
-  border: 1px solid var(--line); border-radius: var(--r-lg);
-  overflow: hidden;
-}
-.glance-chip {
-  padding: 0.875rem 1rem;
-  display: flex; flex-direction: column; gap: 0.35rem;
-  border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
-  margin: 0 -1px -1px 0;
-}
-.glance-chip-value {
-  font-family: var(--font-display);
-  font-size: 2.6rem; font-weight: 700; letter-spacing: 0; line-height: 0.95;
-  font-variant-numeric: tabular-nums;
-  display: flex; align-items: baseline; gap: 0.3rem;
-}
-.glance-chip-unit { font-size: 0.78rem; font-weight: 600; color: var(--muted-2); letter-spacing: 0; }
-.glance-chip-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
 
 /* ── CollapsibleSection ──────────────────────────────────────── */
 .collapsible-section { display: flex; flex-direction: column; }
@@ -550,7 +529,7 @@ button, input, select, textarea { font-family: inherit; }
   display: flex; align-items: center; gap: 6px;
   font-size: 0.76rem; color: var(--muted); white-space: nowrap;
 }
-.legend-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 1.5px var(--marker-edge); }
 
 /* Risk badge — a small solid-edged tag */
 .risk-badge {
@@ -776,7 +755,7 @@ button, input, select, textarea { font-family: inherit; }
 
 /* ── Footer ──────────────────────────────────────────────────── */
 .footer {
-  border-top: 4px solid var(--signal);
+  border-top: 4px solid var(--chrome-accent);
   background: var(--chrome);
   padding: 1rem 1.75rem;
   display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
@@ -1008,8 +987,17 @@ button, input, select, textarea { font-family: inherit; }
 .is-stale .wilayah-status-cell { --tone: var(--line-2); }
 .wilayah-status-name { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; line-height: 1; color: var(--text); }
 .wilayah-status-cell small { font-size: 0.78rem; color: var(--muted-2); }
+/* Phones: one row per wilayah — name left, posts + status right */
 @media (max-width: 520px) {
-  .wilayah-status-list { grid-template-columns: repeat(2, 1fr); }
+  .wilayah-status-list { grid-template-columns: 1fr; }
+  .wilayah-status-cell {
+    flex-direction: row; align-items: center; gap: 0.625rem;
+    padding: 0.75rem 0.875rem 0.75rem 1.125rem;
+    box-shadow: inset 4px 0 0 var(--tone, var(--line-2));
+  }
+  .wilayah-status-name { flex: 1; font-size: 1.25rem; }
+  .wilayah-status-cell small { order: 1; }
+  .wilayah-status-cell .risk-badge { order: 2; }
 }
 
 /* ── AI summary card ─────────────────────────────────────────── */
@@ -1304,8 +1292,9 @@ button, input, select, textarea { font-family: inherit; }
   .route-search-btn { white-space: nowrap; }
   .evac-map-panel { min-height: 300px; }
 
-  .page-header    { flex-direction: column; align-items: stretch; gap: 0.375rem; }
-  .header-actions { justify-content: space-between; align-items: center; }
+  .page-header    { align-items: center; gap: 0.75rem; }
+  .header-actions .btn { min-width: 40px; min-height: 40px; justify-content: center; padding: 0.5rem; }
+  .header-actions .btn-label { display: none; }
   .header-info-col { align-items: flex-start !important; }
   .header-sensor-time { display: none; }
 

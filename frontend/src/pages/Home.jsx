@@ -9,7 +9,6 @@ import CollapsibleSection from "../components/shell/CollapsibleSection";
 import DecisionHero from "../components/dashboard/DecisionHero";
 import WilayahStatus from "../components/dashboard/WilayahStatus";
 import ActionCard from "../components/dashboard/ActionCard";
-import GlanceChips from "../components/dashboard/GlanceChips";
 import { StationPanel } from "../components/dashboard/StationSection";
 import { StaleDataBanner, ModelOutputCard } from "../components/dashboard/StatusModelSection";
 import { WilayahForecastGrid, ForecastPanel } from "../components/dashboard/ForecastSection";
@@ -26,7 +25,7 @@ const DETAIL_TABS = [
    Per the FloodGuard HCI spec, the page answers three questions in order:
    1. "Is my area at risk right now?"  → DecisionHero + WilayahStatus (per wilayah)
    2. "What should I do?"              → ActionCard (≤3 actions, 1 primary CTA)
-   3. "Show me the situation"          → GlanceChips + live map
+   3. "Show me the situation"          → live map
    Everything technical (AI analysis, sensor tables, forecasts) sits behind
    ONE collapsed "Detail" section with tabs, so a stressed user is never
    flooded with data they didn't ask for and only one panel shows at a time.
@@ -48,7 +47,6 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
   const stations    = riskData?.stations ?? [];
   const realSiaga1  = useMemo(() => stations.filter(s => s.ratio >= 1.0).length,  [stations]);
   const realSiaga2  = useMemo(() => stations.filter(s => s.ratio >= 0.75 && s.ratio < 1.0).length, [stations]);
-  const totalStations = riskData?.tmaStationsActive ?? (stations.length || null);
 
   if (loading) return <LoadingSpinner message="Mengambil data realtime..." />;
 
@@ -56,7 +54,7 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem", padding: "3rem 1rem", textAlign: "center" }}>
       <p style={{ fontWeight: 700, color: "var(--text)" }}>{t("error.load")}</p>
       <p style={{ fontSize: "0.82rem", color: "var(--muted)" }}>{error}</p>
-      <button className="btn btn-ghost" onClick={refresh}>{t("error.retry")}</button>
+      <button className="btn btn-ghost" aria-label={t("home.refresh")} onClick={refresh}>{t("error.retry")}</button>
     </div>
   );
 
@@ -69,7 +67,8 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
         </div>
         <div className="header-actions">
           <button className="btn btn-ghost" onClick={refresh} disabled={refreshing} style={refreshing ? { opacity: 0.55, cursor: "wait" } : {}}>
-            {refreshing ? "…" : `↻ ${t("home.refresh")}`}
+            <span aria-hidden="true">↻</span>
+            <span className="btn-label">{refreshing ? "…" : t("home.refresh")}</span>
           </button>
         </div>
       </div>
@@ -87,15 +86,6 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
       <div className="home-main fade-in">
         <div className="home-action">
           <ActionCard riskData={riskData} stations={stations} onNavigate={onNavigate} />
-        </div>
-        <div className="home-glance">
-          <GlanceChips
-            riskData={riskData}
-            siaga1={realSiaga1}
-            siaga2={realSiaga2}
-            totalStations={totalStations}
-            calibratedStations={stations.length || null}
-          />
         </div>
         <div className="home-map" id="map-anchor">
           <div className="panel map-panel">

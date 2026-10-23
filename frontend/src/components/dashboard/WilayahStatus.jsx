@@ -24,6 +24,11 @@ export default function WilayahStatus({ riskData }) {
           ? (isId ? "Status terakhir per wilayah" : "Last known status by area")
           : (isId ? "Status per wilayah" : "Status by area")}
       </p>
+      <p className="station-sub" style={{ marginBottom: 0 }}>
+        {isId
+          ? "Menurut pos pantau air dengan kondisi terparah di tiap wilayah."
+          : "Based on the worst water-level post in each area."}
+      </p>
       <ul className="wilayah-status-list">
         {groups.map((g) => (
           <li key={g.key} className={`wilayah-status-cell tone-${g.maxRatio != null ? stationClass(g.maxRatio) : "none"}`}>
