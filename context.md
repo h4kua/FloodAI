@@ -12,7 +12,7 @@
 | Backend | FastAPI + uvicorn, port 8080 |
 | Frontend | React 18 + Vite 5 + React-Leaflet 4, port 3000 (dev) |
 | Database | Supabase / PostgreSQL (`supabase` client + psycopg2) |
-| ML | XGBoost + scikit-learn 1.8.0 — realtime-native bundle (`models/realtime_native_bundle/`, 17 features). Test-split AUC 0.901 / recall 0.839 / ECE 0.014 are optimistic: bootstrap-proxy data with feature leakage, no field evaluation yet (see *Model & evaluation*). |
+| ML | XGBoost + scikit-learn 1.8.0 — realtime-native bundle (`models/realtime_native_bundle/`, 17 features). Retrained 2026-10-23 with a leak-free frequency feature. Test AUC 0.904 / recall 0.893 / ECE 0.018 are optimistic: bootstrap-proxy data, random split, no field evaluation yet (see *Model & evaluation*). |
 | LLM | Groq `llama-3.3-70b-versatile` (chatbot, explanations, 3-agent crew). Not in the decision path. |
 | Deploy | Fly.io backend (`fly.toml`, app `floodai-8eclra`, region `ams`) · Vercel frontend (`vercel.json`, SPA rewrite to `index.html`) |
 
@@ -228,17 +228,18 @@ The LLM never changes the decision; it only writes explanations, with a determin
 
 | Figure | Source | Model | Caveat |
 |---|---|---|---|
-| AUC 0.901, recall 0.839, precision 0.263, Brier 0.072, ECE 0.014 | `models/realtime_native_bundle/training_stats.json` | Current bundle (created 2026-07-02) | Random stratified split (586 test rows from 2020–2024, 56 positives), leaky feature, `bootstrap_proxy` data; optimistic |
+| AUC 0.904, recall 0.893, precision 0.263, Brier 0.074, ECE 0.018, threshold 0.103 | `models/realtime_native_bundle/training_stats.json` | Current bundle (retrained 2026-10-23) | Random stratified split (586 test rows from 2020–2024, 56 positives), leak-free frequency feature, `bootstrap_proxy` data; optimistic |
+| AUC 0.901, recall 0.839, threshold 0.036 | git history (d06dc0c and earlier) | Previous bundle (2026-07-02) | Same split, leaky frequency feature |
 | ECE 0.1962 | `artifacts/configurations/calibration_cache.json` | Older model (Apr–May 2026 predictions) | Labels derived from the model's own ranking; still read at runtime, penalty off |
 | ECE 0.3784 | `artifacts/reports/scenario_validation.json` | Older model | n = 7 hand-made scenarios |
 | AUC 0.9452 | `artifacts/reports/model_training_report_jakarta.txt` | Legacy Jakarta model (`/predict/realtime`) | Random 80:20 split, train AUC 1.0 |
 
-- **Split:** the current bundle used a random stratified 68/12/20 split — the chronological
-  validation slice (May 2023–Jan 2024) has 0 positives, so training falls back to random. Its report
-  still says `chronological_80_15_5`; training now records the split actually used.
-- **Leakage:** the bundle's `kecamatan_historical_flood_freq` pools BPBD events from all years.
-  Training now computes it per row from earlier years only (`events_by_year` in
-  `data/bundled/kelurahan_flood_history.json`); the bundle is not retrained yet.
+- **Split:** random stratified 68/12/20 — the chronological validation slice (May 2023–Jan 2024)
+  has 0 positives, so training falls back to random; the report records this as
+  `random_stratified_68_12_20 (fallback: …)`. `year_split=(val_year, test_year)` gives a by-year split.
+- **Leakage fixed (2026-10-23):** `kecamatan_historical_flood_freq` is computed per row from BPBD
+  events in earlier years only (`events_by_year` in `data/bundled/kelurahan_flood_history.json`);
+  inference uses years before the snapshot's year, so training and serving match.
 - **Honest estimate (sandbox, by-year split train 2020–2022 / val 2023 / test 2024, 22 positives):**
   leak-free AUC 0.81, without the frequency feature AUC 0.84, leaky AUC 0.89. Very few 2023–2024
   positives (11 and 22), so these are rough.
@@ -254,7 +255,7 @@ The LLM never changes the decision; it only writes explanations, with a determin
 | Issue | Status | Impact |
 |---|---|---|
 | No valid field calibration | Active | See *Model & evaluation*; calibration penalty is off |
-| Feature leakage in test metrics | Active | Bundle test metrics are inflated |
+| Feature leakage in test metrics | Resolved 2026-10-23 | Bundle retrained with the leak-free feature; the random split still makes metrics optimistic |
 | No observed flood labels for evaluation | Active | Model quality in the field is unknown |
 | Wilayah override | Resolved 2026-10-23 | Single source in `realtime_native/wilayah.py`; stations carry `wilayah_jakarta` and the frontend groups by it |
 | DSDADKI misfiles posts | Active | Hek Kramat Jati 1 and Kaliduri 1 are filed under Jakarta Utara at the source (corrected by the override) |

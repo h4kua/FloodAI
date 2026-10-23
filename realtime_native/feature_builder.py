@@ -83,6 +83,7 @@ def _kecamatan_historical_freq_map() -> dict[str, float]:
         return {}
 
 
+@lru_cache(maxsize=16)
 def kecamatan_flood_freq_map_before(year: int) -> dict[str, float]:
     """{kecamatan_slug: frequency} counting only events from years < `year`.
 
@@ -107,10 +108,13 @@ def kecamatan_flood_freq_map_before(year: int) -> dict[str, float]:
     return {slug: round(n / max_events, 4) for slug, n in counts.items()}
 
 
-def kecamatan_historical_flood_freq(kecamatan: str) -> float:
-    """Public lookup: normalised (0-1) long-run flood frequency for a kecamatan
-    name (any casing/prefix). Returns 0.0 when unknown — never raises."""
-    return _kecamatan_historical_freq_map().get(_slug_kecamatan(kecamatan), 0.0)
+def kecamatan_historical_flood_freq(kecamatan: str, year: int | None = None) -> float:
+    """Public lookup: normalised (0-1) flood frequency for a kecamatan name (any
+    casing/prefix), counting only events from years before `year` (default: the
+    current year) — the same window the model is trained with, so inference
+    never sees a feature the model could not have seen. 0.0 when unknown."""
+    year = year or datetime.now(timezone.utc).year
+    return kecamatan_flood_freq_map_before(year).get(_slug_kecamatan(kecamatan), 0.0)
 
 
 @dataclass(frozen=True)
@@ -305,7 +309,7 @@ def _water_level_ratio_from_records(records):
     return min(best_ratio, 1.5)
 
 
-def _citywide_kecamatan_historical_freq(records) -> float:
+def _citywide_kecamatan_historical_freq(records, year: int | None = None) -> float:
     """Mean historical_flood_freq across the kecamatan of every station with a
     known mapping in this snapshot. This is a coarse citywide stand-in used by
     the single-row aggregate inference path — build_realtime_native_features_per_kecamatan
@@ -316,7 +320,7 @@ def _citywide_kecamatan_historical_freq(records) -> float:
         geo = STATION_KECAMATAN.get(nama)
         if not geo:
             continue
-        freqs.append(kecamatan_historical_flood_freq(geo["kecamatan"]))
+        freqs.append(kecamatan_historical_flood_freq(geo["kecamatan"], year))
     return round(sum(freqs) / len(freqs), 4) if freqs else 0.0
 
 
@@ -723,7 +727,7 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
         "temperature_c": temperature_c,
         "water_level_ratio": water_level_ratio,
         "monsoon_season": int(timestamp.month in [11, 12, 1, 2, 3]),
-        "kecamatan_historical_flood_freq": _citywide_kecamatan_historical_freq(scored_records),
+        "kecamatan_historical_flood_freq": _citywide_kecamatan_historical_freq(scored_records, timestamp.year),
         **bmkg_scores,
     }
 
@@ -917,7 +921,7 @@ def build_realtime_native_features_per_kecamatan(snapshot, kecamatan, *, as_of=N
         "wlr_acceleration": 0.0,
         "wlr_roll3_max": water_level_ratio,
         "rainfall_intensity_ratio": 1.0,
-        "kecamatan_historical_flood_freq": kecamatan_historical_flood_freq(kecamatan),
+        "kecamatan_historical_flood_freq": kecamatan_historical_flood_freq(kecamatan, timestamp.year),
         **bmkg_scores,
     }
 

@@ -5,20 +5,20 @@
   "validation_rows": 352,
   "test_rows": 586,
   "performance": {
-    "optimal_threshold": 0.03556898795068264,
-    "train_accuracy": 0.8698363211223694,
-    "test_accuracy": 0.7593856655290102,
-    "test_precision": 0.26256983240223464,
-    "test_recall": 0.8392857142857143,
-    "test_f1": 0.4,
-    "test_roc_auc": 0.9013982479784367,
-    "validation_recall_at_threshold": 0.9117647058823529,
-    "validation_precision_at_threshold": 0.30392156862745096
+    "optimal_threshold": 0.10274996235966682,
+    "train_accuracy": 0.8460639127045986,
+    "test_accuracy": 0.7508532423208191,
+    "test_precision": 0.2631578947368421,
+    "test_recall": 0.8928571428571429,
+    "test_f1": 0.4065040650406504,
+    "test_roc_auc": 0.9036388140161724,
+    "validation_recall_at_threshold": 0.8823529411764706,
+    "validation_precision_at_threshold": 0.3
   },
   "calibration": {
-    "method": "isotonic",
-    "test_brier": 0.07214336081810739,
-    "test_ece": 0.013840897073481172
+    "method": "sigmoid",
+    "test_brier": 0.07437394856500205,
+    "test_ece": 0.01832730736421751
   },
   "scientific_notes": {
     "training_mode": "bootstrap_proxy_until_realtime_history_available",

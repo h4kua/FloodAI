@@ -38,20 +38,19 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 
 ## Known issues
 - Calibration penalty deactivated (`services/decision_engine.py`). No valid field ECE exists for
-  the current realtime-native bundle: 0.0138 (`models/realtime_native_bundle/training_stats.json`)
-  is its bootstrap-proxy test split and optimistic; 0.1962 (`artifacts/configurations/calibration_cache.json`,
+  the current realtime-native bundle: 0.0183 (`models/realtime_native_bundle/training_stats.json`)
+  is its bootstrap-proxy random test split and optimistic; 0.1962 (`artifacts/configurations/calibration_cache.json`,
   labels derived from the model's own ranking) and 0.3784 (`artifacts/reports/scenario_validation.json`,
   n=7) come from older model versions.
-- The current bundle was trained on a RANDOM stratified 68/12/20 split (train 1990 / val 352 /
-  test 586, 56 test positives), not the chronological split its report claims: the chronological
-  validation slice (May 2023–Jan 2024) has 0 positives, so training falls back to random. Its
-  test rows are spread over 2020–2024, so its metrics (AUC 0.901, recall 0.839) are optimistic.
-- Target leakage in the current bundle: `kecamatan_historical_flood_freq` counts BPBD events from
-  all years 2020–2026, including its test rows' own periods. Training now computes it per row
-  from years before that row (`leak_free_kecamatan_freq=True`, default) and records the split
-  actually used; the bundle has NOT been retrained yet. Sandbox retrain (by-year split: train
-  2020–2022, val 2023, test 2024 with 22 positives): leak-free AUC 0.81, no-frequency AUC 0.84,
-  leaky AUC 0.89. Flood labels shrink sharply over time (117/78/54/11/22 for 2020–2024).
+- Bundle retrained 2026-10-23 (`scripts/retrain_bundle.py`) with the leak-free
+  `kecamatan_historical_flood_freq` (per row, events from earlier years only; inference uses
+  years before the snapshot's year). Test AUC 0.904 / recall 0.893 / precision 0.263 /
+  threshold 0.103 (was 0.036). The previous bundle stays in git history (d06dc0c and earlier).
+- The split is still a RANDOM stratified 68/12/20 (train 1990 / val 352 / test 586, 56 test
+  positives): the chronological validation slice (May 2023–Jan 2024) has 0 positives, so training
+  falls back to random (the report now says so). Test rows are spread over 2020–2024, so the
+  metrics above are optimistic. By-year estimate (train 2020–2022, val 2023, test 2024 with 22
+  positives): AUC ~0.81–0.84. Flood labels shrink sharply over time (117/78/54/11/22, 2020–2024).
 - No observed row-level flood labels for evaluation: `realtime_feature_history.csv` has no label
   column; `calibration_labeled.csv` labels are synthetic.
 - AUC 0.9452 belongs to the legacy Jakarta model (`flood_model_jakarta.pkl`, random 80:20 split),

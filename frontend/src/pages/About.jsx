@@ -165,26 +165,26 @@ export default function About({ riskContext = {} }) {
           <Section title={id ? "Performa model" : "Model performance"}>
             <p style={{ fontSize: "0.85rem", color: "var(--muted)", marginBottom: "1rem", lineHeight: 1.6 }}>
               {id
-                ? "Diukur sekali saat pelatihan, pada 586 baris bulanan yang dipilih acak dari 2020–2024. Data latihnya masih proksi, dan satu fitur (frekuensi banjir per kecamatan) ikut menghitung kejadian di periode uji. Jadi angka di bawah terlalu optimistis: saat model serupa dilatih dengan 2020–2022 lalu diuji pada 2024, AUC-nya sekitar 0,81–0,84. Model ini belum pernah diuji dengan data lapangan."
-                : "Measured once at training time on 586 monthly rows picked at random from 2020–2024. The training data is still a proxy, and one feature (per-kecamatan flood frequency) also counts events from the test period. So the figures below are optimistic: when a similar model is trained on 2020–2022 and tested on 2024, its AUC is about 0.81–0.84. The model has not yet been tested on field data."}
+                ? "Diukur sekali saat pelatihan, pada 586 baris bulanan yang dipilih acak dari 2020–2024. Data latihnya masih proksi, dan karena dipilih acak, baris uji bertetangga waktu dengan data latih. Jadi angka di bawah terlalu optimistis: saat model serupa dilatih dengan 2020–2022 lalu diuji pada 2024, AUC-nya sekitar 0,81–0,84. Model ini belum pernah diuji dengan data lapangan."
+                : "Measured once at training time on 586 monthly rows picked at random from 2020–2024. The training data is still a proxy, and because rows were picked at random, test rows sit next to training rows in time. So the figures below are optimistic: when a similar model is trained on 2020–2022 and tested on 2024, its AUC is about 0.81–0.84. The model has not yet been tested on field data."}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
               <MetricBar label="AUC-ROC" hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}
-                value={0.901} color="var(--safe)" format={v => v.toFixed(3)} />
+                value={0.904} color="var(--safe)" format={v => v.toFixed(3)} />
               <MetricBar label={id ? "Recall @ Siaga" : "Recall @ Alert"} hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}
-                value={0.839} color="var(--s2)" format={v => (v * 100).toFixed(1) + "%"} />
+                value={0.893} color="var(--s2)" format={v => (v * 100).toFixed(1) + "%"} />
               <MetricBar label={id ? "Presisi" : "Precision"} hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}
                 value={0.263} color="var(--wsp)" format={v => (v * 100).toFixed(1) + "%"} />
               <MetricBar label="Brier Score" hint={id ? "(makin rendah makin baik)" : "(lower is better)"}
-                value={0.072} max={0.25} color="var(--cyan)" lowerIsBetter format={() => "0.072"} />
+                value={0.074} max={0.25} color="var(--cyan)" lowerIsBetter format={() => "0.074"} />
               <MetricBar label={id ? "ECE (data uji)" : "ECE (test set)"} hint={id ? "(makin rendah makin baik)" : "(lower is better)"}
-                value={0.014} max={0.25} color="var(--cyan)" lowerIsBetter format={() => "0.014"} />
+                value={0.018} max={0.25} color="var(--cyan)" lowerIsBetter format={() => "0.018"} />
             </div>
             <ul style={{ margin: "1rem 0 0", paddingLeft: "1.1rem", display: "flex", flexDirection: "column", gap: "0.4rem", fontSize: "0.85rem", color: "var(--muted)", lineHeight: 1.55 }}>
               <li>
                 {id
-                  ? "Presisi 26% berarti sekitar 3 dari 4 peringatan model adalah alarm palsu. Model sengaja dibuat sensitif supaya banjir jarang terlewat (recall 84%)."
-                  : "26% precision means about 3 in 4 model warnings are false alarms. The model is deliberately sensitive so floods are rarely missed (84% recall)."}
+                  ? "Presisi 26% berarti sekitar 3 dari 4 peringatan model adalah alarm palsu. Model sengaja dibuat sensitif supaya banjir jarang terlewat (recall 89%)."
+                  : "26% precision means about 3 in 4 model warnings are false alarms. The model is deliberately sensitive so floods are rarely missed (89% recall)."}
               </li>
               <li>
                 {id
