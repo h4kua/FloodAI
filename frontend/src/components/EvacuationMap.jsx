@@ -1,11 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, CircleMarker, Polyline, Popup, useMap, useMapEvents } from "react-leaflet";
 import { useApp, useT } from "../lib/appContext";
 import InvalidateMapSize from "./InvalidateMapSize";
+import BaseTiles from "./BaseTiles";
 
-const TILE_DARK  = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-const TILE_LIGHT = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-const TILE_ATTR  = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
 // DKI Jakarta boundary for panning lock (slightly wider than risk map to allow
 // route planning near borders without fighting the maxBounds constraint).
 const JAKARTA_BOUNDS = [[-6.42, 106.66], [-6.06, 107.06]];
@@ -103,7 +101,6 @@ function secToMin(s) {
 export default function EvacuationMap({ origin = null, dest = null, onMapClick = null, onLocateMe = null }) {
   const t = useT();
   const { theme } = useApp();
-  const tileUrl = theme === "light" ? TILE_LIGHT : TILE_DARK;
 
   const [route, setRoute]           = useState(null);
   const [routeInfo, setRouteInfo]   = useState(null);
@@ -153,7 +150,7 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%", minHeight: "420px", flex: 1 }}
       >
-        <TileLayer url={tileUrl} attribution={TILE_ATTR} />
+        <BaseTiles theme={theme} />
         <InvalidateMapSize />
         <FitJakartaDefault />
         {onMapClick && <MapClickHandler onMapClick={onMapClick} />}

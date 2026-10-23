@@ -1,12 +1,10 @@
 import { useMemo, useEffect, useState } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
+import { MapContainer, CircleMarker, Popup, useMap } from "react-leaflet";
 import { useApp, useT } from "../lib/appContext";
 import InvalidateMapSize from "./InvalidateMapSize";
+import BaseTiles from "./BaseTiles";
 import floodProneZones from "../data/floodProneZones.json";
 
-const TILE_DARK  = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-const TILE_LIGHT = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-const TILE_ATTR  = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
 
 // Single muted slate-blue for ALL historical BNPB flood-prone points so the
 // overlay reads as a uniform "background context" layer rather than a second
@@ -60,7 +58,6 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
   const t = useT();
   const { theme, lang } = useApp();
   const isId = lang === "id";
-  const tileUrl = theme === "light" ? TILE_LIGHT : TILE_DARK;
   const [showProne, setShowProne] = useState(true);
 
   // Only plot stations that have validated Jakarta coordinates.
@@ -84,7 +81,7 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%", minHeight: "clamp(280px, 45vh, 460px)" }}
       >
-        <TileLayer url={tileUrl} attribution={TILE_ATTR} />
+        <BaseTiles theme={theme} />
         <FitJakarta />
         <InvalidateMapSize />
 
