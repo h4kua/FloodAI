@@ -3,9 +3,10 @@ import json
 import os
 import logging
 from functools import lru_cache
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from api.ip_rate_limit import require_chat_rate_limit
 from utils.paths import DEFAULT_REALTIME_SNAPSHOT, REPORTS_DIR
 
 _log = logging.getLogger(__name__)
@@ -197,7 +198,9 @@ async def chat_health() -> dict:
     return {"groq_configured": configured}
 
 
-@router.post("/api/chat")
+# Rate-limited per IP: each message spends Groq quota. The frontend falls back
+# to its offline knowledge base on 429.
+@router.post("/api/chat", dependencies=[Depends(require_chat_rate_limit)])
 async def chat_endpoint(req: ChatRequest) -> dict:
     api_key = os.getenv("GROQ_API_KEY")
     model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")

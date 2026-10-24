@@ -48,7 +48,6 @@ from pipeline.flood_pipeline import FloodDecisionPipeline
 from realtime_native.bundle import load_runtime_bundle
 from realtime_native.inference import predict_realtime_native
 from services.decision_engine import _canonical_default_thresholds
-from services.prediction_service import predict_realtime
 from db.psycopg2_connection import close_pool, pooled_connection
 from utils.paths import DEFAULT_REALTIME_SNAPSHOT
 
@@ -596,11 +595,16 @@ _register_middleware(app, RawCORSMiddleware)
 
 app.include_router(agentic_llm_router)
 app.include_router(chat_router)
-app.include_router(community_reports_router)
 app.include_router(crew_analysis_router)
-app.include_router(family_router)
 app.include_router(safe_arrival_router)
-app.include_router(sos_router)
+
+# /reports, /sos, /family/* are public write endpoints with no UI since the
+# Laporan, SOS and Keluarga pages were removed. They stay off unless
+# COMMUNITY_API_ENABLED=true re-exposes them deliberately.
+if os.getenv("COMMUNITY_API_ENABLED", "false").lower() == "true":
+    app.include_router(community_reports_router)
+    app.include_router(family_router)
+    app.include_router(sos_router)
 
 
 @app.api_route("/healthz", methods=["GET", "HEAD"])
@@ -749,19 +753,18 @@ async def demo_dashboard(
     )
 
 
-@app.get("/predict/realtime")
-async def predict_realtime_endpoint(response: Response) -> dict:
-    try:
-        response.headers["Deprecation"] = "true"
-        response.headers["Sunset"] = "Mon, 30 Jun 2026 00:00:00 GMT"
-        response.headers["Link"] = '</predict/realtime-native>; rel="successor-version"'
-        return await _bounded_threadpool(predict_realtime)
-    except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail="snapshot_unavailable") from exc
-    except HTTPException:
-        raise
-    except Exception as exc:
-        _safe_error_response(exc)
+@app.get("/predict/realtime", include_in_schema=False)
+async def predict_realtime_endpoint() -> None:
+    """
+    Retired. Served the legacy Jakarta model (random 80:20 split, train AUC 1.0);
+    its announced sunset (30 Jun 2026) has passed. Answers 410 with a pointer to
+    the realtime-native endpoint the UI uses.
+    """
+    raise HTTPException(
+        status_code=410,
+        detail={"error": "endpoint_retired", "successor": "/predict/realtime-native"},
+        headers={"Link": '</predict/realtime-native>; rel="successor-version"'},
+    )
 
 
 @app.get("/predict/realtime-native")

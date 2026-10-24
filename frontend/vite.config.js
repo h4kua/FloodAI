@@ -21,8 +21,6 @@ export default defineConfig(({ mode }) => {
         "/predict":  { target: backendUrl, changeOrigin: true },
         "/api":      { target: backendUrl, changeOrigin: true },
         "/healthz":  { target: backendUrl, changeOrigin: true },
-        "/family":   { target: backendUrl, changeOrigin: true },
-        "/sos":      { target: backendUrl, changeOrigin: true },
         "/shelters": { target: backendUrl, changeOrigin: true },
       },
     },

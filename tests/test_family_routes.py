@@ -4,10 +4,15 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from api.main import app
+from api.routes.family import router
 
+# The main app leaves this router off unless COMMUNITY_API_ENABLED=true, so it
+# is mounted on a bare app here to keep the route code covered.
+app = FastAPI()
+app.include_router(router)
 client = TestClient(app)
 _HEADERS = {"host": "localhost"}
 

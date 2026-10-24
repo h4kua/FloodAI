@@ -1,6 +1,6 @@
 # deFlood.ai — Project Context
 
-> Last updated: 2026-10-22 (branch `design/simplify-ui`). Update this file whenever architecture,
+> Last updated: 2026-10-24 (branch `design/simplify-ui`). Update this file whenever architecture,
 > known issues, or deployment state changes. Every fact here was checked against the code on that date.
 
 ---
@@ -10,7 +10,7 @@
 | Layer | Tech |
 |---|---|
 | Backend | FastAPI + uvicorn, port 8080 |
-| Frontend | React 18 + Vite 5 + React-Leaflet 4, port 3000 (dev) |
+| Frontend | React 18 + Vite 5 + React-Leaflet 4, port 3000 (dev); basemap Esri Gray Canvas (keyless) |
 | Database | Supabase / PostgreSQL (`supabase` client + psycopg2) |
 | ML | XGBoost + scikit-learn 1.8.0 — realtime-native bundle (`models/realtime_native_bundle/`, 17 features). Retrained 2026-10-23 with a leak-free frequency feature. Test AUC 0.904 / recall 0.893 / ECE 0.018 are optimistic: bootstrap-proxy data, random split, no field evaluation yet (see *Model & evaluation*). |
 | LLM | Groq `llama-3.3-70b-versatile` (chatbot, explanations, 3-agent crew). Not in the decision path. |
@@ -24,7 +24,7 @@
 # Backend (refreshes the snapshot on startup, then every 15 min)
 uvicorn api.main:app --host 0.0.0.0 --port 8080 --reload
 
-# Frontend (Vite proxies /predict, /api, /healthz, /family, /sos, /shelters → :8080)
+# Frontend (Vite proxies /predict, /api, /healthz, /shelters → :8080)
 cd frontend && npm run dev
 
 # Manual snapshot refresh (same builder the scheduler runs)
@@ -60,7 +60,8 @@ first backend start.
 | Path | Purpose |
 |---|---|
 | `api/main.py` | FastAPI app, CORS, scheduler, core endpoints |
-| `api/routes/chat.py` | `POST /api/chat` — Groq chatbot (`max_tokens=800`, `timeout=28s`) |
+| `api/routes/chat.py` | `POST /api/chat` — Groq chatbot (`max_tokens=800`, `timeout=28s`), per-IP rate limit |
+| `api/ip_rate_limit.py` | Per-IP limits; behind Fly.io the client IP comes from `Fly-Client-IP` (trusted only when `FLY_APP_NAME` is set) |
 | `api/routes/crew_analysis.py` | 3-agent "Analisis mendalam"; rebuilds observed rain/water `features` from the pipeline result |
 | `api/routes/safe_arrival.py` | `POST /shelters/checkin` — geofenced check-in, returns `family_notified` |
 | `domain/decision.py` | Decision layers L0–L4 (source of truth) |
@@ -75,7 +76,8 @@ first backend start.
 | `frontend/src/lib/recommendations.js` | `deriveActions()` for the "Apa yang harus saya lakukan?" card |
 | `frontend/src/lib/floodAgent.js` | Chatbot client: `/api/chat` + offline knowledge base |
 | `frontend/src/lib/translations.js` | All UI text, ID + EN |
-| `frontend/src/styles.css` | Single stylesheet, dark + light theme |
+| `frontend/src/styles.css` | Single stylesheet, light (default) + dark theme |
+| `frontend/src/components/BaseTiles.jsx` | Shared basemap (Esri Gray Canvas base + labels, light/dark) |
 
 ---
 
@@ -84,14 +86,14 @@ first backend start.
 | Endpoint | Auth | Notes |
 |---|---|---|
 | `GET /predict/realtime-native` | — | Main endpoint used by the UI |
-| `GET /predict/realtime` | — | Legacy Jakarta model (`flood_model_jakarta.pkl`); not used by the UI |
+| `GET /predict/realtime` | — | **Retired 2026-10-24**: `410 Gone` + `Link` to `/predict/realtime-native` (legacy Jakarta model, sunset was 2026-06-30) |
 | `POST /predict/agentic` | X-Api-Key | Full 5-stage pipeline |
 | `POST /predict/agentic/explain` | X-Api-Key | Pipeline + LLM explanation |
 | `GET /predict/crew-realtime` | — | 3-agent analysis on the live snapshot, cached per snapshot |
 | `POST /predict/crew-analysis` | X-Api-Key | 3-agent analysis on a supplied snapshot |
-| `POST /api/chat`, `GET /api/chat/health` | — | Chatbot |
+| `POST /api/chat`, `GET /api/chat/health` | IP rate limit (chat) | Chatbot; `FLOOD_CHAT_RATE_LIMIT` per IP per minute (default 10), own buckets; on 429 the frontend uses its offline KB |
 | `POST /shelters/checkin` | IP rate limit | Used by Evakuasi ("Saya sudah tiba") |
-| `/reports`, `/sos`, `/sos/recent`, `/family/*` | IP rate limit | Still registered; **no UI uses them** since the Laporan, SOS and Keluarga pages were removed |
+| `/reports`, `/sos`, `/sos/recent`, `/family/*` | IP rate limit | **Off by default** (404): registered only when `COMMUNITY_API_ENABLED=true`. No UI uses them; route code stays tested on a bare app |
 | `GET /health`, `GET /healthz` | — | Liveness + scheduler + snapshot age |
 | `GET /readyz` | — | Readiness (DB + thresholds) |
 | `GET /metrics` | — | Prometheus |
@@ -153,13 +155,15 @@ Three destinations (`components/shell/navConfig.jsx`): **Beranda**, **Evakuasi**
 
 ```
 Home
-├── page header            — title + "Perbarui"
+├── page header            — title + "Perbarui" (icon only on phones)
 ├── StaleDataBanner        — shown when data is > 30 min old
-├── DecisionHero           — status word, plain-language text, trend pill; greyed out with date when data ≥ 3 h old
-├── WilayahStatus          — 5 wilayah, status = worst post in each
-├── ActionCard             — up to 3 actions + CTA buttons (deriveActions)
-├── GlanceChips            — water level, rain, posts on alert, active posts
-├── FloodMap               — Leaflet, DSDADKI posts + optional BNPB flood-prone points
+├── DecisionHero           — solid status block (Aman/Waspada/Siaga/Bahaya), plain-language text,
+│                            trend + rain pills, "Pos pantau air" gauge (one segment per post,
+│                            worst first, counts per level); greyed out with date when data ≥ 3 h old
+├── WilayahStatus          — 5 wilayah, status = worst post in each (status-coloured stripe)
+├── home-main (2 columns from 769 px)
+│   ├── FloodMap           — Leaflet, DSDADKI posts (outlined markers); BNPB flood-prone points off by default
+│   └── ActionCard         — up to 3 plain-language actions + CTA buttons (deriveActions)
 ├── CollapsibleSection "Lihat detail" (tabs)
 │   ├── Analisis AI        — ModelOutputCard + CrewAnalysisPanel
 │   ├── Ketinggian air     — StationPanel, grouped by wilayah
@@ -197,11 +201,14 @@ live in a collapsed "Detail teknis" section, with the evaluation caveats stated 
 
 ### Design system (`styles.css`)
 
-- Fonts: DM Sans (body), Space Grotesk (headings). No monospace labels.
-- Dark: `--bg #0d1117`, `--panel #161b22`, `--panel-2 #1c2333`, `--panel-3 #21293b`.
-- Light: `--bg #f4f2ee`, `--panel #faf9f7`, `--panel-2 #edeae4`, `--panel-3 #e3dfd8`.
-- Status colours: `--safe`, `--wsp` (waspada), `--s2`, `--s1`, each with `-soft` / `-border` variants.
-- Sentence-case labels, minimum ~12 px text, no 3D tilt effects.
+Civic "public information board" style; light theme is the default.
+- Fonts: Public Sans (text), Barlow Condensed (headings, status word, big numbers).
+- Light: `--bg #f5f3ee` (paper), `--panel #ffffff`, thin `--line` rules. Dark: flat `--bg #111214`, `--panel #18191c`.
+- Chrome: navy top bar/footer (`--chrome #12233f`) with a water-blue accent (`--chrome-accent`); accent `--cyan` is civic blue `#1d4ed8`.
+- Status colours are reserved for status: Aman/Normal green, Waspada amber, Siaga/Siaga 2 orange, Bahaya/Siaga 1 red;
+  each has text (`--safe`, `--wsp`, `--s2`, `--s1`), `-soft`, `-border` and `-solid` (+ `-ink`) variants. Text pairs ≥ 4.5:1.
+- Post vocabulary everywhere (gauge, list, map legend): Siaga 1 / Siaga 2 / Waspada / Normal; DSDA "Siaga 3" is shown as Waspada.
+- No gradients, glows or blur; radius 4–10 px; sentence-case labels.
 
 ---
 
@@ -243,6 +250,10 @@ The LLM never changes the decision; it only writes explanations, with a determin
 - **Honest estimate (sandbox, by-year split train 2020–2022 / val 2023 / test 2024, 22 positives):**
   leak-free AUC 0.81, without the frequency feature AUC 0.84, leaky AUC 0.89. Very few 2023–2024
   positives (11 and 22), so these are rough.
+- **Proxy features in the training data:** the 2,928 kecamatan-month rows (2020–2024) are `bootstrap_proxy`:
+  water-level features are derived from rainfall (`max_rainfall / q95`), humidity from soil moisture, BMKG
+  scores from rainfall, missing temperature filled with 28.5 °C (`build_bootstrap_training_dataset()`).
+  Serving uses real DSDA/BMKG/OpenWeather values every 15 min, so training and serving distributions differ.
 - **No observed row-level flood labels** for evaluation: `realtime_feature_history.csv` has no label
   column; `calibration_labeled.csv` labels are synthetic; `bpbd_flood_calendar.csv` is quarterly
   aggregates. Per-incident BPBD data (`data/raw/rekap_kejadian_2020_2025.csv`, git-ignored) has dates
@@ -261,7 +272,12 @@ The LLM never changes the decision; it only writes explanations, with a determin
 | DSDADKI misfiles posts | Active | Hek Kramat Jati 1 and Kaliduri 1 are filed under Jakarta Utara at the source (corrected by the override) |
 | Kecamatan table partly unverified | Active | `_STATION_KEC` entries other than the corrected Ancol/removed ones are unchecked |
 | Posts without GPS | Active | e.g. Bendung Katulampa (`lat=null`): listed, not mapped |
-| Unused public write APIs | Active | `/reports`, `/sos`, `/family/*` have no UI; remove or re-expose deliberately |
+| Unused public write APIs | Resolved 2026-10-24 | Off by default; `COMMUNITY_API_ENABLED=true` re-exposes them |
+| Chatbot without rate limit | Resolved 2026-10-24 | `POST /api/chat` limited per IP; Fly client IP read from `Fly-Client-IP` |
+| Legacy `/predict/realtime` | Resolved 2026-10-24 | Retired (410); `services/prediction_service.py` + legacy model files remain for `services/training_data_monitor.py` |
+| CARTO basemap watermark | Resolved 2026-10-23 | CARTO now watermarks keyless tiles; switched to Esri Gray Canvas |
+| Free third-party services | Active | Esri keyless tiles, OSRM demo server and Nominatim have usage policies; production traffic needs keys or own servers |
+| No CI before 2026-10-24 | Resolved | `.github/workflows/ci.yml`: pytest + frontend build on PRs and pushes to `main` |
 | Emergency numbers | Resolved 2026-10-22 | Ambulance is 119 (or 112) everywhere, per Dinkes DKI; 118 is the older number |
 | `min_machines_running` | Resolved 2026-10-22 | `fly.toml` keeps 1 machine on (2477fcb); the refresh workflow is a backup and its comment now says so |
 | BNPB district mapping gap | Active | Some kecamatan not mapped to kabkot; InaRISK falls back to bundled JSON |
@@ -277,6 +293,9 @@ Names only — values live in `.env` (never committed; `.env.example` holds plac
 | Variable | Used for |
 |---|---|
 | `FLOOD_API_KEYS`, `FLOOD_API_RATE_LIMIT` | X-Api-Key auth + rate limit |
+| `FLOOD_IP_RATE_LIMIT`, `FLOOD_CHAT_RATE_LIMIT` | Per-IP limits per minute: public endpoints (default 20), chatbot (default 10) |
+| `COMMUNITY_API_ENABLED` | `true` registers `/reports`, `/sos`, `/family/*` (default `false`) |
+| `FLY_APP_NAME` | Set by Fly.io; enables trusting `Fly-Client-IP` for rate limiting |
 | `GROQ_API_KEY`, `GROQ_MODEL`, `LLM_PROVIDER` | LLM provider (Groq default) |
 | `ANTHROPIC_API_KEY` (+ `ANTHROPIC_*`) | Optional Claude provider |
 | `OPENWEATHER_API_KEY` | Weather in the snapshot builder |
@@ -303,5 +322,10 @@ Names only — values live in `.env` (never committed; `.env.example` holds plac
 - OpenWeather descriptions in Indonesian; forecast title follows the real slot span.
 - Runtime data (`poskobanjir/data/*`, latest prediction artifact) no longer tracked in git.
 - Metrics and calibration stated with their real sources and caveats (About page, CLAUDE.md, this file).
+- Bundle retrained with a leak-free `kecamatan_historical_flood_freq` (2026-10-23).
+- Frontend redesign (2026-10-23/24): civic public-information style (see *Design system*), Esri basemap,
+  post gauge in the status card, one status vocabulary, GlanceChips removed, two-column map layout.
+- Ops (2026-10-24): chatbot rate limit, community write endpoints off by default, `/predict/realtime`
+  retired, CI workflow, README rewritten.
 
 Full history: `git log`.

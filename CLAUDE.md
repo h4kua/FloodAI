@@ -53,11 +53,14 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   positives): AUC ~0.81–0.84. Flood labels shrink sharply over time (117/78/54/11/22, 2020–2024).
 - No observed row-level flood labels for evaluation: `realtime_feature_history.csv` has no label
   column; `calibration_labeled.csv` labels are synthetic.
-- AUC 0.9452 belongs to the legacy Jakarta model (`flood_model_jakarta.pkl`, random 80:20 split),
-  served only by `/predict/realtime`; the UI uses `/predict/realtime-native`.
+- AUC 0.9452 belongs to the legacy Jakarta model (`flood_model_jakarta.pkl`, random 80:20 split).
+  Its endpoint `/predict/realtime` was retired 2026-10-24 (410 Gone); the UI uses `/predict/realtime-native`.
 - BNPB district mapping gap (kecamatan write-back); InaRISK falls back to bundled static JSON.
 
 ## Resolved
+- 2026-10-24: `POST /api/chat` rate-limited per IP (`FLOOD_CHAT_RATE_LIMIT`, Fly client IP from
+  `Fly-Client-IP`); `/reports`, `/sos`, `/family/*` off unless `COMMUNITY_API_ENABLED=true`;
+  CI in `.github/workflows/ci.yml` (pytest + frontend build).
 - DB CHECK-constraint naming drift (orphan `chk_eval_status` blocked `CONFLICT`/`LOW_TRUST`
   persistence) — fixed by `db/migrations/106_fix_status_constraint_naming_drift.sql`, applied
   to Supabase 2026-06-19.
