@@ -1,11 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import Home from "./pages/Home";
-import Alert from "./pages/Alert";
-import About from "./pages/About";
+import LoadingSpinner from "./components/LoadingSpinner";
 import TopBar from "./components/shell/TopBar";
 import BottomNav from "./components/shell/BottomNav";
 import OnboardingTour from "./components/OnboardingTour";
 import { AppContext, useT } from "./lib/appContext";
+
+// Beranda is the landing page and ships in the main bundle; the other pages
+// load on first visit.
+const Alert = lazy(() => import("./pages/Alert"));
+const About = lazy(() => import("./pages/About"));
 
 function AppShell() {
   const t = useT();
@@ -18,8 +22,10 @@ function AppShell() {
 
       <main className="main">
         {page === "home"  && <Home setRiskContext={setRiskContext} riskLevel={riskContext.level} onNavigate={setPage} />}
-        {page === "alert" && <Alert riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
-        {page === "about" && <About riskContext={riskContext} />}
+        <Suspense fallback={<LoadingSpinner />}>
+          {page === "alert" && <Alert riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
+          {page === "about" && <About riskContext={riskContext} />}
+        </Suspense>
       </main>
 
       <footer className="footer">

@@ -14,6 +14,16 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "dist",
       sourcemap: false,
+      rollupOptions: {
+        output: {
+          // Libraries change far less often than app code: separate chunks
+          // stay cached across deploys.
+          manualChunks(id) {
+            if (/node_modules\/(leaflet|react-leaflet|@react-leaflet)\//.test(id)) return "leaflet";
+            if (/node_modules\/(react|react-dom|scheduler)\//.test(id)) return "react";
+          },
+        },
+      },
     },
     server: {
       port: 3000,

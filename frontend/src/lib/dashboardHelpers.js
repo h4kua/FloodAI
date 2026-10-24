@@ -151,6 +151,33 @@ export function weatherCond(text) {
   return "cloudy";
 }
 
+/* ── Weather description in the UI language ─────────────────
+   BMKG and OpenWeather (fetched with lang=id) describe the sky in Indonesian.
+   In English mode, map the description to a plain English label by keyword,
+   most specific first; unknown text falls back to the original string.
+*/
+const WEATHER_EN = [
+  [["petir", "badai"], "Thunderstorm"],
+  [["lebat", "deras", "intensitas tinggi"], "Heavy rain"],
+  [["hujan sedang"], "Moderate rain"],
+  [["ringan", "rintik", "gerimis"], "Light rain"],
+  [["hujan lokal"], "Local showers"],
+  [["hujan"], "Rain"],
+  [["kabut", "kabur", "asap"], "Haze"],
+  [["cerah berawan", "sedikit berawan", "awan tersebar"], "Partly cloudy"],
+  [["berawan tebal", "mendung", "awan pecah"], "Overcast"],
+  [["berawan", "awan"], "Cloudy"],
+  [["cerah"], "Clear"],
+];
+
+export function weatherLabel(text, isId) {
+  if (!text) return text;
+  if (isId) return text.charAt(0).toUpperCase() + text.slice(1);
+  const s = text.toLowerCase();
+  const hit = WEATHER_EN.find(([keys]) => keys.some((k) => s.includes(k)));
+  return hit ? hit[1] : text;
+}
+
 /* ── Dynamic status description ─────────────────────────────
    Generates a plain-language summary from actual realtime sensor data.
    Replaces the four static hand-written strings that lived in cfgMap.

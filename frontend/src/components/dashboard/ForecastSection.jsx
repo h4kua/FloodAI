@@ -3,7 +3,7 @@
    and the flat BMKG forecast fallback panel.
 */
 import { useApp } from "../../lib/appContext";
-import { weatherCond } from "../../lib/dashboardHelpers";
+import { weatherCond, weatherLabel } from "../../lib/dashboardHelpers";
 import { WeatherGlyph } from "./primitives";
 
 /* ── Wilayah Forecast Grid — compact 12-hour BMKG timeline ──
@@ -96,7 +96,7 @@ export function WilayahForecastGrid({ wilayahSummary }) {
                 return (
                   <div key={i} className={`fct-cell${isRain ? " rain" : ""}`}>
                     <span className="fct-icon"><WeatherGlyph cond={weatherCond(slot.weather_desc)} size={22} /></span>
-                    <span className={`fct-desc${isRain ? " rain" : ""}`}>{slot.weather_desc ?? "—"}</span>
+                    <span className={`fct-desc${isRain ? " rain" : ""}`}>{weatherLabel(slot.weather_desc, isId) ?? "—"}</span>
                     {slot.tmin != null && <span className="fct-temp">{slot.tmin}–{slot.tmax}°</span>}
                   </div>
                 );
@@ -135,7 +135,7 @@ export function ForecastPanel({ forecast }) {
               <span style={{ color: isRain ? "var(--cyan)" : "var(--muted)" }}>
                 <WeatherGlyph cond={weatherCond(slot.weather_desc)} size={24} />
               </span>
-              <span style={{ fontSize: "0.82rem", color: "var(--text)", lineHeight: 1.3, fontWeight: 500 }}>{slot.weather_desc}</span>
+              <span style={{ fontSize: "0.82rem", color: "var(--text)", lineHeight: 1.3, fontWeight: 500 }}>{weatherLabel(slot.weather_desc, isId)}</span>
               {slot.tmin != null && (
                 <span style={{ fontSize: "0.78rem", color: "var(--muted)" }}>{slot.tmin}–{slot.tmax}°C</span>
               )}

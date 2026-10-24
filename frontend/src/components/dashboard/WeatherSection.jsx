@@ -4,15 +4,13 @@
    Only what a resident cares about: sky, temperature, and rain.
 */
 import { useApp } from "../../lib/appContext";
-import { weatherCond } from "../../lib/dashboardHelpers";
+import { weatherCond, weatherLabel } from "../../lib/dashboardHelpers";
 import { WeatherGlyph } from "./primitives";
-
-const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 function WeatherWilayahCard({ entry, isId }) {
   const ow = entry.ow;
   const isRain = ow.rainfall_1h > 0 || ow.weather_main === "Rain" || ow.weather_main === "Drizzle";
-  const desc = ow.weather_desc ? capitalize(ow.weather_desc) : (isId ? "Berawan" : "Cloudy");
+  const desc = ow.weather_desc ? weatherLabel(ow.weather_desc, isId) : (isId ? "Berawan" : "Cloudy");
 
   return (
     <div className={`ow-wilayah-card${isRain ? " rain" : ""}`}>
@@ -24,7 +22,7 @@ function WeatherWilayahCard({ entry, isId }) {
       </div>
       {ow.temp != null && <div className="ow-wilayah-temp">{Math.round(ow.temp)}°C</div>}
       <div className={`ow-wilayah-desc${isRain ? " rain" : ""}`}>
-        {desc}{isRain && ow.rainfall_1h > 0 ? ` · ${ow.rainfall_1h.toFixed(1)} mm/j` : ""}
+        {desc}{isRain && ow.rainfall_1h > 0 ? ` · ${ow.rainfall_1h.toFixed(1)} ${isId ? "mm/j" : "mm/h"}` : ""}
       </div>
     </div>
   );
@@ -52,7 +50,7 @@ export function WeatherCurrentCard({ riskData }) {
         <div>
           <p className="station-sub" style={{ margin: 0 }}>{isId ? "Cuaca Jakarta sekarang" : "Jakarta weather now"}</p>
           <p className="station-title" style={{ margin: "0.1rem 0" }}>
-            {capitalize(descRaw)}{temp != null ? ` · ${Math.round(temp)}°C` : ""}
+            {weatherLabel(descRaw, isId)}{temp != null ? ` · ${Math.round(temp)}°C` : ""}
           </p>
           <p className="station-sub" style={{ margin: 0 }}>
             {rainfall > 0

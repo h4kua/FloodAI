@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useFloodRisk } from "../hooks/useFloodRisk";
 import FloodMap from "../components/FloodMap";
 import LoadingSpinner from "../components/LoadingSpinner";
-import ChatBot from "../components/ChatBot";
 import { useT } from "../lib/appContext";
 
 import CollapsibleSection from "../components/shell/CollapsibleSection";
@@ -14,6 +13,10 @@ import { StaleDataBanner, ModelOutputCard } from "../components/dashboard/Status
 import { WilayahForecastGrid, ForecastPanel } from "../components/dashboard/ForecastSection";
 import { WeatherCurrentCard } from "../components/dashboard/WeatherSection";
 import { CrewAnalysisPanel } from "../components/dashboard/CrewAnalysisPanel";
+
+// The chatbot (and its ~60 KB offline knowledge base) loads after the page,
+// so the status card is not held up by it.
+const ChatBot = lazy(() => import("../components/ChatBot"));
 
 const DETAIL_TABS = [
   { id: "ai",      labelKey: "section.tabAi" },
@@ -36,6 +39,18 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
   const level = riskData?.level ?? riskLevel ?? "waspada";
   const score = riskData?.riskScore ?? 45;
   const [detailTab, setDetailTab] = useState("ai");
+
+  // WAI-ARIA tabs: arrow keys / Home / End move between tabs (roving tabindex).
+  const onTabKeyDown = (e) => {
+    const ids = DETAIL_TABS.map((tab) => tab.id);
+    const i = ids.indexOf(detailTab);
+    const next = { ArrowRight: (i + 1) % ids.length, ArrowLeft: (i - 1 + ids.length) % ids.length,
+                   Home: 0, End: ids.length - 1 }[e.key];
+    if (next === undefined) return;
+    e.preventDefault();
+    setDetailTab(ids[next]);
+    document.getElementById(`detail-tab-${ids[next]}`)?.focus();
+  };
 
   useEffect(() => {
     if (riskData?.level) {
@@ -105,12 +120,15 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
         title={t("section.detail")}
         subtitle={t("section.detailSub")}
       >
-        <div className="detail-tabs" role="tablist">
+        <div className="detail-tabs" role="tablist" aria-label={t("section.detail")} onKeyDown={onTabKeyDown}>
           {DETAIL_TABS.map((tab) => (
             <button
               key={tab.id}
+              id={`detail-tab-${tab.id}`}
               role="tab"
               aria-selected={detailTab === tab.id}
+              aria-controls="detail-tabpanel"
+              tabIndex={detailTab === tab.id ? 0 : -1}
               className={`detail-tab${detailTab === tab.id ? " active" : ""}`}
               onClick={() => setDetailTab(tab.id)}
             >
@@ -119,25 +137,30 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
           ))}
         </div>
 
-        {detailTab === "ai" && (
-          <ModelOutputCard riskData={riskData}>
-            <CrewAnalysisPanel />
-          </ModelOutputCard>
-        )}
+        <div id="detail-tabpanel" role="tabpanel" aria-labelledby={`detail-tab-${detailTab}`} tabIndex={0}
+             style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {detailTab === "ai" && (
+            <ModelOutputCard riskData={riskData}>
+              <CrewAnalysisPanel />
+            </ModelOutputCard>
+          )}
 
-        {detailTab === "sensors" && <StationPanel stations={stations} />}
+          {detailTab === "sensors" && <StationPanel stations={stations} />}
 
-        {detailTab === "weather" && (
-          <>
-            <WeatherCurrentCard riskData={riskData} />
-            <WilayahForecastGrid wilayahSummary={riskData?.wilayahSummary} />
-            {(!riskData?.wilayahSummary?.length) && <ForecastPanel forecast={riskData?.bmkgForecast} />}
-          </>
-        )}
+          {detailTab === "weather" && (
+            <>
+              <WeatherCurrentCard riskData={riskData} />
+              <WilayahForecastGrid wilayahSummary={riskData?.wilayahSummary} />
+              {(!riskData?.wilayahSummary?.length) && <ForecastPanel forecast={riskData?.bmkgForecast} />}
+            </>
+          )}
+        </div>
       </CollapsibleSection>
 
       {/* Floating chatbot — needs Home's riskContext, stays mounted here */}
-      <ChatBot riskContext={{ ...riskData, level }} />
+      <Suspense fallback={null}>
+        <ChatBot riskContext={{ ...riskData, level }} />
+      </Suspense>
     </>
   );
 }
