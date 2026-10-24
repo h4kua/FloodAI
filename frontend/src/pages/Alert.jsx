@@ -1,6 +1,9 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { humanizeRiskLevel } from "../lib/humanize";
-import EvacuationMap, { DESTINATIONS, findNearestShelter } from "../components/EvacuationMap";
+import EvacuationMap, { DESTINATIONS, EVAC_COLORS, findNearestShelter } from "../components/EvacuationMap";
+import floodProneZones from "../data/floodProneZones.json";
+import { activeFloodPoints } from "../lib/floodRoads";
+import { useFloodRisk } from "../hooks/useFloodRisk";
 import ChatBot from "../components/ChatBot";
 import SafeArrival from "./SafeArrival";
 import { useT, useApp } from "../lib/appContext";
@@ -30,6 +33,50 @@ async function geocodeAddress(address) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function searchPlaces(query) {
+  const q = encodeURIComponent(query + " Jakarta");
+  const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=6&countrycodes=id&addressdetails=1`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 6000);
+  try {
+    const res = await fetch(url, {
+      headers: { "Accept-Language": "id", "User-Agent": "deFlood.ai/1.0" },
+      signal: controller.signal,
+    });
+    const data = await res.json();
+    return data.slice(0, 6);
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// The home address stays in this browser (localStorage), never on the server.
+const HOME_KEY = "deflood.home";
+
+function loadHome() {
+  try {
+    const v = JSON.parse(localStorage.getItem(HOME_KEY));
+    return v && Number.isFinite(v.lat) && Number.isFinite(v.lng) ? { ...v, isHome: true } : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveHome(home) {
+  try {
+    localStorage.setItem(HOME_KEY, JSON.stringify({ lat: home.lat, lng: home.lng, name: home.name }));
+  } catch {
+    // Private mode or blocked storage: the home still works for this visit.
+  }
+}
+
+function suggestionLabel(s) {
+  const { main, sub } = formatSuggestion(s);
+  return sub ? `${main}, ${sub}` : main;
 }
 
 function formatSuggestion(s) {
@@ -64,6 +111,24 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const config       = humanizeRiskLevel(riskLevel, lang);
   const selectedDest = destId ? DESTINATIONS.find((d) => d.id === destId) ?? null : null;
 
+  // Destination: a shelter (default, nearest) or home.
+  const [destMode, setDestMode]         = useState("shelter");
+  const [home, setHome]                 = useState(loadHome);
+  const [homeInput, setHomeInput]       = useState(() => loadHome()?.name ?? "");
+  const [homeSugg, setHomeSugg]         = useState([]);
+  const [showHomeSugg, setShowHomeSugg] = useState(false);
+  const homeDebounceRef = useRef(null);
+  const destination = destMode === "home" ? home : selectedDest;
+  const shelterChosen = destMode === "shelter" && selectedDest;
+
+  // Flood-prone areas that count right now: BPBD points on a river whose post
+  // is at Siaga, or all of them in heavy rain.
+  const { riskData } = useFloodRisk();
+  const floodPoints = useMemo(
+    () => activeFloodPoints(floodProneZones.points, riskData?.stations ?? [], riskData?.rainfall ?? 0),
+    [riskData],
+  );
+
   const [safeArrival, setSafeArrival] = useState(null); // { name, familyNotified }
   const [checkingIn, setCheckingIn] = useState(false);
 
@@ -97,7 +162,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     }
   }, []);
 
-  useShelterGeofence(selectedDest, (position) => confirmArrival(position, selectedDest, true));
+  useShelterGeofence(shelterChosen ? selectedDest : null, (position) => confirmArrival(position, selectedDest, true));
 
   const handleManualArrival = () => {
     if (!selectedDest || !navigator.geolocation) return;
@@ -110,23 +175,35 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   };
 
   const fetchSuggestions = async (query) => {
-    const q = encodeURIComponent(query + " Jakarta");
-    const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=6&countrycodes=id&addressdetails=1`;
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 6000);
-    try {
-      const res = await fetch(url, {
-        headers: { "Accept-Language": "id", "User-Agent": "deFlood.ai/1.0" },
-        signal: controller.signal,
-      });
-      const data = await res.json();
-      setSuggestions(data.slice(0, 6));
-      setShowSugg(data.length > 0);
-    } catch {
-      setSuggestions([]);
-    } finally {
-      clearTimeout(timer);
+    const data = await searchPlaces(query);
+    setSuggestions(data);
+    setShowSugg(data.length > 0);
+  };
+
+  const handleHomeInputChange = (e) => {
+    const val = e.target.value;
+    setHomeInput(val);
+    clearTimeout(homeDebounceRef.current);
+    if (val.trim().length >= 3) {
+      homeDebounceRef.current = setTimeout(async () => {
+        const data = await searchPlaces(val);
+        setHomeSugg(data);
+        setShowHomeSugg(data.length > 0);
+      }, 400);
+    } else {
+      setHomeSugg([]);
+      setShowHomeSugg(false);
     }
+  };
+
+  const handleSelectHome = (s) => {
+    const name = suggestionLabel(s);
+    const next = { lat: parseFloat(s.lat), lng: parseFloat(s.lon), name, isHome: true };
+    setHome(next);
+    saveHome(next);
+    setHomeInput(name);
+    setHomeSugg([]);
+    setShowHomeSugg(false);
   };
 
   const handleInputChange = (e) => {
@@ -142,8 +219,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   };
 
   const handleSelectSuggestion = (s) => {
-    const { main, sub } = formatSuggestion(s);
-    const label = sub ? `${main}, ${sub}` : main;
+    const label = suggestionLabel(s);
     setAddressInput(label);
     setSuggestions([]);
     setShowSugg(false);
@@ -264,7 +340,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
         </span>
       </div>
 
-      <div className={`evac-grid fade-in${selectedDest ? "" : " is-single"}`}>
+      <div className={`evac-grid fade-in${shelterChosen ? "" : " is-single"}`}>
         {/* Left: primary CTA + search + map */}
         <div className="evac-col-left">
 
@@ -319,18 +395,54 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
               </button>
             </div>
 
-            {userLocation && selectedDest && (
+            {userLocation && (
               <div className="route-dest-row">
                 <span className="route-label to">{t("evac.shelter")}</span>
-                <select
-                  className="route-select"
-                  value={destId}
-                  onChange={(e) => setDestId(e.target.value)}
-                >
-                  {DESTINATIONS.map((d) => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
+                <div className="dest-toggle" role="group" aria-label={lang === "en" ? "Destination" : "Tujuan"}>
+                  {[["shelter", lang === "en" ? "Shelter" : "Pengungsian"], ["home", lang === "en" ? "Home" : "Rumah"]].map(([mode, label]) => (
+                    <button key={mode} type="button" aria-pressed={destMode === mode}
+                      className={destMode === mode ? "active" : ""} onClick={() => setDestMode(mode)}>
+                      {label}
+                    </button>
                   ))}
-                </select>
+                </div>
+                {destMode === "shelter" ? (
+                  <select
+                    className="route-select"
+                    value={destId ?? ""}
+                    onChange={(e) => setDestId(e.target.value)}
+                  >
+                    {DESTINATIONS.map((d) => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="home-input-wrap">
+                    <input
+                      className="route-input"
+                      type="text"
+                      placeholder={lang === "en" ? "Your home address…" : "Alamat rumah Anda…"}
+                      value={homeInput}
+                      onChange={handleHomeInputChange}
+                      onFocus={() => homeSugg.length > 0 && setShowHomeSugg(true)}
+                      onBlur={() => setTimeout(() => setShowHomeSugg(false), 180)}
+                      onKeyDown={(e) => { if (e.key === "Escape") setShowHomeSugg(false); }}
+                    />
+                    {showHomeSugg && homeSugg.length > 0 && (
+                      <div className="suggestions-dropdown">
+                        {homeSugg.map((s, i) => {
+                          const { main, sub } = formatSuggestion(s);
+                          return (
+                            <div key={i} className="suggestion-item" onMouseDown={() => handleSelectHome(s)}>
+                              <span className="suggestion-main">{main}</span>
+                              {sub && <span className="suggestion-sub">{sub}</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -357,27 +469,40 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           <div className="panel evac-map-panel" style={{ cursor: "crosshair" }}>
             <EvacuationMap
               origin={userLocation}
-              dest={selectedDest}
+              dest={destination}
+              floodPoints={floodPoints}
               onMapClick={handleMapClick}
               onLocateMe={handleLocateMe}
             />
           </div>
-          {/* Once a route is shown: what the map colours mean */}
-          {userLocation && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem", padding: "0 0.25rem" }}>
-              {[["#c8102e","evac.leg.from"],["#1d4ed8","evac.leg.route"],["#15803d","evac.leg.shelter"]].map(([c, k]) => (
-                <div key={k} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: c, flexShrink: 0 }} />
-                  <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>{t(k)}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          {/* What the map colours mean, and what the red is based on */}
+          <div className="evac-legend">
+            <ul>
+              {userLocation && (
+                <>
+                  <li><i className="dot" style={{ background: EVAC_COLORS.from }} />{t("evac.leg.from")}</li>
+                  <li><i className="dot" style={{ background: EVAC_COLORS.dest }} />
+                    {destMode === "home" ? (lang === "en" ? "Home" : "Rumah") : t("evac.leg.shelter")}</li>
+                  <li><i className="line" style={{ background: EVAC_COLORS.safe }} />{lang === "en" ? "Road likely clear" : "Jalan relatif aman"}</li>
+                  <li><i className="line" style={{ background: EVAC_COLORS.risky }} />{lang === "en" ? "Road through a flood-prone area" : "Jalan lewat area rawan banjir"}</li>
+                </>
+              )}
+              <li><i className="area" style={{ borderColor: EVAC_COLORS.risky }} />
+                {floodPoints.length > 0
+                  ? (lang === "en" ? `${floodPoints.length} flood-prone areas active now` : `${floodPoints.length} area rawan banjir aktif sekarang`)
+                  : (lang === "en" ? "No flood-prone area is active now" : "Tidak ada area rawan banjir yang aktif sekarang")}</li>
+            </ul>
+            <p>
+              {lang === "en"
+                ? "An estimate from BPBD flood-prone points near rivers whose water-level post is on alert (all points in heavy rain) — not live road conditions. Check the road yourself before you go."
+                : "Perkiraan dari titik rawan banjir BPBD di sungai yang pos pantaunya berstatus Siaga (semua titik saat hujan deras) — bukan kondisi jalan langsung. Tetap cek kondisi jalan sebelum berangkat."}
+            </p>
+          </div>
         </div>
 
         {/* Right: the chosen shelter, once one is selected */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-          {selectedDest && (
+          {shelterChosen && (
             <div className="panel panel-body shelter-detail-card">
               <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: 0 }}>
                 {lang === "en" ? "Nearest shelter" : "Tempat pengungsian terdekat"}

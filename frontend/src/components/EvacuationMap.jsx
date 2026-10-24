@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { MapContainer, CircleMarker, Polyline, Popup, useMap, useMapEvents } from "react-leaflet";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { MapContainer, Circle, CircleMarker, Polyline, Popup, useMap, useMapEvents } from "react-leaflet";
 import { useApp, useT } from "../lib/appContext";
+import { RISK_RADIUS_M, safestRouteIndex, splitRouteByRisk } from "../lib/floodRoads";
 import InvalidateMapSize from "./InvalidateMapSize";
 import BaseTiles from "./BaseTiles";
 
@@ -98,42 +99,58 @@ function secToMin(s) {
   return m < 60 ? m + " min" : Math.floor(m / 60) + "h " + (m % 60) + "m";
 }
 
-export default function EvacuationMap({ origin = null, dest = null, onMapClick = null, onLocateMe = null }) {
-  const t = useT();
-  const { theme } = useApp();
+// Map colours: roads are green/red, so the endpoints use blue and violet.
+export const EVAC_COLORS = {
+  from: "#1d4ed8",
+  dest: "#7c3aed",
+  safe: "#15803d",
+  risky: "#c8102e",
+  alt: "#94a3b8",
+};
 
-  const [route, setRoute]           = useState(null);
-  const [routeInfo, setRouteInfo]   = useState(null);
-  const [navSteps, setNavSteps]     = useState([]);
+export default function EvacuationMap({ origin = null, dest = null, floodPoints = [], onMapClick = null, onLocateMe = null }) {
+  const t = useT();
+  const { theme, lang } = useApp();
+  const isId = lang !== "en";
+
+  const [routes, setRoutes]         = useState([]);
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState(null);
   const [flyTarget, setFlyTarget]   = useState(null);
 
   const fetchRoute = useCallback(async () => {
-    if (!origin || !dest) { setRoute(null); setRouteInfo(null); setNavSteps([]); setError(null); return; }
-    setLoading(true); setError(null); setRoute(null); setRouteInfo(null); setNavSteps([]);
+    if (!origin || !dest) { setRoutes([]); setError(null); return; }
+    setLoading(true); setError(null); setRoutes([]);
     try {
-      const url = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson&steps=true`;
+      // Ask for alternatives so a drier road can be chosen over the fastest one.
+      const url = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson&steps=true&alternatives=3`;
       const res = await fetch(url);
       if (!res.ok) throw new Error("OSRM " + res.status);
       const data = await res.json();
       if (!data.routes?.length) throw new Error("no route");
-      const r = data.routes[0];
-      setRoute(r.geometry.coordinates.map(([lng, lat]) => [lat, lng]));
-      setRouteInfo({ distance: r.distance, duration: r.duration });
-      setNavSteps(r.legs?.[0]?.steps ?? []);
+      setRoutes(data.routes.map((r) => ({
+        coords: r.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
+        distance: r.distance,
+        duration: r.duration,
+        steps: r.legs?.[0]?.steps ?? [],
+      })));
     } catch { setError(t("evac.noroute")); }
     finally { setLoading(false); }
   }, [origin?.lat, origin?.lng, dest?.lat, dest?.lng]);
 
   useEffect(() => { fetchRoute(); }, [fetchRoute]);
 
-  // Expose a pan function to parent via ref pattern
-  const handleLocateMeClick = useCallback((lat, lng) => {
-    setFlyTarget({ lat, lng });
-    if (onLocateMe) onLocateMe(lat, lng);
-  }, [onLocateMe]);
+  // Re-scored whenever the live flood data changes, without refetching routes.
+  const scored = useMemo(
+    () => routes.map((r) => ({ ...r, ...splitRouteByRisk(r.coords, floodPoints) })),
+    [routes, floodPoints],
+  );
+  const chosenIdx = safestRouteIndex(scored);
+  const chosen = chosenIdx >= 0 ? scored[chosenIdx] : null;
+  const fastest = scored.length ? scored.reduce((a, b) => (b.duration < a.duration ? b : a)) : null;
+  const detourMin = chosen && fastest ? Math.round((chosen.duration - fastest.duration) / 60) : 0;
 
+  const navSteps    = chosen?.steps ?? [];
   const currentStep = navSteps[0];
   const nextStep    = navSteps[1];
 
@@ -156,22 +173,50 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
         {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
         {flyTarget && <FlyTo lat={flyTarget.lat} lng={flyTarget.lng} />}
 
-        {route && (
+        {/* Flood-prone areas that count right now (river post at Siaga, or heavy rain) */}
+        {floodPoints.map((p, i) => (
+          <Circle key={`fp-${i}`} center={[p.lat, p.lon]} radius={RISK_RADIUS_M}
+            pathOptions={{ color: EVAC_COLORS.risky, weight: 1, opacity: 0.35, fillColor: EVAC_COLORS.risky, fillOpacity: 0.1 }}
+          >
+            <Popup>
+              <div>
+                <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>
+                  {isId ? "Area rawan banjir" : "Flood-prone area"} · {p.kelurahan}
+                </p>
+                <p style={{ fontSize: 11, color: "var(--muted)", margin: 0 }}>
+                  {p.reason === "rain"
+                    ? (isId ? "Aktif karena hujan deras" : "Active because of heavy rain")
+                    : (isId ? `Pos di ${(p.rivers || []).join(", ")} berstatus Siaga` : `A post on ${(p.rivers || []).join(", ")} is on alert`)}
+                </p>
+              </div>
+            </Popup>
+          </Circle>
+        ))}
+
+        {/* Other alternatives, faint; the chosen route on top in green/red runs */}
+        {scored.map((r, i) => i !== chosenIdx && (
+          <Polyline key={`alt-${i}`} positions={r.coords}
+            pathOptions={{ color: EVAC_COLORS.alt, weight: 4, opacity: 0.55, dashArray: "6 8" }} />
+        ))}
+        {chosen && (
           <>
-            <Polyline positions={route} pathOptions={{ color: "#1d4ed8", weight: 5, opacity: 0.85, lineJoin: "round" }} />
-            <FitBounds positions={route} />
+            {chosen.runs.map((run, i) => (
+              <Polyline key={`run-${i}`} positions={run.positions}
+                pathOptions={{ color: run.risky ? EVAC_COLORS.risky : EVAC_COLORS.safe, weight: 6, opacity: 0.9, lineJoin: "round", lineCap: "round" }} />
+            ))}
+            <FitBounds positions={chosen.coords} />
           </>
         )}
 
         {/* Origin marker */}
         {origin && !origin.isGPS && (
-          <CircleMarker center={[origin.lat, origin.lng]} radius={12}
-            pathOptions={{ fillColor: "#c8102e", fillOpacity: 0.9, color: "#c8102e", weight: 2 }}
+          <CircleMarker center={[origin.lat, origin.lng]} radius={11}
+            pathOptions={{ fillColor: EVAC_COLORS.from, fillOpacity: 0.95, color: "#fff", weight: 2.5 }}
           >
             <Popup>
               <div>
                 <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{origin.name}</p>
-                <p style={{ fontSize: 11, color: "var(--s1)", margin: 0 }}>{t("evac.depart")}</p>
+                <p style={{ fontSize: 11, color: "var(--cyan)", margin: 0 }}>{t("evac.depart")}</p>
               </div>
             </Popup>
           </CircleMarker>
@@ -196,18 +241,20 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
           </>
         )}
 
-        {/* Destination / Shelter */}
+        {/* Destination — a shelter or home */}
         {dest && (
-          <CircleMarker center={[dest.lat, dest.lng]} radius={12}
-            pathOptions={{ fillColor: "#15803d", fillOpacity: 0.9, color: "#15803d", weight: 2 }}
+          <CircleMarker center={[dest.lat, dest.lng]} radius={11}
+            pathOptions={{ fillColor: EVAC_COLORS.dest, fillOpacity: 0.95, color: "#fff", weight: 2.5 }}
           >
             <Popup>
               <div>
                 <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{dest.name}</p>
-                <p style={{ fontSize: 11, color: "var(--safe)", margin: 0 }}>{t("evac.dest")}</p>
-                {routeInfo && (
+                <p style={{ fontSize: 11, color: "var(--muted)", margin: 0 }}>
+                  {dest.isHome ? (isId ? "Rumah" : "Home") : t("evac.dest")}
+                </p>
+                {chosen && (
                   <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>
-                    {metersToKm(routeInfo.distance)} · {secToMin(routeInfo.duration)}
+                    {metersToKm(chosen.distance)} · {secToMin(chosen.duration)}
                   </p>
                 )}
               </div>
@@ -247,16 +294,35 @@ export default function EvacuationMap({ origin = null, dest = null, onMapClick =
         </div>
       )}
 
-      {/* Route info overlay */}
-      {(loading || error || routeInfo) && (
-        <div style={{ position: "absolute", bottom: 12, right: 12, zIndex: 1000, background: "var(--panel)", border: "1px solid var(--line-2)", borderRadius: 8, boxShadow: "var(--shadow-sm)", padding: "0.75rem 1rem", fontSize: "0.72rem" }}>
+      {/* Route summary — distance, time, and how much of it runs through risky areas */}
+      {(loading || error || chosen) && (
+        <div className="route-summary">
           {loading && <span style={{ color: "var(--muted)" }}>{t("evac.calc")}</span>}
           {error   && <span style={{ color: "var(--s1)" }}>{error}</span>}
-          {routeInfo && !loading && (
-            <div style={{ display: "flex", gap: "1rem" }}>
-              <span style={{ color: "var(--cyan)", fontWeight: 700 }}>{metersToKm(routeInfo.distance)}</span>
-              <span style={{ color: "var(--muted)" }}>{secToMin(routeInfo.duration)}</span>
-            </div>
+          {chosen && !loading && (
+            <>
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <span style={{ color: "var(--cyan)", fontWeight: 700 }}>{metersToKm(chosen.distance)}</span>
+                <span style={{ color: "var(--muted)" }}>{secToMin(chosen.duration)}</span>
+              </div>
+              {chosen.riskyM > 0 ? (
+                <p className="route-summary-risk">
+                  {isId
+                    ? `${metersToKm(chosen.riskyM)} melewati area rawan banjir`
+                    : `${metersToKm(chosen.riskyM)} passes flood-prone areas`}
+                  {scored.length > 1 && (isId ? " — rute lain lebih rawan." : " — the other routes are riskier.")}
+                </p>
+              ) : (
+                <p className="route-summary-safe">
+                  {isId ? "Tidak melewati area rawan yang aktif" : "Avoids the active flood-prone areas"}
+                </p>
+              )}
+              {chosen !== fastest && detourMin > 0 && (
+                <p className="route-summary-note">
+                  {isId ? `Memutar ±${detourMin} mnt untuk menghindari area rawan` : `About ${detourMin} min longer to avoid flood-prone areas`}
+                </p>
+              )}
+            </>
           )}
         </div>
       )}

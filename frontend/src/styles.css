@@ -23,6 +23,7 @@
   /* Text */
   --text:    #15171a;
   --muted:   #4f555d;
+  --dest:    #7c3aed;   /* route destination (roads use green/red) */
   --muted-2: #656b73;
 
   /* Mobile bottom navigation height (content padding + fixed bar share this) */
@@ -113,6 +114,7 @@
   --line-2:  #3b3e44;
   --text:    #ecebe7;
   --muted:   #a6a9ae;
+  --dest:    #8b5cf6;
   --muted-2: #8e9198;
 
   --cyan:        #8eaaff;
@@ -742,14 +744,37 @@ button, input, select, textarea { font-family: inherit; }
 .route-controls {
   display: flex; align-items: center; gap: 0.625rem; flex-wrap: wrap;
   padding: 0.875rem 1rem; position: relative;
+  /* Above Leaflet's panes (400) and controls (1000) so address suggestions
+     are not drawn under the map below. */
+  z-index: 1100;
 }
 .route-input-row { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 0; }
 .route-input-row .route-input { flex: 1; min-width: 0; }
 .route-dest-row { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 0; }
 .route-dest-row .route-select { flex: 1; min-width: 0; }
 .route-label { font-size: 0.78rem; font-weight: 800; flex-shrink: 0; }
-.route-label.from { color: var(--s1); }
-.route-label.to   { color: var(--safe); }
+.route-label.from { color: var(--cyan); }
+.route-label.to   { color: var(--dest); }
+
+/* Destination: shelter or home */
+.dest-toggle { display: inline-flex; border: 1px solid var(--line-2); border-radius: var(--r); overflow: hidden; flex-shrink: 0; }
+.dest-toggle button {
+  font: inherit; font-size: 0.82rem; font-weight: 600; min-height: 40px; padding: 0 0.75rem;
+  background: var(--panel); color: var(--muted); border: 0; cursor: pointer;
+}
+.dest-toggle button + button { border-left: 1px solid var(--line-2); }
+.dest-toggle button.active { background: var(--dest); color: #fff; }
+.home-input-wrap { position: relative; flex: 1; min-width: 0; display: flex; }
+
+/* Evacuation map legend */
+.evac-legend { padding: 0 0.25rem; }
+.evac-legend ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
+.evac-legend li { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--muted); }
+.evac-legend i { flex-shrink: 0; }
+.evac-legend .dot  { width: 10px; height: 10px; border-radius: 50%; }
+.evac-legend .line { width: 18px; height: 4px; border-radius: 2px; }
+.evac-legend .area { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid; background: rgba(200, 16, 46, 0.12); }
+.evac-legend p { font-size: 0.78rem; color: var(--muted-2); margin: 0.4rem 0 0; line-height: 1.45; }
 .route-select, .route-input {
   flex: 1; background: var(--panel); border: 1px solid var(--line-2);
   border-radius: var(--r); color: var(--text); font: inherit;
@@ -781,6 +806,17 @@ button, input, select, textarea { font-family: inherit; }
 }
 .locate-me-btn:hover:not(:disabled) { background: var(--cyan-soft); border-color: var(--cyan); }
 .locate-me-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Route summary — distance, time, and the share through flood-prone areas */
+.route-summary {
+  position: absolute; bottom: 12px; right: 12px; z-index: 1000; max-width: min(320px, calc(100% - 24px));
+  background: var(--panel); border: 1px solid var(--line-2); border-radius: 8px;
+  box-shadow: var(--shadow-sm); padding: 0.75rem 1rem; font-size: 0.8rem;
+}
+.route-summary p { margin: 0.35rem 0 0; line-height: 1.4; }
+.route-summary-risk { color: var(--s1); font-weight: 600; }
+.route-summary-safe { color: var(--safe); font-weight: 600; }
+.route-summary-note { color: var(--muted); }
 
 /* Navigation instruction panel */
 .nav-panel {
