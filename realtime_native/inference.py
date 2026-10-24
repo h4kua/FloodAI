@@ -5,14 +5,24 @@ from pathlib import Path
 
 import numpy as np
 
+from agents.perception_agent import PerceptionAgent
+from agents.reasoning_agent import _base_confidence, _outlier_capped_confidence
 from realtime_native.bundle import load_runtime_bundle
 from realtime_native.feature_builder import (
     REALTIME_NATIVE_FEATURES,
     build_realtime_native_features_from_file,
     build_realtime_native_features_per_kecamatan,
+    scored_station_records,
 )
 from realtime_native.station_kecamatan import STATION_KECAMATAN
 from realtime_native.wilayah import JAKARTA_WILAYAH as _JAKARTA_WILAYAH, record_wilayah
+from services.adaptive_threshold import AdaptiveThresholder
+from services.baseline_check import compare_with_baseline
+from services.decision_engine import run_decision_engine
+from services.decision_logic import extract_signals
+from services.failure_handling import compute_confidence_penalty, detect_failures, detect_ood_escalation
+from services.hydrology_analyzer import analyze_hydrology
+from services.plausibility_check import score_plausibility
 from utils.paths import DEFAULT_REALTIME_SNAPSHOT, REPORTS_DIR
 
 _JAKARTA_TZ = timezone(timedelta(hours=7))
@@ -37,26 +47,86 @@ def _classify(probability: float, thresholds: dict) -> str:
     return "DANGER"
 
 
-def _apply_hydro_override(risk_level: str, probability: float, water_level_ratio: float) -> tuple[str, float]:
+# Same sections PerceptionAgent counts for snapshot completeness.
+_EXPECTED_SNAPSHOT_SECTIONS = ("fetched_at_utc", "openweather", "poskobanjir", "bmkg_alerts")
+
+
+def _snapshot_freshness_minutes(snapshot: dict, now=None) -> float:
+    """Minutes since the snapshot was fetched; -1.0 when unknown (as PerceptionAgent)."""
+    try:
+        fetched = datetime.fromisoformat(str(snapshot["fetched_at_utc"]).replace("Z", "+00:00"))
+    except (KeyError, TypeError, ValueError):
+        return -1.0
+    ref = now or datetime.now(timezone.utc)
+    if fetched.tzinfo is None:
+        fetched = fetched.replace(tzinfo=timezone.utc)
+    if ref.tzinfo is None:
+        ref = ref.replace(tzinfo=timezone.utc)
+    return (ref - fetched).total_seconds() / 60.0
+
+
+def _live_decision(snapshot, engineered, probability, ood_detection, thresholds, model_card, *, now=None):
     """
-    Rule-based safety floor that mirrors the L1/L1.8 hierarchy in decision_engine.py.
-    The ML model was trained when TMA data was often unavailable, so it underestimates
-    risk when water levels are high. These overrides prevent the model from returning
-    SAFE when physical sensors indicate otherwise.
+    Final citywide risk from the canonical L0–L4 decision engine, the same
+    authority /predict/agentic uses. The model probability is one input; the
+    water-level, BMKG, OOD and data-quality layers can raise the level (or
+    return UNKNOWN on unusable input). Returns (DecisionResult, failure_modes).
     """
-    if water_level_ratio >= 1.0:
-        # Water above SIAGA-1 danger threshold → always DANGER
-        return "DANGER", max(probability, 0.92)
-    if water_level_ratio >= 0.90:
-        # L1 SIAGA: ratio ≥ 0.90 → at least WARNING
-        if risk_level == "SAFE":
-            return "WARNING", max(probability, 0.56)
-        return risk_level, max(probability, 0.56)
-    if water_level_ratio >= 0.75:
-        # L1.8 HYDRO_FLOOR: ratio ≥ 0.75 → at least WARNING (mirrors decision_engine.py)
-        if risk_level == "SAFE":
-            return "WARNING", max(probability, 0.35)
-    return risk_level, probability
+    diagnostics = {**engineered.diagnostics, "ood_detection": ood_detection}
+    features = {
+        **engineered.frame[REALTIME_NATIVE_FEATURES].iloc[0].to_dict(),
+        **engineered.diagnostics.get("observed_context", {}),
+    }
+    plausibility = score_plausibility(snapshot)
+    plausibility_score = float(plausibility.get("plausibility_score", 1.0))
+    baseline = compare_with_baseline(probability, features)
+    failures = detect_failures(
+        snapshot=snapshot,
+        features=features,
+        diagnostics=diagnostics,
+        model_prob=probability,
+        baseline_result=baseline,
+        ood_detection=ood_detection,
+        plausibility=plausibility,
+        now=now,
+    )
+    failures.extend(detect_ood_escalation(ood_detection))
+    adaptive = AdaptiveThresholder().build_thresholds(
+        failure_modes=failures,
+        trend_state=diagnostics.get("trend_state") or {},
+        plausibility_score=plausibility_score,
+    )
+    confidence, _, _ = _outlier_capped_confidence(
+        confidence=_base_confidence(probability, ood_detection["score"], thresholds),
+        is_outlier=ood_detection["is_outlier"],
+        model_card=model_card,
+    )
+    present = sum(1 for s in _EXPECTED_SNAPSHOT_SECTIONS if snapshot.get(s) is not None)
+    # Scored posts only: pump and uncalibrated stations have no flood thresholds.
+    # The rise rate comes from each post's own previous reading, as in
+    # PerceptionAgent, not from the feature history (months old after downtime).
+    posts = scored_station_records(snapshot.get("poskobanjir"))
+    hydrology = analyze_hydrology(
+        posts, water_level_delta=PerceptionAgent()._extract_water_level_delta(snapshot, posts),
+    )
+    decision = run_decision_engine(
+        evaluation_risk_level=_classify(probability, thresholds),
+        adjusted_confidence=max(0.05, confidence - compute_confidence_penalty(failures)),
+        system_status="OK",
+        probability=probability,
+        raw_model_confidence=confidence,
+        failure_modes=failures,
+        baseline_result=baseline,
+        signals=extract_signals(features, plausibility_score=plausibility_score),
+        diagnostics=diagnostics,
+        hydrology_assessment=hydrology,
+        plausibility_score=plausibility_score,
+        has_critical_violation=bool(plausibility.get("has_critical_violation", False)),
+        adaptive_classification=adaptive.to_dict(),
+        perception_completeness=present / len(_EXPECTED_SNAPSHOT_SECTIONS),
+        data_freshness_minutes=_snapshot_freshness_minutes(snapshot, now),
+    )
+    return decision, failures
 
 
 _STATION_KECAMATAN = STATION_KECAMATAN
@@ -86,6 +156,12 @@ def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None):
     temporal_ready = diagnostics.get("temporal_features_ready", False)
     water_level_records = diagnostics.get("water_level_records", 0)
     stations = diagnostics.get("stations_summary") or []
+
+    if risk_level == "UNKNOWN":
+        return (
+            "Data saat ini belum cukup atau tidak wajar untuk menilai risiko banjir secara otomatis. "
+            "Ikuti informasi resmi BPBD DKI Jakarta dan BMKG sampai data pulih."
+        )
 
     elevated = [s for s in stations if "Siaga" in s.get("status_siaga", "")]
     elevated.sort(key=lambda s: s.get("ratio", 0), reverse=True)
@@ -141,6 +217,17 @@ def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None):
             "Cocok untuk siaga operasional, bukan alarm penuh."
         )
 
+    if risk_level == "PRE_ALERT":
+        loc_context = ""
+        if top_station:
+            loc_context = (
+                f" {_station_location_label(top_station)} mencatat {_clean_siaga(top_station['status_siaga'])}."
+            )
+        return (
+            f"Ada sinyal awal di atas kondisi normal dari muka air, cuaca, atau data yang tidak biasa.{loc_context} "
+            "Belum mengarah ke banjir, tetapi perlu diwaspadai dan dipantau lebih sering."
+        )
+
     monitored_areas = []
     if normal_wilayah:
         monitored_areas = [w["wilayah"] for w in normal_wilayah[:3]]
@@ -178,10 +265,10 @@ def _kelurahan_targeted_actions(risk_level: str, wilayah_summary: list) -> list[
 
     Threshold per risk_level:
       DANGER  → worst_rank >= 2 (Siaga 3 or worse — evacuation-language enriched)
-      WARNING → worst_rank >= 3 (Siaga 2 or worse — monitoring-language only)
-      SAFE    → never enriched (proportional tone)
+      WARNING, PRE_ALERT → worst_rank >= 3 (Siaga 2 or worse — monitoring-language only)
+      SAFE, UNKNOWN → never enriched (proportional tone)
     """
-    if risk_level == "SAFE" or not wilayah_summary:
+    if risk_level not in ("PRE_ALERT", "WARNING", "DANGER") or not wilayah_summary:
         return []
     threshold = 2 if risk_level == "DANGER" else 3
     candidates = [
@@ -214,7 +301,7 @@ def _kelurahan_targeted_actions(risk_level: str, wilayah_summary: list) -> list[
                 f"Prioritaskan evakuasi dan tim lapangan di {district} — kelurahan {kel_phrase} "
                 f"adalah titik historis paling rawan (maks {max_depth:.0f} cm)."
             )
-        else:  # WARNING
+        else:  # WARNING / PRE_ALERT
             targeted.append(
                 f"Pra-posisi pemantauan di {district} — kelurahan {kel_phrase} "
                 "paling sering banjir secara historis. Belum perlu evakuasi."
@@ -234,6 +321,16 @@ def _recommended_action(risk_level, wilayah_summary=None):
             "Naikkan frekuensi monitoring BMKG, OpenWeather, dan Posko Banjir agar eskalasi bisa ditangkap lebih cepat.",
             "Siapkan personel siaga terbatas dan verifikasi kondisi drainase, pompa, atau titik limpasan yang sering bermasalah.",
             "Gunakan status ini untuk komunikasi internal dan kesiapan operasional, belum untuk alarm publik penuh.",
+        ]
+    elif risk_level == "PRE_ALERT":
+        base = [
+            "Pantau pembaruan muka air dan cuaca lebih sering; status dapat naik bila hujan berlanjut.",
+            "Periksa kesiapan drainase, pompa, dan jalur informasi di titik yang sering tergenang.",
+        ]
+    elif risk_level == "UNKNOWN":
+        return [
+            "Data belum memadai untuk penilaian otomatis — ikuti informasi resmi BPBD DKI Jakarta dan BMKG.",
+            "Periksa sumber data (Posko Banjir, BMKG, OpenWeather) dan muat ulang snapshot.",
         ]
     else:
         base = [
@@ -421,23 +518,34 @@ def predict_realtime_native(
     scaled = scaler.transform(features)
     probability = float(model.predict_proba(scaled)[0, 1])
     ood_score = float(ood_detector.decision_function(scaled)[0])
-    ood_label = int(ood_detector.predict(scaled)[0] == -1)
-    risk_level = _classify(probability, thresholds)
-
-    water_level_ratio = float(features.iloc[0].get("water_level_ratio", 0.0))
-    risk_level, probability = _apply_hydro_override(risk_level, probability, water_level_ratio)
-
-    # Suppress false-positive OOD when water level explains the anomaly.
-    # Model was trained before real TMA data existed (ratio mostly 0.0);
-    # ratios >= 0.75 fall outside training distribution but are not true
-    # operational outliers — the hydro override already accounts for them.
-    if ood_label and water_level_ratio >= 0.75:
-        ood_label = 0
+    ood_detection = {
+        "method": "IsolationForest",
+        "score": ood_score,
+        "is_outlier": bool(ood_detector.predict(scaled)[0] == -1),
+    }
+    model_risk_level = _classify(probability, thresholds)
+    decision, failure_modes = _live_decision(
+        snapshot_raw, engineered, probability, ood_detection, thresholds, model_card, now=as_of,
+    )
+    risk_level = decision.risk_level
 
     result = {
         "model_variant": "realtime_native",
+        # Raw model probability; the final level comes from the decision engine.
         "probability": probability,
         "risk_level": risk_level,
+        "confidence_score": decision.confidence_score,
+        # Which layer set the level and why — the model's own view is kept so
+        # the UI and audits can see when a safety floor overrode it.
+        "decision": {
+            "layer": decision.override_trace.get("authority", ""),
+            "source": decision.decision_source,
+            "reason": decision.final_reason,
+            "system_status": decision.system_status,
+            "model_risk_level": model_risk_level,
+            "failure_modes": [f.get("type") for f in failure_modes],
+            "trace": decision.decision_trace,
+        },
         "risk_interpretation": _risk_interpretation(risk_level, engineered.diagnostics, wilayah_summary),
         "recommended_action": _recommended_action(risk_level, wilayah_summary),
         "risk_thresholds": thresholds,
@@ -446,12 +554,8 @@ def predict_realtime_native(
         # how fresh the underlying TMA/BMKG/OpenWeather data actually is.
         "snapshot_fetched_at": snapshot_fetched_at,
         "bmkg_forecast": bmkg_forecast,
-        "ood_detection": {
-            "method": "IsolationForest",
-            "score": ood_score,
-            "is_outlier": bool(ood_label),
-        },
-        "features": features.iloc[0].to_dict(),
+        "ood_detection": ood_detection,
+        "features": {**features.iloc[0].to_dict(), **engineered.diagnostics.get("observed_context", {})},
         "diagnostics": engineered.diagnostics,
         "model_name": model_card.get("model_name"),
         # Real DSDADKI station readings — sourced directly from sensor snapshot,

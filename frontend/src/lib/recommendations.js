@@ -90,6 +90,12 @@ export function deriveActions(riskData, stations = [], isId = true) {
             : "Risk is rising — prepare to evacuate and coordinate with your local RT/RW.")
     );
   }
+  if (actions.length === 0 && riskData?.level === "unknown") {
+    actions.push(isId
+      ? "Status belum bisa dinilai karena data belum cukup. Ikuti informasi resmi BPBD DKI Jakarta dan BMKG."
+      : "The status can't be judged yet because data is missing. Follow official updates from BPBD DKI Jakarta and BMKG."
+    );
+  }
   if (actions.length === 0) {
     actions.push(isId
       ? "Kondisi saat ini terpantau normal. Tetap pantau sensor tiap 15 menit selama musim hujan."

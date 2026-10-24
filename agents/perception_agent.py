@@ -82,6 +82,7 @@ from services.dem_elevation import (
     get_elevation,
     get_elevation_context,
 )
+from realtime_native.feature_builder import _is_pump_station
 from services.hydrology_analyzer import HydrologyAssessment, analyze_hydrology
 from services.plausibility_check import score_plausibility
 
@@ -269,9 +270,12 @@ class PerceptionAgent:
 
         signal_presence = self._assess_signal_presence(openweather, poskobanjir, bmkg_alerts)
         raw_features = self._extract_raw_features(openweather, poskobanjir, bmkg_alerts)
-        water_level_delta = self._extract_water_level_delta(snapshot, poskobanjir)
+        # Pump stations carry operational (machinery) thresholds, not flood
+        # thresholds — excluded here as in the feature builder and live endpoint.
+        flood_posts = [r for r in poskobanjir if not _is_pump_station(r)]
+        water_level_delta = self._extract_water_level_delta(snapshot, flood_posts)
         hydrology = analyze_hydrology(
-            poskobanjir,
+            flood_posts,
             water_level_delta=water_level_delta,
         )
 

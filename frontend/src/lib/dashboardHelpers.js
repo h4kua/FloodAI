@@ -197,6 +197,12 @@ export function buildStatusDesc(riskData, isId) {
     .sort((a, b) => ({ "Siaga 1":3,"Siaga 2":2,"Siaga 3":1 }[b.worst_status] ?? 0) - ({ "Siaga 1":3,"Siaga 2":2,"Siaga 3":1 }[a.worst_status] ?? 0));
   const topW = dangerW[0];
 
+  if (level === "unknown") {
+    return isId
+      ? "Data pos pantau dan cuaca belum cukup untuk menilai risiko banjir saat ini. Ikuti informasi resmi BPBD DKI Jakarta dan BMKG sampai data pulih."
+      : "There isn't enough water-level and weather data to judge the flood risk right now. Follow official updates from BPBD DKI Jakarta and BMKG until the data is back.";
+  }
+
   if (level === "bahaya") {
     const stNote = s1.length > 0
       ? (isId ? ` ${s1.length} pos pantau sudah melewati batas siaga, terparah di ${cleanStationName(s1[0].nama)}.` : ` ${s1.length} post(s) are past the alert limit, worst at ${cleanStationName(s1[0].nama)}.`)

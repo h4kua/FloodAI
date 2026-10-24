@@ -260,7 +260,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           <h1 className="page-title">{t("evac.title")}</h1>
         </div>
         <span
-          className={`risk-badge badge-${{ aman: "ok", waspada: "wsp", siaga: "s2", bahaya: "s1" }[riskLevel] ?? "wsp"}`}
+          className={`risk-badge badge-${{ aman: "ok", waspada: "wsp", siaga: "s2", bahaya: "s1", unknown: "unknown" }[riskLevel] ?? "wsp"}`}
           style={{ fontSize: "0.85rem", padding: "0.35rem 0.7rem" }}
         >
           Status: {config.label}

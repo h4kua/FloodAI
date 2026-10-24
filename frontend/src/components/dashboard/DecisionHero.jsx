@@ -62,6 +62,7 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
     waspada: { label: isId ? "Waspada" : "Watch" },
     siaga:   { label: isId ? "Siaga"   : "Alert" },
     bahaya:  { label: isId ? "Bahaya!" : "Danger!" },
+    unknown: { label: isId ? "Belum diketahui" : "Unknown" },
   };
   const dynamicDesc = buildStatusDesc(riskData, isId);
 

@@ -60,6 +60,24 @@ _BOUNDS: dict[str, tuple[float, float, float, float]] = {
     "water_level_cm": (0.0, 1200.0,  0.0, 2500.0),
 }
 
+# A station that publishes its own Siaga thresholds is judged on that scale:
+# the normal / physical ceilings above are ≈ 1.25× and ≈ 2.6× Manggarai's
+# Siaga 1 (950 cm). Unit-free, so the DSDA feed — which reports millimetres
+# (Manggarai Siaga 1 = 9500, Katulampa = 2000) — is not read as metres of water
+# and quarantined. Records without thresholds keep the absolute cm bounds.
+_WL_NORMAL_PER_TOP_THRESHOLD = 1.25
+_WL_PHYSICAL_PER_TOP_THRESHOLD = 2.5
+
+
+def _water_level_bounds(station: dict) -> tuple[float, float, float, float]:
+    try:
+        top = max(float(station.get(k) or 0.0) for k in ("siaga1", "siaga2", "siaga3"))
+    except (TypeError, ValueError):
+        top = 0.0
+    if top > 0:
+        return 0.0, top * _WL_NORMAL_PER_TOP_THRESHOLD, 0.0, top * _WL_PHYSICAL_PER_TOP_THRESHOLD
+    return _BOUNDS["water_level_cm"]
+
 # Combination implausibility rules:
 # (condition_fn, combo_key, description, penalty_score)
 # penalty_score = field score assigned when this combo triggers
@@ -189,7 +207,7 @@ def score_plausibility(snapshot: dict) -> dict:
         wl = station.get("tinggi_air")
         if wl is None:
             continue
-        n_lo, n_hi, p_lo, p_hi = _BOUNDS["water_level_cm"]
+        n_lo, n_hi, p_lo, p_hi = _water_level_bounds(station)
         score, severity = _field_plausibility(float(wl), n_lo, n_hi, p_lo, p_hi)
         entry = {
             "field": f"water_level_cm[{station.get('id', '?')}]",

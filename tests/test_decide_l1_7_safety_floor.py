@@ -112,6 +112,19 @@ def test_decision_trace_records_l1_7_layer_with_sub_rule():
     assert floor_entries[0]["outputs"]["risk"] == RiskLevel.WARNING.value
 
 
+def test_floor_does_not_lower_an_ml_danger():
+    """The floor raises to WARNING; it must not cap an ML DANGER at WARNING."""
+    decision = decide(
+        perception=_safe_perception(
+            bmkg_max_severity=0.95,
+            rainfall_1h_mm=25.0,
+        ),
+        reasoning=_safe_reasoning(probability=0.99),
+    )
+    assert decision.risk_level == RiskLevel.DANGER
+    assert decision.authority != DecisionAuthority.L1_7_BMKG_SAFETY_FLOOR
+
+
 def test_confidence_floor_is_at_least_half():
     """After floor fires, Decision.confidence is at least 0.50 (operator-legible)."""
     decision = decide(

@@ -139,7 +139,12 @@ def _run_model(snapshot: dict, *, persist_history: bool = True, as_of=None) -> d
             "confidence_capped_by_ood_floor": was_capped,
             "confidence_floor_on_outlier": round(floor, 4),
         },
-        "features": _to_native(features_df.iloc[0].to_dict()),
+        # Model inputs plus the observed water-level ratio and BMKG scores the
+        # signals, baseline and decision layers read (not model features).
+        "features": _to_native({
+            **features_df.iloc[0].to_dict(),
+            **engineered.diagnostics.get("observed_context", {}),
+        }),
         "diagnostics": _to_native(engineered.diagnostics),
         "model_name": bundle.model_card.get(
             "model_name",

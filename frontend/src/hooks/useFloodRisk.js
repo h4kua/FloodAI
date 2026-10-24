@@ -35,9 +35,11 @@ export function useFloodRisk() {
         PRE_ALERT: "waspada",
         WARNING: "siaga",
         DANGER: "bahaya",
+        // L0: the input could not be judged (missing or implausible data).
+        UNKNOWN: "unknown",
       };
       setRiskData({
-        level: levelMap[json.risk_level] ?? "waspada",
+        level: levelMap[json.risk_level] ?? "unknown",
         rainfall: json.features?.rainfall_mm ?? 0,
         riskScore: (() => {
           const v = (json.probability ?? 0) * 100;

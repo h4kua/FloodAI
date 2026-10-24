@@ -34,9 +34,10 @@ export function ModelOutputCard({ riskData, children }) {
 
   const levelColor = isStale
     ? "var(--muted)"
-    : { aman: "var(--safe)", waspada: "var(--wsp)", siaga: "var(--s2)", bahaya: "var(--s1)" }[level] ?? "var(--wsp)";
+    : { aman: "var(--safe)", waspada: "var(--wsp)", siaga: "var(--s2)", bahaya: "var(--s1)", unknown: "var(--muted)" }[level] ?? "var(--wsp)";
   const levelLabel = { aman: isId ? "Aman" : "Safe", waspada: isId ? "Waspada" : "Watch",
-    siaga: isId ? "Siaga" : "Alert", bahaya: isId ? "Bahaya" : "Danger" }[level] ?? "—";
+    siaga: isId ? "Siaga" : "Alert", bahaya: isId ? "Bahaya" : "Danger",
+    unknown: isId ? "Belum diketahui" : "Unknown" }[level] ?? "—";
 
   const trend = isStale ? null : trendDisplay(riskTrend, level, isId);
 

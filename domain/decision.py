@@ -613,8 +613,10 @@ def decide(
     # rainfall or (b) an out-of-distribution ML signal with no usable water
     # level. Closes the gap where ML SAFE + stale TMA + BMKG severe would
     # otherwise fall through every downstream layer.
+    # A floor, not a cap: when ML already says DANGER the floor is met and L3
+    # keeps the higher level (no later layer lowers DANGER).
     fired, sub_rule = _check_bmkg_safety_floor(perception, reasoning)
-    if fired:
+    if fired and _ml_classify(reasoning, thresholds) is not RiskLevel.DANGER:
         decision_trace.append(_trace(
             DecisionAuthority.L1_7_BMKG_SAFETY_FLOOR,
             inputs={

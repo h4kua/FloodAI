@@ -280,6 +280,22 @@ def _is_pump_station(record: dict) -> bool:
     return name.startswith("POMPA")
 
 
+def scored_station_records(records):
+    """
+    Stations that are actually scored and shown: valid datum, calibrated,
+    non-pump, with a usable siaga-1 threshold. Shared by the feature builder
+    and the live decision engine so both read the same posts.
+    """
+    return [
+        r
+        for r in (records or [])
+        if _safe_float(r.get("tinggi_air")) >= 0
+        and _is_calibrated_station(r)
+        and not _is_pump_station(r)
+        and _safe_float(r.get("siaga1")) > 0
+    ]
+
+
 def _water_level_ratio_from_records(records):
     best_ratio = 0.0
     for record in (records or []):
@@ -706,16 +722,10 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
         for r in valid_records
         if not _is_calibrated_station(r)
     ]
-    # Single source of truth for "which stations are actually scored/shown":
-    # calibrated, non-pump, with a usable siaga-1 threshold. Reused by both the
-    # stations_summary payload and the station_quality breakdown so counts agree.
-    scored_records = [
-        r
-        for r in valid_records
-        if _is_calibrated_station(r)
-        and not _is_pump_station(r)
-        and _safe_float(r.get("siaga1")) > 0
-    ]
+    # Single source of truth for "which stations are actually scored/shown".
+    # Reused by both the stations_summary payload and the station_quality
+    # breakdown so counts agree.
+    scored_records = scored_station_records(valid_records)
     water_level_ratio = _water_level_ratio_from_records(poskobanjir_records)
     bmkg_scores = _bmkg_category_scores_from_alerts(alerts)
 
@@ -798,6 +808,19 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
         "rainfall_acc_6h": round(current_row["rainfall_mm"] + _rf_lag1 + _rf_lag2, 4),
         "water_level_trend": round(current_row.get("water_level_delta", 0.0), 4),
         "trend_source": "realtime_feature_history",
+        # Observed inputs the decision engine needs that are not model features
+        # (the frame below keeps only REALTIME_NATIVE_FEATURES).
+        "observed_context": {
+            key: round(float(current_row.get(key, 0.0)), 4)
+            for key in (
+                "water_level_ratio",
+                "rainfall_3h_proxy_mm",
+                "bmkg_severity_score",
+                "bmkg_certainty_score",
+                "bmkg_urgency_score",
+                "bmkg_weighted_score",
+            )
+        },
         # Real per-station DSDADKI readings — sorted by siaga ratio descending.
         # Includes all calibrated, non-pump stations with positive siaga1 threshold.
         # status_siaga is the raw string from DSDADKI ("Siaga 3", "Normal", etc.).

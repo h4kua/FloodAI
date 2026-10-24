@@ -285,6 +285,8 @@ button, input, select, textarea { font-family: inherit; }
 .status-hero.level-waspada { background: var(--wsp-solid);  border-color: var(--wsp-solid);  color: var(--wsp-ink);  }
 .status-hero.level-siaga   { background: var(--s2-solid);   border-color: var(--s2-solid);   color: var(--s2-ink);   }
 .status-hero.level-bahaya  { background: var(--s1-solid);   border-color: var(--s1-solid);   color: var(--s1-ink);   }
+/* Unknown (decision engine L0: data missing or implausible) — neutral, never a colour that implies a level */
+.status-hero.level-unknown { background: var(--panel); border-color: var(--line-2); color: var(--muted); }
 /* Stale data — a neutral card, so an old status never reads as "now" */
 .status-hero.is-stale { background: var(--panel); border-color: var(--line-2); color: var(--muted); }
 
@@ -542,6 +544,7 @@ button, input, select, textarea { font-family: inherit; }
 .badge-s2  { background: var(--s2-soft);   color: var(--s2);   border: 1px solid var(--s2-border); }
 .badge-wsp { background: var(--wsp-soft);  color: var(--wsp);  border: 1px solid var(--wsp-border); }
 .badge-ok  { background: var(--safe-soft); color: var(--safe); border: 1px solid var(--safe-border); }
+.badge-unknown { background: var(--panel-2); color: var(--muted); border: 1px solid var(--line-2); }
 .is-stale .risk-badge { filter: grayscale(1); opacity: 0.75; }
 
 /* Action buttons */
