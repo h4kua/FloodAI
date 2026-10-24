@@ -1,17 +1,14 @@
 import { useState, useRef, useCallback } from "react";
 import { humanizeRiskLevel } from "../lib/humanize";
 import EvacuationMap, { DESTINATIONS, findNearestShelter } from "../components/EvacuationMap";
-import EmergencyContacts from "../components/EmergencyContacts";
 import ChatBot from "../components/ChatBot";
 import SafeArrival from "./SafeArrival";
-import CollapsibleSection from "../components/shell/CollapsibleSection";
 import { useT, useApp } from "../lib/appContext";
 import { useShelterGeofence } from "../hooks/useShelterGeofence";
 import { getDeviceId, getFamilyCode } from "../lib/deviceIdentity";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
-const STEP_KEYS = ["1","2","3","4","5"];
 
 async function geocodeAddress(address) {
   const q = encodeURIComponent(address + ", Jakarta, Indonesia");
@@ -267,7 +264,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
         </span>
       </div>
 
-      <div className="evac-grid fade-in">
+      <div className={`evac-grid fade-in${selectedDest ? "" : " is-single"}`}>
         {/* Left: primary CTA + search + map */}
         <div className="evac-col-left">
 
@@ -378,9 +375,8 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           )}
         </div>
 
-        {/* Right: chosen shelter + contacts + guidance */}
+        {/* Right: the chosen shelter, once one is selected */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-          {/* Shelter card — shown once a shelter is selected */}
           {selectedDest && (
             <div className="panel panel-body shelter-detail-card">
               <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: 0 }}>
@@ -417,58 +413,6 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
             </div>
           )}
 
-          {/* Emergency contacts — always one tap away, above the fold */}
-          <EmergencyContacts />
-
-          {/* Secondary guidance — progressive disclosure */}
-          <CollapsibleSection
-            icon="☰"
-            iconBg="var(--cyan-soft)"
-            iconColor="var(--cyan)"
-            title={t("evac.steps")}
-            subtitle={lang === "en" ? "5 steps before you leave" : "5 langkah sebelum berangkat"}
-          >
-            <div className="panel panel-body">
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                {STEP_KEYS.map((k) => (
-                  <div key={k} className="step">
-                    <span className="step-num">{k}</span>
-                    <div>
-                      <p className="step-title">{t(`step.${k}.t`)}</p>
-                      <p className="step-desc">{t(`step.${k}.d`)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            icon="◧"
-            iconBg="var(--safe-soft)"
-            iconColor="var(--safe)"
-            title={lang === "en" ? "Emergency Kit Checklist" : "Isi Tas Darurat"}
-            subtitle={lang === "en" ? "10 essentials" : "10 barang penting"}
-          >
-            <div className="panel panel-body">
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-                {(lang === "en" ? [
-                  "ID & documents", "Medicines (3+ days)", "Clothes (3 days)", "Flashlight + batteries",
-                  "Power bank", "Drinking water", "Non-perishable food", "Phone + charger",
-                  "Cash", "First aid kit",
-                ] : [
-                  "KTP & dokumen penting", "Obat-obatan (3+ hari)", "Pakaian (3 hari)", "Senter + baterai",
-                  "Power bank", "Air minum", "Makanan tahan lama", "HP + charger",
-                  "Uang tunai", "P3K",
-                ]).map((item, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.8rem", color: "var(--muted)", lineHeight: 1.4 }}>
-                    <span style={{ flexShrink: 0 }}>›</span>
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CollapsibleSection>
         </div>
       </div>
 

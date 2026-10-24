@@ -21,7 +21,7 @@ function AppShell() {
       <TopBar page={page} onNavigate={setPage} />
 
       <main className="main">
-        {page === "home"  && <Home setRiskContext={setRiskContext} riskLevel={riskContext.level} onNavigate={setPage} />}
+        {page === "home"  && <Home setRiskContext={setRiskContext} riskLevel={riskContext.level} />}
         <Suspense fallback={<LoadingSpinner />}>
           {page === "alert" && <Alert riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
           {page === "about" && <About riskContext={riskContext} />}

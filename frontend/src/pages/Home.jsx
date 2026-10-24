@@ -7,7 +7,6 @@ import { useT } from "../lib/appContext";
 import CollapsibleSection from "../components/shell/CollapsibleSection";
 import DecisionHero from "../components/dashboard/DecisionHero";
 import WilayahStatus from "../components/dashboard/WilayahStatus";
-import ActionCard from "../components/dashboard/ActionCard";
 import { StationPanel } from "../components/dashboard/StationSection";
 import { StaleDataBanner, ModelOutputCard } from "../components/dashboard/StatusModelSection";
 import { WilayahForecastGrid, ForecastPanel } from "../components/dashboard/ForecastSection";
@@ -27,13 +26,12 @@ const DETAIL_TABS = [
 /* ── Beranda — citizen-first, decision-first ───────────────────────────────
    Per the FloodGuard HCI spec, the page answers three questions in order:
    1. "Is my area at risk right now?"  → DecisionHero + WilayahStatus (per wilayah)
-   2. "What should I do?"              → ActionCard (≤3 actions, 1 primary CTA)
-   3. "Show me the situation"          → live map
+   2. "Show me the situation"          → live map, full width
    Everything technical (AI analysis, sensor tables, forecasts) sits behind
    ONE collapsed "Detail" section with tabs, so a stressed user is never
    flooded with data they didn't ask for and only one panel shows at a time.
 */
-export default function Home({ setRiskContext, riskLevel, onNavigate }) {
+export default function Home({ setRiskContext, riskLevel }) {
   const t = useT();
   const { riskData, loading, refreshing, error, refresh } = useFloodRisk();
   const level = riskData?.level ?? riskLevel ?? "waspada";
@@ -97,19 +95,12 @@ export default function Home({ setRiskContext, riskLevel, onNavigate }) {
       {/* 1b — …and in MY part of Jakarta? */}
       <WilayahStatus riskData={riskData} />
 
-      {/* 2 + 3 — What do I do? / Show me. Desktop: map left, action+chips right */}
-      <div className="home-main fade-in">
-        <div className="home-action">
-          <ActionCard riskData={riskData} stations={stations} onNavigate={onNavigate} />
+      {/* 2 — Show me: the map, full width */}
+      <div className="panel map-panel fade-in" id="map-anchor">
+        <div className="panel-body" style={{ paddingBottom: "0.75rem" }}>
+          <p className="panel-title" style={{ marginBottom: 0 }}>{t("map.title")}</p>
         </div>
-        <div className="home-map" id="map-anchor">
-          <div className="panel map-panel">
-            <div className="panel-body" style={{ paddingBottom: "0.75rem" }}>
-              <p className="panel-title" style={{ marginBottom: 0 }}>{t("map.title")}</p>
-            </div>
-            <FloodMap riskScore={score} stations={stations} />
-          </div>
-        </div>
+        <FloodMap riskScore={score} stations={stations} />
       </div>
 
       {/* Progressive disclosure — one collapsed section, one tab visible at a time */}
