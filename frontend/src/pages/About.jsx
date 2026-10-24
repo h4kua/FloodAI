@@ -165,8 +165,8 @@ export default function About({ riskContext = {} }) {
           <Section title={id ? "Performa model" : "Model performance"}>
             <p style={{ fontSize: "0.85rem", color: "var(--muted)", marginBottom: "1rem", lineHeight: 1.6 }}>
               {id
-                ? "Diukur sekali saat pelatihan, pada 586 baris bulanan yang dipilih acak dari 2020–2024. Data latihnya masih proksi, dan karena dipilih acak, baris uji bertetangga waktu dengan data latih. Jadi angka di bawah terlalu optimistis: saat model serupa dilatih dengan 2020–2022 lalu diuji pada 2024, AUC-nya sekitar 0,81–0,84. Model ini belum pernah diuji dengan data lapangan."
-                : "Measured once at training time on 586 monthly rows picked at random from 2020–2024. The training data is still a proxy, and because rows were picked at random, test rows sit next to training rows in time. So the figures below are optimistic: when a similar model is trained on 2020–2022 and tested on 2024, its AUC is about 0.81–0.84. The model has not yet been tested on field data."}
+                ? "Diukur sekali saat pelatihan, pada 586 baris bulanan yang dipilih acak dari 2020–2024. Data latihnya masih proksi, dan karena dipilih acak, baris uji bertetangga waktu dengan data latih. Jadi angka di bawah terlalu optimistis: saat model serupa dilatih dengan 2020–2022 lalu diuji pada 2024, AUC-nya sekitar 0,81 (rentang 0,74–0,87). Model ini belum pernah diuji dengan data lapangan."
+                : "Measured once at training time on 586 monthly rows picked at random from 2020–2024. The training data is still a proxy, and because rows were picked at random, test rows sit next to training rows in time. So the figures below are optimistic: when a similar model is trained on 2020–2022 and tested on 2024, its AUC is about 0.81 (range 0.74–0.87). The model has not yet been tested on field data."}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
               <MetricBar label="AUC-ROC" hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}
@@ -178,7 +178,7 @@ export default function About({ riskContext = {} }) {
               <MetricBar label="Brier Score" hint={id ? "(makin rendah makin baik)" : "(lower is better)"}
                 value={0.074} max={0.25} color="var(--cyan)" lowerIsBetter format={() => "0.074"} />
               <MetricBar label={id ? "ECE (data uji)" : "ECE (test set)"} hint={id ? "(makin rendah makin baik)" : "(lower is better)"}
-                value={0.018} max={0.25} color="var(--cyan)" lowerIsBetter format={() => "0.018"} />
+                value={0.062} max={0.25} color="var(--cyan)" lowerIsBetter format={() => "0.062"} />
             </div>
             <ul style={{ margin: "1rem 0 0", paddingLeft: "1.1rem", display: "flex", flexDirection: "column", gap: "0.4rem", fontSize: "0.85rem", color: "var(--muted)", lineHeight: 1.55 }}>
               <li>

@@ -9,10 +9,11 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.calibration import CalibratedClassifierCV, calibration_curve
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics import (
     accuracy_score,
+    average_precision_score,
     brier_score_loss,
     confusion_matrix,
     f1_score,
@@ -200,21 +201,35 @@ def _write_runtime_bundle(
 
 
 def _expected_calibration_error(y_true, y_proba, n_bins: int = 10) -> float:
-    frac_pos, mean_pred = calibration_curve(y_true, y_proba, n_bins=n_bins, strategy="quantile")
-    bin_edges = np.linspace(0.0, 1.0, n_bins + 1)
-    counts, _ = np.histogram(y_proba, bins=bin_edges)
-    weights = counts[: len(frac_pos)].astype(float) + 1e-9
-    return float(np.average(np.abs(frac_pos - mean_pred), weights=weights))
+    """Expected calibration error with equal-width bins (Naeini et al., 2015).
+
+    ECE = sum_b (n_b / n) * |mean(y in b) - mean(p in b)|. Each bin's gap is
+    weighted by that same bin's share of samples. (The previous version took
+    the gaps from quantile bins but the weights from equal-width bins, so gaps
+    and weights referred to different bins.)
+    """
+    y_true = np.asarray(y_true, dtype=float)
+    y_proba = np.asarray(y_proba, dtype=float)
+    if y_true.size == 0:
+        return 0.0
+    bin_ids = np.clip(np.digitize(y_proba, np.linspace(0.0, 1.0, n_bins + 1)[1:-1]), 0, n_bins - 1)
+    ece = 0.0
+    for b in range(n_bins):
+        in_bin = bin_ids == b
+        if in_bin.any():
+            ece += in_bin.mean() * abs(y_true[in_bin].mean() - y_proba[in_bin].mean())
+    return float(ece)
 
 
 def _select_threshold(y_val, val_proba):
     """Return (threshold, recall, precision, sweep_df).
 
     Strategy: recall-first for early warning.
-    1. Find candidates with recall >= RECALL_FLOOR and precision >= PRECISION_FLOOR.
+    1. Find candidates with recall >= RECALL_FLOOR and precision >= PRECISION_FLOOR;
+       take the highest recall (tiebreak F2).
     2. If none, relax: max recall where precision >= PRECISION_FLOOR.
-    3. If still none, take best F2 overall.
-    Within each tier, sort by recall desc then F2 desc.
+    3. If still none, take the best F2 overall.
+    The tier used is stored in ``sweep_df.attrs["tier"]``.
     """
     prec, rec, thr = precision_recall_curve(y_val, val_proba)
     sweep = pd.DataFrame({
@@ -225,15 +240,23 @@ def _select_threshold(y_val, val_proba):
     sweep["f2"] = (5 * sweep["precision"] * sweep["recall"]) / (
         4 * sweep["precision"] + sweep["recall"] + 1e-9
     )
-    # Tier 1: both floors met
-    candidates = sweep[(sweep["recall"] >= RECALL_FLOOR) & (sweep["precision"] >= PRECISION_FLOOR)]
+    # The curve's end point (recall 0, precision 1 by convention) flags nothing,
+    # yet it always passes the precision floor - keeping it made tier 2 return
+    # threshold 1.0 with recall 0 whenever no real threshold reached the floor.
+    usable = sweep[sweep["recall"] > 0]
+    if usable.empty:
+        usable = sweep
+    candidates = usable[(usable["recall"] >= RECALL_FLOOR) & (usable["precision"] >= PRECISION_FLOOR)]
+    tier = 1
     if candidates.empty:
-        # Tier 2: just precision floor, maximize recall
-        candidates = sweep[sweep["precision"] >= PRECISION_FLOOR]
+        candidates = usable[usable["precision"] >= PRECISION_FLOOR]
+        tier = 2
     if candidates.empty:
-        # Tier 3: best F2 overall
-        candidates = sweep
-    chosen = candidates.sort_values(["recall", "f2"], ascending=False).iloc[0]
+        chosen = usable.sort_values(["f2", "recall"], ascending=False).iloc[0]
+        tier = 3
+    else:
+        chosen = candidates.sort_values(["recall", "f2"], ascending=False).iloc[0]
+    sweep.attrs["tier"] = tier
     return float(chosen["threshold"]), float(chosen["recall"]), float(chosen["precision"]), sweep
 
 
@@ -419,6 +442,7 @@ def train_realtime_native_model(
     dataset_path=REALTIME_NATIVE_BOOTSTRAP_DATASET_PATH,
     leak_free_kecamatan_freq: bool = True,
     year_split: tuple[int, int] | None = None,
+    return_test_predictions: bool = False,
 ):
     """Train and write the realtime-native bundle.
 
@@ -428,6 +452,9 @@ def train_realtime_native_model(
     year_split: (val_year, test_year) → train < val_year ≤ val < test_year ≤ test.
         None keeps the index-based 68/12/20 split, which falls back to a random
         stratified split when the chronological slices lack positives.
+    return_test_predictions: also return ``y_test`` and ``test_proba`` under
+        ``report["_test_predictions"]`` (not written to disk) - used by
+        scripts/evaluate_model.py for bootstrap confidence intervals.
     """
     if not Path(dataset_path).exists():
         build_bootstrap_training_dataset(output_path=dataset_path)
@@ -560,7 +587,10 @@ def train_realtime_native_model(
     base_model = XGBClassifier(n_estimators=chosen_n_estimators, **common_xgb_kwargs)
     base_model.fit(X_train_s, y_train, verbose=False)
 
-    # --- STEP 7a: try both calibration methods, pick by best recall then ECE -
+    # --- STEP 7a: try both calibration methods, pick on the VALIDATION fold --
+    # Highest validation recall at the validation-chosen threshold, then lowest
+    # validation ECE. The test fold is never used for selection, so the test
+    # metrics stay an unbiased estimate.
     best_cal = None
     best_cal_method = "isotonic"
     best_val_proba = None
@@ -576,20 +606,18 @@ def train_realtime_native_model(
         _tp = _cal.predict_proba(X_test_s)[:, 1]
         _trp = _cal.predict_proba(X_train_s)[:, 1]
         _thr, _rec, _, _ = _select_threshold(y_val, _vp)
-        _ece = _expected_calibration_error(y_test, _tp, n_bins=10)
-        _test_preds = (_tp >= _thr).astype(int)
-        _test_rec = float((_test_preds[y_test.values == 1] == 1).mean()) if (y_test.values == 1).any() else 0.0
+        _ece = _expected_calibration_error(y_val, _vp, n_bins=10)
         logger.info(
-            "calibration_candidate method=%s cv=5 val_recall=%.3f test_recall=%.3f ECE=%.4f",
-            _method, _rec, _test_rec, _ece,
+            "calibration_candidate method=%s cv=5 val_recall=%.3f val_ECE=%.4f",
+            _method, _rec, _ece,
         )
-        if _test_rec > best_recall or (_test_rec == best_recall and _ece < best_ece):
+        if _rec > best_recall or (_rec == best_recall and _ece < best_ece):
             best_cal = _cal
             best_cal_method = _method
             best_val_proba = _vp
             best_test_proba = _tp
             best_train_proba = _trp
-            best_recall = _test_rec
+            best_recall = _rec
             best_ece = _ece
 
     calibrated_model = best_cal
@@ -648,8 +676,10 @@ def train_realtime_native_model(
         "validation_precision": val_precision,
         "selection_rule": (
             f"max recall s.t. precision >= {PRECISION_FLOOR}; "
-            f"target recall floor = {RECALL_FLOOR}; tiebreak F2."
+            f"target recall floor = {RECALL_FLOOR}; tiebreak F2; "
+            f"best F2 when no threshold reaches the precision floor."
         ),
+        "selection_tier": sweep_df.attrs.get("tier"),
         "calibration_method": calibration_method,
     }
     with open(REALTIME_NATIVE_THRESHOLD_PATH, "w", encoding="utf-8") as file:
@@ -686,6 +716,10 @@ def train_realtime_native_model(
             "test_recall": float(recall_score(y_test, test_pred, zero_division=0)),
             "test_f1": float(f1_score(y_test, test_pred, zero_division=0)),
             "test_roc_auc": float(roc_auc_score(y_test, test_proba)),
+            # PR-AUC suits the ~10 % positive rate better than ROC-AUC
+            # (Saito & Rehmsmeier, 2015); its no-skill baseline is the prevalence.
+            "test_pr_auc": float(average_precision_score(y_test, test_proba)),
+            "test_prevalence": float(np.mean(y_test)),
             "validation_recall_at_threshold": val_recall,
             "validation_precision_at_threshold": val_precision,
         },
@@ -711,7 +745,7 @@ def train_realtime_native_model(
                 "metrik di sini upper-bound, recall produksi wajib diverifikasi via shadow-mode.",
             ],
             "strengths": [
-                "Chronological split + scale_pos_weight + isotonic calibration menargetkan recall >= 0.80.",
+                "scale_pos_weight + SMOTE + kalibrasi (dipilih di data validasi) menargetkan recall >= 0.80.",
                 "Threshold dipersist di optimal_threshold_realtime_native.json dan dibaca oleh inference.",
                 "Brier + ECE diukur; auto-fallback ke sigmoid bila isotonic ECE > 0.10.",
             ],
@@ -752,6 +786,11 @@ def train_realtime_native_model(
         report=report,
     )
 
+    if return_test_predictions:
+        report["_test_predictions"] = {
+            "y_test": [int(v) for v in np.asarray(y_test)],
+            "test_proba": [float(v) for v in test_proba],
+        }
     return report
 
 

@@ -16,6 +16,8 @@ Two modes:
                      calibrators, then write:
                        * ``xgboost_model.json``  (native XGBoost binary; safe
                                                   across sklearn minor upgrades)
+                       * ``xgboost_model_fold{i}.json`` (one booster per
+                                                  calibration fold)
                        * ``calibration.json``    (extended schema with method
                                                   + per-fold calibrator params)
                        * ``manifest.json``       (with the new
@@ -74,6 +76,7 @@ _THRESHOLD_FILE = "threshold.json"
 _CALIBRATION_FILE = "calibration.json"
 _MANIFEST_FILE = "manifest.json"
 _XGB_NATIVE_FILE = "xgboost_model.json"
+_XGB_FOLD_FILE = "xgboost_model_fold{index}.json"
 
 _AUX_FILES = ("feature_list.json", "model_card.json", "training_stats.json")
 
@@ -144,7 +147,7 @@ def _re_export_only(bundle_dir: Path) -> int:
         return 3
 
     try:
-        booster, calibrator_payload = _extract_xgb_native(model_path)
+        booster, calibrator_payload, fold_boosters = _extract_xgb_native(model_path)
     except Exception:
         log.exception("Failed to extract XGBoost native model from %s", model_path)
         return 3
@@ -156,6 +159,17 @@ def _re_export_only(bundle_dir: Path) -> int:
         native_path,
         native_path.stat().st_size,
     )
+
+    # One booster per calibration fold, so serving reproduces the trained
+    # ensemble exactly (each fold's calibrator was fit on its own booster).
+    for old_fold_file in bundle_dir.glob(_XGB_FOLD_FILE.format(index="*")):
+        old_fold_file.unlink()
+    if fold_boosters and len(fold_boosters) == len(calibrator_payload.get("folds", [])):
+        for index, (fold_booster, fold) in enumerate(zip(fold_boosters, calibrator_payload["folds"])):
+            fold_name = _XGB_FOLD_FILE.format(index=index)
+            fold_booster.save_model(str(bundle_dir / fold_name))
+            fold["booster_file"] = fold_name
+        log.info("Wrote %d per-fold boosters", len(fold_boosters))
 
     calibration_path = bundle_dir / _CALIBRATION_FILE
     _merge_calibration_payload(calibration_path, calibrator_payload)
@@ -180,9 +194,9 @@ def _runtime_versions() -> dict[str, str]:
     return versions
 
 
-def _extract_xgb_native(model_path: Path) -> tuple[object, dict]:
+def _extract_xgb_native(model_path: Path) -> tuple[object, dict, list]:
     """
-    Load model.pkl and return (booster, calibration_payload).
+    Load model.pkl and return (booster, calibration_payload, fold_boosters).
 
     The pickled object can be:
       * CalibratedClassifierCV wrapping XGBClassifier → extract the
@@ -203,13 +217,13 @@ def _extract_xgb_native(model_path: Path) -> tuple[object, dict]:
     try:
         import xgboost as xgb
         if isinstance(obj, xgb.Booster):
-            return obj, {}
+            return obj, {}, []
     except ImportError as exc:
         raise RuntimeError("xgboost not installed in the export environment") from exc
 
     # Path 2: XGBClassifier (no calibration wrapper)
     if hasattr(obj, "get_booster") and not hasattr(obj, "calibrated_classifiers_"):
-        return obj.get_booster(), {}
+        return obj.get_booster(), {}, []
 
     # Path 3: CalibratedClassifierCV (sklearn)
     if hasattr(obj, "calibrated_classifiers_"):
@@ -222,29 +236,32 @@ def _extract_xgb_native(model_path: Path) -> tuple[object, dict]:
     )
 
 
-def _extract_from_calibrated_ensemble(calibrated, *, np) -> tuple[object, dict]:
+def _extract_from_calibrated_ensemble(calibrated, *, np) -> tuple[object, dict, list]:
     """
     Walk a fitted ``CalibratedClassifierCV`` to:
-      1. Recover the underlying XGBoost Booster from the first base estimator.
-         (In our training flow base_model is fit BEFORE CalibratedClassifierCV
-         wraps it, so every fold shares the same trained base.)
+      1. Recover each fold's XGBoost Booster. CalibratedClassifierCV(cv=k)
+         clones and refits the base estimator on every fold, so the folds do
+         NOT share one booster; each calibrator belongs to its own fold's booster.
       2. Serialise each per-fold calibrator to JSON-safe parameters so the
          bundle can rebuild ``predict_proba`` without sklearn pickles.
+    Returns (first booster, payload, per-fold boosters).
     """
     method = (getattr(calibrated, "method", "") or "isotonic").lower()
     folds_payload: list[dict] = []
+    fold_boosters: list = []
 
     base_booster = None
     for fold in calibrated.calibrated_classifiers_:
         base = getattr(fold, "estimator", None) or getattr(fold, "base_estimator", None)
-        if base is not None and base_booster is None:
-            if hasattr(base, "get_booster"):
-                base_booster = base.get_booster()
+        fold_booster = base.get_booster() if base is not None and hasattr(base, "get_booster") else None
+        if base_booster is None and fold_booster is not None:
+            base_booster = fold_booster
 
         calibrators = getattr(fold, "calibrators_", None) or getattr(fold, "calibrators", None)
         if not calibrators:
             continue
         cal = calibrators[0]
+        fold_boosters.append(fold_booster)
 
         if method == "isotonic":
             xs = np.asarray(getattr(cal, "X_thresholds_", []), dtype=float).tolist()
@@ -262,7 +279,9 @@ def _extract_from_calibrated_ensemble(calibrated, *, np) -> tuple[object, dict]:
             "ensemble. Run a full retrain."
         )
 
-    return base_booster, {"method": method, "folds": folds_payload}
+    if any(fb is None for fb in fold_boosters):
+        fold_boosters = []  # cannot pair every calibrator with its booster
+    return base_booster, {"method": method, "folds": folds_payload}, fold_boosters
 
 
 def _merge_calibration_payload(calibration_path: Path, extracted: dict) -> None:
@@ -302,6 +321,8 @@ def _write_manifest(bundle_dir: Path) -> None:
     native_path = bundle_dir / _XGB_NATIVE_FILE
     if native_path.exists():
         asset_files.append(_XGB_NATIVE_FILE)
+    fold_files = sorted(path.name for path in bundle_dir.glob(_XGB_FOLD_FILE.format(index="*")))
+    asset_files.extend(fold_files)
 
     sha256_map: dict[str, str] = {}
     for name in asset_files:
@@ -326,11 +347,14 @@ def _write_manifest(bundle_dir: Path) -> None:
         "scaler_file": _SCALER_FILE,
         "model_file": _MODEL_FILE,
         "xgboost_model_file": _XGB_NATIVE_FILE if native_path.exists() else None,
+        "xgboost_fold_model_files": fold_files,
         "runtime_versions": _runtime_versions(),
         "sha256": sha256_map,
     }
     if manifest["xgboost_model_file"] is None:
         manifest.pop("xgboost_model_file")
+    if not fold_files:
+        manifest.pop("xgboost_fold_model_files")
 
     _atomic_write_json(manifest_path, manifest)
 

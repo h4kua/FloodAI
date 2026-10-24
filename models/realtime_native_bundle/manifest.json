@@ -2,7 +2,7 @@
   "bundle_version": "2.0.0",
   "model_variant": "realtime_native",
   "schema_version": "2",
-  "created_at": "2026-10-23T13:05:51.076530+00:00",
+  "created_at": "2026-10-24T12:27:28.979493+00:00",
   "training_dataset_fingerprint": "sha256:be8d666585b1cf82180f27348c823dd12f6c639b1fa086ef192b8d7a773f95a1",
   "feature_schema": {
     "feature_count": 17,
@@ -32,6 +32,13 @@
   "scaler_file": "scaler.pkl",
   "model_file": "model.pkl",
   "xgboost_model_file": "xgboost_model.json",
+  "xgboost_fold_model_files": [
+    "xgboost_model_fold0.json",
+    "xgboost_model_fold1.json",
+    "xgboost_model_fold2.json",
+    "xgboost_model_fold3.json",
+    "xgboost_model_fold4.json"
+  ],
   "runtime_versions": {
     "python": "3.12.10",
     "sklearn": "1.8.0",
@@ -44,10 +51,15 @@
     "scaler.pkl": "814ceacb726ee427ffaf136c9f20ee6bad24a6a8ee318270adda92857f662f28",
     "ood.pkl": "25507ea30fed43a20e5157ef8b2e0b23317eb37bb517005d5a4d93544f361dd0",
     "threshold.json": "d789a48ae998ffd14f7bd15350c56730405f1471740147978e74df9c33b1e365",
-    "calibration.json": "cda5d17725697737c4309791f59bd2845e2da46fc055893667ad92a00ead4eda",
+    "calibration.json": "810d1b65abdddeb541bf17732cd5d19f356ba6aab5bf0878a2070bebfbaf0b1e",
     "feature_list.json": "424339d85a53106fbc96de4f762c938a1ab5fe3904dc8d65849e34ac2e5cdadb",
     "model_card.json": "dd109281511c6294005552f66de51a3daad614ca07bce3c158923d310261fbf3",
     "training_stats.json": "0264bd7cfb7f7f03eccad8d136413a64861054052a5c7e3d5dbf2dfa86b01d96",
-    "xgboost_model.json": "cf8ec913710dc8b7c68758acc88d9cd653e9bef146dc53020b3a282f3b16efd4"
+    "xgboost_model.json": "cf8ec913710dc8b7c68758acc88d9cd653e9bef146dc53020b3a282f3b16efd4",
+    "xgboost_model_fold0.json": "cf8ec913710dc8b7c68758acc88d9cd653e9bef146dc53020b3a282f3b16efd4",
+    "xgboost_model_fold1.json": "27a11ef64465a7dbd0ba227ce56ea3f70fd9b5e1803e9b5d373e4e8d21b52877",
+    "xgboost_model_fold2.json": "b8b579a97c720eda2afb8f5e857198ac87d6ac8383561303bc88ed1d4e0357c0",
+    "xgboost_model_fold3.json": "557ba41e95e339c57532df2b828513adba64d9978f57fdb8318e6b636ff16faf",
+    "xgboost_model_fold4.json": "25b586c22bf27e25863436d5cf8b09f6a07cd6869acd42ae09e34e68d5bc0131"
   }
 }

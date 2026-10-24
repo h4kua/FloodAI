@@ -98,14 +98,16 @@ latih, kalibrasi sigmoid, deteksi OOD dengan IsolationForest.
 | Metrik (data uji) | Nilai |
 |---|---|
 | AUC / recall / precision | 0,904 / 0,893 / 0,263 |
-| Brier / ECE / ambang | 0,074 / 0,018 / 0,103 |
+| PR-AUC (garis dasar 0,096) | 0,528 |
+| Brier / ECE / ambang | 0,074 / 0,062 / 0,103 |
 
 **Angka di atas optimis.** Data latih adalah 2.928 baris kecamatan-bulan (2020–2024) dengan sebagian
 fitur berupa proksi (`bootstrap_proxy`), dan pembagian datanya acak terstratifikasi 68/12/20. Pada
-pembagian per tahun (uji 2024), AUC sekitar 0,81–0,84. Belum ada evaluasi lapangan dengan label banjir
+pembagian per tahun (uji 2024), AUC 0,81 (95 % CI 0,74–0,87). Belum ada evaluasi lapangan dengan label banjir
 teramati. Rincian dan sumber tiap angka: [`context.md`](context.md#model--evaluation).
 
-Latih ulang: `python scripts/retrain_bundle.py`.
+Evaluasi lengkap dengan interval kepercayaan: `python scripts/evaluate_model.py`
+(hasil di `artifacts/reports/model_evaluation.md`). Latih ulang: `python scripts/retrain_bundle.py`.
 
 ---
 

@@ -1,0 +1,162 @@
+{
+  "generated_at": "2026-10-24T12:28:21+00:00",
+  "bootstrap_resamples": 1000,
+  "bundle": "D:\\FloodAI - Copy\\models\\realtime_native_bundle",
+  "deployed": {
+    "split": "random_stratified_68_12_20 (as deployed)",
+    "threshold": 0.1027,
+    "calibration_method": "sigmoid",
+    "metrics": {
+      "roc_auc": {
+        "value": 0.9036,
+        "ci95": [
+          0.8658,
+          0.9397
+        ]
+      },
+      "pr_auc": {
+        "value": 0.5285,
+        "ci95": [
+          0.3965,
+          0.6691
+        ]
+      },
+      "brier": {
+        "value": 0.0744,
+        "ci95": [
+          0.0585,
+          0.0885
+        ]
+      },
+      "recall": {
+        "value": 0.8929,
+        "ci95": [
+          0.8103,
+          0.9649
+        ]
+      },
+      "precision": {
+        "value": 0.2632,
+        "ci95": [
+          0.1989,
+          0.3274
+        ]
+      },
+      "ece": 0.0618,
+      "prevalence": 0.0956,
+      "test_rows": 586,
+      "test_positives": 56,
+      "flagged_share": 0.3242
+    }
+  },
+  "random": {
+    "split": "random_stratified_68_12_20 (fallback: chronological_68_12_20 had no positives)",
+    "rows_train_val_test": [
+      1990,
+      352,
+      586
+    ],
+    "threshold": 0.1027,
+    "threshold_selection_tier": 1,
+    "calibration_method": "sigmoid",
+    "validation_recall": 0.8824,
+    "validation_precision": 0.3,
+    "metrics": {
+      "roc_auc": {
+        "value": 0.9036,
+        "ci95": [
+          0.8658,
+          0.9397
+        ]
+      },
+      "pr_auc": {
+        "value": 0.5285,
+        "ci95": [
+          0.3965,
+          0.6691
+        ]
+      },
+      "brier": {
+        "value": 0.0744,
+        "ci95": [
+          0.0585,
+          0.0885
+        ]
+      },
+      "recall": {
+        "value": 0.8929,
+        "ci95": [
+          0.8103,
+          0.9649
+        ]
+      },
+      "precision": {
+        "value": 0.2632,
+        "ci95": [
+          0.1989,
+          0.3274
+        ]
+      },
+      "ece": 0.0618,
+      "prevalence": 0.0956,
+      "test_rows": 586,
+      "test_positives": 56,
+      "flagged_share": 0.3242
+    }
+  },
+  "by_year": {
+    "split": "by_year (train<2023, val 2023\u20132023, test>=2024)",
+    "rows_train_val_test": [
+      1764,
+      577,
+      587
+    ],
+    "threshold": 0.4248,
+    "threshold_selection_tier": 3,
+    "calibration_method": "isotonic",
+    "validation_recall": 1.0,
+    "validation_precision": 0.1134,
+    "metrics": {
+      "roc_auc": {
+        "value": 0.8125,
+        "ci95": [
+          0.7407,
+          0.869
+        ]
+      },
+      "pr_auc": {
+        "value": 0.1036,
+        "ci95": [
+          0.0642,
+          0.162
+        ]
+      },
+      "brier": {
+        "value": 0.0949,
+        "ci95": [
+          0.0855,
+          0.1043
+        ]
+      },
+      "recall": {
+        "value": 0.8636,
+        "ci95": [
+          0.7199,
+          1.0
+        ]
+      },
+      "precision": {
+        "value": 0.1242,
+        "ci95": [
+          0.0736,
+          0.1831
+        ]
+      },
+      "ece": 0.192,
+      "prevalence": 0.0375,
+      "test_rows": 587,
+      "test_positives": 22,
+      "flagged_share": 0.2606
+    }
+  }
+}

@@ -352,9 +352,26 @@ def _load_xgb_native(
 
     booster = xgb.Booster()
     booster.load_model(str(booster_path))
+    payload = _load_json(calibration_path) if calibration_path.exists() else {}
+
+    # CalibratedClassifierCV(cv=k) trains a separate booster per fold. When the
+    # export saved each fold's booster, pair it with its own calibrator so the
+    # served probabilities equal the trained ensemble's.
+    folds = payload.get("folds") or []
+    fold_boosters: list = []
+    if folds and all(fold.get("booster_file") for fold in folds):
+        for fold in folds:
+            fold_path = booster_path.parent / str(fold["booster_file"])
+            if not fold_path.exists():
+                raise FileNotFoundError(f"fold booster declared in calibration.json is missing: {fold_path}")
+            fold_booster = xgb.Booster()
+            fold_booster.load_model(str(fold_path))
+            fold_boosters.append(fold_booster)
+
     return _CalibratedBoosterAdapter(
         booster=booster,
-        calibration_payload=_load_json(calibration_path) if calibration_path.exists() else {},
+        calibration_payload=payload,
+        fold_boosters=tuple(fold_boosters),
     )
 
 
@@ -380,20 +397,36 @@ class _CalibratedBoosterAdapter:
 
     Predictions are the mean of per-fold calibrated probabilities — the same
     semantics CalibratedClassifierCV uses when assembling its CV ensemble.
+    With ``fold_boosters`` each fold's calibrator is applied to that fold's own
+    booster (exact parity with the trained ensemble). Without them (older
+    bundles) every calibrator is applied to the single ``booster``.
     """
 
     booster: object
     calibration_payload: dict
+    fold_boosters: tuple = ()
 
     def predict_proba(self, X):  # type: ignore[no-untyped-def]
         import numpy as np
         import xgboost as xgb
 
         dmat = xgb.DMatrix(np.asarray(X))
-        raw = self.booster.predict(dmat)
-        raw = np.clip(np.asarray(raw, dtype=float), 1e-7, 1.0 - 1e-7)
-        calibrated = _apply_calibration(raw, self.calibration_payload)
+        if self.fold_boosters:
+            method = str(self.calibration_payload.get("method") or "").lower()
+            per_fold = [
+                _calibrate_fold(_raw_scores(fold_booster, dmat), fold, method)
+                for fold_booster, fold in zip(self.fold_boosters, self.calibration_payload["folds"])
+            ]
+            calibrated = np.clip(np.stack(per_fold, axis=0).mean(axis=0), 0.0, 1.0)
+        else:
+            calibrated = _apply_calibration(_raw_scores(self.booster, dmat), self.calibration_payload)
         return np.column_stack([1.0 - calibrated, calibrated])
+
+
+def _raw_scores(booster, dmat):
+    import numpy as np
+
+    return np.clip(np.asarray(booster.predict(dmat), dtype=float), 1e-7, 1.0 - 1e-7)
 
 
 def _apply_calibration(probabilities, payload: dict):
@@ -404,21 +437,23 @@ def _apply_calibration(probabilities, payload: dict):
     if not folds or method not in ("isotonic", "sigmoid"):
         return probabilities
 
-    per_fold = []
-    for fold in folds:
-        if method == "isotonic":
-            xs = np.asarray(fold.get("x") or [], dtype=float)
-            ys = np.asarray(fold.get("y") or [], dtype=float)
-            if xs.size < 2:
-                per_fold.append(probabilities)
-                continue
-            per_fold.append(np.interp(probabilities, xs, ys, left=ys[0], right=ys[-1]))
-        else:  # sigmoid
-            a = float(fold.get("a", 0.0))
-            b = float(fold.get("b", 0.0))
-            per_fold.append(1.0 / (1.0 + np.exp(a * probabilities + b)))
-    stack = np.stack(per_fold, axis=0)
+    stack = np.stack([_calibrate_fold(probabilities, fold, method) for fold in folds], axis=0)
     return np.clip(stack.mean(axis=0), 0.0, 1.0)
+
+
+def _calibrate_fold(probabilities, fold: dict, method: str):
+    """Apply one fold's isotonic or sigmoid calibrator (sklearn semantics)."""
+    import numpy as np
+
+    if method == "isotonic":
+        xs = np.asarray(fold.get("x") or [], dtype=float)
+        ys = np.asarray(fold.get("y") or [], dtype=float)
+        if xs.size < 2:
+            return probabilities
+        return np.interp(probabilities, xs, ys, left=ys[0], right=ys[-1])
+    a = float(fold.get("a", 0.0))
+    b = float(fold.get("b", 0.0))
+    return 1.0 / (1.0 + np.exp(a * probabilities + b))
 
 
 def _bundle_mtime(manifest_file: Path, manifest: dict) -> int:
@@ -429,6 +464,7 @@ def _bundle_mtime(manifest_file: Path, manifest: dict) -> int:
     optional_native = manifest.get("xgboost_model_file")
     if optional_native:
         paths.append(bundle_dir / str(optional_native))
+    paths.extend(bundle_dir / str(name) for name in manifest.get("xgboost_fold_model_files") or [])
     for file_name in _REQUIRED_BUNDLE_FILES:
         paths.append(bundle_dir / file_name)
     return max(path.stat().st_mtime_ns for path in paths if path.exists())
@@ -454,6 +490,7 @@ def _validate_manifest(bundle_dir: Path, manifest: dict) -> None:
     optional_native = manifest.get("xgboost_model_file")
     if optional_native:
         required_files.add(str(optional_native))
+    required_files.update(str(name) for name in manifest.get("xgboost_fold_model_files") or [])
 
     missing_hashes = sorted(required_files - set(expected_hashes))
     if missing_hashes:

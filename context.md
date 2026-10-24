@@ -12,7 +12,7 @@
 | Backend | FastAPI + uvicorn, port 8080 |
 | Frontend | React 18 + Vite 5 + React-Leaflet 4, port 3000 (dev); basemap Esri Gray Canvas (keyless) |
 | Database | Supabase / PostgreSQL (`supabase` client + psycopg2) |
-| ML | XGBoost + scikit-learn 1.8.0 — realtime-native bundle (`models/realtime_native_bundle/`, 17 features). Retrained 2026-10-23 with a leak-free frequency feature. Test AUC 0.904 / recall 0.893 / ECE 0.018 are optimistic: bootstrap-proxy data, random split, no field evaluation yet (see *Model & evaluation*). |
+| ML | XGBoost + scikit-learn 1.8.0 — realtime-native bundle (`models/realtime_native_bundle/`, 17 features). Retrained 2026-10-23 with a leak-free frequency feature. Test AUC 0.904 / recall 0.893 / ECE 0.062 are optimistic: bootstrap-proxy data, random split, no field evaluation yet (see *Model & evaluation*). |
 | LLM | Groq `llama-3.3-70b-versatile` (chatbot, explanations, 3-agent crew). Not in the decision path. |
 | Deploy | Fly.io backend (`fly.toml`, app `floodai-8eclra`, region `ams`) · Vercel frontend (`vercel.json`, SPA rewrite to `index.html`) |
 
@@ -235,7 +235,7 @@ The LLM never changes the decision; it only writes explanations, with a determin
 
 | Figure | Source | Model | Caveat |
 |---|---|---|---|
-| AUC 0.904, recall 0.893, precision 0.263, Brier 0.074, ECE 0.018, threshold 0.103 | `models/realtime_native_bundle/training_stats.json` | Current bundle (retrained 2026-10-23) | Random stratified split (586 test rows from 2020–2024, 56 positives), leak-free frequency feature, `bootstrap_proxy` data; optimistic |
+| AUC 0.904 [0.866–0.940], PR-AUC 0.528, recall 0.893, precision 0.263, Brier 0.074, ECE 0.062, threshold 0.103 | `artifacts/reports/model_evaluation.md` (`scripts/evaluate_model.py`, 95 % bootstrap CIs) | Current bundle (retrained 2026-10-23) | Random stratified split (586 test rows from 2020–2024, 56 positives), leak-free frequency feature, `bootstrap_proxy` data; optimistic |
 | AUC 0.901, recall 0.839, threshold 0.036 | git history (d06dc0c and earlier) | Previous bundle (2026-07-02) | Same split, leaky frequency feature |
 | ECE 0.1962 | `artifacts/configurations/calibration_cache.json` | Older model (Apr–May 2026 predictions) | Labels derived from the model's own ranking; still read at runtime, penalty off |
 | ECE 0.3784 | `artifacts/reports/scenario_validation.json` | Older model | n = 7 hand-made scenarios |
@@ -247,9 +247,15 @@ The LLM never changes the decision; it only writes explanations, with a determin
 - **Leakage fixed (2026-10-23):** `kecamatan_historical_flood_freq` is computed per row from BPBD
   events in earlier years only (`events_by_year` in `data/bundled/kelurahan_flood_history.json`);
   inference uses years before the snapshot's year, so training and serving match.
-- **Honest estimate (sandbox, by-year split train 2020–2022 / val 2023 / test 2024, 22 positives):**
-  leak-free AUC 0.81, without the frequency feature AUC 0.84, leaky AUC 0.89. Very few 2023–2024
-  positives (11 and 22), so these are rough.
+- **Honest estimate (by-year split train 2020–2022 / val 2023 / test 2024, 22 positives):**
+  AUC 0.812 [0.741–0.869], PR-AUC 0.104 (no-skill 0.037), recall 0.864 / precision 0.124 at the
+  threshold picked on 2023, ECE 0.192 (`artifacts/reports/model_evaluation.md`). Earlier sandbox runs:
+  without the frequency feature AUC 0.84, leaky feature AUC 0.89. Very few 2023–2024 positives
+  (11 and 22), so these are rough.
+- **Evaluation fixes (2026-10-24):** ECE now uses equal-width bins consistently (the old function
+  gave 0.018 for this bundle); calibration method chosen on the validation fold; the threshold rule
+  no longer returns 1.0 / recall 0 when no threshold reaches precision 0.30 (falls back to best F2);
+  the served bundle ships one booster per calibration fold, so serving equals training.
 - **Proxy features in the training data:** the 2,928 kecamatan-month rows (2020–2024) are `bootstrap_proxy`:
   water-level features are derived from rainfall (`max_rainfall / q95`), humidity from soil moisture, BMKG
   scores from rainfall, missing temperature filled with 28.5 °C (`build_bootstrap_training_dataset()`).
