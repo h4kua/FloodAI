@@ -184,8 +184,8 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
                   </p>
                   <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>
                     {isId
-                      ? `Air ${Math.round(s.ratio * 100)}% dari batas siaga (${s.tinggi_air} cm)`
-                      : `Water at ${Math.round(s.ratio * 100)}% of the alert limit (${s.tinggi_air} cm)`}
+                      ? `Air ${Math.round(s.ratio * 100)}% dari batas siaga (${Math.round(s.tinggi_air)} cm)`
+                      : `Water at ${Math.round(s.ratio * 100)}% of the alert limit (${Math.round(s.tinggi_air)} cm)`}
                   </p>
                 </div>
               </Popup>

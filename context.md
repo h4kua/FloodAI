@@ -131,8 +131,8 @@ first backend start.
   "wilayah": "KOTA JAKARTA SELATAN",   // DSDADKI file_export, as sent
   "wilayah_jakarta": "Jakarta Selatan", // canonical (null = upstream), realtime_native/wilayah.py
   "lokasi": "Banjir Kanal Barat",       // river / channel
-  "tinggi_air": 5036.0,                  // cm
-  "siaga1": 6000.0, "siaga2": 5500.0, "siaga3": 5000.0,
+  "tinggi_air": 503.6,                   // cm (DSDA sends mm; poskobanjir/services/parser.py converts)
+  "siaga1": 600.0, "siaga2": 550.0, "siaga3": 500.0,
   "status_siaga": "Status : Siaga 3",
   "ratio": 0.839,                        // tinggi_air / siaga1
   "lat": -6.2234, "lon": 106.8015        // null when missing or outside Jakarta

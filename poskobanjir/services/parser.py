@@ -19,6 +19,29 @@ def _safe_text(element):
     return (element.text or "").strip() if element is not None else ""
 
 
+# DSDA publishes water levels and Siaga thresholds in millimetres (Katulampa
+# Siaga 1 = 2000, i.e. the official 200 cm; Manggarai = 9500 for 950 cm). The
+# rest of the system, its texts and its physical limits work in centimetres,
+# so the feed is converted once here. tma_unaltered keeps the raw value.
+_DSDA_MM_FIELDS = (
+    "tinggi_air", "tinggi_air_sebelumnya", "siaga1", "siaga2", "siaga3", "siaga4",
+)
+
+
+def dsda_mm_to_cm(record: dict) -> dict:
+    """Convert one DSDA record from mm to cm (idempotent via tinggi_air_unit)."""
+    if record.get("tinggi_air_unit") == "cm":
+        return record
+    out = dict(record)
+    for key in _DSDA_MM_FIELDS:
+        try:
+            out[key] = f"{float(out[key]) / 10:g}"
+        except (KeyError, TypeError, ValueError):
+            pass  # missing or non-numeric: leave as is
+    out["tinggi_air_unit"] = "cm"
+    return out
+
+
 def parse_poskobanjir_json(json_data: list) -> list:
     """Normalize the JSON TMA endpoint (UPPERCASE keys) to the same lowercase
     schema used by parse_poskobanjir_xml so downstream code is unchanged."""
@@ -47,7 +70,7 @@ def parse_poskobanjir_json(json_data: list) -> list:
             "tma_unaltered": str(item.get("TINGGI_AIR", "")),
             "cctv_url": item.get("CCTV_URL") or "",
         })
-    return records
+    return [dsda_mm_to_cm(r) for r in records]
 
 
 _BMKG_WILAYAH_MAP = {
@@ -139,7 +162,7 @@ def parse_poskobanjir_xml(xml_string):
         for item in child:
             row[_strip_namespace(item.tag)] = _safe_text(item)
         if row:
-            data.append(row)
+            data.append(dsda_mm_to_cm(row))
 
     return data
 
