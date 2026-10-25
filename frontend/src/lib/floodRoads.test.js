@@ -34,6 +34,13 @@ test("a Siaga post activates only the flood-prone points on its river", () => {
   assert.deepEqual(active.map((p) => p.kelurahan), ["KAPUK"]);
 });
 
+test("each active area names the posts that activated it, once each", () => {
+  const point = { kelurahan: "KEDOYA", lat: -6.17, lon: 106.76, rivers: ["ANGKE", "PESANGGRAHAN & ANGKE"] };
+  const posts = [post("P.A. Cengkareng Drain", "Siaga 3"), post("P.S. Angke Hulu 1", "Siaga 2")];
+  const [area] = activeFloodPoints([point], posts, 0);
+  assert.deepEqual(area.causes.map((s) => s.nama), ["P.A. Cengkareng Drain", "P.S. Angke Hulu 1"]);
+});
+
 test("heavy rain activates every flood-prone point", () => {
   assert.equal(activeFloodPoints(POINTS, [], 25).length, POINTS.length);
 });

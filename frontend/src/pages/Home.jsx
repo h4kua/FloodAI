@@ -100,7 +100,7 @@ export default function Home({ setRiskContext, riskLevel }) {
         <div className="panel-body" style={{ paddingBottom: "0.75rem" }}>
           <p className="panel-title" style={{ marginBottom: 0 }}>{t("map.title")}</p>
         </div>
-        <FloodMap riskScore={score} stations={stations} />
+        <FloodMap riskScore={score} stations={stations} rainfall={riskData?.rainfall ?? 0} />
       </div>
 
       {/* Progressive disclosure — one collapsed section, one tab visible at a time */}

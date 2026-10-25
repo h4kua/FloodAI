@@ -438,6 +438,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
             origin={userLocation}
             dest={destination}
             floodPoints={floodPoints}
+            stations={riskData?.stations ?? []}
             onMapClick={handleMapClick}
             onLocateMe={handleLocateMe}
           />
@@ -473,6 +474,8 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
                 <li><i className="line" style={{ background: EVAC_COLORS.risky }} />{lang === "en" ? "Road through a flood-prone area" : "Jalan lewat area rawan banjir"}</li>
               </>
             )}
+            <li><i className="dot" style={{ background: "#e0a400", boxShadow: "0 0 0 1.5px var(--text)" }} />
+              {lang === "en" ? "Water-level post (colour = its status, as on the home map)" : "Pos pantau (warna = statusnya, sama seperti peta beranda)"}</li>
             <li><i className="area" style={{ borderColor: EVAC_COLORS.risky }} />
               {floodPoints.length > 0
                 ? (lang === "en" ? `${floodPoints.length} flood-prone areas active now` : `${floodPoints.length} area rawan banjir aktif sekarang`)

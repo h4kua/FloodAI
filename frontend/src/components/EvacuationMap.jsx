@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { MapContainer, Circle, CircleMarker, Polyline, Popup, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, CircleMarker, Polyline, Popup, useMap, useMapEvents } from "react-leaflet";
 import { useApp, useT } from "../lib/appContext";
-import { RISK_RADIUS_M, safestRouteIndex, splitRouteByRisk } from "../lib/floodRoads";
+import { safestRouteIndex, splitRouteByRisk } from "../lib/floodRoads";
+import { ActiveFloodAreas, StationMarkers } from "./mapLayers";
 import InvalidateMapSize from "./InvalidateMapSize";
 import BaseTiles from "./BaseTiles";
 
@@ -108,7 +109,7 @@ export const EVAC_COLORS = {
   alt: "#94a3b8",
 };
 
-export default function EvacuationMap({ origin = null, dest = null, floodPoints = [], onMapClick = null, onLocateMe = null }) {
+export default function EvacuationMap({ origin = null, dest = null, floodPoints = [], stations = [], onMapClick = null, onLocateMe = null }) {
   const t = useT();
   const { theme, lang } = useApp();
   const isId = lang !== "en";
@@ -173,25 +174,9 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
         {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
         {flyTarget && <FlyTo lat={flyTarget.lat} lng={flyTarget.lng} />}
 
-        {/* Flood-prone areas that count right now (river post at Siaga, or heavy rain) */}
-        {floodPoints.map((p, i) => (
-          <Circle key={`fp-${i}`} center={[p.lat, p.lon]} radius={RISK_RADIUS_M}
-            pathOptions={{ color: EVAC_COLORS.risky, weight: 1, opacity: 0.35, fillColor: EVAC_COLORS.risky, fillOpacity: 0.1 }}
-          >
-            <Popup>
-              <div>
-                <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>
-                  {isId ? "Area rawan banjir" : "Flood-prone area"} · {p.kelurahan}
-                </p>
-                <p style={{ fontSize: 11, color: "var(--muted)", margin: 0 }}>
-                  {p.reason === "rain"
-                    ? (isId ? "Aktif karena hujan deras" : "Active because of heavy rain")
-                    : (isId ? `Pos di ${(p.rivers || []).join(", ")} berstatus Siaga` : `A post on ${(p.rivers || []).join(", ")} is on alert`)}
-                </p>
-              </div>
-            </Popup>
-          </Circle>
-        ))}
+        {/* Active flood-prone areas and the posts that drive them (shared with the water-level map) */}
+        <ActiveFloodAreas points={floodPoints} />
+        <StationMarkers stations={stations} small />
 
         {/* Other alternatives, faint; the chosen route on top in green/red runs */}
         {scored.map((r, i) => i !== chosenIdx && (

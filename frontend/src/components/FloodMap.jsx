@@ -4,6 +4,8 @@ import { useApp, useT } from "../lib/appContext";
 import InvalidateMapSize from "./InvalidateMapSize";
 import BaseTiles from "./BaseTiles";
 import floodProneZones from "../data/floodProneZones.json";
+import { activeFloodPoints } from "../lib/floodRoads";
+import { ActiveFloodAreas, AREA_COLOR, StationMarkers } from "./mapLayers";
 
 
 // Single muted slate-blue for ALL historical BNPB flood-prone points so the
@@ -35,13 +37,6 @@ const DISTRICT_REFS = [
   { id: "pusat",   name: "Jakarta Pusat",   lat: -6.186, lng: 106.834 },
 ];
 
-function stationColor(ratio) {
-  if (ratio >= 1.0)  return "#c8102e";
-  if (ratio >= 0.75) return "#c2410c";
-  if (ratio >= 0.50) return "#e0a400";
-  return "#15803d";
-}
-
 // Fits the map to DKI Jakarta on mount.
 function FitJakarta() {
   const map = useMap();
@@ -54,7 +49,7 @@ function FitJakarta() {
 // stations: real DSDADKI readings from /predict/realtime-native response.
 // riskScore: passed through only for the fallback district tint when no
 // station coords are available — NOT used when real stations are shown.
-export default function FloodMap({ riskScore = 45, stations = [] }) {
+export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }) {
   const t = useT();
   const { theme, lang } = useApp();
   const isId = lang === "id";
@@ -67,6 +62,11 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
   );
   const hasRealStations = mappedStations.length > 0;
   const pronePoints = floodProneZones.points ?? [];
+  // Same rule as the evacuation map: points on a river whose post is at Siaga, or all in heavy rain.
+  const floodPoints = useMemo(
+    () => activeFloodPoints(pronePoints, stations, rainfall),
+    [pronePoints, stations, rainfall],
+  );
 
   return (
     <div style={{ position: "relative", flex: 1, minHeight: "clamp(340px, 58vh, 600px)" }}>
@@ -155,43 +155,9 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
           </CircleMarker>
         ))}
 
-        {/* Real DSDADKI sensor station markers.
-            Position, color, and popup data all come directly from the sensor
-            snapshot — nothing is derived or estimated here. */}
-        {mappedStations.map((s, i) => {
-          const color  = stationColor(s.ratio);
-          const radius = s.ratio >= 0.75 ? 11 : 8;
-          return (
-            <CircleMarker
-              key={i}
-              center={[s.lat, s.lon]}
-              radius={radius}
-              pathOptions={{
-                fillColor: color,
-                fillOpacity: 0.95,
-                // Dark outline on the light basemap (pale amber vanishes on grey
-                // otherwise); white outline on the dark basemap.
-                color: theme === "dark" ? "#ffffff" : "#15171a",
-                weight: 1.5,
-                opacity: 0.9,
-              }}
-            >
-              <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>
-                <div style={{ minWidth: 180 }}>
-                  <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{s.nama}</p>
-                  <p style={{ fontSize: 12, color, fontWeight: 700, marginBottom: 4 }}>
-                    {s.status_siaga}
-                  </p>
-                  <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>
-                    {isId
-                      ? `Air ${Math.round(s.ratio * 100)}% dari batas siaga (${Math.round(s.tinggi_air)} cm)`
-                      : `Water at ${Math.round(s.ratio * 100)}% of the alert limit (${Math.round(s.tinggi_air)} cm)`}
-                  </p>
-                </div>
-              </Popup>
-            </CircleMarker>
-          );
-        })}
+        {/* Active flood-prone areas, then the posts on top (shared with the evacuation map) */}
+        <ActiveFloodAreas points={floodPoints} />
+        <StationMarkers stations={mappedStations} />
       </MapContainer>
 
       <div className="map-legend">
@@ -209,6 +175,12 @@ export default function FloodMap({ riskScore = 45, stations = [] }) {
             {t(key)}
           </div>
         ))}
+        <div className="legend-row">
+          <span className="legend-dot" style={{ background: "rgba(200, 16, 46, 0.12)", border: `1.5px solid ${AREA_COLOR}` }} />
+          {floodPoints.length > 0
+            ? (isId ? `Area rawan aktif (${floodPoints.length})` : `Active flood-prone areas (${floodPoints.length})`)
+            : (isId ? "Tidak ada area rawan aktif" : "No active flood-prone area")}
+        </div>
         {/* Flood-prone overlay toggle — single compact line, no second color key */}
         <div style={{ marginTop: 5, borderTop: "1px solid var(--line)", paddingTop: 5 }}>
           <button

@@ -34,18 +34,33 @@ export function riversForPost(name) {
 
 const isSiaga = (station) => /siaga/i.test(station?.status_siaga || "");
 
-/** BPBD rivers whose post is at Siaga now. */
-export function riversOnAlert(stations = []) {
-  return new Set(stations.filter(isSiaga).flatMap((s) => riversForPost(s.nama)));
+/** Posts at Siaga now, grouped by the BPBD river they feed. */
+export function postsOnAlert(stations = []) {
+  const byRiver = new Map();
+  for (const s of stations.filter(isSiaga)) {
+    for (const river of riversForPost(s.nama)) byRiver.set(river, [...(byRiver.get(river) || []), s]);
+  }
+  return byRiver;
 }
 
-/** Flood-prone points that count right now, each with the reason it is active. */
+/** BPBD rivers whose post is at Siaga now. */
+export function riversOnAlert(stations = []) {
+  return new Set(postsOnAlert(stations).keys());
+}
+
+/**
+ * Flood-prone points that count right now, each with the reason it is active
+ * and, for a river, the posts that caused it (`causes`, each post once).
+ */
 export function activeFloodPoints(points = [], stations = [], rainfallMmH = 0) {
-  if (rainfallMmH >= HEAVY_RAIN_MM_H) return points.map((p) => ({ ...p, reason: "rain" }));
-  const rivers = riversOnAlert(stations);
-  return points
-    .filter((p) => (p.rivers || []).some((r) => rivers.has(r)))
-    .map((p) => ({ ...p, reason: "river" }));
+  if (rainfallMmH >= HEAVY_RAIN_MM_H) return points.map((p) => ({ ...p, reason: "rain", causes: [] }));
+  const byRiver = postsOnAlert(stations);
+  return points.flatMap((p) => {
+    const causes = [...new Map(
+      (p.rivers || []).flatMap((r) => byRiver.get(r) || []).map((s) => [s.nama, s]),
+    ).values()];
+    return causes.length ? [{ ...p, reason: "river", causes }] : [];
+  });
 }
 
 // Equirectangular metres around Jakarta's latitude — accurate to well under 1 %
