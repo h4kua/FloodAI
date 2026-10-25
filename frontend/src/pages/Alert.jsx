@@ -1,16 +1,11 @@
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
 import { humanizeRiskLevel } from "../lib/humanize";
-import EvacuationMap, { DESTINATIONS, EVAC_COLORS, findNearestShelter } from "../components/EvacuationMap";
+import EvacuationMap, { DESTINATIONS, EVAC_COLORS, findNearestShelter, haversineKm } from "../components/EvacuationMap";
 import floodProneZones from "../data/floodProneZones.json";
 import { activeFloodPoints } from "../lib/floodRoads";
 import { useFloodRisk } from "../hooks/useFloodRisk";
 import ChatBot from "../components/ChatBot";
-import SafeArrival from "./SafeArrival";
 import { useT, useApp } from "../lib/appContext";
-import { useShelterGeofence } from "../hooks/useShelterGeofence";
-import { getDeviceId, getFamilyCode } from "../lib/deviceIdentity";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 
 async function geocodeAddress(address) {
@@ -79,6 +74,28 @@ function suggestionLabel(s) {
   return sub ? `${main}, ${sub}` : main;
 }
 
+// The "Rumah" entry in the destination dropdown.
+const HOME_OPTION = "__home";
+
+// "Kembangan Selatan, Kembangan, Jakarta Barat" → "Kembangan Selatan"
+const shortPlace = (name) => (name || "").split(",")[0].trim();
+
+function Suggestions({ items, onPick }) {
+  return (
+    <div className="suggestions-dropdown">
+      {items.map((s, i) => {
+        const { main, sub } = formatSuggestion(s);
+        return (
+          <div key={i} className="suggestion-item" onMouseDown={() => onPick(s)}>
+            <span className="suggestion-main">{main}</span>
+            {sub && <span className="suggestion-sub">{sub}</span>}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function formatSuggestion(s) {
   const addr = s.address ?? {};
   const main =
@@ -117,9 +134,31 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const [homeInput, setHomeInput]       = useState(() => loadHome()?.name ?? "");
   const [homeSugg, setHomeSugg]         = useState([]);
   const [showHomeSugg, setShowHomeSugg] = useState(false);
+  const [editingHome, setEditingHome]   = useState(false);
   const homeDebounceRef = useRef(null);
   const destination = destMode === "home" ? home : selectedDest;
   const shelterChosen = destMode === "shelter" && selectedDest;
+
+  // Shelters nearest-first from where the user starts.
+  const shelterOptions = useMemo(() => (
+    userLocation
+      ? [...DESTINATIONS].sort((a, b) =>
+          haversineKm(userLocation.lat, userLocation.lng, a.lat, a.lng)
+          - haversineKm(userLocation.lat, userLocation.lng, b.lat, b.lng))
+      : DESTINATIONS
+  ), [userLocation]);
+  const nearestId = userLocation ? shelterOptions[0].id : null;
+  const destValue = destMode === "home" ? HOME_OPTION : (destId ?? "");
+
+  const handleDestChange = (e) => {
+    const value = e.target.value;
+    if (value === HOME_OPTION) {
+      setDestMode("home");
+    } else {
+      setDestMode("shelter");
+      setDestId(value);
+    }
+  };
 
   // Flood-prone areas that count right now: BPBD points on a river whose post
   // is at Siaga, or all of them in heavy rain.
@@ -128,51 +167,6 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     () => activeFloodPoints(floodProneZones.points, riskData?.stations ?? [], riskData?.rainfall ?? 0),
     [riskData],
   );
-
-  const [safeArrival, setSafeArrival] = useState(null); // { name, familyNotified }
-  const [checkingIn, setCheckingIn] = useState(false);
-
-  const confirmArrival = useCallback(async (position, shelter, auto) => {
-    if (!shelter) return;
-    setCheckingIn(true);
-    try {
-      const res = await fetch(`${API_BASE}/shelters/checkin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          device_id: getDeviceId(),
-          shelter_id: shelter.id,
-          shelter_name: shelter.name,
-          shelter_lat: shelter.lat,
-          shelter_lon: shelter.lng,
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-          auto,
-          family_code: getFamilyCode() || null,
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setSafeArrival({ name: shelter.name, familyNotified: data.family_notified === true });
-      }
-    } catch {
-      // Best-effort — arrival confirmation is not on the critical path.
-    } finally {
-      setCheckingIn(false);
-    }
-  }, []);
-
-  useShelterGeofence(shelterChosen ? selectedDest : null, (position) => confirmArrival(position, selectedDest, true));
-
-  const handleManualArrival = () => {
-    if (!selectedDest || !navigator.geolocation) return;
-    setCheckingIn(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => confirmArrival(pos, selectedDest, false),
-      () => setCheckingIn(false),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
-  };
 
   const fetchSuggestions = async (query) => {
     const data = await searchPlaces(query);
@@ -201,6 +195,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     const next = { lat: parseFloat(s.lat), lng: parseFloat(s.lon), name, isHome: true };
     setHome(next);
     saveHome(next);
+    setEditingHome(false);
     setHomeInput(name);
     setHomeSugg([]);
     setShowHomeSugg(false);
@@ -340,216 +335,158 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
         </span>
       </div>
 
-      <div className={`evac-grid fade-in${shelterChosen ? "" : " is-single"}`}>
-        {/* Left: primary CTA + search + map */}
-        <div className="evac-col-left">
+      <div className="evac-col-left fade-in">
+        {/* Primary CTA — one tap: GPS → nearest shelter → route (decision-first).
+            Hidden once a location is set; the search panel takes over. */}
+        {!userLocation && (
+          <button className="evac-primary-cta" onClick={handleLocateMe} disabled={locating}>
+            <span className="evac-primary-cta-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="3 11 22 2 13 21 11 13 3 11" />
+              </svg>
+            </span>
+            <span className="evac-primary-cta-text">
+              <strong>{locating ? t("evac.locatingYou") : t("evac.ctaNearest")}</strong>
+              <small>{t("evac.ctaNearestSub")}</small>
+            </span>
+          </button>
+        )}
 
-          {/* Primary CTA — one tap: GPS → nearest shelter → route (decision-first).
-              Hidden once a location is set; the search panel takes over. */}
-          {!userLocation && (
-            <button className="evac-primary-cta" onClick={handleLocateMe} disabled={locating}>
-              <span className="evac-primary-cta-icon" aria-hidden="true">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="3 11 22 2 13 21 11 13 3 11" />
-                </svg>
-              </span>
-              <span className="evac-primary-cta-text">
-                <strong>{locating ? t("evac.locatingYou") : t("evac.ctaNearest")}</strong>
-                <small>{t("evac.ctaNearestSub")}</small>
-              </span>
+        {/* From / To — one field per row */}
+        <div className="panel route-controls">
+          <label className="route-label" htmlFor="route-from">{t("evac.from")}</label>
+          <div className="route-field">
+            <input
+              id="route-from"
+              className="route-input"
+              type="text"
+              placeholder={geocoding ? t("evac.searching") : t("evac.placeholder")}
+              value={addressInput}
+              onChange={handleInputChange}
+              onFocus={() => suggestions.length > 0 && setShowSugg(true)}
+              onBlur={() => setTimeout(() => setShowSugg(false), 180)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !geocoding) { setShowSugg(false); handleGeocode(); }
+                if (e.key === "Escape") setShowSugg(false);
+              }}
+              disabled={geocoding}
+            />
+            <button
+              className="route-field-btn"
+              onClick={handleLocateMe}
+              disabled={locating}
+              title={lang === "en" ? "Use my current location" : "Gunakan lokasi saya"}
+              aria-label={lang === "en" ? "Use my current location" : "Gunakan lokasi saya"}
+            >
+              {locating ? "…" : "⊕"}
             </button>
+            {showSugg && suggestions.length > 0 && (
+              <Suggestions items={suggestions} onPick={handleSelectSuggestion} />
+            )}
+          </div>
+
+          {userLocation && (
+            <>
+              <label className="route-label" htmlFor="route-to">{t("evac.shelter")}</label>
+              <div className="route-field">
+                <select id="route-to" className="route-select" value={destValue} onChange={handleDestChange}>
+                  {shelterOptions.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.id === nearestId ? `${d.name} (${lang === "en" ? "nearest" : "terdekat"})` : d.name}
+                    </option>
+                  ))}
+                  <option value={HOME_OPTION}>
+                    {home ? `${lang === "en" ? "Home" : "Rumah"} — ${shortPlace(home.name)}` : (lang === "en" ? "Home…" : "Rumah…")}
+                  </option>
+                </select>
+              </div>
+            </>
           )}
 
-          {/* Search panel — manual fallback, above the map, NOT overlaid */}
-          <div className="panel route-controls">
-            <span className="route-label from">{t("evac.from")}</span>
-            <div className="route-input-row">
+          {userLocation && destMode === "home" && (home === null || editingHome) && (
+            <div className="route-field route-field-sub">
               <input
                 className="route-input"
                 type="text"
-                placeholder={t("evac.placeholder")}
-                value={addressInput}
-                onChange={handleInputChange}
-                onFocus={() => suggestions.length > 0 && setShowSugg(true)}
-                onBlur={() => setTimeout(() => setShowSugg(false), 180)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !geocoding) { setShowSugg(false); handleGeocode(); }
-                  if (e.key === "Escape") setShowSugg(false);
-                }}
-                disabled={geocoding}
+                autoFocus
+                placeholder={lang === "en" ? "Your home address…" : "Alamat rumah Anda…"}
+                value={homeInput}
+                onChange={handleHomeInputChange}
+                onFocus={() => homeSugg.length > 0 && setShowHomeSugg(true)}
+                onBlur={() => setTimeout(() => setShowHomeSugg(false), 180)}
+                onKeyDown={(e) => { if (e.key === "Escape") setShowHomeSugg(false); }}
               />
-              <button
-                className="route-search-btn"
-                onClick={() => { setShowSugg(false); handleGeocode(); }}
-                disabled={geocoding || !addressInput.trim()}
-              >
-                {geocoding ? t("evac.searching") : t("evac.search")}
-              </button>
-              <button
-                className="locate-me-btn"
-                onClick={handleLocateMe}
-                disabled={locating}
-                title={lang === "en" ? "Use my current location" : "Gunakan lokasi saya"}
-              >
-                {locating ? "…" : "⊕"}
-              </button>
-            </div>
-
-            {userLocation && (
-              <div className="route-dest-row">
-                <span className="route-label to">{t("evac.shelter")}</span>
-                <div className="dest-toggle" role="group" aria-label={lang === "en" ? "Destination" : "Tujuan"}>
-                  {[["shelter", lang === "en" ? "Shelter" : "Pengungsian"], ["home", lang === "en" ? "Home" : "Rumah"]].map(([mode, label]) => (
-                    <button key={mode} type="button" aria-pressed={destMode === mode}
-                      className={destMode === mode ? "active" : ""} onClick={() => setDestMode(mode)}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                {destMode === "shelter" ? (
-                  <select
-                    className="route-select"
-                    value={destId ?? ""}
-                    onChange={(e) => setDestId(e.target.value)}
-                  >
-                    {DESTINATIONS.map((d) => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <div className="home-input-wrap">
-                    <input
-                      className="route-input"
-                      type="text"
-                      placeholder={lang === "en" ? "Your home address…" : "Alamat rumah Anda…"}
-                      value={homeInput}
-                      onChange={handleHomeInputChange}
-                      onFocus={() => homeSugg.length > 0 && setShowHomeSugg(true)}
-                      onBlur={() => setTimeout(() => setShowHomeSugg(false), 180)}
-                      onKeyDown={(e) => { if (e.key === "Escape") setShowHomeSugg(false); }}
-                    />
-                    {showHomeSugg && homeSugg.length > 0 && (
-                      <div className="suggestions-dropdown">
-                        {homeSugg.map((s, i) => {
-                          const { main, sub } = formatSuggestion(s);
-                          return (
-                            <div key={i} className="suggestion-item" onMouseDown={() => handleSelectHome(s)}>
-                              <span className="suggestion-main">{main}</span>
-                              {sub && <span className="suggestion-sub">{sub}</span>}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {showSugg && suggestions.length > 0 && (
-              <div className="suggestions-dropdown">
-                {suggestions.map((s, i) => {
-                  const { main, sub } = formatSuggestion(s);
-                  return (
-                    <div key={i} className="suggestion-item" onMouseDown={() => handleSelectSuggestion(s)}>
-                      <span className="suggestion-main">{main}</span>
-                      {sub && <span className="suggestion-sub">{sub}</span>}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {(geoError || locateError) && (
-            <div className="geo-error-banner">{geoError || locateError}</div>
-          )}
-
-          {/* Map — klik atau GPS untuk set lokasi */}
-          <div className="panel evac-map-panel" style={{ cursor: "crosshair" }}>
-            <EvacuationMap
-              origin={userLocation}
-              dest={destination}
-              floodPoints={floodPoints}
-              onMapClick={handleMapClick}
-              onLocateMe={handleLocateMe}
-            />
-          </div>
-          {/* What the map colours mean, and what the red is based on */}
-          <div className="evac-legend">
-            <ul>
-              {userLocation && (
-                <>
-                  <li><i className="dot" style={{ background: EVAC_COLORS.from }} />{t("evac.leg.from")}</li>
-                  <li><i className="dot" style={{ background: EVAC_COLORS.dest }} />
-                    {destMode === "home" ? (lang === "en" ? "Home" : "Rumah") : t("evac.leg.shelter")}</li>
-                  <li><i className="line" style={{ background: EVAC_COLORS.safe }} />{lang === "en" ? "Road likely clear" : "Jalan relatif aman"}</li>
-                  <li><i className="line" style={{ background: EVAC_COLORS.risky }} />{lang === "en" ? "Road through a flood-prone area" : "Jalan lewat area rawan banjir"}</li>
-                </>
+              {showHomeSugg && homeSugg.length > 0 && (
+                <Suggestions items={homeSugg} onPick={handleSelectHome} />
               )}
-              <li><i className="area" style={{ borderColor: EVAC_COLORS.risky }} />
-                {floodPoints.length > 0
-                  ? (lang === "en" ? `${floodPoints.length} flood-prone areas active now` : `${floodPoints.length} area rawan banjir aktif sekarang`)
-                  : (lang === "en" ? "No flood-prone area is active now" : "Tidak ada area rawan banjir yang aktif sekarang")}</li>
-            </ul>
-            <p>
-              {lang === "en"
-                ? "An estimate from BPBD flood-prone points near rivers whose water-level post is on alert (all points in heavy rain) — not live road conditions. Check the road yourself before you go."
-                : "Perkiraan dari titik rawan banjir BPBD di sungai yang pos pantaunya berstatus Siaga (semua titik saat hujan deras) — bukan kondisi jalan langsung. Tetap cek kondisi jalan sebelum berangkat."}
-            </p>
-          </div>
+            </div>
+          )}
+          {userLocation && destMode === "home" && home && !editingHome && (
+            <button className="route-link route-field-sub" onClick={() => setEditingHome(true)}>
+              {lang === "en" ? "Change home address" : "Ubah alamat rumah"}
+            </button>
+          )}
         </div>
 
-        {/* Right: the chosen shelter, once one is selected */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-          {shelterChosen && (
-            <div className="panel panel-body shelter-detail-card">
-              <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: 0 }}>
-                {lang === "en" ? "Nearest shelter" : "Tempat pengungsian terdekat"}
-              </p>
-              <p className="station-title" style={{ margin: "0.2rem 0 0.4rem" }}>{selectedDest.name}</p>
-              {(selectedDest.address || selectedDest.area) && (
-                <p style={{ fontSize: "0.875rem", color: "var(--muted)", lineHeight: 1.5, margin: 0 }}>
-                  {selectedDest.address || selectedDest.area}
-                </p>
-              )}
-              {selectedDest.capacity && (
-                <p style={{ fontSize: "0.875rem", color: "var(--muted)", margin: "0.25rem 0 0" }}>
-                  {lang === "en"
-                    ? `Room for about ${selectedDest.capacity.toLocaleString()} people`
-                    : `Muat sekitar ${selectedDest.capacity.toLocaleString("id-ID")} orang`}
-                </p>
-              )}
-              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.875rem", flexWrap: "wrap" }}>
-                {selectedDest.phone && (
-                  <a className="btn btn-ghost" href={`tel:${selectedDest.phone}`} style={{ flex: 1, justifyContent: "center", textDecoration: "none" }}>
-                    {lang === "en" ? "Call shelter" : "Telepon"}
-                  </a>
-                )}
-                <button
-                  className="btn"
-                  style={{ flex: 1, justifyContent: "center", background: "var(--safe-soft)", color: "var(--safe)", border: "1px solid var(--safe-border)" }}
-                  onClick={handleManualArrival}
-                  disabled={checkingIn}
-                >
-                  {checkingIn ? t("evac.checkingIn") : t("evac.iveArrived")}
-                </button>
-              </div>
-            </div>
-          )}
+        {(geoError || locateError) && (
+          <div className="geo-error-banner">{geoError || locateError}</div>
+        )}
 
+        {/* Map — klik atau GPS untuk set lokasi */}
+        <div className="panel evac-map-panel" style={{ cursor: "crosshair" }}>
+          <EvacuationMap
+            origin={userLocation}
+            dest={destination}
+            floodPoints={floodPoints}
+            onMapClick={handleMapClick}
+            onLocateMe={handleLocateMe}
+          />
+        </div>
+
+        {/* The chosen shelter, in one line */}
+        {shelterChosen && (
+          <div className="shelter-line">
+            <i style={{ background: EVAC_COLORS.dest }} aria-hidden="true" />
+            <div>
+              <p><strong>{selectedDest.name}</strong>{selectedDest.address ? ` · ${selectedDest.address}` : ""}</p>
+              <p className="shelter-line-meta">
+                {selectedDest.capacity && (lang === "en"
+                  ? `Room for about ${selectedDest.capacity.toLocaleString()} people`
+                  : `Muat ±${selectedDest.capacity.toLocaleString("id-ID")} orang`)}
+                {selectedDest.phone && (
+                  <> · <a href={`tel:${selectedDest.phone}`}>{selectedDest.phone}</a></>
+                )}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* What the map colours mean, and what the red is based on */}
+        <div className="evac-legend">
+          <ul>
+            {userLocation && (
+              <>
+                <li><i className="dot" style={{ background: EVAC_COLORS.from }} />{t("evac.leg.from")}</li>
+                <li><i className="dot" style={{ background: EVAC_COLORS.dest }} />
+                  {destMode === "home" ? (lang === "en" ? "Home" : "Rumah") : t("evac.leg.shelter")}</li>
+                <li><i className="line" style={{ background: EVAC_COLORS.safe }} />{lang === "en" ? "Road likely clear" : "Jalan relatif aman"}</li>
+                <li><i className="line" style={{ background: EVAC_COLORS.risky }} />{lang === "en" ? "Road through a flood-prone area" : "Jalan lewat area rawan banjir"}</li>
+              </>
+            )}
+            <li><i className="area" style={{ borderColor: EVAC_COLORS.risky }} />
+              {floodPoints.length > 0
+                ? (lang === "en" ? `${floodPoints.length} flood-prone areas active now` : `${floodPoints.length} area rawan banjir aktif sekarang`)
+                : (lang === "en" ? "No flood-prone area is active now" : "Tidak ada area rawan banjir yang aktif sekarang")}</li>
+          </ul>
+          <p>
+            {lang === "en"
+              ? "An estimate from BPBD flood-prone points near rivers whose water-level post is on alert (all points in heavy rain) — not live road conditions. Check the road yourself before you go."
+              : "Perkiraan dari titik rawan banjir BPBD di sungai yang pos pantaunya berstatus Siaga (semua titik saat hujan deras) — bukan kondisi jalan langsung. Tetap cek kondisi jalan sebelum berangkat."}
+          </p>
         </div>
       </div>
 
       <ChatBot riskContext={{ level: riskLevel, rainfall }} />
-
-      {safeArrival && (
-        <SafeArrival
-          shelterName={safeArrival.name}
-          familyNotified={safeArrival.familyNotified}
-          onClose={() => setSafeArrival(null)}
-        />
-      )}
     </>
   );
 }

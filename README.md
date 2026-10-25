@@ -67,7 +67,7 @@ Swagger UI: `http://localhost:8080/docs`.
 | `POST /predict/agentic`, `POST /predict/agentic/explain` | X-Api-Key | Pipeline 5 tahap (+ penjelasan LLM) |
 | `GET /predict/crew-realtime` | — | Analisis 3 agen atas snapshot terkini, di-cache per snapshot |
 | `POST /api/chat` | batas per IP (10/menit) | Chatbot Groq; frontend jatuh ke basis pengetahuan offline bila ditolak |
-| `POST /shelters/checkin` | batas per IP | Check-in "Saya sudah tiba" di halaman Evakuasi |
+| `POST /shelters/checkin` | batas per IP | Check-in tiba di pengungsian; tidak dipakai UI lagi (tombol "Saya sudah tiba" dihapus) |
 | `GET /healthz`, `GET /readyz`, `GET /metrics` | — | Liveness, readiness, Prometheus |
 | `GET /predict/realtime` | — | **Dipensiunkan** — menjawab `410 Gone` dengan tautan ke `/predict/realtime-native` |
 | `/reports`, `/sos`, `/family/*` | — | **Nonaktif** (tidak ada UI); hanya terpasang jika `COMMUNITY_API_ENABLED=true` |

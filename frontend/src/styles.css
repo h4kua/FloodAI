@@ -570,16 +570,6 @@ button, input, select, textarea { font-family: inherit; }
 }
 .section-teaser-chevron { margin-left: auto; font-size: 1.1rem; line-height: 1; flex-shrink: 0; }
 
-/* ── Safe Arrival confirmation ───────────────────────────────── */
-.safe-arrival-check { animation: safe-arrival-pop 0.4s var(--ease-out-quart) both; }
-@keyframes safe-arrival-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.safe-arrival-checkmark path {
-  stroke-dasharray: 48;
-  stroke-dashoffset: 48;
-  animation: safe-arrival-draw 0.6s var(--ease-out-quart) 0.2s forwards;
-}
-@keyframes safe-arrival-draw { to { stroke-dashoffset: 0; } }
-
 /* ── Floating ChatBot ────────────────────────────────────────── */
 .chatbot-fab { position: fixed; bottom: 1.5rem; right: 1.75rem; z-index: var(--z-modal); }
 .chatbot-toggle {
@@ -735,36 +725,41 @@ button, input, select, textarea { font-family: inherit; }
 }
 
 /* ── Evakuasi page ───────────────────────────────────────────── */
-.evac-grid { display: grid; grid-template-columns: minmax(0,1fr) 380px; gap: 1rem; align-items: stretch; }
-.evac-grid.is-single { grid-template-columns: minmax(0,1fr); }
 .evac-col-left { display: flex; flex-direction: column; gap: 0.75rem; }
 .evac-map-panel { display: flex; flex-direction: column; flex: 1; min-height: 420px; overflow: hidden; }
 .evac-map-panel .leaflet-container { flex: 1; background: var(--panel-2); }
 
+/* From / To: label column + field column, one field per row */
 .route-controls {
-  display: flex; align-items: center; gap: 0.625rem; flex-wrap: wrap;
-  padding: 0.875rem 1rem; position: relative;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center;
+  gap: 0.5rem 0.75rem; padding: 0.75rem 1rem; position: relative;
   /* Above Leaflet's panes (400) and controls (1000) so address suggestions
      are not drawn under the map below. */
   z-index: 1100;
 }
-.route-input-row { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 0; }
-.route-input-row .route-input { flex: 1; min-width: 0; }
-.route-dest-row { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 0; }
-.route-dest-row .route-select { flex: 1; min-width: 0; }
-.route-label { font-size: 0.78rem; font-weight: 800; flex-shrink: 0; }
-.route-label.from { color: var(--cyan); }
-.route-label.to   { color: var(--dest); }
-
-/* Destination: shelter or home */
-.dest-toggle { display: inline-flex; border: 1px solid var(--line-2); border-radius: var(--r); overflow: hidden; flex-shrink: 0; }
-.dest-toggle button {
-  font: inherit; font-size: 0.82rem; font-weight: 600; min-height: 40px; padding: 0 0.75rem;
-  background: var(--panel); color: var(--muted); border: 0; cursor: pointer;
+.route-label { font-size: 0.8rem; font-weight: 700; color: var(--muted); }
+.route-field { position: relative; display: flex; min-width: 0; }
+.route-field-sub { grid-column: 2; }
+.route-field .route-input { padding-right: 2.75rem; }
+.route-field-btn {
+  position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+  width: 34px; height: 34px; border-radius: var(--r-sm);
+  background: transparent; border: 0; color: var(--cyan);
+  font-size: 1.1rem; font-weight: 700; cursor: pointer; display: grid; place-items: center;
 }
-.dest-toggle button + button { border-left: 1px solid var(--line-2); }
-.dest-toggle button.active { background: var(--dest); color: #fff; }
-.home-input-wrap { position: relative; flex: 1; min-width: 0; display: flex; }
+.route-field-btn:hover:not(:disabled) { background: var(--cyan-soft); }
+.route-field-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.route-link {
+  justify-self: start; background: none; border: 0; padding: 0;
+  font: inherit; font-size: 0.8rem; color: var(--cyan); cursor: pointer; text-decoration: underline;
+}
+
+/* The chosen shelter, one line under the map */
+.shelter-line { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0 0.25rem; font-size: 0.9rem; }
+.shelter-line > i { width: 10px; height: 10px; border-radius: 50%; margin-top: 0.4rem; flex-shrink: 0; }
+.shelter-line p { margin: 0; line-height: 1.45; color: var(--text); }
+.shelter-line .shelter-line-meta { font-size: 0.82rem; color: var(--muted); }
+.shelter-line a { color: var(--cyan); font-weight: 600; }
 
 /* Evacuation map legend */
 .evac-legend { padding: 0 0.25rem; }
@@ -786,27 +781,6 @@ button, input, select, textarea { font-family: inherit; }
 .route-select:focus, .route-input:focus { border-color: var(--cyan); }
 .route-input::placeholder { color: var(--muted-2); }
 .route-input:disabled { opacity: 0.5; cursor: not-allowed; }
-.route-search-btn {
-  flex-shrink: 0; min-height: 40px;
-  background: var(--cyan); color: var(--on-accent);
-  border: none; border-radius: var(--r); padding: 0 1rem;
-  font-size: 0.85rem; font-weight: 700;
-  cursor: pointer;
-  transition: filter 0.15s, transform 0.12s var(--ease-out);
-}
-.route-search-btn:hover:not(:disabled) { filter: brightness(1.1); }
-.route-search-btn:active:not(:disabled) { transform: scale(0.97); }
-.route-search-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.locate-me-btn {
-  flex-shrink: 0; width: 40px; height: 40px; border-radius: var(--r);
-  background: var(--panel); border: 1px solid var(--line-2);
-  color: var(--cyan); font-size: 1.1rem; font-weight: 700;
-  cursor: pointer; display: grid; place-items: center;
-  transition: background 0.15s, border-color 0.15s;
-}
-.locate-me-btn:hover:not(:disabled) { background: var(--cyan-soft); border-color: var(--cyan); }
-.locate-me-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
 /* Route summary — distance, time, and the share through flood-prone areas */
 .route-summary {
   position: absolute; bottom: 12px; right: 12px; z-index: 1000; max-width: min(320px, calc(100% - 24px));
@@ -879,7 +853,6 @@ button, input, select, textarea { font-family: inherit; }
 .step-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem; }
 .step-desc  { font-size: 0.875rem; color: var(--muted); line-height: 1.55; }
 
-.shelter-detail-card { background: var(--safe-soft); border: 1px solid var(--safe-border); }
 
 /* ── About page ──────────────────────────────────────────────── */
 .about-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1rem; }
@@ -1205,13 +1178,8 @@ button, input, select, textarea { font-family: inherit; }
 /* ================================================================
    RESPONSIVE
    ================================================================ */
-@media (max-width: 1280px) {
-  .evac-grid:not(.is-single) { grid-template-columns: minmax(0,1fr) 340px; }
-}
-
 @media (max-width: 1100px) {
   .about-grid  { grid-template-columns: 1fr; }
-  .evac-grid   { grid-template-columns: 1fr; }
   .evac-map-panel { min-height: 340px; }
 }
 
@@ -1269,11 +1237,6 @@ button, input, select, textarea { font-family: inherit; }
   .team-name  { font-size: 0.9rem; }
   .about-hero { padding: 1.125rem; gap: 0.875rem; }
 
-  /* Evakuasi — stack controls vertically so the search row never gets clipped */
-  .route-controls { flex-direction: column; align-items: stretch; gap: 0.5rem; }
-  .route-label.from { display: none; }
-  .route-input-row, .route-dest-row { width: 100%; }
-  .route-search-btn { white-space: nowrap; }
   .evac-map-panel { min-height: 300px; }
 
   .page-header    { align-items: center; gap: 0.75rem; }
