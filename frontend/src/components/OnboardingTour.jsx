@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback, useLayoutEffect } from "react";
+import { useState, useEffect, useCallback, useLayoutEffect, useRef } from "react";
 import { useApp } from "../lib/appContext";
 
 const TOUR_KEY = "deflood_tour_v8_done";
+// The "?" button in the top bar fires this to reopen the guide.
+export const OPEN_GUIDE_EVENT = "deflood:open-guide";
 
 /* ── SVG icons ──────────────────────────────────────────── */
 const Icons = {
@@ -93,7 +95,7 @@ const STEPS = (id) => [
       : "Questions about flooding? Tap this button and just ask.",
   },
   {
-    key: "done", selector: ".tour-reopen-btn", icon: Icons.check, accent: "var(--safe)",
+    key: "done", selector: "[data-tour='guide']", icon: Icons.check, accent: "var(--safe)",
     title: id ? "Selesai" : "All set",
     desc: id
       ? "Ketuk tombol ini kapan saja untuk melihat panduan lagi."
@@ -142,38 +144,32 @@ function useTargetRect(selector, active, dep) {
 }
 
 /* ── Card position logic ────────────────────────────────── */
-function getCardPos(rect, isMobile) {
+/* The card always lies fully between the top bar and the bottom nav, so its
+   buttons can be pressed: below the target if it fits, else above it, else
+   (a target taller than the free space) on the half of the screen the
+   target's centre leaves freer. ``h`` is the card's measured height. */
+function getCardStyle(rect, isMobile, h) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const W = isMobile ? Math.min(312, vw - 32) : 340;
+  const W = Math.min(isMobile ? 340 : 360, vw - 32);
   const GAP = 12;
+  const topLimit = 72;                                  // below the top bar
+  const bottomLimit = vh - (vw <= 768 ? 76 : 16);       // above the bottom nav
+  const maxHeight = bottomLimit - topLimit;
 
-  // No target — centered
   if (!rect) {
-    return { style: { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: W }, fromTop: false };
+    return { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: W, maxHeight };
   }
 
-  if (isMobile) {
-    // Target in bottom 45% → float card near top (below topbar)
-    const fromTop = rect.top > vh * 0.45;
-    const x = Math.max(16, Math.min(vw / 2 - W / 2, vw - W - 16));
-    if (fromTop) {
-      return { style: { position: "fixed", top: 64, left: x, width: W }, fromTop: true };
-    }
-    // Just above the fixed bottom nav (64px); the floating buttons sit under
-    // the tour overlay, so the card may cover them.
-    return { style: { position: "fixed", bottom: 76, left: x, width: W }, fromTop: false };
-  }
-
-  // Desktop: prefer below
-  const below = vh - rect.bottom > 190;
-  const above = rect.top > 190;
-  const cx = Math.max(GAP, Math.min(rect.left + rect.width / 2 - W / 2, vw - W - GAP));
-  if (below) return { style: { position: "fixed", top: rect.bottom + GAP, left: cx, width: W }, fromTop: true };
-  if (above) return { style: { position: "fixed", bottom: vh - rect.top + GAP, left: cx, width: W }, fromTop: false };
-  // Fallback right-anchored
-  const right = Math.max(GAP, vw - rect.right);
-  return { style: { position: "fixed", top: rect.bottom + GAP, right, width: W }, fromTop: true };
+  const left = isMobile
+    ? (vw - W) / 2
+    : Math.max(GAP, Math.min(rect.left + rect.width / 2 - W / 2, vw - W - GAP));
+  let top;
+  if (rect.bottom + GAP + h <= bottomLimit) top = rect.bottom + GAP;
+  else if (rect.top - GAP - h >= topLimit) top = rect.top - GAP - h;
+  else top = rect.top + rect.height / 2 < vh / 2 ? bottomLimit - h : topLimit;
+  top = Math.min(Math.max(top, topLimit), Math.max(topLimit, bottomLimit - h));
+  return { position: "fixed", top, left, width: W, maxHeight };
 }
 
 /* ── Pip dots ───────────────────────────────────────────── */
@@ -194,14 +190,15 @@ function TourCard({ step, idx, total, rect, isMobile, onNext, onPrev, onSkip }) 
   const id = lang === "id";
   const isFirst = idx === 0;
   const isLast = idx === total - 1;
-  const { style, fromTop } = getCardPos(rect, isMobile);
-
-  const radiusClass = isMobile
-    ? (fromTop ? "tour-card--radius-top" : "tour-card--radius-bottom")
-    : "";
+  const cardRef = useRef(null);
+  const [height, setHeight] = useState(0);
+  useLayoutEffect(() => {
+    if (cardRef.current) setHeight(cardRef.current.offsetHeight);
+  }, [step.key, lang, isMobile]);
+  const style = getCardStyle(rect, isMobile, height);
 
   return (
-    <div className={`tour-card ${radiusClass}`} style={style}>
+    <div ref={cardRef} className="tour-card" style={style}>
       <div className="tour-card-inner">
         {/* Header */}
         <div className="tour-card-head">
@@ -261,6 +258,12 @@ export default function OnboardingTour() {
     }
   }, []);
 
+  useEffect(() => {
+    const open = () => { setIdx(0); setAnimKey((k) => k + 1); setVisible(true); };
+    window.addEventListener(OPEN_GUIDE_EVENT, open);
+    return () => window.removeEventListener(OPEN_GUIDE_EVENT, open);
+  }, []);
+
   const finish = useCallback(() => {
     localStorage.setItem(TOUR_KEY, "1");
     setVisible(false);
@@ -273,30 +276,10 @@ export default function OnboardingTour() {
   const hasTarget = Boolean(step.selector);
   const rect = useTargetRect(step.selector, visible, animKey);
 
-  const isLastStep = idx === allSteps.length - 1;
   const spotPad = isMobile ? 10 : 7;
-
-  // Help button: always in DOM so spotlight can find it on last step.
-  // Hidden (invisible, non-interactive) during tour except on the final step.
-  const helpBtnStyle = visible && !isLastStep
-    ? { opacity: 0, pointerEvents: "none" }
-    : {};
 
   return (
     <>
-      {/* Help / reopen button — always rendered for spotlight targeting */}
-      <button
-        className="tour-reopen-btn"
-        style={helpBtnStyle}
-        onClick={!visible ? () => { setIdx(0); setVisible(true); } : undefined}
-        title={id ? "Buka panduan" : "Open guide"}
-        aria-hidden={visible && !isLastStep}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-        </svg>
-      </button>
-
       {visible && (
         <>
           {/* Dark backdrop — spotlight handles bg for targeted steps */}

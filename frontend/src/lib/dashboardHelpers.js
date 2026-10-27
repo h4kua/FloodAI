@@ -18,6 +18,9 @@ const _wibFormatter = new Intl.DateTimeFormat("en-GB", {
   hour12: false,
 });
 
+// "1 post is" / "3 posts are" for the English status sentences.
+const postsEn = (n) => (n === 1 ? "1 post is" : `${n} posts are`);
+
 export function formatWib(isoString) {
   if (!isoString) return null;
   return _wibFormatter.format(new Date(isoString));
@@ -205,7 +208,7 @@ export function buildStatusDesc(riskData, isId) {
 
   if (level === "bahaya") {
     const stNote = s1.length > 0
-      ? (isId ? ` ${s1.length} pos pantau sudah melewati batas siaga, terparah di ${cleanStationName(s1[0].nama)}.` : ` ${s1.length} post(s) are past the alert limit, worst at ${cleanStationName(s1[0].nama)}.`)
+      ? (isId ? ` ${s1.length} pos pantau sudah melewati batas siaga, terparah di ${cleanStationName(s1[0].nama)}.` : ` ${postsEn(s1.length)} past the alert limit, worst at ${cleanStationName(s1[0].nama)}.`)
       : "";
     return isId
       ? `Kondisi berbahaya.${stNote} Ikuti arahan BPBD dan bersiap mengungsi. Telepon 117 jika butuh bantuan.`
@@ -215,7 +218,7 @@ export function buildStatusDesc(riskData, isId) {
   if (level === "siaga") {
     const wlrPct = Math.round(wlr * 100);
     const sNote  = s1.length + s2.length > 0
-      ? (isId ? ` ${s1.length + s2.length} pos pantau mendekati atau melewati batas siaga.` : ` ${s1.length + s2.length} post(s) are near or past the alert limit.`)
+      ? (isId ? ` ${s1.length + s2.length} pos pantau mendekati atau melewati batas siaga.` : ` ${postsEn(s1.length + s2.length)} near or past the alert limit.`)
       : "";
     const wNote  = topW
       ? (isId ? ` Paling perlu diwaspadai: ${topW.wilayah}.` : ` Watch ${topW.wilayah} most closely.`)
@@ -233,7 +236,7 @@ export function buildStatusDesc(riskData, isId) {
       : "";
     const alertCount = s1.length + s2.length;
     const sNote = alertCount > 0
-      ? (isId ? ` ${alertCount} pos pantau berstatus siaga.` : ` ${alertCount} post(s) are on alert.`)
+      ? (isId ? ` ${alertCount} pos pantau berstatus siaga.` : ` ${postsEn(alertCount)} on alert.`)
       : "";
     const rfNote = rainfall > 5
       ? (isId ? ` Sedang hujan ${Math.round(rainfall)} mm/jam.` : ` It's raining ${Math.round(rainfall)} mm/h.`)

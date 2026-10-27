@@ -260,10 +260,10 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
               <p className="nav-dist">{metersToKm(currentStep.distance)}</p>
             </div>
           </div>
-          {nextStep && (
+          {nextStep && (nextStep.name || nextStep.maneuver?.type === "arrive") && (
             <div className="nav-step-next">
               <span style={{ opacity: 0.6 }}>{maneuverArrow(nextStep.maneuver)}</span>
-              <span>{nextStep.name || "—"}</span>
+              <span>{nextStep.name || (t ? t("evac.arrive") : "Arrive")}</span>
             </div>
           )}
         </div>

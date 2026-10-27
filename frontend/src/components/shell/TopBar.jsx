@@ -1,5 +1,6 @@
 import { useApp, useT } from "../../lib/appContext";
 import { NAV_ITEMS } from "./navConfig";
+import { OPEN_GUIDE_EVENT } from "../OnboardingTour";
 
 /* ── deFlood.ai logo mark ───────────────────────────────── */
 /* A plain signage tile: water-blue square, two water lines in the chrome colour. */
@@ -42,6 +43,17 @@ export default function TopBar({ page, onNavigate }) {
       </nav>
 
       <div className="topbar-right">
+        <button
+          className="topbar-toggle"
+          data-tour="guide"
+          onClick={() => window.dispatchEvent(new Event(OPEN_GUIDE_EVENT))}
+          title={lang === "id" ? "Buka panduan" : "Open guide"}
+          aria-label={lang === "id" ? "Buka panduan" : "Open guide"}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ display: "block" }}>
+            <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </button>
         <button
           className="topbar-toggle"
           data-tour="lang"

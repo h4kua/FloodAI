@@ -252,6 +252,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     setSuggestions([]);
     setShowSugg(false);
     setGeoError("");
+    setLocateError("");
     const lat = parseFloat(s.lat);
     const lng = parseFloat(s.lon);
     const nearest = findNearestShelter(lat, lng);
@@ -304,6 +305,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
 
   const handleMapClick = async (lat, lng) => {
     setGeoError("");
+    setLocateError("");
     setSuggestions([]);
     setShowSugg(false);
     setGeocoding(true);
@@ -339,6 +341,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     setShowSugg(false);
     setGeocoding(true);
     setGeoError("");
+    setLocateError("");  // a typed address replaces a refused GPS fix
     setUserLocation(null);
     setDestId(null);
     try {

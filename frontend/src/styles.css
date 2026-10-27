@@ -747,7 +747,7 @@ button, input, select, textarea { font-family: inherit; }
   font-size: 0.8rem; color: var(--chrome-muted);
 }
 @media (min-width: 769px) {
-  .footer { padding-left: 4.75rem; padding-right: 9rem; } /* clears the fixed tour + chat buttons */
+  .footer { padding-right: 9rem; } /* clears the floating chat button */
 }
 
 /* ── Evakuasi page ───────────────────────────────────────────── */
@@ -803,7 +803,17 @@ button, input, select, textarea { font-family: inherit; }
   padding: 0.5rem 0.875rem; outline: none; min-width: 0;
   transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
-.route-select { cursor: pointer; }
+/* Own chevron, so the select lines up with the text inputs in every browser */
+.route-select {
+  cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23677184' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  text-overflow: ellipsis;
+}
+.route-select option { background: var(--panel); color: var(--text); }
 .route-select:focus, .route-input:focus { border-color: var(--cyan); background: var(--panel); box-shadow: 0 0 0 3px var(--cyan-soft); }
 .route-input::placeholder { color: var(--muted-2); }
 .route-input:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -856,7 +866,8 @@ button, input, select, textarea { font-family: inherit; }
 
 /* Navigation instruction panel */
 .nav-panel {
-  position: absolute; top: 12px; left: 12px; right: 12px; z-index: var(--z-modal);
+  /* left clears Leaflet's zoom buttons (10px + 34px wide) */
+  position: absolute; top: 12px; left: 56px; right: 12px; z-index: var(--z-modal);
   background: var(--panel);
   border: 1px solid var(--line-2); border-radius: var(--r-lg);
   box-shadow: var(--shadow);
@@ -1152,9 +1163,8 @@ button, input, select, textarea { font-family: inherit; }
   border: 1px solid var(--line-2); border-radius: var(--r-xl);
   box-shadow: var(--shadow);
   position: fixed; z-index: calc(var(--z-tour) + 3);
+  overflow-y: auto; overscroll-behavior: contain;
 }
-.tour-card--radius-bottom { border-radius: 0 0 var(--r-xl) var(--r-xl) !important; border-top: none; }
-.tour-card--radius-top    { border-radius: var(--r-xl) var(--r-xl) 0 0 !important; border-bottom: none; }
 .tour-card-inner { padding: 1.375rem 1.5rem 1.25rem; }
 .tour-card-head  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.875rem; }
 .tour-icon-pill  { width: 38px; height: 38px; border-radius: var(--r); display: grid; place-items: center; flex-shrink: 0; }
@@ -1194,16 +1204,6 @@ button, input, select, textarea { font-family: inherit; }
   transition: filter 0.15s;
 }
 .tour-btn-next:hover { filter: brightness(1.1); }
-.tour-reopen-btn {
-  position: fixed; bottom: 1.5rem; left: 1.75rem; z-index: var(--z-modal);
-  width: 40px; height: 40px; border-radius: 50%;
-  background: var(--chrome-glass); border: 1px solid var(--line);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  color: var(--muted); cursor: pointer;
-  display: grid; place-items: center; box-shadow: var(--shadow-sm);
-  transition: background .15s, border-color .15s, color .15s;
-}
-.tour-reopen-btn:hover { background: var(--panel-2); border-color: var(--line-2); color: var(--text); }
 
 /* ── Animations ──────────────────────────────────────────────── */
 @keyframes blink      { 0%,100%{opacity:1} 50%{opacity:0.25} }
@@ -1315,11 +1315,7 @@ button, input, select, textarea { font-family: inherit; }
   .header-info-col { align-items: flex-start !important; }
   .header-sensor-time { display: none; }
 
-  /* Floating buttons sit above the bottom nav */
-  .tour-reopen-btn {
-    bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px) + 12px);
-    left: 1rem;
-  }
+  /* The floating chat button sits above the bottom nav */
   .chatbot-fab {
     bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px) + 12px);
     right: 1rem;

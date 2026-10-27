@@ -19,7 +19,7 @@ import os
 import re
 from typing import Any
 
-from config.llm_config import LLMConfigError, get_llm_config
+from config.llm_config import DEFAULT_GROQ_MODEL, LLMConfigError, get_llm_config
 
 _log = logging.getLogger(__name__)
 
@@ -475,7 +475,7 @@ def _call_groq_sync(
         api_key=os.getenv("GROQ_API_KEY"),
         base_url="https://api.groq.com/openai/v1",
     )
-    model = model or os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+    model = model or os.getenv("GROQ_MODEL", DEFAULT_GROQ_MODEL)
     if max_tokens is None:
         max_tokens = int(os.getenv("ANTHROPIC_MAX_TOKENS", "1024"))
 

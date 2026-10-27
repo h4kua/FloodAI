@@ -13,7 +13,7 @@
 | Frontend | React 18 + Vite 5 + React-Leaflet 4, port 3000 (dev); basemap Esri Gray Canvas (keyless) |
 | Database | Supabase / PostgreSQL (`supabase` client + psycopg2) |
 | ML | XGBoost + scikit-learn 1.8.0 — realtime-native bundle (`models/realtime_native_bundle/`, 17 features). Retrained 2026-10-23 with a leak-free frequency feature. Test AUC 0.904 / recall 0.893 / ECE 0.062 are optimistic: bootstrap-proxy data, random split, no field evaluation yet (see *Model & evaluation*). |
-| LLM | Groq `llama-3.3-70b-versatile` (chatbot, explanations, 3-agent crew). Not in the decision path. |
+| LLM | Groq `qwen/qwen3.8-27b` (`DEFAULT_GROQ_MODEL` in `config/llm_config.py`, override with `GROQ_MODEL`; `llama-3.3-70b-versatile` was withdrawn) for the chatbot, explanations and 3-agent crew. Not in the decision path. |
 | Deploy | Fly.io backend (`fly.toml`, app `floodai-8eclra`, region `ams`) · Vercel frontend (`vercel.json`, SPA rewrite to `index.html`) |
 
 ---

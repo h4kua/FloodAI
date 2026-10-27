@@ -187,8 +187,8 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
             type="button"
             onClick={() => setShowProne(v => !v)}
             style={{
-              display: "flex", alignItems: "center", gap: 6, width: "100%",
-              background: "transparent", border: "none", padding: 0, cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6, width: "100%", minHeight: 32,
+              background: "transparent", border: "none", padding: "4px 0", cursor: "pointer",
               color: "var(--muted)", fontSize: "0.78rem",
             }}
             title={isId

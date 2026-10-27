@@ -79,7 +79,9 @@ ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514")
 
 # Groq (primary)
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+# llama-3.3-70b-versatile was withdrawn from Groq (model_not_found, 2026-10-27).
+DEFAULT_GROQ_MODEL = "qwen/qwen3.8-27b"
+GROQ_MODEL = os.getenv("GROQ_MODEL", DEFAULT_GROQ_MODEL)
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 
 # Active provider: "groq" | "anthropic"

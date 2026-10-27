@@ -56,6 +56,7 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem("deflood_lang", lang);
+    document.documentElement.lang = lang;  // screen readers and translation tools
   }, [lang]);
 
   return (

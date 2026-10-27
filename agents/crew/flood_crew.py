@@ -21,6 +21,7 @@ import re
 from typing import Any
 
 from agents.llm_orchestrator import _fallback_explanation
+from config.llm_config import DEFAULT_GROQ_MODEL
 
 _log = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ _REQUIRED_KEYS = (
     "analisis_hidrologi",
 )
 
-_MODEL = "llama-3.3-70b-versatile"
+_MODEL = os.getenv("GROQ_MODEL", DEFAULT_GROQ_MODEL)
 _TEMPERATURE = 0.1
 _MAX_TOKENS_EXPERT = 200   # AhliCuaca / AhliHidrologi — short analysis only
 _MAX_TOKENS_COORD  = 512   # KoordinatorRisiko — JSON output

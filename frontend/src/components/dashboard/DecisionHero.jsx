@@ -85,12 +85,12 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
   // AlertRibbon folded in: one red line with real station counts, Siaga only.
   const alertLine = siaga1Count > 0
     ? (isId
-        ? `Siaga 1 — ${siaga1Count} pos pantau melewati batas aman. Hubungi BPBD 117.`
-        : `Alert 1 — ${siaga1Count} posts above the safe limit. Contact BPBD 117.`)
+        ? `Siaga 1 — ${siaga1Count} pos pantau di level tertinggi. Hubungi BPBD 117 bila butuh bantuan.`
+        : `Alert 1 — ${siaga1Count === 1 ? "1 post is" : `${siaga1Count} posts are`} at the highest level. Call BPBD 117 if you need help.`)
     : siaga2Count > 0
     ? (isId
-        ? `Siaga 2 — ${siaga2Count} pos pantau mendekati batas aman. Pantau terus.`
-        : `Alert 2 — ${siaga2Count} posts nearing the safe limit. Keep watching.`)
+        ? `Siaga 2 — ${siaga2Count} pos pantau di level Siaga 2. Pantau terus.`
+        : `Alert 2 — ${siaga2Count === 1 ? "1 post is" : `${siaga2Count} posts are`} at Alert 2. Keep watching.`)
     : null;
 
   return (

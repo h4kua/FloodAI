@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from api.ip_rate_limit import require_chat_rate_limit
+from config.llm_config import DEFAULT_GROQ_MODEL
 from utils.paths import DEFAULT_REALTIME_SNAPSHOT, REPORTS_DIR
 
 _log = logging.getLogger(__name__)
@@ -203,7 +204,7 @@ async def chat_health() -> dict:
 @router.post("/api/chat", dependencies=[Depends(require_chat_rate_limit)])
 async def chat_endpoint(req: ChatRequest) -> dict:
     api_key = os.getenv("GROQ_API_KEY")
-    model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+    model = os.getenv("GROQ_MODEL", DEFAULT_GROQ_MODEL)
     if not api_key:
         raise HTTPException(status_code=503, detail="GROQ_API_KEY not configured")
     try:
