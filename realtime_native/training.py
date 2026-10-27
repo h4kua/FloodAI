@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import IsolationForest
+from sklearn.frozen import FrozenEstimator
 from sklearn.metrics import (
     accuracy_score,
     average_precision_score,
@@ -77,6 +78,12 @@ HUMAN_REVIEW_QUEUE_PATH = REPORTS_DIR / "pseudo_label_review_queue.json"
 RECALL_FLOOR = 0.80
 PRECISION_FLOOR = 0.30
 
+# Bootstrap proxies with no observed signal behind them (temperature averages
+# ~38 °C; humidity and the BMKG scores are derived from rainfall). In the
+# 2026-10-27 by-year experiment, dropping them improved every model family.
+PROXY_FEATURES = ("temperature_c", "humidity_pct", "bmkg_certainty_score", "bmkg_weighted_score")
+CORE_FEATURES = [name for name in REALTIME_NATIVE_FEATURES if name not in PROXY_FEATURES]
+
 # ─── Incremental retraining contracts ─────────────────────────────────────────
 # Confidence floor stamped into ``model_card.json`` and consumed at inference
 # time: when the OOD detector flags an input as outlier, the published
@@ -123,6 +130,7 @@ def _write_runtime_bundle(
     threshold_payload: dict,
     model_card: dict,
     report: dict,
+    features: list[str],
 ) -> None:
     REALTIME_NATIVE_BUNDLE_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -183,8 +191,8 @@ def _write_runtime_bundle(
         "created_at": pd.Timestamp.utcnow().isoformat(),
         "training_dataset_fingerprint": f"sha256:{_sha256_file(Path(dataset_path))}",
         "feature_schema": {
-            "feature_count": len(REALTIME_NATIVE_FEATURES),
-            "features": list(REALTIME_NATIVE_FEATURES),
+            "feature_count": len(features),
+            "features": list(features),
         },
         "threshold_file": "threshold.json",
         "ood_file": "ood.pkl",
@@ -443,6 +451,8 @@ def train_realtime_native_model(
     leak_free_kecamatan_freq: bool = True,
     year_split: tuple[int, int] | None = None,
     return_test_predictions: bool = False,
+    features: list[str] | None = None,
+    calibration: str = "cv",
 ):
     """Train and write the realtime-native bundle.
 
@@ -455,7 +465,20 @@ def train_realtime_native_model(
     return_test_predictions: also return ``y_test`` and ``test_proba`` under
         ``report["_test_predictions"]`` (not written to disk) - used by
         scripts/evaluate_model.py for bootstrap confidence intervals.
+    features: columns to train on (default REALTIME_NATIVE_FEATURES; CORE_FEATURES
+        drops the proxies). Written to the bundle's feature_list.json.
+    calibration: "cv" fits isotonic and sigmoid with 5-fold CV on the training
+        fold and keeps the better one on validation. "latest_year" fits a sigmoid
+        (Platt) calibrator on the validation fold — with ``year_split`` that is
+        the most recent labelled year before the test year — on top of the
+        frozen base model, so probabilities follow the recent flood rate.
     """
+    if calibration not in ("cv", "latest_year"):
+        raise ValueError(f"unknown calibration mode: {calibration!r}")
+    if calibration == "latest_year" and year_split is None:
+        raise ValueError('calibration="latest_year" needs year_split')
+    features = list(features or REALTIME_NATIVE_FEATURES)
+
     if not Path(dataset_path).exists():
         build_bootstrap_training_dataset(output_path=dataset_path)
 
@@ -469,7 +492,7 @@ def train_realtime_native_model(
             freq_by_year[int(yr)].get(slug, 0.0) for yr, slug in zip(years, df["name_3"])
         ]
 
-    X = df[REALTIME_NATIVE_FEATURES].apply(pd.to_numeric, errors="coerce").fillna(0.0)
+    X = df[features].apply(pd.to_numeric, errors="coerce").fillna(0.0)
     y = pd.to_numeric(df["banjir"], errors="coerce").fillna(0).astype(int)
 
     # --- STEP 4: split ---------------------------------------------------------
@@ -493,6 +516,9 @@ def train_realtime_native_model(
     val_positives = int(y_val.sum())
     test_positives = int(y_test.sum())
     train_positives = int(y_train.sum())
+    if calibration == "latest_year" and min(val_positives, test_positives) < FLOOD_RETRAIN_MIN_POSITIVES:
+        # A shuffled fallback would calibrate on a random slice, not the latest year.
+        raise ValueError(f"{split_used} has no positives in the validation or test year")
     if (
         val_positives < FLOOD_RETRAIN_MIN_POSITIVES
         or test_positives < FLOOD_RETRAIN_MIN_POSITIVES
@@ -599,7 +625,16 @@ def train_realtime_native_model(
     best_recall = -1.0
     best_ece = 1.0
 
-    for _method in ("isotonic", "sigmoid"):
+    if calibration == "latest_year":
+        # Platt on the validation year over the frozen base model. Sigmoid, not
+        # isotonic: the validation year has only a handful of positives.
+        best_cal = CalibratedClassifierCV(FrozenEstimator(base_model), method="sigmoid")
+        best_cal.fit(X_val_s, y_val)
+        best_cal_method = "sigmoid"
+        best_val_proba = best_cal.predict_proba(X_val_s)[:, 1]
+        best_test_proba = best_cal.predict_proba(X_test_s)[:, 1]
+        best_train_proba = best_cal.predict_proba(X_train_s)[:, 1]
+    for _method in (("isotonic", "sigmoid") if calibration == "cv" else ()):
         _cal = CalibratedClassifierCV(base_model, method=_method, cv=5)
         _cal.fit(X_train_s, y_train)
         _vp = _cal.predict_proba(X_val_s)[:, 1]
@@ -665,7 +700,7 @@ def train_realtime_native_model(
     joblib.dump(ood_detector, REALTIME_NATIVE_OOD_PATH)
 
     with open(REALTIME_NATIVE_FEATURE_LIST_PATH, "w", encoding="utf-8") as file:
-        json.dump(REALTIME_NATIVE_FEATURES, file, indent=2)
+        json.dump(features, file, indent=2)
 
     threshold_payload = {
         "model_variant": "realtime_native",
@@ -689,7 +724,7 @@ def train_realtime_native_model(
 
     report = {
         "dataset_path": str(dataset_path),
-        "feature_count": len(REALTIME_NATIVE_FEATURES),
+        "feature_count": len(features),
         "training_rows": int(len(X_train)),
         "validation_rows": int(len(X_val)),
         "test_rows": int(len(X_test)),
@@ -725,6 +760,7 @@ def train_realtime_native_model(
         },
         "calibration": {
             "method": calibration_method,
+            "fit_on": "validation fold (latest year)" if calibration == "latest_year" else "5-fold CV on train",
             "test_brier": test_brier,
             "test_ece": test_ece,
         },
@@ -755,7 +791,7 @@ def train_realtime_native_model(
     model_card = {
         "model_name": "XGBoost Flood Predictor - Realtime Native",
         "purpose": "Realtime-native flood prediction using only operationally available signals",
-        "feature_set": REALTIME_NATIVE_FEATURES,
+        "feature_set": features,
         "training_dataset": str(dataset_path),
         "report_path": str(REALTIME_NATIVE_REPORT_PATH),
         "threshold_path": str(REALTIME_NATIVE_THRESHOLD_PATH),
@@ -784,6 +820,7 @@ def train_realtime_native_model(
         threshold_payload=threshold_payload,
         model_card=model_card,
         report=report,
+        features=features,
     )
 
     if return_test_predictions:
