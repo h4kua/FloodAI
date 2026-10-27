@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+import { API_BASE } from "../lib/api";
 // Poll every 5 minutes. The backend snapshot refreshes every 15 min, but the
 // ML inference is cheap and the response includes snapshot_fetched_at so users
 // can always see exactly how old the underlying sensor data is.
@@ -92,7 +92,7 @@ export function useFloodRisk() {
     } catch (err) {
       const msg = err?.message ?? "";
       if (msg.includes("fetch") || msg.includes("NetworkError") || msg.includes("Failed")) {
-        setError("Backend tidak terjangkau. Mencoba lagi dalam 30 detik...");
+        setError("unreachable");  // Home shows the translated text
       } else {
         setError(`Gagal memuat data: ${msg}`);
       }

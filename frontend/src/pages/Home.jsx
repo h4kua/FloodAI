@@ -66,7 +66,7 @@ export default function Home({ setRiskContext, riskLevel }) {
   if (error) return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem", padding: "3rem 1rem", textAlign: "center" }}>
       <p style={{ fontWeight: 700, color: "var(--text)" }}>{t("error.load")}</p>
-      <p style={{ fontSize: "0.82rem", color: "var(--muted)" }}>{error}</p>
+      <p style={{ fontSize: "0.82rem", color: "var(--muted)" }}>{error === "unreachable" ? t("error.unreachable") : error}</p>
       <button className="btn btn-ghost" aria-label={t("home.refresh")} onClick={refresh}>{t("error.retry")}</button>
     </div>
   );

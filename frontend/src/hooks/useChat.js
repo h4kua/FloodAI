@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { sendToFloodAgent } from "../lib/floodAgent";
 import { translate } from "../lib/translations";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+import { API_BASE } from "../lib/api";
 
 async function probeGroqHealth() {
   try {

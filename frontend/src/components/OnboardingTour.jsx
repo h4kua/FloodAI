@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useLayoutEffect } from "react";
 import { useApp } from "../lib/appContext";
 
-const TOUR_KEY = "deflood_tour_v7_done";
+const TOUR_KEY = "deflood_tour_v8_done";
 
 /* ── SVG icons ──────────────────────────────────────────── */
 const Icons = {
@@ -9,23 +9,81 @@ const Icons = {
   shield: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
   bot:   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><circle cx="8.5" cy="16" r="1" fill="currentColor"/><circle cx="15.5" cy="16" r="1" fill="currentColor"/></svg>,
   check:  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  gauge:  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>,
+  grid:   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18"/></svg>,
+  map:    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m9 4-6 2v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>,
+  list:   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>,
+  report: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+  info:   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>,
+  globe:  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>,
 };
 
-/* ── Steps (plain text, no markup) ─────────────────────── */
+/* ── Steps (plain text, no markup) ─────────────────────────
+   Beranda steps point at the page's own sections; a step whose element is
+   not on screen (another page open, data still loading) shows centred. */
 const STEPS = (id) => [
   {
     key: "welcome", selector: null, icon: Icons.wave, accent: "var(--cyan)",
     title: id ? "Selamat datang di deFlood.ai" : "Welcome to deFlood.ai",
     desc: id
-      ? "Di sini Anda bisa melihat apakah Jakarta aman dari banjir dan apa yang perlu dilakukan."
-      : "See whether Jakarta is safe from flooding and what you should do.",
+      ? "Panduan singkat ini menunjukkan cara membaca status banjir, mencari rute evakuasi, dan mengirim laporan. Sekitar satu menit."
+      : "This short guide shows how to read the flood status, find an evacuation route and send a report. About a minute.",
+  },
+  {
+    key: "status", selector: ".status-hero", icon: Icons.gauge, accent: "var(--s2)",
+    title: id ? "Status Jakarta saat ini" : "Jakarta's status now",
+    desc: id
+      ? "Satu kata: Aman, Waspada, Siaga, atau Bahaya. Diperbarui tiap 15 menit dari pos pantau air DSDA, cuaca, dan peringatan BMKG. Kotak kecilnya menghitung pos pantau per status."
+      : "One word: Safe, Watch, Alert or Danger. Updated every 15 minutes from DSDA water posts, the weather and BMKG warnings. The small panel counts the posts at each status.",
+  },
+  {
+    key: "wilayah", selector: ".wilayah-status-list", icon: Icons.grid, accent: "var(--wsp)",
+    title: id ? "Status per wilayah" : "Status by area",
+    desc: id
+      ? "Cek wilayah tempat Anda tinggal atau bekerja. Warnanya mengikuti pos pantau dengan status terparah di wilayah itu."
+      : "Check the area where you live or work. Its colour follows the worst water post in that area.",
+  },
+  {
+    key: "map", selector: "#map-anchor", icon: Icons.map, accent: "var(--safe)",
+    title: id ? "Peta kondisi air" : "Water map",
+    desc: id
+      ? "Tiap titik adalah pos pantau, warnanya sama dengan statusnya. Lingkaran merah adalah area rawan banjir yang sedang aktif. Ketuk titik untuk melihat ketinggian airnya."
+      : "Each dot is a water post, coloured by its status. Red circles are flood-prone areas that are active now. Tap a dot to see its water level.",
+  },
+  {
+    key: "detail", selector: ".collapsible-section", icon: Icons.list, accent: "var(--cyan)",
+    title: id ? "Lihat detail" : "See details",
+    desc: id
+      ? "Buka bagian ini untuk analisis AI, ketinggian air tiap pos, dan prakiraan cuaca."
+      : "Open this for the AI analysis, the water level at every post and the weather forecast.",
   },
   {
     key: "nav-evac", selector: "[data-tour='nav-evac']", icon: Icons.shield, accent: "var(--s1)",
     title: id ? "Evakuasi" : "Evacuation",
     desc: id
-      ? "Temukan tempat pengungsian terdekat dan rute aman ke sana."
-      : "Find the nearest shelter and a safe route to get there.",
+      ? "Rute ke rumah Anda atau ke tempat pengungsian terdekat. Jalan hijau aman, jalan merah melewati area rawan banjir. Setelah rutenya cocok, buka di Google Maps untuk navigasi."
+      : "A route home or to the nearest shelter. Green roads are clear, red roads pass flood-prone areas. Once the route looks right, open it in Google Maps to navigate.",
+  },
+  {
+    key: "nav-reports", selector: "[data-tour='nav-reports']", icon: Icons.report, accent: "var(--s2)",
+    title: id ? "Laporan warga" : "Community reports",
+    desc: id
+      ? "Lihat dan kirim kabar kondisi air di sekitar Anda, boleh dengan foto. Laporan belum diverifikasi, tampil 6 jam, dan tidak mengubah status resmi."
+      : "Read and send updates on the water near you, with a photo if you like. Reports are unverified, shown for 6 hours and never change the official status.",
+  },
+  {
+    key: "nav-about", selector: "[data-tour='nav-about']", icon: Icons.info, accent: "var(--muted)",
+    title: id ? "Tentang" : "About",
+    desc: id
+      ? "Cara kerja deFlood.ai dan batasannya. Tetap ikuti arahan resmi BPBD."
+      : "How deFlood.ai works and where its limits are. Always follow official BPBD guidance.",
+  },
+  {
+    key: "settings", selector: ".topbar-right", icon: Icons.globe, accent: "var(--cyan)",
+    title: id ? "Bahasa dan tema" : "Language and theme",
+    desc: id
+      ? "Ganti bahasa Indonesia/English dan mode terang/gelap di sini."
+      : "Switch between Indonesian and English, and between light and dark mode, here.",
   },
   {
     key: "chat", selector: ".chatbot-toggle", icon: Icons.bot, accent: "var(--cyan)",
@@ -60,9 +118,25 @@ function useTargetRect(selector, active, dep) {
       const r = el.getBoundingClientRect();
       setRect({ top: r.top, left: r.left, right: r.right, bottom: r.bottom, width: r.width, height: r.height });
     };
+    // Scroll a page section into view first (the navs and floating buttons
+    // are fixed, so they are left alone). On phones the section goes to the
+    // top, leaving the lower part of the screen for the card.
+    const target = [...document.querySelectorAll(selector)].find((c) => c.getBoundingClientRect().height > 0);
+    if (target?.closest(".main")) {
+      const r = target.getBoundingClientRect();
+      if (window.innerWidth <= 640) {
+        if (r.top < 64 || r.top > 140) target.scrollIntoView({ block: "start" });
+      } else if (r.top < 64 || r.bottom > window.innerHeight - 80) {
+        target.scrollIntoView({ block: r.height > window.innerHeight * 0.6 ? "start" : "center" });
+      }
+    }
     run();
     window.addEventListener("resize", run);
-    return () => window.removeEventListener("resize", run);
+    window.addEventListener("scroll", run, { passive: true });
+    return () => {
+      window.removeEventListener("resize", run);
+      window.removeEventListener("scroll", run);
+    };
   }, [selector, active, dep]);
   return rect;
 }
@@ -86,8 +160,9 @@ function getCardPos(rect, isMobile) {
     if (fromTop) {
       return { style: { position: "fixed", top: 64, left: x, width: W }, fromTop: true };
     }
-    // 148 clears the fixed bottom nav (64px) + lifted chatbot FAB (54px) + gap
-    return { style: { position: "fixed", bottom: 148, left: x, width: W }, fromTop: false };
+    // Just above the fixed bottom nav (64px); the floating buttons sit under
+    // the tour overlay, so the card may cover them.
+    return { style: { position: "fixed", bottom: 76, left: x, width: W }, fromTop: false };
   }
 
   // Desktop: prefer below

@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useApp } from "../../lib/appContext";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+import { API_BASE } from "../../lib/api";
 
 export function CrewAnalysisPanel() {
   const { lang } = useApp();

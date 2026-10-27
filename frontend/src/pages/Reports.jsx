@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useApp } from "../lib/appContext";
 import ChatBot from "../components/ChatBot";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+import { API_BASE } from "../lib/api";
 const MAX_LEN = 500;
 
 // Shrink a photo in the browser (max 1280 px, JPEG) before upload: quicker on
