@@ -16,7 +16,9 @@ const About = lazy(() => import("./pages/About"));
 function AppShell() {
   const t = useT();
   const { lang } = useApp();
-  const [page, setPage] = useState("home");
+  // A shared report link (?report=<id>) opens the Laporan page on that report.
+  const [focusReportId] = useState(() => new URLSearchParams(window.location.search).get("report"));
+  const [page, setPage] = useState(() => (focusReportId ? "reports" : "home"));
   const [riskContext, setRiskContext] = useState({ level: "waspada", rainfall: 0 });
 
   return (
@@ -28,7 +30,7 @@ function AppShell() {
           {page === "home"  && <Home setRiskContext={setRiskContext} riskLevel={riskContext.level} />}
           <Suspense fallback={<LoadingSpinner />}>
             {page === "alert" && <Alert riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
-            {page === "reports" && <Reports riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
+            {page === "reports" && <Reports riskLevel={riskContext.level} rainfall={riskContext.rainfall} focusReportId={focusReportId} />}
             {page === "about" && <About riskContext={riskContext} />}
           </Suspense>
         </ErrorBoundary>

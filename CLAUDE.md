@@ -31,7 +31,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (572, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (17: flood roads,
+- Tests: `tests/` (582, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (17: flood roads,
   post levels)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -94,6 +94,9 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   fallback, Groq call off the event loop (one slow answer stalled every request), 429 shown as "busy".
 - 2026-10-27: Beranda gauge, Siaga line, wilayah cells and map classify posts by their DSDA band
   (`postRiskLevel` in `frontend/src/lib/dashboardHelpers.js`), like the engine; the ratio is a fallback.
+- 2026-10-27: report reactions — likes/dislikes per device, comments, ⋯ menu (share, copy link, Google Maps,
+  report); 3 flags hide a report; `/?report=<id>` deep links. Needs `db/migrations/111_report_interactions.sql`
+  run in Supabase (until then the endpoints answer 503 and counts show 0).
 - 2026-10-27: English page fully English except the 3-agent deep analysis (prompts ask for Indonesian):
   `/predict/realtime-native` returns `risk_interpretation_en` beside `risk_interpretation`. The map legend
   folds on phones. Mentors removed from the About page.

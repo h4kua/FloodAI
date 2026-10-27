@@ -14,13 +14,25 @@ import io
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Literal, Optional
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field
 
 from api.ip_rate_limit import require_ip_rate_limit
-from db.community_reports_repository import PHOTO_BUCKET, create_report, list_reports, upload_photo
+from db.community_reports_repository import (
+    PHOTO_BUCKET,
+    add_comment,
+    create_report,
+    flag_report,
+    get_report,
+    list_comments,
+    list_reports,
+    report_interactions,
+    set_vote,
+    upload_photo,
+)
 from services.shelter_locator import haversine_m
 
 router = APIRouter(tags=["community-reports"])
@@ -37,6 +49,11 @@ PHOTO_MAX_SIDE_PX = 1280
 # A small file can still decode to a huge bitmap; refuse anything over ~40 MP
 # (a 512 MB machine) instead of only warning, as Pillow does by default.
 PHOTO_MAX_PIXELS = 40_000_000
+
+# A report flagged by this many devices drops out of the list (migration 111).
+FLAG_HIDE_THRESHOLD = 3
+# Devices are the random IDs the web app keeps in localStorage.
+_DEVICE_ID = dict(min_length=8, max_length=64, pattern=r"^[A-Za-z0-9-]+$")
 
 
 def _normalise_photo(data: bytes) -> bytes:
@@ -67,6 +84,79 @@ class CommunityReportIn(BaseModel):
     device_id: Optional[str] = Field(default=None, max_length=64)
     location_label: Optional[str] = Field(default=None, max_length=160)
     photo_url: Optional[str] = Field(default=None, max_length=300)
+
+
+class VoteIn(BaseModel):
+    device_id: str = Field(**_DEVICE_ID)
+    value: Literal[-1, 0, 1]  # 0 takes the vote back
+
+
+class CommentIn(BaseModel):
+    device_id: Optional[str] = Field(default=None, **_DEVICE_ID)
+    author: Optional[str] = Field(default=None, max_length=80)
+    message: str = Field(min_length=1, max_length=300)
+
+
+class FlagIn(BaseModel):
+    device_id: str = Field(**_DEVICE_ID)
+    reason: Literal["spam", "wrong", "offensive", "private"]
+
+
+async def _existing_report(report_id: UUID) -> str:
+    rid = str(report_id)
+    if await get_report(rid) is None:
+        raise HTTPException(status_code=404, detail={"error": "report_not_found"})
+    return rid
+
+
+@router.post(
+    "/reports/{report_id}/vote",
+    dependencies=[Depends(require_ip_rate_limit)],
+    summary="Like (1), dislike (-1) or take back (0) this device's vote on a report.",
+)
+async def vote_report(report_id: UUID, payload: VoteIn) -> dict:
+    rid = await _existing_report(report_id)
+    if not await set_vote(rid, payload.device_id, payload.value):
+        raise HTTPException(status_code=503, detail={"error": "reactions_unavailable"})
+    counts = (await report_interactions([rid], payload.device_id)).get(rid, {})
+    return {k: counts.get(k, 0) for k in ("likes", "dislikes", "my_vote")}
+
+
+@router.get("/reports/{report_id}/comments", summary="Comments on a report, oldest first.")
+async def get_report_comments(report_id: UUID) -> dict:
+    comments = await list_comments(str(report_id))
+    if comments is None:
+        raise HTTPException(status_code=503, detail={"error": "reactions_unavailable"})
+    return {"comments": comments, "count": len(comments)}
+
+
+@router.post(
+    "/reports/{report_id}/comments",
+    dependencies=[Depends(require_ip_rate_limit)],
+    summary="Add a comment to a report (no API key required).",
+)
+async def post_report_comment(report_id: UUID, payload: CommentIn) -> dict:
+    rid = await _existing_report(report_id)
+    message = payload.message.strip()
+    if not message:
+        raise HTTPException(status_code=422, detail={"error": "empty_comment"})
+    author = (payload.author or "").strip() or None
+    comment = await add_comment(rid, message, author, payload.device_id)
+    if comment is None:
+        raise HTTPException(status_code=503, detail={"error": "reactions_unavailable"})
+    return {"comment": comment}
+
+
+@router.post(
+    "/reports/{report_id}/flag",
+    dependencies=[Depends(require_ip_rate_limit)],
+    summary=f"Flag a report as unwanted; {FLAG_HIDE_THRESHOLD} devices hide it.",
+)
+async def flag_report_endpoint(report_id: UUID, payload: FlagIn) -> dict:
+    rid = await _existing_report(report_id)
+    if not await flag_report(rid, payload.device_id, payload.reason):
+        raise HTTPException(status_code=503, detail={"error": "reactions_unavailable"})
+    return {"flagged": True}
 
 
 @router.post(
@@ -120,9 +210,23 @@ async def get_reports(
     near_lat: Optional[float] = Query(default=None),
     near_lon: Optional[float] = Query(default=None),
     limit: int = Query(default=50, ge=1, le=200),
+    device_id: Optional[str] = Query(default=None, max_length=64),
 ) -> dict:
     since = (datetime.now(timezone.utc) - REPORT_MAX_AGE).isoformat()
     reports = await list_reports(severity=severity, verified=verified, since=since, limit=limit)
+
+    # Likes, dislikes, comment counts and this device's vote; reports flagged by
+    # enough devices drop out. Device IDs are never sent back.
+    reactions = await report_interactions([r["id"] for r in reports if r.get("id")], device_id)
+    shown = []
+    for r in reports:
+        r.pop("device_id", None)
+        counts = reactions.get(r.get("id"), {})
+        if counts.get("flags", 0) >= FLAG_HIDE_THRESHOLD:
+            continue
+        r.update({k: counts.get(k, 0) for k in ("likes", "dislikes", "comment_count", "my_vote")})
+        shown.append(r)
+    reports = shown
 
     if near_lat is not None and near_lon is not None and reports:
         distances = [

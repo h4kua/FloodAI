@@ -73,6 +73,7 @@ Swagger UI: `http://localhost:8080/docs`.
 | `GET /healthz`, `GET /readyz`, `GET /metrics` | — | Liveness, readiness (cek tabel snapshot di Supabase), Prometheus |
 | `GET /predict/realtime` | — | **Dipensiunkan** — menjawab `410 Gone` dengan tautan ke `/predict/realtime-native` |
 | `GET /reports`, `POST /reports` | batas per IP | Laporan warga (6 jam terakhir, belum diverifikasi, tidak mengubah status). Aktif kecuali `COMMUNITY_REPORTS_ENABLED=false` |
+| `POST /reports/{id}/vote`, `GET`/`POST /reports/{id}/comments`, `POST /reports/{id}/flag` | batas per IP (POST) | Suka/tidak suka per perangkat, komentar, dan penandaan konten (3 tanda menyembunyikan laporan). Butuh migration 111 |
 | `POST /reports/photo` | batas per IP | Foto laporan: maks. 8 MB, di-encode ulang jadi JPEG ≤ 1280 px tanpa metadata, disimpan di bucket Supabase `report-photos` |
 | `/sos`, `/family/*` | — | **Nonaktif**; hanya terpasang jika `COMMUNITY_API_ENABLED=true` |
 
@@ -144,7 +145,7 @@ Nama saja — nilai disimpan di `.env` (lihat `.env.example`), tidak pernah di-c
 ## Tes & CI
 
 ```bash
-python -m pytest tests -q        # 572 tes backend
+python -m pytest tests -q        # 582 tes backend
 cd frontend && npm test          # 17 tes: rute banjir, level pos (node --test)
 ```
 

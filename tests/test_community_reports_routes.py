@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+import pytest
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -15,6 +17,13 @@ app = FastAPI()
 app.include_router(router)
 client = TestClient(app)
 _HEADERS = {"host": "localhost"}
+
+
+@pytest.fixture(autouse=True)
+def _no_reactions():
+    # Reactions (migration 111) have their own tests in test_report_interactions.py.
+    with patch("api.routes.community_reports.report_interactions", return_value={}):
+        yield
 
 
 def test_submit_report_success():

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useApp } from "../lib/appContext";
 import ChatBot from "../components/ChatBot";
+import ReportCard from "../components/ReportCard";
+import { getDeviceId } from "../lib/device";
 
 import { API_BASE } from "../lib/api";
 const MAX_LEN = 500;
@@ -18,19 +20,19 @@ async function shrinkPhoto(file, maxSide = 1280) {
   return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.8));
 }
 
-function timeAgo(isoString, isId) {
-  const mins = Math.round((Date.now() - new Date(isoString).getTime()) / 60000);
-  if (mins < 1) return isId ? "baru saja" : "just now";
-  if (mins < 60) return isId ? `${mins} mnt lalu` : `${mins} min ago`;
-  const hours = Math.round(mins / 60);
-  return isId ? `${hours} jam lalu` : `${hours} h ago`;
+// Reports this device flagged stay hidden for it, even before others agree.
+const HIDDEN_KEY = "deflood_hidden_reports";
+function loadHidden() {
+  try { return new Set(JSON.parse(localStorage.getItem(HIDDEN_KEY) || "[]")); } catch { return new Set(); }
 }
 
 /* ── Laporan warga ───────────────────────────────────────────────────────────
    First-hand observations from residents. Shown as unverified, only from the
-   last 6 hours, and never used for the official status.
+   last 6 hours, and never used for the official status. Each card carries
+   likes, comments and a share/report menu (components/ReportCard.jsx);
+   ``focusReportId`` comes from a shared link (?report=<id>).
 */
-export default function Reports({ riskLevel = "waspada", rainfall = 0 }) {
+export default function Reports({ riskLevel = "waspada", rainfall = 0, focusReportId = null }) {
   const { lang } = useApp();
   const isId = lang !== "en";
 
@@ -50,6 +52,8 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0 }) {
   const [formError, setFormError]   = useState("");
   const [sent, setSent]             = useState(false);
   const [photo, setPhoto]           = useState(null);   // { file, preview }
+  const [deviceId]                  = useState(getDeviceId);
+  const [hidden, setHidden]         = useState(loadHidden);
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
@@ -57,6 +61,7 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0 }) {
     try {
       const params = new URLSearchParams();
       if (onlyFlood) params.set("severity", "alert");
+      if (deviceId) params.set("device_id", deviceId);
       if (coords) {
         params.set("near_lat", coords.lat);
         params.set("near_lon", coords.lon);
@@ -71,7 +76,22 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0 }) {
     } finally {
       setLoading(false);
     }
-  }, [onlyFlood, coords, isId]);
+  }, [onlyFlood, coords, isId, deviceId]);
+
+  const updateReport = useCallback((next) => {
+    setReports((list) => list.map((r) => (r.id === next.id ? next : r)));
+  }, []);
+
+  const hideReport = useCallback((id) => {
+    setHidden((prev) => {
+      const next = new Set(prev).add(id);
+      try { localStorage.setItem(HIDDEN_KEY, JSON.stringify([...next].slice(-200))); } catch { /* storage blocked */ }
+      return next;
+    });
+  }, []);
+
+  const visible = reports.filter((r) => !hidden.has(r.id));
+  const focusMissing = Boolean(focusReportId) && !loading && !error && !visible.some((r) => r.id === focusReportId);
 
   useEffect(() => { fetchReports(); }, [fetchReports]);
 
@@ -139,6 +159,7 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0 }) {
           lat: coords.lat,
           lon: coords.lon,
           reporter_name: name.trim() || null,
+          device_id: deviceId,
           photo_url: photoUrl,
         }),
       });
@@ -262,32 +283,22 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0 }) {
       <div className="panel panel-body fade-in">
         {loading && <p className="report-meta">{isId ? "Memuat laporan…" : "Loading reports…"}</p>}
         {error && <p className="reports-error">{error}</p>}
-        {!loading && !error && reports.length === 0 && (
+        {focusMissing && (
+          <p className="report-meta">
+            {isId
+              ? `Laporan yang dibagikan sudah lebih dari ${maxAge} jam atau sudah disembunyikan.`
+              : `The shared report is older than ${maxAge} hours or has been hidden.`}
+          </p>
+        )}
+        {!loading && !error && visible.length === 0 && (
           <p className="report-meta">
             {isId ? `Belum ada laporan dalam ${maxAge} jam terakhir.` : `No reports in the last ${maxAge} hours.`}
           </p>
         )}
         <ul className="report-list">
-          {reports.map((r) => (
-            <li key={r.id} className={`report-item${r.is_pinned ? " report-pinned" : ""}`}>
-              <div className="report-head">
-                <span className={`risk-badge badge-${r.severity === "alert" ? "s1" : "ok"}`}>{sevLabel(r.severity)}</span>
-                <span className="report-meta">{timeAgo(r.created_at, isId)}</span>
-              </div>
-              <p className="report-text">{r.message}</p>
-              {r.photo_url && (
-                <a href={r.photo_url} target="_blank" rel="noopener noreferrer" className="report-photo-link">
-                  <img className="report-photo" src={r.photo_url} loading="lazy"
-                    alt={isId ? "Foto dari pelapor" : "Photo from the reporter"} />
-                </a>
-              )}
-              <p className="report-meta">
-                {r.reporter_name || (isId ? "Anonim" : "Anonymous")}
-                {" · "}
-                {r.verified ? (isId ? "Terverifikasi" : "Verified") : (isId ? "Belum diverifikasi" : "Unverified")}
-                {r.is_pinned ? (isId ? " · Terdekat dari Anda" : " · Nearest to you") : ""}
-              </p>
-            </li>
+          {visible.map((r) => (
+            <ReportCard key={r.id} report={r} isId={isId} deviceId={deviceId} sevLabel={sevLabel}
+              focused={r.id === focusReportId} onChange={updateReport} onHide={hideReport} />
           ))}
         </ul>
       </div>

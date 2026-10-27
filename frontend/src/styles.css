@@ -860,6 +860,50 @@ button, input, select, textarea { font-family: inherit; }
 .reports-photo-hint { font-size: 0.75rem; color: var(--muted-2); margin: -0.25rem 0 0; }
 .reports-photo-preview { display: flex; align-items: flex-end; gap: 0.75rem; }
 .reports-photo-preview img { width: 120px; height: 90px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--line); }
+.report-head .report-meta { margin-left: auto; }
+.report-focus { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--cyan-soft); }
+
+/* Reactions, comments and the ⋯ menu on a report (components/ReportCard.jsx) */
+.report-menu-wrap { position: relative; }
+.report-icon-btn {
+  width: 36px; height: 36px; border-radius: 50%; margin: -6px -6px -6px 0;
+  display: grid; place-items: center; background: none; border: 0; color: var(--muted); cursor: pointer;
+}
+.report-icon-btn:hover, .report-icon-btn[aria-expanded="true"] { background: var(--panel-2); color: var(--text); }
+.report-menu {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: var(--z-dropdown);
+  min-width: 220px; max-width: min(280px, calc(100vw - 48px)); padding: 6px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow);
+  display: flex; flex-direction: column;
+}
+.report-menu button, .report-menu a {
+  text-align: left; padding: 0.6rem 0.75rem; min-height: 40px; border-radius: var(--r-sm);
+  background: none; border: 0; font: inherit; font-size: 0.875rem; color: var(--text);
+  cursor: pointer; text-decoration: none;
+}
+.report-menu button:hover, .report-menu a:hover { background: var(--panel-2); }
+.report-menu .danger { color: var(--s1); }
+.report-menu-title { font-size: 0.75rem; font-weight: 700; color: var(--muted); padding: 0.4rem 0.75rem 0.2rem; margin: 0; }
+.report-actions-row { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.2rem; }
+.report-react {
+  display: inline-flex; align-items: center; gap: 0.35rem; min-height: 36px; padding: 0 0.8rem;
+  border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--panel);
+  color: var(--muted); font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  font-variant-numeric: tabular-nums; transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.report-react:hover { background: var(--panel-2); color: var(--text); }
+.report-react.is-on { background: var(--cyan-soft); border-color: var(--cyan-border); color: var(--cyan); }
+.report-react.is-down.is-on { background: var(--s1-soft); border-color: var(--s1-border); color: var(--s1); }
+.report-note { font-size: 0.78rem; color: var(--muted); margin: 0; overflow-wrap: anywhere; }
+.report-comments { border-top: 1px solid var(--line); padding-top: 0.6rem; margin-top: 0.2rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.comment-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+.comment-list li { background: var(--panel-2); border-radius: var(--r); padding: 0.5rem 0.7rem; }
+.comment-head { font-size: 0.75rem; color: var(--muted); margin: 0 0 0.15rem; }
+.comment-head strong { color: var(--text); font-weight: 700; }
+.comment-text { font-size: 0.875rem; color: var(--text); margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.comment-form { display: flex; flex-direction: column; gap: 0.45rem; }
+.comment-send-row { display: flex; gap: 0.45rem; }
+.comment-send-row .route-input { flex: 1; min-width: 0; }
 .report-photo-link { display: block; align-self: flex-start; }
 .report-photo { display: block; max-width: 100%; max-height: 240px; border-radius: var(--r-sm); border: 1px solid var(--line); }
 
@@ -1300,9 +1344,19 @@ button, input, select, textarea { font-family: inherit; }
   .topbar-toggle { min-width: 36px; height: 36px; }
 
   /* Map legend: compact so it covers less of a phone-sized map */
-  .map-legend { bottom: 8px; left: 8px; padding: 0.45rem 0.6rem; gap: 2px; }
-  .legend-row { font-size: 0.7rem; }
-  .legend-dot { width: 8px; height: 8px; }
+  /* Phones: the legend sits under the map as a wrapped row, always visible */
+  .flood-map-wrap { display: flex; flex-direction: column; }
+  .flood-map-wrap .map-legend {
+    position: static; pointer-events: auto;
+    flex-direction: row; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.9rem;
+    padding: 0.65rem 1rem 0.75rem; border: 0; border-top: 1px solid var(--line);
+    border-radius: 0; box-shadow: none;
+  }
+  /* Title only (no folding) on phones */
+  .flood-map-wrap .map-legend-toggle { pointer-events: none; min-height: 0; margin-bottom: 0; font-size: 0.78rem; }
+  .flood-map-wrap .map-legend-chevron { display: none; }
+  .flood-map-wrap .map-legend > div:last-child { margin-top: 0 !important; border-top: 0 !important; padding-top: 0 !important; flex-basis: 100%; }
+  .legend-row { font-size: 0.78rem; }
   .logo   { font-size: 1.05rem; margin-right: 0.875rem; }
   .topbar-right { gap: 0.25rem; padding-left: 0.5rem; }
 

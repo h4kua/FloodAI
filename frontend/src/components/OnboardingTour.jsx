@@ -252,7 +252,8 @@ export default function OnboardingTour() {
   }, []);
 
   useEffect(() => {
-    if (!localStorage.getItem(TOUR_KEY)) {
+    // A visitor arriving on a shared report link came to read that report.
+    if (!localStorage.getItem(TOUR_KEY) && !new URLSearchParams(window.location.search).has("report")) {
       const t = setTimeout(() => setVisible(true), 600);
       return () => clearTimeout(t);
     }

@@ -54,8 +54,9 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
   const { theme, lang } = useApp();
   const isId = lang === "id";
   const [showProne, setShowProne] = useState(false); // off by default — it buries the post markers
-  // On phones the open legend covers a third of the map, so it starts folded.
-  const [legendOpen, setLegendOpen] = useState(() => typeof window === "undefined" || window.innerWidth > 640);
+  // Desktop: the legend floats on the map and can be folded. Phones: CSS puts
+  // it under the map, always open, so it neither covers the map nor hides.
+  const [legendOpen, setLegendOpen] = useState(true);
 
   // Only plot stations that have validated Jakarta coordinates.
   const mappedStations = useMemo(
@@ -71,7 +72,7 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
   );
 
   return (
-    <div style={{ position: "relative", flex: 1, minHeight: "clamp(340px, 58vh, 600px)" }}>
+    <div className="flood-map-wrap" style={{ position: "relative", flex: 1, minHeight: "clamp(340px, 58vh, 600px)" }}>
       <MapContainer
         center={[-6.23, 106.85]}
         zoom={12}

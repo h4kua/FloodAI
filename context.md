@@ -98,6 +98,7 @@ first backend start.
 | `POST /shelters/checkin` | IP rate limit | Kept in the API; the interface no longer uses it |
 | `GET /reports`, `POST /reports` | IP rate limit | Laporan page: last 6 h, unverified, never changes the status; on unless `COMMUNITY_REPORTS_ENABLED=false` |
 | `POST /reports/photo` | IP rate limit | ≤ 8 MB / 40 MP in, re-encoded JPEG ≤ 1280 px without metadata, Supabase bucket `report-photos` (migration 110) |
+| `POST /reports/{id}/vote`, `GET`/`POST /reports/{id}/comments`, `POST /reports/{id}/flag` | IP rate limit (POST) | Reactions (migration 111): one like/dislike per device (`value` 1/-1, 0 takes it back), comments ≤ 300 chars, flags (spam/wrong/offensive/private); 3 flags hide a report. `GET /reports?device_id=` adds `likes`, `dislikes`, `comment_count`, `my_vote` and never returns device IDs. 503 `reactions_unavailable` until migration 111 runs |
 | `/sos`, `/sos/recent`, `/family/*` | IP rate limit | **Off by default** (404): registered only when `COMMUNITY_API_ENABLED=true` |
 | `GET /health`, `GET /healthz` | — | Liveness + scheduler + snapshot age |
 | `GET /readyz` | — | Readiness: Supabase `realtime_snapshot_store` answers (+ Postgres pool when `DB_PERSISTENCE_ENABLED=true`) + thresholds |
@@ -171,7 +172,7 @@ Home
 │                            greyed out with date when data ≥ 3 h old
 ├── WilayahStatus          — 5 wilayah, status = worst post in each
 ├── FloodMap               — full width; shared post markers + active flood-area circles (mapLayers.jsx);
-│                            legend folds into one button, folded by default at ≤ 640 px
+│                            legend floats and folds on desktop; under the map, always open, at ≤ 640 px
 ├── CollapsibleSection "Lihat detail" (tabs)
 │   ├── Analisis AI        — ModelOutputCard (`risk_interpretation` / `risk_interpretation_en` by language)
 │   │                        + CrewAnalysisPanel (3-agent output is Indonesian only)
@@ -210,7 +211,11 @@ refused-GPS message.
 ### Laporan (`pages/Reports.jsx`)
 
 List of the last 6 h (all / flooding only), each labelled unverified, with optional photo; a form with
-severity, text (≤ 500), name, location and a photo shrunk in the browser before upload.
+severity, text (≤ 500), name, location and a photo shrunk in the browser before upload. Each card
+(`components/ReportCard.jsx`) has 👍/👎 with counts (one vote per device ID from `lib/device.js`,
+optimistic, rolled back on error), comments loaded on open, and a ⋯ menu: share (Web Share API or copy),
+copy link, the place in Google Maps, and report (four reasons; hidden at once for that device). A link
+`/?report=<id>` opens Laporan on that report (no guide on that visit).
 
 ### Tentang (`pages/About.jsx`)
 
