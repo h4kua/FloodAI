@@ -6,7 +6,7 @@
 */
 import { useApp } from "../../lib/appContext";
 import {
-  stationClass, stationRiskLevel, cleanStationName, stationKecamatan,
+  postClass, postRiskLevel, cleanStationName, stationKecamatan,
   groupStationsByWilayah, UPSTREAM_GROUP,
 } from "../../lib/dashboardHelpers";
 import { RiskBadge } from "./primitives";
@@ -15,7 +15,7 @@ const BAR_COLOR = { s1: "var(--s1)", s2: "var(--s2)", wsp: "var(--wsp)", ok: "va
 
 function StationRow({ s }) {
   const kec   = stationKecamatan(s.nama);
-  const color = BAR_COLOR[stationClass(s.ratio)];
+  const color = BAR_COLOR[postClass(s)];
   const pct   = Math.round(s.ratio * 100);
   return (
     <li className="station-row">
@@ -25,7 +25,7 @@ function StationRow({ s }) {
       </div>
       <div className="station-bar"><i style={{ width: `${Math.min(pct, 100)}%`, background: color }} /></div>
       <span className="station-pct" style={{ color }}>{pct}%</span>
-      <RiskBadge level={stationRiskLevel(s.ratio)} />
+      <RiskBadge level={postRiskLevel(s)} />
     </li>
   );
 }

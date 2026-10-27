@@ -1,21 +1,21 @@
 import { useApp, useT } from "../../lib/appContext";
 import {
   buildStatusDesc, formatDataTime, dataAgeMinutes, trendDisplay, STALE_STATUS_MIN,
-  stationClass, cleanStationName,
+  postClass, byPostSeverity, cleanStationName,
 } from "../../lib/dashboardHelpers";
 
 const GAUGE_LEVELS = [["s1", "SIAGA_1"], ["s2", "SIAGA_2"], ["wsp", "WASPADA"], ["ok", "NORMAL"]];
 
 /* ── Post gauge — every monitoring post as one coloured segment ───────────
    Worst first, so the eye lands on trouble; the legend gives exact counts.
-   Same thresholds as the post list (stationClass).
+   Each post's own DSDA band, as in the post list and the map (postClass).
 */
 function PostGauge({ stations, isId }) {
   const t = useT();
   if (!stations.length) return null;
-  const sorted = [...stations].sort((a, b) => (b.ratio ?? 0) - (a.ratio ?? 0));
+  const sorted = [...stations].sort(byPostSeverity);
   const counts = { s1: 0, s2: 0, wsp: 0, ok: 0 };
-  sorted.forEach((s) => { counts[stationClass(s.ratio ?? 0)] += 1; });
+  sorted.forEach((s) => { counts[postClass(s)] += 1; });
   return (
     <aside className="hero-gauge" aria-label={isId ? "Ringkasan pos pantau air" : "Water-level post summary"}>
       <div className="hero-gauge-head">
@@ -24,7 +24,7 @@ function PostGauge({ stations, isId }) {
       </div>
       <div className="hero-gauge-bar" aria-hidden="true">
         {sorted.map((s, i) => (
-          <i key={i} className={`seg-${stationClass(s.ratio ?? 0)}`} title={cleanStationName(s.nama)} />
+          <i key={i} className={`seg-${postClass(s)}`} title={cleanStationName(s.nama)} />
         ))}
       </div>
       <ul className="hero-gauge-legend">

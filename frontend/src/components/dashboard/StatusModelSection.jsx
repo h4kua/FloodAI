@@ -26,7 +26,7 @@ export function ModelOutputCard({ riskData, children }) {
   const isId = lang === "id";
   const [expanded, setExpanded] = useState(false);
 
-  const interpretation = riskData?.interpretation;
+  const interpretation = (!isId && riskData?.interpretationEn) || riskData?.interpretation;
   const riskTrend = riskData?.trendState?.risk_trend;
   const level     = riskData?.level ?? "waspada";
   const snapTimeStr = formatDataTime(riskData?.snapshotFetchedAt, isId);

@@ -149,6 +149,8 @@ def test_endpoint_reports_the_engine_level_and_the_model_view(tmp_path, monkeypa
     assert result["decision"]["layer"]
     assert result["features"]["water_level_ratio"] == pytest.approx(2008 / 3100, abs=1e-3)
     assert result["risk_interpretation"]
+    # The English page gets its own reading, not the Indonesian one.
+    assert result["risk_interpretation_en"] and result["risk_interpretation_en"] != result["risk_interpretation"]
 
 
 def test_station_label_uses_the_corrected_area():

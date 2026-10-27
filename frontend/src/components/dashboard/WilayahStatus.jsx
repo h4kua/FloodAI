@@ -1,12 +1,12 @@
 import { useApp } from "../../lib/appContext";
 import {
-  JAKARTA_WILAYAH, groupStationsByWilayah, stationRiskLevel, stationClass, dataAgeMinutes, STALE_STATUS_MIN,
+  JAKARTA_WILAYAH, groupStationsByWilayah, postRiskLevel, postClass, dataAgeMinutes, STALE_STATUS_MIN,
 } from "../../lib/dashboardHelpers";
 import { RiskBadge } from "./primitives";
 
 /* ── WilayahStatus — "is MY area at risk?" ─────────────────────────────────
    One cell per Jakarta wilayah, status = the worst monitoring post in that
-   wilayah (same thresholds as the post list). No model percentages.
+   wilayah by its own DSDA band (as in the post list). No model percentages.
 */
 export default function WilayahStatus({ riskData }) {
   const { lang } = useApp();
@@ -31,11 +31,11 @@ export default function WilayahStatus({ riskData }) {
       </p>
       <ul className="wilayah-status-list">
         {groups.map((g) => (
-          <li key={g.key} className={`wilayah-status-cell tone-${g.maxRatio != null ? stationClass(g.maxRatio) : "none"}`}>
+          <li key={g.key} className={`wilayah-status-cell tone-${g.worst ? postClass(g.worst) : "none"}`}>
             <span className="wilayah-status-name">{g.key.replace("Jakarta ", "")}</span>
-            {g.maxRatio != null ? (
+            {g.worst ? (
               <>
-                <RiskBadge level={stationRiskLevel(g.maxRatio)} />
+                <RiskBadge level={postRiskLevel(g.worst)} />
                 <small>{isId ? `${g.stations.length} pos pantau` : `${g.stations.length} post${g.stations.length > 1 ? "s" : ""}`}</small>
               </>
             ) : (

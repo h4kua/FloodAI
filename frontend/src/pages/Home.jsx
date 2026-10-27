@@ -3,6 +3,7 @@ import { useFloodRisk } from "../hooks/useFloodRisk";
 import FloodMap from "../components/FloodMap";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useT } from "../lib/appContext";
+import { postRiskLevel } from "../lib/dashboardHelpers";
 
 import CollapsibleSection from "../components/shell/CollapsibleSection";
 import DecisionHero from "../components/dashboard/DecisionHero";
@@ -58,8 +59,8 @@ export default function Home({ setRiskContext, riskLevel }) {
 
   // ── Real station counts from DSDADKI sensors (NOT derived from ML zones) ──
   const stations    = riskData?.stations ?? [];
-  const realSiaga1  = useMemo(() => stations.filter(s => s.ratio >= 1.0).length,  [stations]);
-  const realSiaga2  = useMemo(() => stations.filter(s => s.ratio >= 0.75 && s.ratio < 1.0).length, [stations]);
+  const realSiaga1  = useMemo(() => stations.filter(s => postRiskLevel(s) === "SIAGA_1").length, [stations]);
+  const realSiaga2  = useMemo(() => stations.filter(s => postRiskLevel(s) === "SIAGA_2").length, [stations]);
 
   if (loading) return <LoadingSpinner message="Mengambil data realtime..." />;
 

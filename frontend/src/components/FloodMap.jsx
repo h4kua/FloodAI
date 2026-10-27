@@ -54,6 +54,8 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
   const { theme, lang } = useApp();
   const isId = lang === "id";
   const [showProne, setShowProne] = useState(false); // off by default — it buries the post markers
+  // On phones the open legend covers a third of the map, so it starts folded.
+  const [legendOpen, setLegendOpen] = useState(() => typeof window === "undefined" || window.innerWidth > 640);
 
   // Only plot stations that have validated Jakarta coordinates.
   const mappedStations = useMemo(
@@ -160,10 +162,17 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
         <StationMarkers stations={mappedStations} />
       </MapContainer>
 
-      <div className="map-legend">
-        <p style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text)", marginBottom: 4 }}>
-          {t("legend.title")}
-        </p>
+      <div className={`map-legend${legendOpen ? "" : " is-collapsed"}`}>
+        <button
+          type="button"
+          className="map-legend-toggle"
+          aria-expanded={legendOpen}
+          onClick={() => setLegendOpen((open) => !open)}
+        >
+          <span>{t("legend.title")}</span>
+          <span aria-hidden="true" className="map-legend-chevron">▾</span>
+        </button>
+        {legendOpen && <>
         {[
           ["legend.danger",  "#c8102e"],
           ["legend.alert",   "#c2410c"],
@@ -206,6 +215,7 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
             </span>
           </button>
         </div>
+        </>}
       </div>
     </div>
   );

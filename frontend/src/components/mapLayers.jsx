@@ -6,28 +6,27 @@
 import { Circle, CircleMarker, Popup } from "react-leaflet";
 import { useApp } from "../lib/appContext";
 import { RISK_RADIUS_M } from "../lib/floodRoads";
+import { postClass } from "../lib/dashboardHelpers";
 
 export const AREA_COLOR = "#c8102e";
 
 // Post colour by its ratio to Siaga 1 (same bands as the map legend).
-export function stationColor(ratio) {
-  if (ratio >= 1.0)  return "#c8102e";
-  if (ratio >= 0.75) return "#c2410c";
-  if (ratio >= 0.50) return "#e0a400";
-  return "#15803d";
-}
+const POST_COLOR = { s1: "#c8102e", s2: "#c2410c", wsp: "#e0a400", ok: "#15803d" };
+/** Marker colour from the post's own DSDA band (ratio only as a fallback). */
+export const stationColor = (station) => POST_COLOR[postClass(station)];
 
 const titleCase = (s) => (s || "").toLowerCase().split(" ").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 const siagaWord = (status) => (status || "").replace(/^Status\s*:\s*/i, "");
 const popupPad = { autoPan: true, autoPanPaddingTopLeft: [8, 64], autoPanPaddingBottomRight: [8, 8] };
 
-/** Monitoring posts with validated coordinates, coloured by ratio. */
+/** Monitoring posts with validated coordinates, coloured by their DSDA band. */
 export function StationMarkers({ stations = [], small = false }) {
   const { theme, lang } = useApp();
   const isId = lang === "id";
   return stations.filter((s) => s.lat != null && s.lon != null).map((s) => {
-    const color = stationColor(s.ratio);
-    const radius = (s.ratio >= 0.75 ? 11 : 8) - (small ? 2 : 0);
+    const cls = postClass(s);
+    const color = POST_COLOR[cls];
+    const radius = (cls === "s1" || cls === "s2" ? 11 : 8) - (small ? 2 : 0);
     return (
       <CircleMarker
         key={`st-${s.nama}`}

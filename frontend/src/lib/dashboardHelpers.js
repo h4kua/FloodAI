@@ -138,6 +138,24 @@ export function stationClass(ratio) {
   return "ok";
 }
 
+/* A post's level from the band DSDA itself reports ("Status : Siaga 2"), the
+   same band the decision engine floors on; the ratio to Siaga 1 is only the
+   fallback when the feed gives none. With the ratio alone a post at 76% of
+   Siaga 1 read "Siaga 2" while DSDA, and the city status, said Siaga 3. */
+const BAND_LEVEL = { 1: "SIAGA_1", 2: "SIAGA_2", 3: "WASPADA", 4: "NORMAL" };
+const LEVEL_RANK = { NORMAL: 0, WASPADA: 1, SIAGA_2: 2, SIAGA_1: 3 };
+export function postRiskLevel(s) {
+  const status = s?.status_siaga || "";
+  const band = /siaga\s*([1-4])/i.exec(status);
+  if (band) return BAND_LEVEL[band[1]];
+  if (/normal/i.test(status)) return "NORMAL";
+  return stationRiskLevel(s?.ratio ?? 0);
+}
+export const postClass = (s) => riskClass(postRiskLevel(s));
+// Worst first: by band, then by how close the water is to Siaga 1.
+export const byPostSeverity = (a, b) =>
+  LEVEL_RANK[postRiskLevel(b)] - LEVEL_RANK[postRiskLevel(a)] || (b.ratio ?? 0) - (a.ratio ?? 0);
+
 /* ── Weather iconography — condition normalizer ─────────────────────────────
    Normalizes any BMKG weather_desc (Indonesian) or OpenWeather weather_main
    (English) to one of seven condition keys consumed by <WeatherGlyph>.
@@ -193,8 +211,8 @@ export function buildStatusDesc(riskData, isId) {
   const stations   = riskData?.stations ?? [];
   const wSummary   = riskData?.wilayahSummary ?? [];
 
-  const s1 = [...stations].filter(s => s.ratio >= 1.0).sort((a, b) => b.ratio - a.ratio);
-  const s2 = [...stations].filter(s => s.ratio >= 0.75 && s.ratio < 1.0).sort((a, b) => b.ratio - a.ratio);
+  const s1 = stations.filter(s => postRiskLevel(s) === "SIAGA_1").sort(byPostSeverity);
+  const s2 = stations.filter(s => postRiskLevel(s) === "SIAGA_2").sort(byPostSeverity);
   const dangerW = [...wSummary]
     .filter(w => ["Siaga 1","Siaga 2","Siaga 3"].includes(w.worst_status))
     .sort((a, b) => ({ "Siaga 1":3,"Siaga 2":2,"Siaga 3":1 }[b.worst_status] ?? 0) - ({ "Siaga 1":3,"Siaga 2":2,"Siaga 3":1 }[a.worst_status] ?? 0));
@@ -250,11 +268,11 @@ export function buildStatusDesc(riskData, isId) {
   // so the sentence agrees with the per-wilayah badges right below it.
   const totalSt   = stations.length;
   const alertSt   = s1.length + s2.length;
-  const waspadaSt = stations.filter(s => s.ratio >= 0.5 && s.ratio < 0.75).length;
+  const waspadaSt = stations.filter(s => postRiskLevel(s) === "WASPADA").length;
   const sNote = totalSt === 0
     ? ""
     : alertSt > 0
-    ? (isId ? ` Tapi ${alertSt} pos pantau sudah mendekati batas siaga — pantau terus.` : ` But ${alertSt} post(s) are close to the alert limit — keep watching.`)
+    ? (isId ? ` Tapi ${alertSt} pos pantau sudah mendekati batas siaga — pantau terus.` : ` But ${postsEn(alertSt)} close to the alert limit — keep watching.`)
     : waspadaSt > 0
     ? (isId ? ` Air di ${waspadaSt} dari ${totalSt} pos pantau mulai tinggi (Waspada), tapi belum mendekati batas siaga.` : ` Water is getting high at ${waspadaSt} of ${totalSt} posts (Watch), but not near the alert limit.`)
     : (isId ? ` Semua ${totalSt} pos pantau dalam batas normal.` : ` All ${totalSt} monitoring posts are normal.`);
@@ -345,14 +363,14 @@ export function stationWilayah(s) {
 }
 
 /* All 5 Jakarta wilayah (even with no posts) plus the upstream group when it
-   has posts. Each group: { key, stations (highest first), maxRatio }. */
+   has posts. Each group: { key, stations (worst first), worst, maxRatio }. */
 export function groupStationsByWilayah(stations = []) {
   const byKey = {};
   for (const s of stations) (byKey[stationWilayah(s)] ??= []).push(s);
   const keys = [...JAKARTA_WILAYAH, ...(byKey[UPSTREAM_GROUP] ? [UPSTREAM_GROUP] : [])];
   return keys.map((key) => {
-    const list = [...(byKey[key] ?? [])].sort((a, b) => b.ratio - a.ratio);
-    return { key, stations: list, maxRatio: list.length ? list[0].ratio : null };
+    const list = [...(byKey[key] ?? [])].sort(byPostSeverity);
+    return { key, stations: list, worst: list[0] ?? null, maxRatio: list.length ? Math.max(...list.map((s) => s.ratio ?? 0)) : null };
   });
 }
 

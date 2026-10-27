@@ -153,16 +153,24 @@ def _station_location_label(station: dict) -> str:
     return nama
 
 
-def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None):
+def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None, lang="id"):
+    """Plain-language reading of the level, in Indonesian (default) or English."""
+    en = lang == "en"
+
+    def tr(id_text, en_text):
+        return en_text if en else id_text
+
     bmkg_source = diagnostics.get("bmkg_source", "no_alert")
     temporal_ready = diagnostics.get("temporal_features_ready", False)
     water_level_records = diagnostics.get("water_level_records", 0)
     stations = diagnostics.get("stations_summary") or []
 
     if risk_level == "UNKNOWN":
-        return (
+        return tr(
             "Data saat ini belum cukup atau tidak wajar untuk menilai risiko banjir secara otomatis. "
-            "Ikuti informasi resmi BPBD DKI Jakarta dan BMKG sampai data pulih."
+            "Ikuti informasi resmi BPBD DKI Jakarta dan BMKG sampai data pulih.",
+            "The current data is too sparse or implausible to judge the flood risk automatically. "
+            "Follow official updates from BPBD DKI Jakarta and BMKG until the data is back.",
         )
 
     elevated = [s for s in stations if "Siaga" in s.get("status_siaga", "")]
@@ -178,56 +186,63 @@ def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None):
             elif w.get("tma_count", 0) > 0:
                 normal_wilayah.append(w)
 
+    if top_station:
+        label = _station_location_label(top_station)
+        siaga = _clean_siaga(top_station["status_siaga"])
+        height = f"{top_station.get('tinggi_air', 0):.0f} cm"
+
     if risk_level == "DANGER":
         loc_context = ""
         if top_station:
-            siaga = _clean_siaga(top_station["status_siaga"])
-            loc_context = (
-                f" Stasiun {_station_location_label(top_station)} mencatat {siaga} "
-                f"dengan TMA {top_station.get('tinggi_air', 0):.0f} cm."
-            )
+            loc_context = tr(f" Stasiun {label} mencatat {siaga} dengan TMA {height}.",
+                             f" Post {label} reads {siaga} at {height}.")
         if bmkg_source == "observed_alerts" and water_level_records > 0:
-            return (
+            return tr(
                 f"Risiko tinggi terdeteksi - sinyal cuaca ekstrem dikonfirmasi alert BMKG "
                 f"dan diperkuat kondisi muka air.{loc_context} "
-                "Potensi banjir konsisten dengan indikator lapangan, bukan hanya prediksi statistik."
+                "Potensi banjir konsisten dengan indikator lapangan, bukan hanya prediksi statistik.",
+                f"High risk - extreme weather confirmed by a BMKG alert and backed by the water levels.{loc_context} "
+                "The flood risk matches what the posts measure, not only a statistical forecast.",
             )
-        return (
+        return tr(
             f"Risiko tinggi dari kombinasi hujan intens, akumulasi temporal, dan sinyal hidrologi.{loc_context} "
-            "Potensi genangan atau banjir meningkat dalam waktu dekat."
+            "Potensi genangan atau banjir meningkat dalam waktu dekat.",
+            f"High risk from heavy rain, rain building up over time and the water levels together.{loc_context} "
+            "Waterlogging or flooding is getting more likely soon.",
         )
 
     if risk_level == "WARNING":
         loc_context = ""
         if top_station:
-            siaga = _clean_siaga(top_station["status_siaga"])
-            loc_context = (
-                f" {_station_location_label(top_station)} di {siaga} "
-                f"(TMA {top_station.get('tinggi_air', 0):.0f} cm, "
-                f"rasio {top_station.get('ratio', 0):.0%} ambang Siaga 1)."
-            )
+            ratio = f"{top_station.get('ratio', 0):.0%}"
+            loc_context = tr(f" {label} di {siaga} (TMA {height}, rasio {ratio} ambang Siaga 1).",
+                             f" {label} is at {siaga} ({height}, {ratio} of its Siaga 1 level).")
         elif alert_wilayah:
             names = ", ".join(w["wilayah"] for w in alert_wilayah[:2])
-            loc_context = f" Area terdampak: {names}."
+            loc_context = tr(f" Area terdampak: {names}.", f" Areas affected: {names}.")
         if temporal_ready:
-            return (
+            return tr(
                 f"Pola mulai mengarah ke banjir dari akumulasi hujan dan perubahan kondisi air.{loc_context} "
-                "Belum kritis, tetapi perlu pemantauan lebih rapat."
+                "Belum kritis, tetapi perlu pemantauan lebih rapat.",
+                f"Rain building up and changing water levels are starting to point towards flooding.{loc_context} "
+                "Not critical yet, but it needs closer watching.",
             )
-        return (
+        return tr(
             f"Sinyal kewaspadaan awal dari cuaca dan hidrologi, bukti temporal belum sepenuhnya kuat.{loc_context} "
-            "Cocok untuk siaga operasional, bukan alarm penuh."
+            "Cocok untuk siaga operasional, bukan alarm penuh.",
+            f"Early warning signs from the weather and the rivers; the trend is not yet clear.{loc_context} "
+            "A reason to be ready, not a full alarm.",
         )
 
     if risk_level == "PRE_ALERT":
         loc_context = ""
         if top_station:
-            loc_context = (
-                f" {_station_location_label(top_station)} mencatat {_clean_siaga(top_station['status_siaga'])}."
-            )
-        return (
+            loc_context = tr(f" {label} mencatat {siaga}.", f" {label} reads {siaga}.")
+        return tr(
             f"Ada sinyal awal di atas kondisi normal dari muka air, cuaca, atau data yang tidak biasa.{loc_context} "
-            "Belum mengarah ke banjir, tetapi perlu diwaspadai dan dipantau lebih sering."
+            "Belum mengarah ke banjir, tetapi perlu diwaspadai dan dipantau lebih sering.",
+            f"Early signs above normal from the water levels, the weather or unusual data.{loc_context} "
+            "Not heading for a flood yet, but worth watching more often.",
         )
 
     monitored_areas = []
@@ -235,20 +250,22 @@ def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None):
         monitored_areas = [w["wilayah"] for w in normal_wilayah[:3]]
     loc_context = ""
     if monitored_areas:
-        loc_context = f" Sensor di {', '.join(monitored_areas)} terpantau normal."
+        areas = ", ".join(monitored_areas)
+        loc_context = tr(f" Sensor di {areas} terpantau normal.", f" Posts in {areas} read normal.")
     elif water_level_records > 0:
-        loc_context = f" {water_level_records} stasiun TMA terpantau dalam batas aman."
+        loc_context = tr(f" {water_level_records} stasiun TMA terpantau dalam batas aman.",
+                         f" {water_level_records} water-level posts are within safe limits.")
     elevated_note = ""
     if top_station:
-        siaga = _clean_siaga(top_station["status_siaga"])
-        elevated_note = (
-            f" Catatan: {_station_location_label(top_station)} tercatat {siaga} "
-            f"(TMA {top_station.get('tinggi_air', 0):.0f} cm) - pantau perkembangan."
-        )
-    return (
+        elevated_note = tr(f" Catatan: {label} tercatat {siaga} (TMA {height}) - pantau perkembangan.",
+                           f" Note: {label} reads {siaga} ({height}) - keep an eye on it.")
+    return tr(
         f"Belum ada indikasi kuat banjir dari kombinasi cuaca, alert resmi, dan kondisi air saat ini.{loc_context}"
         f"{elevated_note} "
-        "Monitoring tetap diperlukan karena situasi dapat berubah cepat di wilayah urban padat seperti Jakarta."
+        "Monitoring tetap diperlukan karena situasi dapat berubah cepat di wilayah urban padat seperti Jakarta.",
+        f"No strong sign of flooding from the weather, official alerts and water levels right now.{loc_context}"
+        f"{elevated_note} "
+        "Keep checking: conditions can change fast in a dense city like Jakarta.",
     )
 
 
@@ -549,6 +566,7 @@ def predict_realtime_native(
             "trace": decision.decision_trace,
         },
         "risk_interpretation": _risk_interpretation(risk_level, engineered.diagnostics, wilayah_summary),
+        "risk_interpretation_en": _risk_interpretation(risk_level, engineered.diagnostics, wilayah_summary, lang="en"),
         "recommended_action": _recommended_action(risk_level, wilayah_summary),
         "risk_thresholds": thresholds,
         # ISO-8601 UTC timestamp when the sensor snapshot was built.

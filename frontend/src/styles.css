@@ -519,6 +519,16 @@ button, input, select, textarea { font-family: inherit; }
   pointer-events: none;
 }
 .map-legend button { pointer-events: auto; }
+.map-legend-toggle {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  width: 100%; min-height: 28px; margin-bottom: 2px; padding: 0;
+  background: none; border: 0; cursor: pointer;
+  font: inherit; font-size: 0.8rem; font-weight: 700; color: var(--text);
+}
+.map-legend-chevron { color: var(--muted); transition: transform 0.15s var(--ease-out); }
+.map-legend.is-collapsed { padding: 0.3rem 0.75rem; }
+.map-legend.is-collapsed .map-legend-toggle { margin-bottom: 0; }
+.map-legend.is-collapsed .map-legend-chevron { transform: rotate(-90deg); }
 .legend-row {
   display: flex; align-items: center; gap: 6px;
   font-size: 0.76rem; color: var(--muted); white-space: nowrap;
@@ -979,7 +989,6 @@ button, input, select, textarea { font-family: inherit; }
 }
 .team-role.lead   { color: var(--cyan); background: var(--cyan-soft); border: 1px solid var(--cyan-border); }
 .team-role.member { color: var(--safe); background: var(--safe-soft); border: 1px solid var(--safe-border); }
-.team-role.mentor { color: var(--wsp);  background: var(--wsp-soft);  border: 1px solid var(--wsp-border); }
 .team-name { font-size: 1rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; line-height: 1.25; }
 .li-btn {
   display: inline-flex; align-items: center; gap: 0.4rem;

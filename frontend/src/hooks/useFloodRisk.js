@@ -46,6 +46,7 @@ export function useFloodRisk() {
           return v > 0 && v < 1 ? 1 : Math.round(v);
         })(),
         interpretation: json.risk_interpretation ?? "",
+        interpretationEn: json.risk_interpretation_en ?? "",
         humidity: json.features?.humidity_pct ?? null,
         temperature: json.features?.temperature_c ?? null,
         waterLevelRatio: json.features?.water_level_ratio ?? null,
