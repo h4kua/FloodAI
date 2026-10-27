@@ -2,6 +2,47 @@ import { useState, useRef, useEffect } from "react";
 import { useChat } from "../hooks/useChat";
 import { useT, useApp } from "../lib/appContext";
 
+/* AI answers arrive as light markdown: **bold**, "* " or "- " bullets,
+   "1. " steps, "### " headings. They are rendered as text elements, so no
+   asterisks show and no HTML from the model is ever injected. */
+function inline(text, keyBase) {
+  return text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean).map((part, i) =>
+    part.length > 4 && part.startsWith("**") && part.endsWith("**")
+      ? <strong key={`${keyBase}-${i}`}>{part.slice(2, -2)}</strong>
+      : part.replace(/\*(\S[^*]*?)\*/g, "$1"));
+}
+
+function MessageText({ text }) {
+  const blocks = [];
+  let list = null;
+  for (const raw of text.split("\n")) {
+    const line = raw.trim();
+    const bullet = line.match(/^[*\-•]\s+(.*)$/);
+    const step = line.match(/^\d+[.)]\s+(.*)$/);
+    if (bullet || step) {
+      const type = bullet ? "ul" : "ol";
+      if (!list || list.type !== type) { list = { type, items: [] }; blocks.push(list); }
+      list.items.push((bullet || step)[1]);
+      continue;
+    }
+    list = null;
+    if (!line || /^[-*_]{3,}$/.test(line)) continue;   // blank lines and rules
+    const heading = line.match(/^#{1,6}\s+(.*)$/);
+    blocks.push({ type: heading ? "heading" : "p", text: heading ? heading[1] : line });
+  }
+  return (
+    <div className="msg-text">
+      {blocks.map((b, i) => {
+        if (b.type === "ul" || b.type === "ol") {
+          const List = b.type;
+          return <List key={i}>{b.items.map((item, j) => <li key={j}>{inline(item, `${i}-${j}`)}</li>)}</List>;
+        }
+        return <p key={i} className={b.type === "heading" ? "msg-heading" : undefined}>{inline(b.text, i)}</p>;
+      })}
+    </div>
+  );
+}
+
 export default function ChatBot({ riskContext = {} }) {
   const t = useT();
   const { lang } = useApp();
@@ -60,7 +101,7 @@ export default function ChatBot({ riskContext = {} }) {
             {messages.map((m, i) => (
               <div key={i} className={`msg ${m.role}`}>
                 <div className="msg-bubble">
-                  <pre>{m.content}</pre>
+                  {m.role === "assistant" ? <MessageText text={m.content} /> : <pre>{m.content}</pre>}
                   {/* Show KB badge on offline replies */}
                   {m.role === "assistant" && m.isAI === false && i > 0 && (
                     <span style={{
