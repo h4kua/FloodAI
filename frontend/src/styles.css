@@ -781,16 +781,41 @@ button, input, select, textarea { font-family: inherit; }
 .route-select:focus, .route-input:focus { border-color: var(--cyan); }
 .route-input::placeholder { color: var(--muted-2); }
 .route-input:disabled { opacity: 0.5; cursor: not-allowed; }
-/* Route summary — distance, time, and the share through flood-prone areas */
+/* Laporan warga */
+.reports-note { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin: 0 0 0.75rem; }
+.reports-sent { font-size: 0.85rem; color: var(--safe); font-weight: 600; margin: 0.5rem 0; }
+.reports-form { display: flex; flex-direction: column; gap: 0.625rem; margin: 0.75rem 0; }
+.reports-form textarea { resize: vertical; font-family: inherit; }
+.reports-severity { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.reports-severity .risk-badge { cursor: pointer; opacity: 0.45; }
+.reports-severity .risk-badge.active { opacity: 1; box-shadow: 0 0 0 2px currentColor; }
+.reports-count { align-self: flex-end; font-size: 0.75rem; color: var(--muted-2); margin-top: -0.4rem; }
+.reports-actions { display: flex; gap: 0.625rem; flex-wrap: wrap; }
+.reports-error { color: var(--s1); font-size: 0.82rem; margin: 0; }
+.reports-filter-row { display: flex; gap: 0.5rem; margin: 0.75rem 0; }
+.report-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.625rem; }
+.report-item { border: 1px solid var(--line); border-radius: var(--r); padding: 0.75rem 0.875rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.report-pinned { border-color: var(--cyan); }
+.report-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.report-text { font-size: 0.9rem; color: var(--text); line-height: 1.5; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.report-meta { font-size: 0.78rem; color: var(--muted); margin: 0; }
+
+/* Route summary — a strip under the map (the map's corners hold floating buttons) */
 .route-summary {
-  position: absolute; bottom: 12px; right: 12px; z-index: 1000; max-width: min(320px, calc(100% - 24px));
-  background: var(--panel); border: 1px solid var(--line-2); border-radius: 8px;
-  box-shadow: var(--shadow-sm); padding: 0.75rem 1rem; font-size: 0.8rem;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 1rem;
+  padding: 0.75rem 1rem; border-top: 1px solid var(--line); background: var(--panel);
+  font-size: 0.85rem;
 }
-.route-summary p { margin: 0.35rem 0 0; line-height: 1.4; }
+.route-summary p { margin: 0; line-height: 1.4; }
 .route-summary-risk { color: var(--s1); font-weight: 600; }
 .route-summary-safe { color: var(--safe); font-weight: 600; }
 .route-summary-note { color: var(--muted); }
+.route-gmaps {
+  display: inline-block; margin-left: auto; padding: 0.4rem 0.8rem;
+  border-radius: var(--r-sm); background: var(--cyan); color: var(--on-accent);
+  font-weight: 700; text-decoration: none;
+}
+.route-gmaps:hover { filter: brightness(1.1); }
 
 /* Navigation instruction panel */
 .nav-panel {

@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   activeFloodPoints,
   distanceToSegmentM,
+  googleMapsUrl,
   riversForPost,
   riversOnAlert,
   safestRouteIndex,
@@ -62,6 +63,21 @@ test("a route is split into risky and safe runs around an active point", () => {
   assert.ok(riskyM > 3500 && riskyM < 5000, riskyM);
   assert.ok(totalM > 8500);
   assert.equal(pointsHit.length, 1);
+});
+
+test("the Google Maps link follows the chosen route through waypoints", () => {
+  const coords = Array.from({ length: 11 }, (_, i) => [-6.1 - i * 0.01, 106.7 + i * 0.01]);
+  const url = new URL(googleMapsUrl({ lat: -6.1, lng: 106.7 }, { lat: -6.2, lng: 106.8 }, coords, 4));
+  assert.equal(url.origin + url.pathname, "https://www.google.com/maps/dir/");
+  assert.equal(url.searchParams.get("api"), "1");
+  assert.equal(url.searchParams.get("origin"), "-6.10000,106.70000");
+  assert.equal(url.searchParams.get("destination"), "-6.20000,106.80000");
+  assert.equal(url.searchParams.get("waypoints").split("|").length, 4);
+});
+
+test("a two-point route needs no waypoints", () => {
+  const url = new URL(googleMapsUrl({ lat: -6.1, lng: 106.7 }, { lat: -6.2, lng: 106.8 }, [[-6.1, 106.7], [-6.2, 106.8]]));
+  assert.equal(url.searchParams.get("waypoints"), null);
 });
 
 test("the safest alternative wins; near-ties go to the faster one", () => {

@@ -9,6 +9,7 @@ the frontend bundle. Rate-limited by IP to prevent spam (api/ip_rate_limit.py).
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -20,10 +21,14 @@ from services.shelter_locator import haversine_m
 
 router = APIRouter(tags=["community-reports"])
 
+# Reports are unverified first-hand observations: they are shown as such and only
+# while they can still describe the present. They never feed the flood status.
+REPORT_MAX_AGE = timedelta(hours=6)
+
 
 class CommunityReportIn(BaseModel):
     severity: Literal["alert", "safe"]
-    message: str = Field(min_length=1, max_length=2000)
+    message: str = Field(min_length=1, max_length=500)
     lat: float
     lon: float
     reporter_name: Optional[str] = Field(default=None, max_length=80)
@@ -61,7 +66,8 @@ async def get_reports(
     near_lon: Optional[float] = Query(default=None),
     limit: int = Query(default=50, ge=1, le=200),
 ) -> dict:
-    reports = await list_reports(severity=severity, verified=verified, limit=limit)
+    since = (datetime.now(timezone.utc) - REPORT_MAX_AGE).isoformat()
+    reports = await list_reports(severity=severity, verified=verified, since=since, limit=limit)
 
     if near_lat is not None and near_lon is not None and reports:
         distances = [
@@ -74,4 +80,8 @@ async def get_reports(
             for r in reports:
                 r["is_pinned"] = r["id"] == nearest_id
 
-    return {"reports": reports, "count": len(reports)}
+    return {
+        "reports": reports,
+        "count": len(reports),
+        "max_age_hours": int(REPORT_MAX_AGE.total_seconds() // 3600),
+    }

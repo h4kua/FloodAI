@@ -116,6 +116,27 @@ export function splitRouteByRisk(coords, points, radiusM = RISK_RADIUS_M) {
 }
 
 /**
+ * A Google Maps directions link that follows the given route: up to `stops`
+ * evenly spaced points along it are passed as waypoints, so Google does not
+ * pick its own (possibly flooded) way between the two ends.
+ */
+export function googleMapsUrl(origin, dest, coords = [], stops = 4) {
+  const ll = ([lat, lng]) => `${lat.toFixed(5)},${lng.toFixed(5)}`;
+  const params = new URLSearchParams({
+    api: "1",
+    origin: ll([origin.lat, origin.lng]),
+    destination: ll([dest.lat, dest.lng]),
+    travelmode: "driving",
+  });
+  if (coords.length > 2 && stops > 0) {
+    const picks = Array.from({ length: stops }, (_, i) =>
+      coords.at(Math.round(((i + 1) * (coords.length - 1)) / (stops + 1))));
+    params.set("waypoints", picks.map(ll).join("|"));
+  }
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
+}
+
+/**
  * Among alternative routes ({ coords, duration, … }), the one with the least
  * risky distance; within 100 m of that, the fastest. Returns its index.
  */

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { MapContainer, CircleMarker, Polyline, Popup, useMap, useMapEvents } from "react-leaflet";
 import { useApp, useT } from "../lib/appContext";
-import { safestRouteIndex, splitRouteByRisk } from "../lib/floodRoads";
+import { googleMapsUrl, safestRouteIndex, splitRouteByRisk } from "../lib/floodRoads";
 import { ActiveFloodAreas, StationMarkers } from "./mapLayers";
 import InvalidateMapSize from "./InvalidateMapSize";
 import BaseTiles from "./BaseTiles";
@@ -142,9 +142,11 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
   useEffect(() => { fetchRoute(); }, [fetchRoute]);
 
   // Re-scored whenever the live flood data changes, without refetching routes.
+  // No route without both ends: a destination can be cleared (e.g. "another
+  // place" chosen but not typed yet) one render before the routes reset.
   const scored = useMemo(
-    () => routes.map((r) => ({ ...r, ...splitRouteByRisk(r.coords, floodPoints) })),
-    [routes, floodPoints],
+    () => (origin && dest ? routes.map((r) => ({ ...r, ...splitRouteByRisk(r.coords, floodPoints) })) : []),
+    [routes, floodPoints, origin, dest],
   );
   const chosenIdx = safestRouteIndex(scored);
   const chosen = chosenIdx >= 0 ? scored[chosenIdx] : null;
@@ -307,6 +309,10 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
                   {isId ? `Memutar ±${detourMin} mnt untuk menghindari area rawan` : `About ${detourMin} min longer to avoid flood-prone areas`}
                 </p>
               )}
+              {/* Hand the chosen route to Google Maps for turn-by-turn navigation */}
+              <a className="route-gmaps" href={googleMapsUrl(origin, dest, chosen.coords)} target="_blank" rel="noopener noreferrer">
+                {isId ? "Buka di Google Maps" : "Open in Google Maps"} ↗
+              </a>
             </>
           )}
         </div>

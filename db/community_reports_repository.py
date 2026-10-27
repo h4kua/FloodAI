@@ -58,9 +58,10 @@ def _list_reports_sync(
     *,
     severity: Optional[str] = None,
     verified: Optional[bool] = None,
+    since: Optional[str] = None,
     limit: int = 50,
 ) -> list[dict]:
-    """Return recent reports, newest first. Returns [] on any failure."""
+    """Return recent reports (created at or after ``since``, ISO-8601), newest first. [] on failure."""
     try:
         client = get_supabase_client()
         query = client.table(_TABLE).select("*")
@@ -68,6 +69,8 @@ def _list_reports_sync(
             query = query.eq("severity", severity)
         if verified is not None:
             query = query.eq("verified", verified)
+        if since is not None:
+            query = query.gte("created_at", since)
         result = query.order("created_at", desc=True).limit(limit).execute()
         return result.data or []
     except Exception as exc:  # noqa: BLE001 — repository must never raise.
@@ -102,7 +105,10 @@ async def list_reports(
     *,
     severity: Optional[str] = None,
     verified: Optional[bool] = None,
+    since: Optional[str] = None,
     limit: int = 50,
 ) -> list[dict]:
     """Async load of recent reports, newest first. Never raises."""
-    return await asyncio.to_thread(_list_reports_sync, severity=severity, verified=verified, limit=limit)
+    return await asyncio.to_thread(
+        _list_reports_sync, severity=severity, verified=verified, since=since, limit=limit,
+    )

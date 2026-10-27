@@ -74,8 +74,9 @@ function suggestionLabel(s) {
   return sub ? `${main}, ${sub}` : main;
 }
 
-// The "Rumah" entry in the destination dropdown.
+// Special entries in the destination dropdown (shelters use their ids).
 const HOME_OPTION = "__home";
+const OTHER_OPTION = "__other";
 
 // "Kembangan Selatan, Kembangan, Jakarta Barat" → "Kembangan Selatan"
 const shortPlace = (name) => (name || "").split(",")[0].trim();
@@ -92,6 +93,46 @@ function Suggestions({ items, onPick }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// An address field with place suggestions, used for the home and any-place destinations.
+function PlaceField({ value, onText, onPick, placeholder }) {
+  const [sugg, setSugg] = useState([]);
+  const [show, setShow] = useState(false);
+  const timer = useRef(null);
+  const onChange = (e) => {
+    const v = e.target.value;
+    onText(v);
+    clearTimeout(timer.current);
+    if (v.trim().length >= 3) {
+      timer.current = setTimeout(async () => {
+        const data = await searchPlaces(v);
+        setSugg(data);
+        setShow(data.length > 0);
+      }, 400);
+    } else {
+      setSugg([]);
+      setShow(false);
+    }
+  };
+  return (
+    <div className="route-field route-field-sub">
+      <input
+        className="route-input"
+        type="text"
+        autoFocus
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        onFocus={() => sugg.length > 0 && setShow(true)}
+        onBlur={() => setTimeout(() => setShow(false), 180)}
+        onKeyDown={(e) => { if (e.key === "Escape") setShow(false); }}
+      />
+      {show && sugg.length > 0 && (
+        <Suggestions items={sugg} onPick={(sg) => { setSugg([]); setShow(false); onPick(sg); }} />
+      )}
     </div>
   );
 }
@@ -128,15 +169,15 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const config       = humanizeRiskLevel(riskLevel, lang);
   const selectedDest = destId ? DESTINATIONS.find((d) => d.id === destId) ?? null : null;
 
-  // Destination: a shelter (default, nearest) or home.
-  const [destMode, setDestMode]         = useState("shelter");
+  // Destination: home first (the default once saved), any place, or a shelter.
+  const [destMode, setDestMode]         = useState(() => (loadHome() ? "home" : "shelter"));
   const [home, setHome]                 = useState(loadHome);
   const [homeInput, setHomeInput]       = useState(() => loadHome()?.name ?? "");
-  const [homeSugg, setHomeSugg]         = useState([]);
-  const [showHomeSugg, setShowHomeSugg] = useState(false);
   const [editingHome, setEditingHome]   = useState(false);
-  const homeDebounceRef = useRef(null);
-  const destination = destMode === "home" ? home : selectedDest;
+  const [other, setOther]               = useState(null);
+  const [otherInput, setOtherInput]     = useState("");
+  const [editingOther, setEditingOther] = useState(false);
+  const destination = { home, other, shelter: selectedDest }[destMode];
   const shelterChosen = destMode === "shelter" && selectedDest;
 
   // Shelters nearest-first from where the user starts.
@@ -148,12 +189,14 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
       : DESTINATIONS
   ), [userLocation]);
   const nearestId = userLocation ? shelterOptions[0].id : null;
-  const destValue = destMode === "home" ? HOME_OPTION : (destId ?? "");
+  const destValue = { home: HOME_OPTION, other: OTHER_OPTION }[destMode] ?? (destId ?? "");
 
   const handleDestChange = (e) => {
     const value = e.target.value;
     if (value === HOME_OPTION) {
       setDestMode("home");
+    } else if (value === OTHER_OPTION) {
+      setDestMode("other");
     } else {
       setDestMode("shelter");
       setDestId(value);
@@ -174,22 +217,6 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     setShowSugg(data.length > 0);
   };
 
-  const handleHomeInputChange = (e) => {
-    const val = e.target.value;
-    setHomeInput(val);
-    clearTimeout(homeDebounceRef.current);
-    if (val.trim().length >= 3) {
-      homeDebounceRef.current = setTimeout(async () => {
-        const data = await searchPlaces(val);
-        setHomeSugg(data);
-        setShowHomeSugg(data.length > 0);
-      }, 400);
-    } else {
-      setHomeSugg([]);
-      setShowHomeSugg(false);
-    }
-  };
-
   const handleSelectHome = (s) => {
     const name = suggestionLabel(s);
     const next = { lat: parseFloat(s.lat), lng: parseFloat(s.lon), name, isHome: true };
@@ -197,8 +224,14 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     saveHome(next);
     setEditingHome(false);
     setHomeInput(name);
-    setHomeSugg([]);
-    setShowHomeSugg(false);
+  };
+
+  // Any place, e.g. a route the user only wants to drive through; not saved.
+  const handleSelectOther = (s) => {
+    const name = suggestionLabel(s);
+    setOther({ lat: parseFloat(s.lat), lng: parseFloat(s.lon), name });
+    setEditingOther(false);
+    setOtherInput(name);
   };
 
   const handleInputChange = (e) => {
@@ -346,7 +379,11 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
               </svg>
             </span>
             <span className="evac-primary-cta-text">
-              <strong>{locating ? t("evac.locatingYou") : t("evac.ctaNearest")}</strong>
+              <strong>
+                {locating ? t("evac.locatingYou")
+                  : destMode === "home" ? (lang === "en" ? "Safe route home" : "Rute aman pulang ke rumah")
+                  : t("evac.ctaNearest")}
+              </strong>
               <small>{t("evac.ctaNearestSub")}</small>
             </span>
           </button>
@@ -390,40 +427,40 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
               <label className="route-label" htmlFor="route-to">{t("evac.shelter")}</label>
               <div className="route-field">
                 <select id="route-to" className="route-select" value={destValue} onChange={handleDestChange}>
-                  {shelterOptions.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.id === nearestId ? `${d.name} (${lang === "en" ? "nearest" : "terdekat"})` : d.name}
-                    </option>
-                  ))}
                   <option value={HOME_OPTION}>
                     {home ? `${lang === "en" ? "Home" : "Rumah"} — ${shortPlace(home.name)}` : (lang === "en" ? "Home…" : "Rumah…")}
                   </option>
+                  <option value={OTHER_OPTION}>
+                    {other ? `${shortPlace(other.name)}` : (lang === "en" ? "Another place…" : "Tujuan lain…")}
+                  </option>
+                  <optgroup label={lang === "en" ? "Shelters (nearest first)" : "Tempat pengungsian (terdekat dulu)"}>
+                    {shelterOptions.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.id === nearestId ? `${d.name} (${lang === "en" ? "nearest" : "terdekat"})` : d.name}
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
               </div>
             </>
           )}
 
           {userLocation && destMode === "home" && (home === null || editingHome) && (
-            <div className="route-field route-field-sub">
-              <input
-                className="route-input"
-                type="text"
-                autoFocus
-                placeholder={lang === "en" ? "Your home address…" : "Alamat rumah Anda…"}
-                value={homeInput}
-                onChange={handleHomeInputChange}
-                onFocus={() => homeSugg.length > 0 && setShowHomeSugg(true)}
-                onBlur={() => setTimeout(() => setShowHomeSugg(false), 180)}
-                onKeyDown={(e) => { if (e.key === "Escape") setShowHomeSugg(false); }}
-              />
-              {showHomeSugg && homeSugg.length > 0 && (
-                <Suggestions items={homeSugg} onPick={handleSelectHome} />
-              )}
-            </div>
+            <PlaceField value={homeInput} onText={setHomeInput} onPick={handleSelectHome}
+              placeholder={lang === "en" ? "Your home address…" : "Alamat rumah Anda…"} />
           )}
           {userLocation && destMode === "home" && home && !editingHome && (
             <button className="route-link route-field-sub" onClick={() => setEditingHome(true)}>
               {lang === "en" ? "Change home address" : "Ubah alamat rumah"}
+            </button>
+          )}
+          {userLocation && destMode === "other" && (other === null || editingOther) && (
+            <PlaceField value={otherInput} onText={setOtherInput} onPick={handleSelectOther}
+              placeholder={lang === "en" ? "Where to? Any address in Jakarta…" : "Mau ke mana? Alamat apa saja di Jakarta…"} />
+          )}
+          {userLocation && destMode === "other" && other && !editingOther && (
+            <button className="route-link route-field-sub" onClick={() => setEditingOther(true)}>
+              {lang === "en" ? "Change destination" : "Ubah tujuan"}
             </button>
           )}
         </div>
@@ -469,7 +506,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
               <>
                 <li><i className="dot" style={{ background: EVAC_COLORS.from }} />{t("evac.leg.from")}</li>
                 <li><i className="dot" style={{ background: EVAC_COLORS.dest }} />
-                  {destMode === "home" ? (lang === "en" ? "Home" : "Rumah") : t("evac.leg.shelter")}</li>
+                  {{ home: lang === "en" ? "Home" : "Rumah", other: lang === "en" ? "Destination" : "Tujuan" }[destMode] ?? t("evac.leg.shelter")}</li>
                 <li><i className="line" style={{ background: EVAC_COLORS.safe }} />{lang === "en" ? "Road likely clear" : "Jalan relatif aman"}</li>
                 <li><i className="line" style={{ background: EVAC_COLORS.risky }} />{lang === "en" ? "Road through a flood-prone area" : "Jalan lewat area rawan banjir"}</li>
               </>

@@ -598,11 +598,14 @@ app.include_router(chat_router)
 app.include_router(crew_analysis_router)
 app.include_router(safe_arrival_router)
 
-# /reports, /sos, /family/* are public write endpoints with no UI since the
-# Laporan, SOS and Keluarga pages were removed. They stay off unless
-# COMMUNITY_API_ENABLED=true re-exposes them deliberately.
-if os.getenv("COMMUNITY_API_ENABLED", "false").lower() == "true":
+# /reports backs the Laporan page: on unless COMMUNITY_REPORTS_ENABLED=false.
+# Reports are shown as unverified, expire after 6 hours and never feed the status.
+if os.getenv("COMMUNITY_REPORTS_ENABLED", "true").lower() != "false":
     app.include_router(community_reports_router)
+
+# /sos and /family/* are public write endpoints with no UI since the SOS and
+# Keluarga pages were removed. They stay off unless COMMUNITY_API_ENABLED=true.
+if os.getenv("COMMUNITY_API_ENABLED", "false").lower() == "true":
     app.include_router(family_router)
     app.include_router(sos_router)
 

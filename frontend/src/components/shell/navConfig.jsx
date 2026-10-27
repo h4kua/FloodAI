@@ -1,5 +1,5 @@
 /* ── Shared navigation config ──────────────────────────────────────────────
-   Single source of truth for the app's 3 destinations, consumed by both
+   Single source of truth for the app's 4 destinations, consumed by both
    TopBar (desktop, labels only) and BottomNav (mobile, icon + label).
    `tour` is the data-tour attribute the OnboardingTour anchors to — both
    navs carry it; the tour picks whichever element is visible.
@@ -27,6 +27,16 @@ export const NAV_ITEMS = [
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" {...stroke} aria-hidden="true">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    ),
+  },
+  {
+    id: "reports",
+    labelKey: "nav.reports",
+    tour: "nav-reports",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" {...stroke} aria-hidden="true">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
     ),
   },

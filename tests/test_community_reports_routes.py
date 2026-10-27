@@ -65,4 +65,26 @@ def test_list_reports_filters_by_severity():
     with patch("api.routes.community_reports.list_reports", return_value=[]) as mock_list:
         response = client.get("/reports?severity=alert&verified=true", headers=_HEADERS)
     assert response.status_code == 200
-    mock_list.assert_called_once_with(severity="alert", verified=True, limit=50)
+    kwargs = mock_list.call_args.kwargs
+    assert (kwargs["severity"], kwargs["verified"], kwargs["limit"]) == ("alert", True, 50)
+
+
+def test_list_reports_only_asks_for_the_last_six_hours():
+    from datetime import datetime, timedelta, timezone
+
+    with patch("api.routes.community_reports.list_reports", return_value=[]) as mocked:
+        response = client.get("/reports", headers=_HEADERS)
+    assert response.status_code == 200
+    assert response.json()["max_age_hours"] == 6
+    since = datetime.fromisoformat(mocked.call_args.kwargs["since"])
+    age = datetime.now(timezone.utc) - since
+    assert timedelta(hours=5, minutes=59) < age < timedelta(hours=6, minutes=1)
+
+
+def test_submit_report_rejects_messages_over_500_characters():
+    response = client.post(
+        "/reports",
+        json={"severity": "alert", "message": "x" * 501, "lat": -6.15, "lon": 106.85},
+        headers=_HEADERS,
+    )
+    assert response.status_code == 422
