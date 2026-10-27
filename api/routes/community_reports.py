@@ -9,14 +9,18 @@ the frontend bundle. Rate-limited by IP to prevent spam (api/ip_rate_limit.py).
 
 from __future__ import annotations
 
+import asyncio
+import io
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Literal, Optional
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
+from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field
 
 from api.ip_rate_limit import require_ip_rate_limit
-from db.community_reports_repository import create_report, list_reports
+from db.community_reports_repository import PHOTO_BUCKET, create_report, list_reports, upload_photo
 from services.shelter_locator import haversine_m
 
 router = APIRouter(tags=["community-reports"])
@@ -24,6 +28,34 @@ router = APIRouter(tags=["community-reports"])
 # Reports are unverified first-hand observations: they are shown as such and only
 # while they can still describe the present. They never feed the flood status.
 REPORT_MAX_AGE = timedelta(hours=6)
+
+# Photos: at most 8 MB in, re-encoded to a JPEG of at most 1280 px on the long
+# side. Re-encoding drops all metadata (camera GPS, device) and anything that is
+# not a plain image.
+PHOTO_MAX_UPLOAD_BYTES = 8 * 1024 * 1024
+PHOTO_MAX_SIDE_PX = 1280
+# A small file can still decode to a huge bitmap; refuse anything over ~40 MP
+# (a 512 MB machine) instead of only warning, as Pillow does by default.
+PHOTO_MAX_PIXELS = 40_000_000
+
+
+def _normalise_photo(data: bytes) -> bytes:
+    """Decode an uploaded image and re-encode it as a small, metadata-free JPEG."""
+    with Image.open(io.BytesIO(data)) as img:
+        if img.width * img.height > PHOTO_MAX_PIXELS:
+            raise ValueError("image dimensions too large")
+        img.load()
+        img = img.convert("RGB")
+        img.thumbnail((PHOTO_MAX_SIDE_PX, PHOTO_MAX_SIDE_PX))
+        out = io.BytesIO()
+        img.save(out, format="JPEG", quality=80, optimize=True)
+    return out.getvalue()
+
+
+def _photo_url_prefix() -> str:
+    """Public URL prefix of the report-photos bucket; reports may only link there."""
+    base = (os.getenv("SUPABASE_URL") or "").rstrip("/")
+    return f"{base}/storage/v1/object/public/{PHOTO_BUCKET}/"
 
 
 class CommunityReportIn(BaseModel):
@@ -34,6 +66,26 @@ class CommunityReportIn(BaseModel):
     reporter_name: Optional[str] = Field(default=None, max_length=80)
     device_id: Optional[str] = Field(default=None, max_length=64)
     location_label: Optional[str] = Field(default=None, max_length=160)
+    photo_url: Optional[str] = Field(default=None, max_length=300)
+
+
+@router.post(
+    "/reports/photo",
+    dependencies=[Depends(require_ip_rate_limit)],
+    summary="Upload a photo for a community report; returns its public URL.",
+)
+async def submit_report_photo(photo: UploadFile = File(...)) -> dict:
+    data = await photo.read(PHOTO_MAX_UPLOAD_BYTES + 1)
+    if len(data) > PHOTO_MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail={"error": "photo_too_large"})
+    try:
+        jpeg = await asyncio.to_thread(_normalise_photo, data)
+    except (UnidentifiedImageError, Image.DecompressionBombError, OSError, ValueError) as exc:
+        raise HTTPException(status_code=415, detail={"error": "not_an_image"}) from exc
+    url = await upload_photo(jpeg)
+    if url is None:
+        raise HTTPException(status_code=503, detail={"error": "photo_store_unavailable"})
+    return {"photo_url": url}
 
 
 @router.post(
@@ -42,6 +94,8 @@ class CommunityReportIn(BaseModel):
     summary="Submit a crowdsourced community flood report (no API key required).",
 )
 async def submit_report(payload: CommunityReportIn) -> dict:
+    if payload.photo_url and not payload.photo_url.startswith(_photo_url_prefix()):
+        raise HTTPException(status_code=422, detail={"error": "photo_url_not_from_report_photos"})
     report = await create_report(
         severity=payload.severity,
         message=payload.message,
@@ -50,6 +104,7 @@ async def submit_report(payload: CommunityReportIn) -> dict:
         reporter_name=payload.reporter_name,
         device_id=payload.device_id,
         location_label=payload.location_label,
+        photo_url=payload.photo_url,
     )
     return {"report": report, "saved": report is not None}
 

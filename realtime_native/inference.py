@@ -143,7 +143,9 @@ def _station_location_label(station: dict) -> str:
     if geo:
         return f"{nama} (Kec. {geo['kecamatan']}, {geo['area']})"
     lokasi = station.get("lokasi") or ""
-    wilayah = station.get("wilayah") or ""
+    # The canonical area (realtime_native/wilayah.py) corrects posts DSDA files
+    # under the wrong city; the raw file_export is only a fallback.
+    wilayah = station.get("wilayah_jakarta") or station.get("wilayah") or ""
     if lokasi and wilayah:
         return f"{nama} ({lokasi}, {wilayah})"
     if wilayah:

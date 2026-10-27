@@ -5,6 +5,19 @@ import ChatBot from "../components/ChatBot";
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 const MAX_LEN = 500;
 
+// Shrink a photo in the browser (max 1280 px, JPEG) before upload: quicker on
+// mobile data; the server re-encodes it again and drops all metadata.
+async function shrinkPhoto(file, maxSide = 1280) {
+  const bmp = await createImageBitmap(file);
+  const scale = Math.min(1, maxSide / Math.max(bmp.width, bmp.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bmp.width * scale);
+  canvas.height = Math.round(bmp.height * scale);
+  canvas.getContext("2d").drawImage(bmp, 0, 0, canvas.width, canvas.height);
+  bmp.close?.();
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.8));
+}
+
 function timeAgo(isoString, isId) {
   const mins = Math.round((Date.now() - new Date(isoString).getTime()) / 60000);
   if (mins < 1) return isId ? "baru saja" : "just now";
@@ -36,6 +49,7 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0 }) {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError]   = useState("");
   const [sent, setSent]             = useState(false);
+  const [photo, setPhoto]           = useState(null);   // { file, preview }
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
@@ -81,6 +95,31 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0 }) {
     );
   };
 
+  const choosePhoto = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (photo?.preview) URL.revokeObjectURL(photo.preview);
+    setPhoto({ file, preview: URL.createObjectURL(file) });
+  };
+
+  const removePhoto = () => {
+    if (photo?.preview) URL.revokeObjectURL(photo.preview);
+    setPhoto(null);
+  };
+
+  // Uploads the chosen photo; returns its URL, or throws an Error whose message
+  // is the text to show.
+  const uploadPhoto = async () => {
+    const blob = await shrinkPhoto(photo.file).catch(() => null);
+    if (!blob) throw new Error(isId ? "Foto tidak bisa dibaca. Pilih foto lain." : "The photo could not be read. Choose another one.");
+    const form = new FormData();
+    form.append("photo", blob, "laporan.jpg");
+    const res = await fetch(`${API_BASE}/reports/photo`, { method: "POST", body: form });
+    if (res.status === 429) throw new Error("rate");
+    if (!res.ok) throw new Error(isId ? "Foto gagal diunggah. Hapus fotonya untuk mengirim tanpa foto." : "The photo could not be uploaded. Remove it to send without a photo.");
+    return (await res.json()).photo_url;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!message.trim() || !coords) {
@@ -90,6 +129,7 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0 }) {
     setSubmitting(true);
     setFormError("");
     try {
+      const photoUrl = photo ? await uploadPhoto() : null;
       const res = await fetch(`${API_BASE}/reports`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -99,18 +139,22 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0 }) {
           lat: coords.lat,
           lon: coords.lon,
           reporter_name: name.trim() || null,
+          photo_url: photoUrl,
         }),
       });
       if (res.status === 429) throw new Error("rate");
       if (!res.ok) throw new Error(String(res.status));
       setMessage("");
+      removePhoto();
       setShowForm(false);
       setSent(true);
       await fetchReports();
     } catch (err) {
       setFormError(err.message === "rate"
         ? (isId ? "Terlalu banyak laporan dari jaringan ini. Coba lagi beberapa menit lagi." : "Too many reports from this network. Try again in a few minutes.")
-        : (isId ? "Laporan gagal dikirim. Coba lagi." : "The report could not be sent. Try again."));
+        : /^\d+$/.test(err.message) || !err.message
+        ? (isId ? "Laporan gagal dikirim. Coba lagi." : "The report could not be sent. Try again.")
+        : err.message);
     } finally {
       setSubmitting(false);
     }
@@ -174,6 +218,24 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0 }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
+          {photo ? (
+            <div className="reports-photo-preview">
+              <img src={photo.preview} alt={isId ? "Foto yang akan dikirim" : "Photo to send"} />
+              <button type="button" className="route-link" onClick={removePhoto}>
+                {isId ? "Hapus foto" : "Remove photo"}
+              </button>
+            </div>
+          ) : (
+            <label className="btn btn-ghost reports-photo-pick">
+              {isId ? "Tambah foto (opsional)" : "Add a photo (optional)"}
+              <input type="file" accept="image/*" capture="environment" onChange={choosePhoto} hidden />
+            </label>
+          )}
+          <p className="reports-photo-hint">
+            {isId
+              ? "Foto tampil untuk semua orang. Jangan memotret wajah orang atau pelat nomor dari dekat."
+              : "Photos are public. Avoid close-ups of faces or number plates."}
+          </p>
           <div className="reports-actions">
             <button type="button" className="btn btn-ghost" onClick={handleLocate} disabled={locating}>
               {locating ? (isId ? "Mencari lokasi…" : "Locating…")
@@ -213,6 +275,12 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0 }) {
                 <span className="report-meta">{timeAgo(r.created_at, isId)}</span>
               </div>
               <p className="report-text">{r.message}</p>
+              {r.photo_url && (
+                <a href={r.photo_url} target="_blank" rel="noopener noreferrer" className="report-photo-link">
+                  <img className="report-photo" src={r.photo_url} loading="lazy"
+                    alt={isId ? "Foto dari pelapor" : "Photo from the reporter"} />
+                </a>
+              )}
               <p className="report-meta">
                 {r.reporter_name || (isId ? "Anonim" : "Anonymous")}
                 {" · "}

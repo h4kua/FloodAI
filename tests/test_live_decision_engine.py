@@ -59,10 +59,24 @@ def test_post_at_siaga_3_gives_watch_even_when_the_model_says_safe():
     assert decision.risk_level == "PRE_ALERT"
 
 
-def test_post_above_ninety_percent_of_siaga_1_gives_danger():
-    decision = _decide(_snapshot([_post(2900)]))  # ratio 0.94
+def test_post_at_its_siaga_1_gives_danger():
+    decision = _decide(_snapshot([_post(3150)]))  # its Siaga 1 is 3100
     assert decision.risk_level == "DANGER"
     assert decision.override_trace["authority"] == "L1_SIAGA"
+
+
+def test_post_in_its_siaga_2_band_gives_alert_not_danger():
+    # 94% of Siaga 1, but DSDA's own bands put it at Siaga 2 (2700-3100).
+    decision = _decide(_snapshot([_post(2900)]))
+    assert decision.risk_level == "WARNING"
+
+
+def test_post_below_its_own_siaga_3_sets_no_floor():
+    # 60% of Siaga 1 (1500 of 2500) but under this post's Siaga 3 (1700): DSDA
+    # calls it Normal, so the water level alone must not raise Watch.
+    post = _post(1500, s1=2500, s2=2000, s3=1700, name="P.A. Marina Ancol 1 (Laut)")
+    decision = _decide(_snapshot([post]))
+    assert decision.risk_level == "SAFE"
 
 
 def test_severe_bmkg_alert_with_heavy_rain_gives_at_least_warning():
@@ -135,3 +149,21 @@ def test_endpoint_reports_the_engine_level_and_the_model_view(tmp_path, monkeypa
     assert result["decision"]["layer"]
     assert result["features"]["water_level_ratio"] == pytest.approx(2008 / 3100, abs=1e-3)
     assert result["risk_interpretation"]
+
+
+def test_station_label_uses_the_corrected_area():
+    from realtime_native.inference import _station_location_label
+
+    station = {"nama": "P.A. Contoh Salah Kota", "lokasi": "Kali Baru Timur",
+               "wilayah": "KOTA JAKARTA UTARA", "wilayah_jakarta": "Jakarta Timur"}
+    assert _station_location_label(station) == "P.A. Contoh Salah Kota (Kali Baru Timur, Jakarta Timur)"
+
+
+def test_placeholder_siaga4_does_not_put_every_post_at_siaga_4():
+    from services.hydrology_analyzer import analyze_hydrology
+
+    record = {"nama_pintu_air": "P.A. Contoh", "tinggi_air": "120",
+              "siaga1": "300", "siaga2": "250", "siaga3": "200", "siaga4": "0.1"}
+    (station,) = analyze_hydrology([record]).stations
+    assert station.siaga_level == "normal"
+    assert "siaga4" not in station.thresholds

@@ -53,14 +53,24 @@ export function riversOnAlert(stations = []) {
  * and, for a river, the posts that caused it (`causes`, each post once).
  */
 export function activeFloodPoints(points = [], stations = [], rainfallMmH = 0) {
-  if (rainfallMmH >= HEAVY_RAIN_MM_H) return points.map((p) => ({ ...p, reason: "rain", causes: [] }));
   const byRiver = postsOnAlert(stations);
-  return points.flatMap((p) => {
-    const causes = [...new Map(
-      (p.rivers || []).flatMap((r) => byRiver.get(r) || []).map((s) => [s.nama, s]),
-    ).values()];
-    return causes.length ? [{ ...p, reason: "river", causes }] : [];
-  });
+  const active = rainfallMmH >= HEAVY_RAIN_MM_H
+    ? points.map((p) => ({ ...p, reason: "rain", causes: [] }))
+    : points.flatMap((p) => {
+        const causes = [...new Map(
+          (p.rivers || []).flatMap((r) => byRiver.get(r) || []).map((s) => [s.nama, s]),
+        ).values()];
+        return causes.length ? [{ ...p, reason: "river", causes }] : [];
+      });
+  // A post at Siaga whose river has no BPBD point (e.g. Kali Baru Timur) would
+  // otherwise mark nothing: the area around the post itself counts instead.
+  const covered = new Set(points.flatMap((p) => p.rivers || []));
+  const postAreas = stations
+    .filter(isSiaga)
+    .filter((s) => s.lat != null && s.lon != null)
+    .filter((s) => !riversForPost(s.nama).some((r) => covered.has(r)))
+    .map((s) => ({ kelurahan: null, lat: s.lat, lon: s.lon, rivers: [], reason: "post", causes: [s] }));
+  return [...active, ...postAreas];
 }
 
 // Equirectangular metres around Jakarta's latitude — accurate to well under 1 %
@@ -115,19 +125,23 @@ export function splitRouteByRisk(coords, points, radiusM = RISK_RADIUS_M) {
   return { runs, riskyM, totalM, pointsHit: [...hit] };
 }
 
+// Google Maps URLs accept at most 3 waypoints on mobile browsers (9 elsewhere);
+// more than that and phones may drop the route.
+export const GMAPS_MAX_STOPS = 3;
+
 /**
  * A Google Maps directions link that follows the given route: up to `stops`
  * evenly spaced points along it are passed as waypoints, so Google does not
- * pick its own (possibly flooded) way between the two ends.
+ * pick its own (possibly flooded) way between the two ends. A GPS start is left
+ * out so Google navigates from the phone's live position.
  */
-export function googleMapsUrl(origin, dest, coords = [], stops = 4) {
+export function googleMapsUrl(origin, dest, coords = [], stops = GMAPS_MAX_STOPS) {
   const ll = ([lat, lng]) => `${lat.toFixed(5)},${lng.toFixed(5)}`;
-  const params = new URLSearchParams({
-    api: "1",
-    origin: ll([origin.lat, origin.lng]),
-    destination: ll([dest.lat, dest.lng]),
-    travelmode: "driving",
-  });
+  const params = new URLSearchParams({ api: "1" });
+  if (!origin.isGPS) params.set("origin", ll([origin.lat, origin.lng]));
+  params.set("destination", ll([dest.lat, dest.lng]));
+  params.set("travelmode", "driving");
+  stops = Math.min(stops, GMAPS_MAX_STOPS);
   if (coords.length > 2 && stops > 0) {
     const picks = Array.from({ length: stops }, (_, i) =>
       coords.at(Math.round(((i + 1) * (coords.length - 1)) / (stops + 1))));

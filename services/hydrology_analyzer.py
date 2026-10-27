@@ -44,6 +44,7 @@ _SIAGA_SEVERITY: dict[str, float] = {
 }
 
 _NEAR_THRESHOLD_MARGIN = 0.10   # within 10% of next siaga level value
+_MIN_REAL_THRESHOLD_CM = 1.0    # smaller thresholds are DSDA placeholders
 _RAPID_DELTA_THRESHOLD = 0.10   # normalised ratio delta for rapid escalation
 
 
@@ -108,7 +109,9 @@ def _resolve_thresholds(record: dict, station_id: str) -> dict[str, float]:
         k: _safe_float(record.get(k), defaults.get(k, 0.0))
         for k in ("siaga1", "siaga2", "siaga3", "siaga4")
     }
-    resolved = {k: v for k, v in resolved.items() if v > 0}
+    # Below 1 cm is a placeholder, not an alert level: DSDA sends SIAGA4 = 1 (mm)
+    # for posts without a fourth band, which would put every post "at Siaga 4".
+    resolved = {k: v for k, v in resolved.items() if v >= _MIN_REAL_THRESHOLD_CM}
     # Last resort: an unknown station with no thresholds at all would otherwise
     # report "normal" for any water level. Apply the generic Jakarta standard so
     # high levels (e.g. 280 cm -> Siaga 1) still surface.

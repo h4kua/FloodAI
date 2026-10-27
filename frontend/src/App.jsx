@@ -4,7 +4,8 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import TopBar from "./components/shell/TopBar";
 import BottomNav from "./components/shell/BottomNav";
 import OnboardingTour from "./components/OnboardingTour";
-import { AppContext, useT } from "./lib/appContext";
+import { AppContext, useApp, useT } from "./lib/appContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Beranda is the landing page and ships in the main bundle; the other pages
 // load on first visit.
@@ -14,6 +15,7 @@ const About = lazy(() => import("./pages/About"));
 
 function AppShell() {
   const t = useT();
+  const { lang } = useApp();
   const [page, setPage] = useState("home");
   const [riskContext, setRiskContext] = useState({ level: "waspada", rainfall: 0 });
 
@@ -22,12 +24,14 @@ function AppShell() {
       <TopBar page={page} onNavigate={setPage} />
 
       <main className="main">
-        {page === "home"  && <Home setRiskContext={setRiskContext} riskLevel={riskContext.level} />}
-        <Suspense fallback={<LoadingSpinner />}>
-          {page === "alert" && <Alert riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
-          {page === "reports" && <Reports riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
-          {page === "about" && <About riskContext={riskContext} />}
-        </Suspense>
+        <ErrorBoundary key={page} lang={lang}>
+          {page === "home"  && <Home setRiskContext={setRiskContext} riskLevel={riskContext.level} />}
+          <Suspense fallback={<LoadingSpinner />}>
+            {page === "alert" && <Alert riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
+            {page === "reports" && <Reports riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
+            {page === "about" && <About riskContext={riskContext} />}
+          </Suspense>
+        </ErrorBoundary>
       </main>
 
       <footer className="footer">

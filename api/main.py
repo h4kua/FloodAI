@@ -636,14 +636,28 @@ async def liveness() -> dict:
     return result
 
 
+def _check_snapshot_store() -> None:
+    """One cheap read of the snapshot store (Supabase REST), which the live endpoint uses."""
+    from db.supabase_client import get_supabase_client
+
+    get_supabase_client().table("realtime_snapshot_store").select("id").limit(1).execute()
+
+
 @app.get("/readyz")
 async def readiness() -> dict[str, str]:
+    """
+    Ready when what the live endpoint depends on answers: the snapshot store and
+    the model thresholds. The direct Postgres pool is checked only when the
+    agentic persistence that uses it is on (DB_PERSISTENCE_ENABLED=true).
+    """
     try:
-        with pooled_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT 1")
-                cur.fetchone()
-            conn.commit()
+        await asyncio.to_thread(_check_snapshot_store)
+        if os.getenv("DB_PERSISTENCE_ENABLED", "false").lower() == "true":
+            with pooled_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT 1")
+                    cur.fetchone()
+                conn.commit()
         _canonical_default_thresholds()
         return {"status": "ready"}
     except Exception as exc:

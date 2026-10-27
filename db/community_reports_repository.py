@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import uuid
 from typing import Optional
 
 from db.supabase_client import get_supabase_client
@@ -22,6 +23,22 @@ from db.supabase_client import get_supabase_client
 logger = logging.getLogger("flood.community_reports_repository")
 
 _TABLE = "community_reports"
+
+
+PHOTO_BUCKET = "report-photos"
+
+
+def _upload_photo_sync(jpeg: bytes) -> Optional[str]:
+    """Store a JPEG in the report-photos bucket. Returns its public URL, or None on failure."""
+    try:
+        client = get_supabase_client()
+        name = f"{uuid.uuid4().hex}.jpg"
+        bucket = client.storage.from_(PHOTO_BUCKET)
+        bucket.upload(name, jpeg, {"content-type": "image/jpeg"})
+        return bucket.get_public_url(name).rstrip("?")
+    except Exception as exc:  # noqa: BLE001 — repository must never raise.
+        logger.warning("report_photo_upload_failed error_type=%s error=%s", type(exc).__name__, exc)
+        return None
 
 
 def _create_report_sync(
@@ -33,6 +50,7 @@ def _create_report_sync(
     reporter_name: Optional[str] = None,
     device_id: Optional[str] = None,
     location_label: Optional[str] = None,
+    photo_url: Optional[str] = None,
 ) -> Optional[dict]:
     """Insert a new report. Returns the inserted row dict, or None on failure."""
     try:
@@ -46,6 +64,9 @@ def _create_report_sync(
             "device_id": device_id,
             "location_label": location_label,
         }
+        if photo_url:
+            # Only sent with a photo, so reports still save before migration 110.
+            payload["photo_url"] = photo_url
         result = client.table(_TABLE).insert(payload).execute()
         rows = result.data or []
         return rows[0] if rows else None
@@ -87,6 +108,7 @@ async def create_report(
     reporter_name: Optional[str] = None,
     device_id: Optional[str] = None,
     location_label: Optional[str] = None,
+    photo_url: Optional[str] = None,
 ) -> Optional[dict]:
     """Async insert of a new community report. Never raises."""
     return await asyncio.to_thread(
@@ -98,7 +120,13 @@ async def create_report(
         reporter_name=reporter_name,
         device_id=device_id,
         location_label=location_label,
+        photo_url=photo_url,
     )
+
+
+async def upload_photo(jpeg: bytes) -> Optional[str]:
+    """Async upload of a report photo. Never raises; returns the public URL or None."""
+    return await asyncio.to_thread(_upload_photo_sync, jpeg)
 
 
 async def list_reports(

@@ -42,6 +42,20 @@ test("each active area names the posts that activated it, once each", () => {
   assert.deepEqual(area.causes.map((s) => s.nama), ["P.A. Cengkareng Drain", "P.S. Angke Hulu 1"]);
 });
 
+test("a Siaga post on a river BPBD does not list marks the area around itself", () => {
+  const hek = { nama: "P.A. Hek Kramat Jati 1", status_siaga: "Status : Siaga 3", lat: -6.27, lon: 106.87 };
+  const active = activeFloodPoints(POINTS, [hek], 0);
+  assert.equal(active.length, 1);
+  assert.deepEqual([active[0].reason, active[0].lat, active[0].lon], ["post", -6.27, 106.87]);
+  assert.equal(active[0].causes[0].nama, "P.A. Hek Kramat Jati 1");
+});
+
+test("a Siaga post whose river has BPBD points gets no extra area", () => {
+  const drain = { nama: "P.A. Cengkareng Drain", status_siaga: "Status : Siaga 3", lat: -6.13, lon: 106.73 };
+  const active = activeFloodPoints(POINTS, [drain], 0);
+  assert.deepEqual(active.map((p) => p.reason), ["river"]);
+});
+
 test("heavy rain activates every flood-prone point", () => {
   assert.equal(activeFloodPoints(POINTS, [], 25).length, POINTS.length);
 });
@@ -67,12 +81,19 @@ test("a route is split into risky and safe runs around an active point", () => {
 
 test("the Google Maps link follows the chosen route through waypoints", () => {
   const coords = Array.from({ length: 11 }, (_, i) => [-6.1 - i * 0.01, 106.7 + i * 0.01]);
-  const url = new URL(googleMapsUrl({ lat: -6.1, lng: 106.7 }, { lat: -6.2, lng: 106.8 }, coords, 4));
+  const url = new URL(googleMapsUrl({ lat: -6.1, lng: 106.7 }, { lat: -6.2, lng: 106.8 }, coords, 9));
   assert.equal(url.origin + url.pathname, "https://www.google.com/maps/dir/");
   assert.equal(url.searchParams.get("api"), "1");
   assert.equal(url.searchParams.get("origin"), "-6.10000,106.70000");
   assert.equal(url.searchParams.get("destination"), "-6.20000,106.80000");
-  assert.equal(url.searchParams.get("waypoints").split("|").length, 4);
+  // Phones take at most 3 waypoints, whatever is asked for.
+  assert.equal(url.searchParams.get("waypoints").split("|").length, 3);
+});
+
+test("a GPS start is left to Google's live location", () => {
+  const url = new URL(googleMapsUrl({ lat: -6.1, lng: 106.7, isGPS: true }, { lat: -6.2, lng: 106.8 }, []));
+  assert.equal(url.searchParams.get("origin"), null);
+  assert.equal(url.searchParams.get("destination"), "-6.20000,106.80000");
 });
 
 test("a two-point route needs no waypoints", () => {

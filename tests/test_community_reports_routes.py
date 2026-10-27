@@ -88,3 +88,68 @@ def test_submit_report_rejects_messages_over_500_characters():
         headers=_HEADERS,
     )
     assert response.status_code == 422
+
+
+def _png_bytes(size=(2000, 1000)):
+    import io
+
+    from PIL import Image
+
+    out = io.BytesIO()
+    Image.new("RGB", size, (30, 90, 160)).save(out, format="PNG")
+    return out.getvalue()
+
+
+def test_photo_is_reencoded_as_small_jpeg_before_upload():
+    import io
+
+    from PIL import Image
+
+    stored = {}
+
+    async def fake_upload(jpeg):
+        stored["bytes"] = jpeg
+        return "https://x.supabase.co/storage/v1/object/public/report-photos/a.jpg"
+
+    with patch("api.routes.community_reports.upload_photo", side_effect=fake_upload):
+        response = client.post("/reports/photo", files={"photo": ("banjir.png", _png_bytes(), "image/png")}, headers=_HEADERS)
+    assert response.status_code == 200
+    assert response.json()["photo_url"].endswith("/report-photos/a.jpg")
+    with Image.open(io.BytesIO(stored["bytes"])) as img:
+        assert img.format == "JPEG"
+        assert max(img.size) == 1280
+        assert not img.info.get("exif")
+
+
+def test_photo_that_is_not_an_image_is_rejected():
+    response = client.post("/reports/photo", files={"photo": ("x.jpg", b"not an image", "image/jpeg")}, headers=_HEADERS)
+    assert response.status_code == 415
+
+
+def test_photo_store_down_gives_503():
+    with patch("api.routes.community_reports.upload_photo", return_value=None):
+        response = client.post("/reports/photo", files={"photo": ("a.png", _png_bytes((10, 10)), "image/png")}, headers=_HEADERS)
+    assert response.status_code == 503
+
+
+def test_report_accepts_only_photos_from_our_bucket(monkeypatch):
+    monkeypatch.setenv("SUPABASE_URL", "https://x.supabase.co")
+    body = {"severity": "alert", "message": "Air naik", "lat": -6.15, "lon": 106.85}
+    foreign = client.post("/reports", json={**body, "photo_url": "https://evil.example/a.jpg"}, headers=_HEADERS)
+    assert foreign.status_code == 422
+    ours = "https://x.supabase.co/storage/v1/object/public/report-photos/a.jpg"
+    with patch("api.routes.community_reports.create_report", return_value={"id": "r-2"}) as mocked:
+        response = client.post("/reports", json={**body, "photo_url": ours}, headers=_HEADERS)
+    assert response.status_code == 200
+    assert mocked.call_args.kwargs["photo_url"] == ours
+
+
+def test_photo_with_huge_dimensions_is_refused_before_decoding():
+    import io
+
+    from PIL import Image
+
+    out = io.BytesIO()
+    Image.new("1", (8000, 6000)).save(out, format="PNG")  # 48 MP, tiny file
+    response = client.post("/reports/photo", files={"photo": ("bomb.png", out.getvalue(), "image/png")}, headers=_HEADERS)
+    assert response.status_code == 415

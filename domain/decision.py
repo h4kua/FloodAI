@@ -111,6 +111,9 @@ class PhysicalSignals:
     rapid_escalation: bool = False        # rapid water-level rise detected
     plausibility_score: float = 1.0       # [0, 1] from PerceptionAgent
     has_critical_violation: bool = False  # hard physical-gate failure
+    # True when hydrology_max_severity was read from real posts against their
+    # own Siaga thresholds; L1/L1.8 then follow those bands (see _water_level_floor).
+    hydrology_bands: bool = False
 
 
 @dataclass(frozen=True)
@@ -174,13 +177,41 @@ _BMKG_SAFETY_FLOOR_RAIN_MIN = 20.0
 _BMKG_SAFETY_FLOOR_CONFIDENCE_FLOOR = 0.50
 
 # ---------------------------------------------------------------------------
-# L1 / L1.8 water-level ratio thresholds — BNPB/BPBD Siaga standard.
+# L1 / L1.8 water-level floors.
 # ---------------------------------------------------------------------------
-# L1 fires unconditionally (pre-ML); L1.8 is a post-ML one-way floor.
-# These constants are the single source of truth for all ratio comparisons.
-_WL_DANGER_FLOOR = 0.90    # L1 hard gate  + L1.8 DANGER floor
-_WL_WARNING_FLOOR = 0.75   # L1.8 WARNING floor
-_WL_PRE_ALERT_FLOOR = 0.60 # L1.8 PRE_ALERT floor
+# L1 fires unconditionally (pre-ML); L1.8 is a post-ML one-way floor. With real
+# posts the floor follows the DSDA band of the highest post, read against that
+# post's own Siaga thresholds (Siaga 1/2/3 -> Danger/Alert/Watch). The ratio
+# fractions below remain only for callers without station data.
+_WL_DANGER_FLOOR = 0.90    # fallback: L1 hard gate + L1.8 DANGER floor
+_WL_WARNING_FLOOR = 0.75   # fallback: L1.8 WARNING floor
+_WL_PRE_ALERT_FLOOR = 0.60 # fallback: L1.8 PRE_ALERT floor
+
+# Station severity per band (services/hydrology_analyzer._SIAGA_SEVERITY).
+_BAND_SIAGA1 = 1.00
+_BAND_SIAGA2 = 0.75
+_BAND_SIAGA3 = 0.50
+
+
+def _water_level_floor(perception: "PerceptionInputs", physical: "PhysicalSignals | None") -> "RiskLevel | None":
+    """Floor from the highest post: its own DSDA band when known, else the ratio fractions."""
+    if physical is not None and physical.hydrology_bands:
+        severity = physical.hydrology_max_severity
+        if severity >= _BAND_SIAGA1:
+            return RiskLevel.DANGER
+        if severity >= _BAND_SIAGA2:
+            return RiskLevel.WARNING
+        if severity >= _BAND_SIAGA3:
+            return RiskLevel.PRE_ALERT
+        return None
+    ratio = perception.max_water_level_ratio
+    if ratio >= _WL_DANGER_FLOOR:
+        return RiskLevel.DANGER
+    if ratio >= _WL_WARNING_FLOOR:
+        return RiskLevel.WARNING
+    if ratio >= _WL_PRE_ALERT_FLOOR:
+        return RiskLevel.PRE_ALERT
+    return None
 
 # ---------------------------------------------------------------------------
 # L1.9 OOD_FLOOR — conservative risk floor + confidence cap for OOD inputs.
@@ -526,10 +557,14 @@ def decide(
         )
 
     # ------------------------------------------------------------------ L1
-    if perception.max_water_level_ratio >= _WL_DANGER_FLOOR:
+    if _water_level_floor(perception, physical) is RiskLevel.DANGER:
         decision_trace.append(_trace(
             DecisionAuthority.L1_SIAGA,
-            inputs={"max_water_level_ratio": perception.max_water_level_ratio},
+            inputs={
+                "max_water_level_ratio": perception.max_water_level_ratio,
+                "hydrology_max_severity": physical.hydrology_max_severity if physical is not None else None,
+                "basis": "post_band" if physical is not None and physical.hydrology_bands else "ratio",
+            },
             outputs={"risk": RiskLevel.DANGER.value, "driver": Driver.CRITICAL_HYDROLOGY.value},
         ))
         return Decision(
@@ -783,23 +818,17 @@ def decide(
         )
 
     # ------------------------------------------------------------------ L1.8
-    # HYDRO_FLOOR: post-ML one-way floor based on BNPB/BPBD water-level ratio.
+    # HYDRO_FLOOR: post-ML one-way floor from the highest post's DSDA band.
     # Closes the gap where low ML probability + channel near capacity → SAFE.
     # Only escalates — never downgrades ML output.
-    if perception.max_water_level_ratio >= _WL_DANGER_FLOOR:
-        _hydro_floor: RiskLevel | None = RiskLevel.DANGER
-    elif perception.max_water_level_ratio >= _WL_WARNING_FLOOR:
-        _hydro_floor = RiskLevel.WARNING
-    elif perception.max_water_level_ratio >= _WL_PRE_ALERT_FLOOR:
-        _hydro_floor = RiskLevel.PRE_ALERT
-    else:
-        _hydro_floor = None
+    _hydro_floor = _water_level_floor(perception, physical)
 
     if _hydro_floor is not None and _RISK_RANK[_hydro_floor] > _RISK_RANK[decision.risk_level]:
         decision_trace.append(_trace(
             DecisionAuthority.L1_8_HYDRO_FLOOR,
             inputs={
                 "max_water_level_ratio": perception.max_water_level_ratio,
+                "hydrology_max_severity": physical.hydrology_max_severity if physical is not None else None,
                 "floor_applied": _hydro_floor.value,
                 "risk_before": decision.risk_level.value,
             },

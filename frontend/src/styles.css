@@ -781,6 +781,11 @@ button, input, select, textarea { font-family: inherit; }
 .route-select:focus, .route-input:focus { border-color: var(--cyan); }
 .route-input::placeholder { color: var(--muted-2); }
 .route-input:disabled { opacity: 0.5; cursor: not-allowed; }
+/* A page that failed to render */
+.page-error { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; margin-top: 1rem; }
+.page-error-title { font-weight: 700; color: var(--text); margin: 0; }
+.page-error-text { color: var(--muted); font-size: 0.9rem; margin: 0; }
+
 /* Laporan warga */
 .reports-note { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin: 0 0 0.75rem; }
 .reports-sent { font-size: 0.85rem; color: var(--safe); font-weight: 600; margin: 0.5rem 0; }
@@ -799,6 +804,12 @@ button, input, select, textarea { font-family: inherit; }
 .report-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .report-text { font-size: 0.9rem; color: var(--text); line-height: 1.5; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .report-meta { font-size: 0.78rem; color: var(--muted); margin: 0; }
+.reports-photo-pick { align-self: flex-start; cursor: pointer; }
+.reports-photo-hint { font-size: 0.75rem; color: var(--muted-2); margin: -0.25rem 0 0; }
+.reports-photo-preview { display: flex; align-items: flex-end; gap: 0.75rem; }
+.reports-photo-preview img { width: 120px; height: 90px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--line); }
+.report-photo-link { display: block; align-self: flex-start; }
+.report-photo { display: block; max-width: 100%; max-height: 240px; border-radius: var(--r-sm); border: 1px solid var(--line); }
 
 /* Route summary — a strip under the map (the map's corners hold floating buttons) */
 .route-summary {

@@ -375,6 +375,9 @@ def _build_canonical_inputs(kw: dict) -> dict:
 
     physical = PhysicalSignals(
         hydrology_max_severity=max(0.0, min(1.0, hydro_severity)),
+        # Real posts were read against their own Siaga thresholds: L1/L1.8
+        # follow those DSDA bands instead of fixed ratio fractions.
+        hydrology_bands=bool(hydro is not None and getattr(hydro, "stations", None)),
         rapid_escalation=rapid_escalation,
         plausibility_score=max(0.0, min(1.0, plausibility_score)),
         has_critical_violation=has_critical_violation,

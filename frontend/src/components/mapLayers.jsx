@@ -72,7 +72,9 @@ export function ActiveFloodAreas({ points = [] }) {
         <Popup {...popupPad}>
           <div style={{ minWidth: 200 }}>
             <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>
-              {isId ? "Area rawan banjir" : "Flood-prone area"} · {titleCase(p.kelurahan)}
+              {p.reason === "post"
+                ? (isId ? `Sekitar pos ${p.causes[0].nama}` : `Around post ${p.causes[0].nama}`)
+                : `${isId ? "Area rawan banjir" : "Flood-prone area"} · ${titleCase(p.kelurahan)}`}
             </p>
             {p.rivers?.length > 0 && (
               <p style={{ fontSize: 11, color: "var(--muted)", marginBottom: 4 }}>
