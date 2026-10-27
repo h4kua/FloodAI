@@ -9,7 +9,10 @@ FastAPI backend + React frontend. Agentic flood prediction system for Jakarta.
 - ML: XGBoost + scikit-learn 1.8.0 — the `realtime_native` bundle (`models/realtime_native_bundle/`)
   serves the UI; the legacy Jakarta model serves only `/predict/realtime`. No Torch.
 - LLM (non-critical path): Groq `qwen/qwen3.8-27b` primary (`DEFAULT_GROQ_MODEL` in `config/llm_config.py`,
-  `GROQ_MODEL` overrides), Anthropic Claude optional — explanation and chat only
+  `GROQ_MODEL` overrides), Anthropic Claude optional — explanation and chat only. Chat prompt lives in
+  `api/chat_knowledge.txt` (core rules + only the sections the question touches, ~1.5k tokens); the
+  free tier allows 8k tokens/min per model, so `/api/chat` falls back to `openai/gpt-oss-20b`, waits out
+  a retry-after of ≤ 3 s once, then answers 429 `ai_busy`
 - Deploy: Fly.io (backend, `fly.toml`) + Vercel (frontend, `vercel.json`)
 
 ## Run

@@ -1,8 +1,12 @@
 from __future__ import annotations
+import asyncio
 import json
 import os
 import logging
+import re
+import time
 from functools import lru_cache
+from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
@@ -13,11 +17,42 @@ from utils.paths import DEFAULT_REALTIME_SNAPSHOT, REPORTS_DIR
 _log = logging.getLogger(__name__)
 router = APIRouter(tags=["chat"])
 
-_MAX_HISTORY_MESSAGES = 10
+# Groq's free tier allows ~8,000 tokens per minute per model. A request used
+# to send ~5,000 prompt tokens, so a second question within a minute hit 429
+# and the SDK's retries kept the user waiting. The budgets below keep a
+# typical request near 1,500 prompt tokens.
+_MAX_HISTORY_MESSAGES = 4
+_MAX_HISTORY_CHARS = 400          # per earlier message
 _MAX_MESSAGE_CHARS = 1800
-_MAX_SYSTEM_CHARS = 12000
-_MAX_CONTEXT_CHARS = 5000
+_MAX_CONTEXT_CHARS = 1800
+_MAX_TOPIC_CHARS = 2200           # knowledge sections picked for the question
+_MAX_REPLY_TOKENS = 500
+_GROQ_TIMEOUT_S = 20.0
+_MAX_RETRY_WAIT_S = 3.0        # one wait on Groq's retry-after before answering "busy"
+# Tried in order; Groq rate limits are per model, so the fallback has its own budget.
+_FALLBACK_MODEL = "openai/gpt-oss-20b"
 _PREDICTION_PATH = REPORTS_DIR / "latest_realtime_native_prediction.json"
+_KNOWLEDGE_PATH = Path(__file__).resolve().parents[1] / "chat_knowledge.txt"
+
+# Knowledge sections (by heading prefix) and the words that make them relevant.
+_TOPICS = {
+    "SINGKATAN LOKASI": ("pik", "jakut", "jakbar", "jaktim", "jaksel", "jakpus", "kampmel", "kamp mel", "k.melayu",
+                         "kalder", "kalidrs", "penjar", "penjrng", "cengkrng", "cengkrg", "padam", "pdmgn", "mangdu",
+                         "kalgading", "kel gading", "tpi", "sntr", "bsd", "serpong", "bintaro"),
+    "JAKARTA FLOOD GEOGRAPHY": ("utara", "barat", "timur", "selatan", "pusat", "wilayah", "daerah", "kecamatan",
+                                "kelurahan", "rawan", "north", "west", "east", "south", "area"),
+    "ESTIMASI DURASI": ("lama", "durasi", "surut", "berapa jam", "kapan selesai", "how long", "recede"),
+    "TITIK PENGUNGSIAN": ("ngungsi", "pengungsian", "shelter", "evakuasi", "posko", "evacuat"),
+    "RT/RW RAWAN": ("rt ", "rw ", "rt/rw", "rt0", "rw0"),
+    "LANDMARK JAKARTA": ("mall", "rumah sakit", "rs ", "sekolah", "stasiun", "kampus", "hospital", "school", "landmark"),
+    "ESTIMASI JARAK": ("jarak", "jauh", " km", "terdekat", "distance", "nearest"),
+    "NAMA JALAN": ("jalan", "jl.", "jl ", "rute", "lewat", "tol", "kawasan", "komplek", "sungai", "kali ", "road",
+                   "route", "street", "river"),
+    "FITUR WEBSITE": ("fitur", "website", "aplikasi", "cara pakai", "cara kerja", "deflood", "halaman", "tombol",
+                      "peta", "laporan", "google maps", "panduan", "feature", "app", "how does", "page", "report"),
+    "DATA HISTORIS": ("histori", "sejarah", "pernah", "tahun", "berapa tinggi", "kedalaman", "dalam", "dampak",
+                      "history", "deep", "depth", "past"),
+}
 
 # Module-level client cache — avoids creating a new HTTP connection pool on
 # every request. Re-initialised if the API key changes at runtime (rare but
@@ -73,17 +108,50 @@ def _static_jakarta_knowledge() -> str:
     return (
         "Operational guardrails: answer as a Jakarta flood assistant; prioritize BPBD/official "
         "instructions; never claim exact street safety without live ground confirmation; for danger "
-        "or trapped users give immediate actions and emergency numbers BPBD 117, Basarnas 115, DKI 112.\n\n"
-        "PROPORTIONAL TONE — match urgency to actual risk level:\n"
-        "- AMAN/Normal: calm, brief. Do NOT mention evacuation, emergency bags, or moving belongings.\n"
-        "- WASPADA/Warning: alert but NOT panicking. Rain is heavy but water has NOT entered homes yet. "
-        "Suggest: check drains, prepare flashlight, monitor RT/RW updates. "
-        "Do NOT suggest evacuation, packing emergency bags, or moving valuables upstairs — that's overreacting.\n"
-        "- BAHAYA/Danger: lives at risk NOW. Only here: evacuation, emergency bags, move documents.\n\n"
-        "LOCATION SPECIFICITY: always mention specific kelurahan, kecamatan, or river names when available.\n"
-        "DEPTH ESTIMATES: when historical data is available, mention typical flood depths (e.g. '50-100 cm').\n"
-        "HISTORICAL CONTEXT: reference past flood frequency and impact when it helps the user understand risk."
+        "or trapped users give immediate actions and emergency numbers BPBD 117, Basarnas 115, DKI 112.\n"
+        "Answer only the user's last message. Name kelurahan, kecamatan or rivers when the data gives them.\n"
+        "FORMAT: short paragraphs and bullet lists only; never tables or HTML."
     )
+
+
+@lru_cache(maxsize=1)
+def _knowledge_sections() -> tuple[list[str], list[str]]:
+    """(always-sent sections, topic sections) from chat_knowledge.txt."""
+    try:
+        text = _KNOWLEDGE_PATH.read_text(encoding="utf-8")
+    except OSError:
+        _log.warning("chat_knowledge_missing: %s", _KNOWLEDGE_PATH)
+        return [], []
+    body = "\n".join(line for line in text.splitlines() if not line.startswith("# "))
+    parts = [p.strip() for p in re.split(r"\n━{5,}\n", body) if p.strip()]
+    if len(parts) < 3:
+        return parts, []
+    return [parts[0], *parts[-2:]], parts[1:-2]
+
+
+def _knowledge_for(message: str) -> str:
+    """The always-sent rules plus the topic sections the question touches.
+
+    A topic counts when one of its trigger words is in the question (weight 3)
+    or when longer words of the question appear in its text (place names).
+    """
+    core, topics = _knowledge_sections()
+    msg = f" {message.lower()} "
+    words = {w for w in re.findall(r"[a-z]{5,}", msg)}
+    scored = []
+    for section in topics:
+        head = section.splitlines()[0]
+        triggers = next((t for prefix, t in _TOPICS.items() if head.startswith(prefix)), ())
+        low = section.lower()
+        score = 3 * sum(1 for t in triggers if t in msg) + sum(1 for w in words if w in low)
+        if score:
+            scored.append((score, section))
+    picked, used = [], 0
+    for _, section in sorted(scored, key=lambda s: -s[0]):
+        if used + len(section) <= _MAX_TOPIC_CHARS:
+            picked.append(section)
+            used += len(section)
+    return "\n\n".join(core + picked)
 
 
 def _sanitize_history(history: list[dict]) -> list[dict]:
@@ -94,7 +162,7 @@ def _sanitize_history(history: list[dict]) -> list[dict]:
         role = item.get("role")
         if role not in {"user", "assistant"}:
             continue
-        content = _clip(item.get("content"), _MAX_MESSAGE_CHARS)
+        content = _clip(item.get("content"), _MAX_HISTORY_CHARS)
         if content:
             clean.append({"role": role, "content": content})
     return clean
@@ -114,6 +182,13 @@ def _top_stations(stations: list[dict], limit: int = 5) -> list[dict]:
             "height": station.get("tinggi_air"),
         })
     return result
+
+
+# The app's own words for the engine's levels, so answers never show "PRE_ALERT".
+_STATUS_WORDS = {
+    "SAFE": "Aman (Safe)", "PRE_ALERT": "Waspada (Watch)", "WARNING": "Siaga (Alert)",
+    "DANGER": "Bahaya (Danger)", "UNKNOWN": "Tidak diketahui (Unknown)",
+}
 
 
 def _list_value(value: object) -> list:
@@ -151,7 +226,7 @@ def _build_retrieved_context(req: ChatRequest) -> str:
             "snapshotFetchedAt": frontend.get("snapshotFetchedAt"),
         },
         "latest_model_context": {
-            "risk_level": prediction.get("risk_level"),
+            "status": _STATUS_WORDS.get(str(prediction.get("risk_level") or "").upper(), prediction.get("risk_level")),
             "probability_pct": round((_safe_float(prediction.get("probability")) or 0) * 100),
             "rainfall_mm_h": features.get("rainfall_mm"),
             "rainfall_acc_3h": diagnostics.get("rainfall_acc_3h"),
@@ -183,10 +258,7 @@ def _build_retrieved_context(req: ChatRequest) -> str:
         "instructions": [
             "Use this context only when relevant to the user's question.",
             "If data timestamps are stale, say 'data terakhir' and avoid pretending it is live.",
-            "Give next actions before explanation for emergency-sounding messages.",
-            "When mentioning flood risk, reference historical_flood_data for depth estimates and affected areas.",
-            "Be PROPORTIONAL: WASPADA means alert, NOT panic. Don't suggest evacuation for WASPADA status.",
-            "BREVITY: match answer length to question complexity. Simple question = 1-2 sentences. Do NOT pad with unrequested context.",
+            "Quote a post's status exactly as given here; never invent a Siaga level.",
         ],
     }
     return json.dumps(context, ensure_ascii=False, separators=(",", ":"))[:_MAX_CONTEXT_CHARS]
@@ -199,31 +271,82 @@ async def chat_health() -> dict:
     return {"groq_configured": configured}
 
 
-# Rate-limited per IP: each message spends Groq quota. The frontend falls back
-# to its offline knowledge base on 429.
-@router.post("/api/chat", dependencies=[Depends(require_chat_rate_limit)])
-async def chat_endpoint(req: ChatRequest) -> dict:
-    api_key = os.getenv("GROQ_API_KEY")
-    model = os.getenv("GROQ_MODEL", DEFAULT_GROQ_MODEL)
-    if not api_key:
-        raise HTTPException(status_code=503, detail="GROQ_API_KEY not configured")
-    try:
-        client = _get_groq_client()
-        messages = []
-        system_parts = [_static_jakarta_knowledge()]
-        if req.system:
-            system_parts.append(_clip(req.system, _MAX_SYSTEM_CHARS))
-        system_parts.append("Retrieved realtime context JSON:\n" + _build_retrieved_context(req))
-        messages.append({"role": "system", "content": "\n\n".join(system_parts)})
-        messages.extend(_sanitize_history(req.history))
-        messages.append({"role": "user", "content": _clip(req.message, _MAX_MESSAGE_CHARS)})
+def _build_messages(req: ChatRequest) -> list[dict]:
+    # The server owns the system prompt. ``req.system`` from older clients is
+    # ignored: it cost ~5,000 tokens a request and let any caller rewrite the prompt.
+    system = "\n\n".join([
+        _static_jakarta_knowledge(),
+        _knowledge_for(req.message),
+        "Retrieved realtime context JSON:\n" + _build_retrieved_context(req),
+    ])
+    return [
+        {"role": "system", "content": system},
+        *_sanitize_history(req.history),
+        {"role": "user", "content": _clip(req.message, _MAX_MESSAGE_CHARS)},
+    ]
+
+
+def _complete(messages: list[dict]) -> str:
+    """Ask the primary model, then the fallback when the first fails.
+
+    The fallback covers a rate limit (429), a withdrawn model (404, as with
+    llama-3.3-70b-versatile) and provider errors; a bad key (401) does not
+    fall back. No SDK retries: a retry waits for Groq's per-minute window and
+    kept users waiting 20–40 s; failing fast lets the next model answer.
+    """
+    client = _get_groq_client().with_options(max_retries=0)
+    models = list(dict.fromkeys([os.getenv("GROQ_MODEL", DEFAULT_GROQ_MODEL), _FALLBACK_MODEL]))
+
+    def ask(model: str) -> str:
+        reasoning = model.startswith("openai/gpt-oss")
         response = client.chat.completions.create(
             model=model,
             messages=messages,
-            max_tokens=800,
-            timeout=28.0,
+            max_tokens=_MAX_REPLY_TOKENS + (300 if reasoning else 0),  # gpt-oss also spends tokens reasoning
+            timeout=_GROQ_TIMEOUT_S,
+            extra_body={"reasoning_effort": "low"} if reasoning else None,
         )
-        return {"reply": response.choices[0].message.content}
+        return response.choices[0].message.content
+
+    for i, model in enumerate(models):
+        try:
+            return ask(model)
+        except Exception as exc:
+            status = getattr(exc, "status_code", None)
+            if status != 401 and i + 1 < len(models):
+                _log.warning("chat_model_failed model=%s status=%s; trying %s", model, status, models[i + 1])
+                continue
+            # Last model rate limited: Groq often frees the tokens within a
+            # second or two, so one short wait beats telling the user "busy".
+            wait = _retry_after_seconds(exc)
+            if status == 429 and wait is not None and wait <= _MAX_RETRY_WAIT_S:
+                time.sleep(wait)
+                return ask(model)
+            raise
+
+
+def _retry_after_seconds(exc: Exception) -> float | None:
+    headers = getattr(getattr(exc, "response", None), "headers", None) or {}
+    try:
+        return float(headers.get("retry-after"))
+    except (TypeError, ValueError):
+        return None
+
+
+# Rate-limited per IP: each message spends Groq quota. The frontend falls back
+# to its offline knowledge base on errors and says "busy" on 429.
+@router.post("/api/chat", dependencies=[Depends(require_chat_rate_limit)])
+async def chat_endpoint(req: ChatRequest) -> dict:
+    if not os.getenv("GROQ_API_KEY"):
+        raise HTTPException(status_code=503, detail="GROQ_API_KEY not configured")
+    try:
+        # The Groq client is synchronous; run it off the event loop so one slow
+        # answer does not stall every other request.
+        reply = await asyncio.to_thread(_complete, _build_messages(req))
+        return {"reply": reply}
     except Exception as exc:
+        if getattr(exc, "status_code", None) == 429:
+            _log.warning("chat_rate_limited: %s", exc)
+            raise HTTPException(status_code=429, detail="ai_busy") from exc
         _log.error("chat_endpoint_failed: %s", exc)
         raise HTTPException(status_code=500, detail="chat_failed") from exc

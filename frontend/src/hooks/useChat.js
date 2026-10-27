@@ -43,7 +43,8 @@ export function useChat(riskContext = {}, lang = "id") {
     try {
       const history = messagesRef.current.map((m) => ({ role: m.role, content: m.content }));
       const result = await sendToFloodAgent(text, history, riskContext, lang);
-      setAiOnline(result.isAI === true);
+      // A busy AI (per-minute quota) is still online; only a real failure flips the status.
+      if (!result.busy) setAiOnline(result.isAI === true);
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: result.reply, isAI: result.isAI === true },
