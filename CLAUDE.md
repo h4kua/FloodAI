@@ -8,7 +8,8 @@ FastAPI backend + React frontend. Agentic flood prediction system for Jakarta.
 - DB: Supabase/PostgreSQL (RPC over HTTPS via `supabase` client; psycopg2 for direct/pooled access)
 - ML: XGBoost + scikit-learn 1.8.0 — the `realtime_native` bundle (`models/realtime_native_bundle/`)
   serves the UI; the legacy Jakarta model serves only `/predict/realtime`. No Torch.
-- LLM (non-critical path): Groq (LLaMA-3) primary, Anthropic Claude optional — explanation only
+- LLM (non-critical path): Groq `qwen/qwen3.8-27b` primary (`DEFAULT_GROQ_MODEL` in `config/llm_config.py`,
+  `GROQ_MODEL` overrides), Anthropic Claude optional — explanation and chat only
 - Deploy: Fly.io (backend, `fly.toml`) + Vercel (frontend, `vercel.json`)
 
 ## Run
@@ -27,7 +28,9 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/`
+- Tests: `tests/` (563, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (14, flood roads)
+- Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
+  onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
 
 ## Data ingestion
 - Live water levels: Jakarta Satu ArcGIS FeatureServers via `services/pintu_air_fetcher.py`
@@ -59,6 +62,14 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - AUC 0.9452 belongs to the legacy Jakarta model (`flood_model_jakarta.pkl`, random 80:20 split).
   Its endpoint `/predict/realtime` was retired 2026-10-24 (410 Gone); the UI uses `/predict/realtime-native`.
 - BNPB district mapping gap (kecamatan write-back); InaRISK falls back to bundled static JSON.
+- Model experiment 2026-10-27 (by year, test 2024): 609 variants; logistic regression without the proxy
+  features ranked floods better (PR-AUC 0.27 vs 0.10) but no variant beat the served model's precision at
+  ~86 % recall. The XGBoost candidate without proxies + Platt on the latest year (`scripts/train_candidate.py`,
+  `artifacts/reports/candidate_comparison.md`) is worse: AUC 0.733 vs 0.812. The served bundle stays.
+- Fly suspends both machines despite `min_machines_running = 1`, which stops the 15-minute scheduler; the
+  GitHub backup cron needs `INTERNAL_SECRET` (+ repo secrets `REFRESH_URL`, `INTERNAL_SECRET`), not set yet.
+- Hero "Siaga 2" count on Beranda is the frontend's ratio class, not the DSDA band the engine uses, so it can
+  disagree with the status level.
 
 ## Resolved
 - 2026-10-24: served model = trained model. The native export kept only fold 0's booster and
@@ -69,6 +80,13 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - 2026-10-24: `POST /api/chat` rate-limited per IP (`FLOOD_CHAT_RATE_LIMIT`, Fly client IP from
   `Fly-Client-IP`); `/reports`, `/sos`, `/family/*` off unless `COMMUNITY_API_ENABLED=true`;
   CI in `.github/workflows/ci.yml` (pytest + frontend build).
+- 2026-10-27: Groq withdrew `llama-3.3-70b-versatile` (model_not_found → chat always offline); default is
+  now `qwen/qwen3.8-27b`. AI answers render bold/lists in the chat bubble.
+- 2026-10-27: DSDA water levels arrive in mm and are converted to cm at ingestion (`dsda_mm_to_cm`);
+  the L1/L1.8 floors use each post's own DSDA band; `/readyz` checks Supabase; community reports with
+  photos (migration 110, bucket `report-photos`); Fly secrets re-imported (were the literal "...").
+- 2026-10-27: Vercel `VITE_API_BASE_URL` pointed at the old `floodai.fly.dev`; it is now
+  `https://floodai-8eclra.fly.dev` (type Config). `html/body` use `overflow-x: clip` so the top bar stays sticky.
 - DB CHECK-constraint naming drift (orphan `chk_eval_status` blocked `CONFLICT`/`LOW_TRUST`
   persistence) — fixed by `db/migrations/106_fix_status_constraint_naming_drift.sql`, applied
   to Supabase 2026-06-19.

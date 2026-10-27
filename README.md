@@ -1,11 +1,12 @@
 # deFlood.ai — Informasi & Peringatan Dini Banjir Jakarta
 
 Aplikasi web untuk warga DKI Jakarta: status banjir kota dan per wilayah, peta pos pantau air,
-langkah yang harus dilakukan, dan panduan evakuasi ke tempat pengungsian terdekat. Backend membaca
+rute evakuasi ke rumah atau ke pengungsian terdekat (jalan hijau/merah, diteruskan ke Google Maps),
+dan laporan warga dengan foto. Backend membaca
 data tinggi muka air dan cuaca setiap 15 menit, menilai risiko dengan aturan deterministik berlapis
 ditambah model XGBoost, lalu menyajikannya lewat FastAPI.
 
-LLM (Groq) hanya menulis penjelasan dan menjawab chatbot. **Keputusan status tidak pernah diambil
+LLM (Groq, model `qwen/qwen3.8-27b`) hanya menulis penjelasan dan menjawab chatbot. **Keputusan status tidak pernah diambil
 oleh LLM**; jika LLM gagal, sistem memakai teks templat dari nilai observasi.
 
 Dokumentasi teknis lengkap (alur data, field API, hierarki keputusan, evaluasi model, isu yang
@@ -25,15 +26,16 @@ OpenWeather (5 wilayah) ─┘   tiap 15 mnt   └─ LLM: penjelasan + chatbot 
                          Supabase            GET /predict/realtime-native
                                                         │
                                                         ▼
-                                     React + Vite (Beranda · Evakuasi · Tentang)
+                          React + Vite (Beranda · Evakuasi · Laporan · Tentang)
 ```
 
 - **Backend**: FastAPI + uvicorn (port 8080), APScheduler untuk refresh snapshot.
 - **Pipeline agentik** (`pipeline/flood_pipeline.py`): Perception → Reasoning → Evaluation →
   Action → Routing, dipakai oleh `POST /predict/agentic`.
 - **Frontend**: React 18 + Vite 5 + React-Leaflet (peta dasar Esri Gray Canvas), dwibahasa ID/EN,
-  mode terang/gelap.
-- **Deploy**: backend di Fly.io (`fly.toml`, region `ams`, 1 mesin selalu hidup), frontend di
+  mode terang/gelap, responsif dari 360 px, panduan pengguna 11 langkah (tombol "?" di top bar).
+  Rute evakuasi dari OSRM; jalan yang melewati titik rawan BPBD di sungai berstatus Siaga diwarnai merah.
+- **Deploy**: backend di Fly.io (`fly.toml`, region `ams`; `min_machines_running = 1`, tetapi Fly tetap bisa men-suspend mesin), frontend di
   Vercel (`vercel.json`).
 
 ---
@@ -68,9 +70,11 @@ Swagger UI: `http://localhost:8080/docs`.
 | `GET /predict/crew-realtime` | — | Analisis 3 agen atas snapshot terkini, di-cache per snapshot |
 | `POST /api/chat` | batas per IP (10/menit) | Chatbot Groq; frontend jatuh ke basis pengetahuan offline bila ditolak |
 | `POST /shelters/checkin` | batas per IP | Check-in tiba di pengungsian; tidak dipakai UI lagi (tombol "Saya sudah tiba" dihapus) |
-| `GET /healthz`, `GET /readyz`, `GET /metrics` | — | Liveness, readiness, Prometheus |
+| `GET /healthz`, `GET /readyz`, `GET /metrics` | — | Liveness, readiness (cek tabel snapshot di Supabase), Prometheus |
 | `GET /predict/realtime` | — | **Dipensiunkan** — menjawab `410 Gone` dengan tautan ke `/predict/realtime-native` |
-| `/reports`, `/sos`, `/family/*` | — | **Nonaktif** (tidak ada UI); hanya terpasang jika `COMMUNITY_API_ENABLED=true` |
+| `GET /reports`, `POST /reports` | batas per IP | Laporan warga (6 jam terakhir, belum diverifikasi, tidak mengubah status). Aktif kecuali `COMMUNITY_REPORTS_ENABLED=false` |
+| `POST /reports/photo` | batas per IP | Foto laporan: maks. 8 MB, di-encode ulang jadi JPEG ≤ 1280 px tanpa metadata, disimpan di bucket Supabase `report-photos` |
+| `/sos`, `/family/*` | — | **Nonaktif**; hanya terpasang jika `COMMUNITY_API_ENABLED=true` |
 
 Daftar lengkap: [`context.md`](context.md#endpoints).
 
@@ -80,7 +84,7 @@ Daftar lengkap: [`context.md`](context.md#endpoints).
 
 | Sumber | Dipakai untuk |
 |---|---|
-| DSDA DKI / Posko Banjir (`datatmalaststatus.json`, `xmldata.xml`) | Tinggi muka air dan status siaga pos pantau |
+| DSDA DKI / Posko Banjir (`datatmalaststatus.json`, `xmldata.xml`) | Tinggi muka air (dilaporkan dalam mm, dikonversi ke cm saat ingest) dan pita siaga tiap pos |
 | Jakarta Satu ArcGIS FeatureServer | Pintu air dan ambang batas AWLR |
 | BMKG | Prakiraan cuaca dan peringatan dini nowcast (CAP) |
 | OpenWeather | Curah hujan, suhu, kelembapan (pusat + 5 wilayah) |
@@ -109,6 +113,13 @@ teramati. Rincian dan sumber tiap angka: [`context.md`](context.md#model--evalua
 Evaluasi lengkap dengan interval kepercayaan: `python scripts/evaluate_model.py`
 (hasil di `artifacts/reports/model_evaluation.md`). Latih ulang: `python scripts/retrain_bundle.py`.
 
+Eksperimen 2026-10-27 (609 varian, dipilih pada 2022–2023, diuji pada 2024): kalibrasi ulang di tahun
+terbaru menurunkan ECE dari 0,19 ke ~0,03, tetapi kandidat tanpa fitur proksi + kalibrasi tahun
+terbaru justru lebih buruk (AUC 0,733 vs 0,812, selisih −0,079 [−0,131; −0,026]), sehingga model yang
+dipakai tidak diganti. Ulangi: `python scripts/train_candidate.py` (hasil di
+`artifacts/reports/candidate_comparison.md`; bundle kandidat ke `models/candidates/`, tidak pernah
+menimpa bundle yang dipakai).
+
 ---
 
 ## Variabel lingkungan
@@ -119,24 +130,26 @@ Nama saja — nilai disimpan di `.env` (lihat `.env.example`), tidak pernah di-c
 |---|---|
 | `FLOOD_API_KEYS`, `FLOOD_API_RATE_LIMIT` | Auth X-Api-Key + batas per kunci |
 | `FLOOD_IP_RATE_LIMIT`, `FLOOD_CHAT_RATE_LIMIT` | Batas per IP untuk endpoint publik (default 20 dan 10 per menit) |
-| `COMMUNITY_API_ENABLED` | `true` memasang kembali `/reports`, `/sos`, `/family/*` (default `false`) |
-| `GROQ_API_KEY`, `GROQ_MODEL`, `LLM_PROVIDER`, `ANTHROPIC_*` | Penyedia LLM |
+| `COMMUNITY_REPORTS_ENABLED` | `false` mematikan `/reports` (default aktif) |
+| `COMMUNITY_API_ENABLED` | `true` memasang kembali `/sos`, `/family/*` (default `false`) |
+| `GROQ_API_KEY`, `GROQ_MODEL`, `LLM_PROVIDER`, `ANTHROPIC_*` | Penyedia LLM (`GROQ_MODEL` kosong = `qwen/qwen3.8-27b`; `llama-3.3-70b-versatile` sudah ditarik Groq) |
 | `OPENWEATHER_API_KEY` | Cuaca di snapshot |
 | `SUPABASE_URL`, `SUPABASE_KEY`, `DB_*` | Basis data |
 | `SNAPSHOT_REFRESH_INTERVAL_MINUTES`, `SNAPSHOT_SCHEDULER_ENABLED` | Penjadwal snapshot |
 | `INTERNAL_SECRET` | `POST /internal/refresh-snapshot` (cadangan dari GitHub Actions) |
-| `VITE_API_BASE_URL` (frontend) | Kosong = proxy Vite; URL backend di produksi |
+| `VITE_API_BASE_URL` (frontend) | Kosong = proxy Vite; URL backend di produksi (`https://floodai-8eclra.fly.dev`, tipe *Config* di Vercel, bukan *Secret*) |
 
 ---
 
 ## Tes & CI
 
 ```bash
-python -m pytest tests -q
+python -m pytest tests -q        # 563 tes backend
+cd frontend && npm test          # 14 tes rute banjir (node --test)
 ```
 
 GitHub Actions (`.github/workflows/ci.yml`) menjalankan seluruh tes backend dan build frontend pada
-setiap pull request dan push ke `main`. Tes tidak butuh kunci API: Supabase, LLM, dan scraper
+setiap pull request dan push ke `main`, ditambah tes frontend. Tes tidak butuh kunci API: Supabase, LLM, dan scraper
 di-mock, dan `tests/conftest.py` mematikan penjadwal snapshot.
 
 ---

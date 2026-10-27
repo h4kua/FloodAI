@@ -116,7 +116,10 @@ export default function About({ riskContext = {} }) {
               desc={id ? "Model komputer yang dilatih dengan data banjir Jakarta 2020–2024 memperkirakan seberapa besar kemungkinan banjir." : "A computer model trained on Jakarta flood records from 2020–2024 estimates how likely a flood is."} />
             <Step num="3"
               label={id ? "Memberi tahu Anda" : "Telling you"}
-              desc={id ? "Hasilnya ditampilkan sebagai status sederhana — Aman, Waspada, Siaga, atau Bahaya — beserta langkah yang disarankan." : "The result is shown as a simple status — Safe, Watch, Alert, or Danger — with suggested next steps."} />
+              desc={id ? "Hasilnya ditampilkan sebagai status sederhana — Aman, Waspada, Siaga, atau Bahaya — per kota dan di peta. Status tidak pernah lebih rendah dari batas siaga yang sudah dilewati pos pantau." : "The result is shown as a simple status — Safe, Watch, Alert, or Danger — per city and on the map. The status is never lower than the alert band a monitoring post has already reached."} />
+            <Step num="4"
+              label={id ? "Membantu Anda bertindak" : "Helping you act"}
+              desc={id ? "Halaman Evakuasi mencari rute ke rumah Anda atau ke pengungsian terdekat: jalan hijau aman, jalan merah melewati area rawan banjir, lalu bisa dibuka di Google Maps. Di halaman Laporan, warga saling berbagi kondisi air, boleh dengan foto." : "The Evacuation page finds a route home or to the nearest shelter: green roads are clear, red roads pass flood-prone areas, and the route opens in Google Maps. On the Reports page, residents share what they see, photos included."} />
           </div>
         </Section>
 
@@ -126,10 +129,12 @@ export default function About({ riskContext = {} }) {
               "Aplikasi ini alat bantu, bukan pengganti informasi resmi dari BPBD, BMKG, atau BNPB.",
               "Saat darurat, selalu ikuti arahan petugas BPBD dan Basarnas.",
               "Data bisa terlambat jika pos pantau belum mengirim pembaruan.",
+              "Laporan warga belum diverifikasi, tampil 6 jam, dan tidak mengubah status resmi.",
             ] : [
               "This app is an aid, not a replacement for official information from BPBD, BMKG, or BNPB.",
               "In an emergency, always follow instructions from BPBD and Basarnas officers.",
               "Data can be late if monitoring posts haven't sent an update.",
+              "Community reports are unverified, shown for 6 hours and never change the official status.",
             ]).map((text) => <li key={text}>{text}</li>)}
           </ul>
         </Section>
@@ -191,26 +196,35 @@ export default function About({ riskContext = {} }) {
                   ? "Belum ada pengukuran kalibrasi yang sahih untuk model ini di lapangan. Angka kalibrasi lain di proyek ini (ECE 0,196 dan 0,378) berasal dari versi model sebelumnya, dan penyesuaian kalibrasi saat aplikasi berjalan sedang dinonaktifkan."
                   : "There is no valid field calibration measurement for this model yet. Other calibration figures in this project (ECE 0.196 and 0.378) come from earlier model versions, and the live calibration adjustment is switched off."}
               </li>
+              <li>
+                {id
+                  ? "Kami mencoba ratusan variasi model dan menilainya pada tahun yang belum pernah dilihat model (2024). Membuang fitur proksi dan mengkalibrasi ulang pada tahun terbaru justru menurunkan AUC menjadi 0,73, jadi model yang dipakai tidak diganti. Peningkatan berarti butuh data yang lebih baik: label banjir harian, muka air hulu, dan pasang laut."
+                  : "We tried hundreds of model variants and judged them on a year the model had not seen (2024). Dropping the proxy features and recalibrating on the latest year lowered the AUC to 0.73, so the served model was kept. A real gain needs better data: daily flood labels, upstream water levels and tides."}
+              </li>
             </ul>
           </Section>
 
           <Section title={id ? "Sumber data" : "Data sources"}>
             <Row tag="DSDADKI" title={id ? "Pos pantau ketinggian air" : "Water-level monitoring posts"}
-              desc={id ? "38 pos pantau sungai Jakarta dari Dinas Sumber Daya Air DKI, diperbarui tiap 15 menit." : "38 Jakarta river posts from the DKI Water Resources Agency, updated every 15 minutes."} />
+              desc={id ? "38 titik dari Dinas Sumber Daya Air DKI (28 pos sungai, pintu air, bendung, dan waduk, serta 10 rumah pompa), diperbarui tiap 15 menit. Status memakai pos yang punya batas siaga resmi; rumah pompa tidak dihitung." : "38 points from the DKI Water Resources Agency (28 river posts, water gates, weirs and reservoirs, plus 10 pump houses), updated every 15 minutes. The status uses posts with official alert levels; pump houses are left out."} />
             <Row tag="BMKG" title={id ? "Peringatan & prakiraan cuaca" : "Weather warnings & forecasts"}
               desc={id ? "Peringatan cuaca ekstrem dan prakiraan per wilayah." : "Extreme-weather warnings and per-area forecasts."} />
             <Row tag="OWM" title="OpenWeatherMap"
               desc={id ? "Suhu, kelembapan, dan curah hujan realtime." : "Realtime temperature, humidity, and rainfall."} />
             <Row tag="BPBD" title={id ? "Data historis banjir" : "Historical flood data"}
-              desc={id ? "Kejadian banjir Jakarta 2020–2024, dipakai untuk melatih model." : "Jakarta flood events from 2020–2024, used to train the model."} />
+              desc={id ? "Kejadian banjir Jakarta 2020–2024 untuk melatih model, dan titik rawan banjir untuk mewarnai jalan di peta evakuasi." : "Jakarta flood events from 2020–2024 to train the model, and flood-prone points to colour roads on the evacuation map."} />
+            <Row tag="OSM" title={id ? "Peta dan rute jalan" : "Maps and road routes"}
+              desc={id ? "OpenStreetMap dan OSRM untuk rute evakuasi; navigasi diteruskan ke Google Maps." : "OpenStreetMap and OSRM for evacuation routes; navigation is handed to Google Maps."} />
+            <Row tag={id ? "Warga" : "Public"} title={id ? "Laporan warga" : "Community reports"}
+              desc={id ? "Kabar dan foto dari warga, disimpan di Supabase. Foto diperkecil dan metadatanya (termasuk lokasi GPS kamera) dihapus." : "Updates and photos from residents, stored in Supabase. Photos are resized and stripped of metadata, including the camera's GPS location."} />
           </Section>
 
           <Section title={id ? "Model & AI" : "Model & AI"}>
             <Row tag="XGB" title="XGBoost Classifier"
-              desc={id ? "17 fitur cuaca, hidrologi, dan geografis → 4 level risiko. Aturan hidrologi menaikkan level jika air ≥75% ambang siaga." : "17 weather, hydrology, and geographic features → 4 risk levels. A hydrology rule raises the level when water is ≥75% of the alert threshold."} />
+              desc={id ? "17 fitur cuaca, hidrologi, dan geografis → peluang banjir. Mesin keputusan berlapis (L0–L4) lalu menetapkan status: data rusak jadi Tidak diketahui, dan status tidak pernah di bawah pita siaga DSDA pos pantau terparah." : "17 weather, hydrology and geographic features → a flood probability. A layered decision engine (L0–L4) then sets the status: broken data becomes Unknown, and the status never sits below the DSDA alert band of the worst post."} />
             <Row tag="OOD" title="IsolationForest"
               desc={id ? "Menandai kondisi data yang tidak biasa dibanding data latih." : "Flags data conditions that look unusual compared with the training data."} />
-            <Row tag="LLM" title="Groq — Llama 3.3 70B"
+            <Row tag="LLM" title="Groq — Qwen3 (qwen3.8-27b)"
               desc={id ? "Menulis penjelasan dan menjawab chat. Tidak ikut menentukan status; jika gagal, dipakai template tetap." : "Writes explanations and answers chat. It does not decide the status; a fixed template is used if it fails."} />
           </Section>
 
