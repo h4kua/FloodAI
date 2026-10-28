@@ -1,0 +1,151 @@
+{
+  "generated_at": "2026-10-28T03:09:58+00:00",
+  "split": "chronological_68_12_20",
+  "calibration": "isotonic",
+  "rows_train_val_test": [
+    1990,
+    352,
+    586
+  ],
+  "test": {
+    "positives": 154,
+    "prevalence": 0.263,
+    "roc_auc": 0.793,
+    "pr_auc": 0.563,
+    "ece": 0.085,
+    "brier": 0.157
+  },
+  "thresholds": {
+    "candidate": {
+      "pre_alert": 0.1861,
+      "warning": 0.2035,
+      "danger": 0.2465,
+      "validation": {
+        "pre_alert": {
+          "recall": 0.953,
+          "precision": 0.279
+        },
+        "warning": {
+          "recall": 0.93,
+          "precision": 0.303
+        },
+        "danger": {
+          "recall": 0.86,
+          "precision": 0.389
+        }
+      }
+    },
+    "served": {
+      "pre_alert": 0.07,
+      "warning": 0.07,
+      "danger": 0.1255
+    }
+  },
+  "levels": {
+    "2023": {
+      "bpbd_flood_rate": 0.196,
+      "served": {
+        "SAFE": {
+          "rows": 486,
+          "share": 0.842,
+          "bpbd_flood_rate": 0.126
+        },
+        "PRE_ALERT": {
+          "rows": 0,
+          "share": 0.0,
+          "bpbd_flood_rate": null
+        },
+        "WARNING": {
+          "rows": 34,
+          "share": 0.059,
+          "bpbd_flood_rate": 0.382
+        },
+        "DANGER": {
+          "rows": 57,
+          "share": 0.099,
+          "bpbd_flood_rate": 0.684
+        }
+      },
+      "candidate": {
+        "SAFE": {
+          "rows": 263,
+          "share": 0.456,
+          "bpbd_flood_rate": 0.008
+        },
+        "PRE_ALERT": {
+          "rows": 23,
+          "share": 0.04,
+          "bpbd_flood_rate": 0.043
+        },
+        "WARNING": {
+          "rows": 69,
+          "share": 0.12,
+          "bpbd_flood_rate": 0.072
+        },
+        "DANGER": {
+          "rows": 222,
+          "share": 0.385,
+          "bpbd_flood_rate": 0.473
+        }
+      }
+    },
+    "2024": {
+      "bpbd_flood_rate": 0.264,
+      "served": {
+        "SAFE": {
+          "rows": 477,
+          "share": 0.813,
+          "bpbd_flood_rate": 0.17
+        },
+        "PRE_ALERT": {
+          "rows": 0,
+          "share": 0.0,
+          "bpbd_flood_rate": null
+        },
+        "WARNING": {
+          "rows": 28,
+          "share": 0.048,
+          "bpbd_flood_rate": 0.429
+        },
+        "DANGER": {
+          "rows": 82,
+          "share": 0.14,
+          "bpbd_flood_rate": 0.756
+        }
+      },
+      "candidate": {
+        "SAFE": {
+          "rows": 179,
+          "share": 0.305,
+          "bpbd_flood_rate": 0.067
+        },
+        "PRE_ALERT": {
+          "rows": 16,
+          "share": 0.027,
+          "bpbd_flood_rate": 0.188
+        },
+        "WARNING": {
+          "rows": 56,
+          "share": 0.095,
+          "bpbd_flood_rate": 0.125
+        },
+        "DANGER": {
+          "rows": 336,
+          "share": 0.572,
+          "bpbd_flood_rate": 0.396
+        }
+      }
+    }
+  },
+  "candidate_bundle_loads": true,
+  "live_snapshot": {
+    "served": {
+      "probability": 0.0009,
+      "level": "SAFE"
+    },
+    "candidate": {
+      "probability": 0.1414,
+      "level": "SAFE"
+    }
+  }
+}

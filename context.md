@@ -308,6 +308,12 @@ The LLM never changes the decision; it only writes explanations, with a determin
     unstable (11 validation positives).
   - Daily city-level flood days from BPBD dates + ERA5 rainfall (Open-Meteo): ROC-AUC 0.57–0.78, no better
     than the 3-day rain sum alone; rainfall alone cannot separate flood days. Water-level history is needed.
+  - BPBD-label candidate bundle (`scripts/train_bpbd_candidate.py` → `models/candidates/realtime_native_bpbd_labels/`,
+    `artifacts/reports/bpbd_candidate.md`): chronological test ROC-AUC 0.793, PR-AUC 0.563 (no-skill 0.263). Its
+    validation thresholds (Waspada 0.186 / Siaga 0.204 / Bahaya 0.247, isotonic steps) put 57 % of 2024
+    kecamatan-months at Bahaya, of which BPBD recorded a flood in 40 %. At equal alarm volume it is not more precise
+    than the served model, and its label ("any RW flooded this month") does not match a live "flood now" status.
+    Not promoted.
   - Nothing was promoted; the served bundle is unchanged.
 - **Honest estimate (by-year split train 2020–2022 / val 2023 / test 2024, 22 positives):**
   AUC 0.826 [0.745–0.889], PR-AUC 0.124 (no-skill 0.037), recall 0.864 / precision 0.128 at the

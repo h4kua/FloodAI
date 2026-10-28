@@ -76,7 +76,8 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Label gap (2026-10-28, `scripts/precision_experiments.py`): the training `banjir` label covers only
   276 of the 895 kecamatan-months with a BPBD flood (2020–2024); against BPBD records the by-year
   model's 2024 precision is 0.53, not 0.13. A BPBD-labelled model (by year AUC 0.76, PR-AUC 0.50,
-  no-skill 0.26) is a candidate, not served. Daily rainfall alone does not predict flood days
+  no-skill 0.26) was built as a bundle (`scripts/train_bpbd_candidate.py`) and rejected: its thresholds put
+  57 % of 2024 kecamatan-months at Bahaya and it is not more precise at equal alarm volume. Daily rainfall alone does not predict flood days
   (`scripts/daily_flood_experiment.py`). BPBD per-kelurahan events exist from 2013 (`events_clean.csv`);
   training stops at 2020–2024 only because the features do.
 - Fly stopped/suspended both machines despite `min_machines_running = 1`, halting the 15-minute
