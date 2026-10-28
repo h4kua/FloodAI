@@ -1,0 +1,117 @@
+{
+  "generated_at": "2026-10-28T03:01:26+00:00",
+  "flood_days_per_year": {
+    "2020": 110,
+    "2021": 84,
+    "2022": 135,
+    "2023": 71,
+    "2024": 144,
+    "2025": 147
+  },
+  "runs": [
+    {
+      "flood_day": ">= 1 kelurahan",
+      "split": "train 2020\u20132021, test 2022 (complete dates)",
+      "model": "logistic",
+      "test_days": 365,
+      "test_flood_days": 135,
+      "prevalence": 0.37,
+      "roc_auc": 0.577,
+      "pr_auc": 0.443,
+      "precision_at_recall_80": 0.408,
+      "precision_at_recall_50": 0.433,
+      "rain_3day_sum_alone_roc_auc": 0.617
+    },
+    {
+      "flood_day": ">= 1 kelurahan",
+      "split": "train 2020\u20132021, test 2022 (complete dates)",
+      "model": "xgboost",
+      "test_days": 365,
+      "test_flood_days": 135,
+      "prevalence": 0.37,
+      "roc_auc": 0.568,
+      "pr_auc": 0.406,
+      "precision_at_recall_80": 0.396,
+      "precision_at_recall_50": 0.455,
+      "rain_3day_sum_alone_roc_auc": 0.617
+    },
+    {
+      "flood_day": ">= 1 kelurahan",
+      "split": "train 2020\u20132022, test 2023\u20132025 (partial dates)",
+      "model": "logistic",
+      "test_days": 1096,
+      "test_flood_days": 362,
+      "prevalence": 0.33,
+      "roc_auc": 0.682,
+      "pr_auc": 0.504,
+      "precision_at_recall_80": 0.422,
+      "precision_at_recall_50": 0.488,
+      "rain_3day_sum_alone_roc_auc": 0.674
+    },
+    {
+      "flood_day": ">= 1 kelurahan",
+      "split": "train 2020\u20132022, test 2023\u20132025 (partial dates)",
+      "model": "xgboost",
+      "test_days": 1096,
+      "test_flood_days": 362,
+      "prevalence": 0.33,
+      "roc_auc": 0.66,
+      "pr_auc": 0.464,
+      "precision_at_recall_80": 0.406,
+      "precision_at_recall_50": 0.457,
+      "rain_3day_sum_alone_roc_auc": 0.674
+    },
+    {
+      "flood_day": ">= 5 kelurahan",
+      "split": "train 2020\u20132021, test 2022 (complete dates)",
+      "model": "logistic",
+      "test_days": 365,
+      "test_flood_days": 51,
+      "prevalence": 0.14,
+      "roc_auc": 0.661,
+      "pr_auc": 0.232,
+      "precision_at_recall_80": 0.183,
+      "precision_at_recall_50": 0.216,
+      "rain_3day_sum_alone_roc_auc": 0.66
+    },
+    {
+      "flood_day": ">= 5 kelurahan",
+      "split": "train 2020\u20132021, test 2022 (complete dates)",
+      "model": "xgboost",
+      "test_days": 365,
+      "test_flood_days": 51,
+      "prevalence": 0.14,
+      "roc_auc": 0.635,
+      "pr_auc": 0.192,
+      "precision_at_recall_80": 0.189,
+      "precision_at_recall_50": 0.208,
+      "rain_3day_sum_alone_roc_auc": 0.66
+    },
+    {
+      "flood_day": ">= 5 kelurahan",
+      "split": "train 2020\u20132022, test 2023\u20132025 (partial dates)",
+      "model": "logistic",
+      "test_days": 1096,
+      "test_flood_days": 91,
+      "prevalence": 0.083,
+      "roc_auc": 0.78,
+      "pr_auc": 0.25,
+      "precision_at_recall_80": 0.153,
+      "precision_at_recall_50": 0.201,
+      "rain_3day_sum_alone_roc_auc": 0.769
+    },
+    {
+      "flood_day": ">= 5 kelurahan",
+      "split": "train 2020\u20132022, test 2023\u20132025 (partial dates)",
+      "model": "xgboost",
+      "test_days": 1096,
+      "test_flood_days": 91,
+      "prevalence": 0.083,
+      "roc_auc": 0.746,
+      "pr_auc": 0.19,
+      "precision_at_recall_80": 0.139,
+      "precision_at_recall_50": 0.182,
+      "rain_3day_sum_alone_roc_auc": 0.769
+    }
+  ]
+}

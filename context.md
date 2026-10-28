@@ -288,9 +288,27 @@ The LLM never changes the decision; it only writes explanations, with a determin
   `rekap_kejadian_2020_2025.csv` keeps only the RW, so 2,634 rows were identical copies. The history
   builder now counts each RW-date once: 4,667 events 2020–Mar 2026 (was 7,301). The bundle was
   retrained on the corrected feature (serving the old bundle with it raised ECE 0.062 → 0.074).
-- **Flood records available:** BPBD monthly city recaps 2013–2020 (no kecamatan, so not usable as
-  labels) and per-RW/kelurahan records 2020–Mar 2026 (Q4 2025 missing from the quarterly export).
-  Only 2020–2024 is used for training.
+- **Flood records available:** BPBD per-kelurahan daily events 2013–2020 (`data/raw/combined.csv` →
+  `data/processed/events_clean.csv`, 5,889 rows), per-RW records 2020–2025 and quarterly per-kelurahan
+  records to Mar 2026 (Q4 2025 missing). Training uses 2020–2024 only because the bootstrap features
+  (`cleaned_flood_data_jakarta.csv`) exist only for those years.
+- **Precision experiments (2026-10-28, `artifacts/reports/precision_experiments.md`,
+  `daily_flood_experiment.md`):**
+  - The dataset's `banjir` label marks 282 kecamatan-months; BPBD records show 895 (267/147/213/113/155,
+    2020–2024), and the label covers only 276 of them. The "floods shrink over time" pattern is a label
+    artifact.
+  - Scored against BPBD records, the by-year model's 2024 alarms are right 53 % of the time (recall 51 %),
+    not 13 %: about half the "false alarms" are recorded floods.
+  - Retrained on BPBD labels, the chronological split works (113 validation positives) and by year gives
+    ROC-AUC 0.760 [0.715–0.800], PR-AUC 0.501 (no-skill 0.264); at the best-F1 threshold on 2023,
+    recall 0.73 / precision 0.48 on 2024. Ranking of BPBD floods is no better than the current model's
+    (PR-AUC 0.555 vs 0.501), so the features, not the label, cap it.
+  - Stricter Danger threshold for the served model (precision ≥ 0.50 on validation → 0.425): random-split
+    test recall 0.66 / precision 0.44 instead of 0.875 / 0.282. On dataset labels by year the choice is
+    unstable (11 validation positives).
+  - Daily city-level flood days from BPBD dates + ERA5 rainfall (Open-Meteo): ROC-AUC 0.57–0.78, no better
+    than the 3-day rain sum alone; rainfall alone cannot separate flood days. Water-level history is needed.
+  - Nothing was promoted; the served bundle is unchanged.
 - **Honest estimate (by-year split train 2020–2022 / val 2023 / test 2024, 22 positives):**
   AUC 0.826 [0.745–0.889], PR-AUC 0.124 (no-skill 0.037), recall 0.864 / precision 0.128 at the
   threshold picked on 2023, ECE 0.169 (`artifacts/reports/model_evaluation.md`; before the event-count

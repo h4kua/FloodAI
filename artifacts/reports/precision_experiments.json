@@ -1,0 +1,773 @@
+{
+  "generated_at": "2026-10-28T02:59:48+00:00",
+  "label_summary": {
+    "2020": {
+      "dataset": 117,
+      "bpbd": 267,
+      "both": 116,
+      "rows": 589
+    },
+    "2021": {
+      "dataset": 78,
+      "bpbd": 147,
+      "both": 78,
+      "rows": 595
+    },
+    "2022": {
+      "dataset": 54,
+      "bpbd": 213,
+      "both": 53,
+      "rows": 580
+    },
+    "2023": {
+      "dataset": 11,
+      "bpbd": 113,
+      "both": 8,
+      "rows": 577
+    },
+    "2024": {
+      "dataset": 22,
+      "bpbd": 155,
+      "both": 21,
+      "rows": 587
+    }
+  },
+  "runs": {
+    "by_year/dataset": {
+      "split": "by_year (train<2023, val 2023\u20132023, test>=2024)",
+      "calibration": "sigmoid",
+      "validation_positives": 11,
+      "on_own_labels": {
+        "test_rows": 587,
+        "test_positives": 22,
+        "prevalence": 0.037,
+        "roc_auc": [
+          0.826,
+          0.745,
+          0.889
+        ],
+        "pr_auc": [
+          0.124,
+          0.078,
+          0.192
+        ],
+        "operating_points": [
+          {
+            "rule": "current (recall-first, precision >= 0.30)",
+            "threshold": 0.347,
+            "recall": 0.864,
+            "precision": 0.128,
+            "f1": 0.222,
+            "alarms": 149,
+            "true_alarms": 19,
+            "false_alarms": 130,
+            "missed": 3
+          },
+          {
+            "rule": "best F1 on validation",
+            "threshold": 0.5336,
+            "recall": 0.045,
+            "precision": 0.026,
+            "f1": 0.033,
+            "alarms": 38,
+            "true_alarms": 1,
+            "false_alarms": 37,
+            "missed": 21
+          },
+          {
+            "rule": "best F0.5 on validation (precision-weighted)",
+            "threshold": 0.5336,
+            "recall": 0.045,
+            "precision": 0.026,
+            "f1": 0.033,
+            "alarms": 38,
+            "true_alarms": 1,
+            "false_alarms": 37,
+            "missed": 21
+          }
+        ],
+        "fixed_threshold_sweep": [
+          {
+            "threshold": 0.05,
+            "recall": 0.955,
+            "precision": 0.046,
+            "alarms": 459
+          },
+          {
+            "threshold": 0.07,
+            "recall": 0.955,
+            "precision": 0.048,
+            "alarms": 440
+          },
+          {
+            "threshold": 0.1,
+            "recall": 0.955,
+            "precision": 0.057,
+            "alarms": 367
+          },
+          {
+            "threshold": 0.126,
+            "recall": 0.955,
+            "precision": 0.066,
+            "alarms": 319
+          },
+          {
+            "threshold": 0.15,
+            "recall": 0.955,
+            "precision": 0.077,
+            "alarms": 274
+          },
+          {
+            "threshold": 0.2,
+            "recall": 0.909,
+            "precision": 0.1,
+            "alarms": 201
+          },
+          {
+            "threshold": 0.3,
+            "recall": 0.864,
+            "precision": 0.109,
+            "alarms": 174
+          },
+          {
+            "threshold": 0.4,
+            "recall": 0.682,
+            "precision": 0.136,
+            "alarms": 110
+          },
+          {
+            "threshold": 0.5,
+            "recall": 0.182,
+            "precision": 0.075,
+            "alarms": 53
+          },
+          {
+            "threshold": 0.6,
+            "recall": 0.0,
+            "precision": null,
+            "alarms": 0
+          }
+        ]
+      },
+      "on_bpbd_labels": {
+        "test_rows": 587,
+        "test_positives": 155,
+        "prevalence": 0.264,
+        "roc_auc": [
+          0.76,
+          0.715,
+          0.802
+        ],
+        "pr_auc": [
+          0.555,
+          0.48,
+          0.638
+        ],
+        "operating_points": [
+          {
+            "rule": "current (recall-first, precision >= 0.30)",
+            "threshold": 0.347,
+            "recall": 0.51,
+            "precision": 0.53,
+            "f1": 0.52,
+            "alarms": 149,
+            "true_alarms": 79,
+            "false_alarms": 70,
+            "missed": 76
+          },
+          {
+            "rule": "best F1 on validation",
+            "threshold": 0.5336,
+            "recall": 0.174,
+            "precision": 0.711,
+            "f1": 0.28,
+            "alarms": 38,
+            "true_alarms": 27,
+            "false_alarms": 11,
+            "missed": 128
+          },
+          {
+            "rule": "best F0.5 on validation (precision-weighted)",
+            "threshold": 0.5336,
+            "recall": 0.174,
+            "precision": 0.711,
+            "f1": 0.28,
+            "alarms": 38,
+            "true_alarms": 27,
+            "false_alarms": 11,
+            "missed": 128
+          }
+        ],
+        "fixed_threshold_sweep": [
+          {
+            "threshold": 0.05,
+            "recall": 0.968,
+            "precision": 0.327,
+            "alarms": 459
+          },
+          {
+            "threshold": 0.07,
+            "recall": 0.935,
+            "precision": 0.33,
+            "alarms": 440
+          },
+          {
+            "threshold": 0.1,
+            "recall": 0.845,
+            "precision": 0.357,
+            "alarms": 367
+          },
+          {
+            "threshold": 0.126,
+            "recall": 0.813,
+            "precision": 0.395,
+            "alarms": 319
+          },
+          {
+            "threshold": 0.15,
+            "recall": 0.755,
+            "precision": 0.427,
+            "alarms": 274
+          },
+          {
+            "threshold": 0.2,
+            "recall": 0.587,
+            "precision": 0.453,
+            "alarms": 201
+          },
+          {
+            "threshold": 0.3,
+            "recall": 0.535,
+            "precision": 0.477,
+            "alarms": 174
+          },
+          {
+            "threshold": 0.4,
+            "recall": 0.426,
+            "precision": 0.6,
+            "alarms": 110
+          },
+          {
+            "threshold": 0.5,
+            "recall": 0.219,
+            "precision": 0.642,
+            "alarms": 53
+          },
+          {
+            "threshold": 0.6,
+            "recall": 0.0,
+            "precision": null,
+            "alarms": 0
+          }
+        ]
+      }
+    },
+    "by_year/bpbd": {
+      "split": "by_year (train<2023, val 2023\u20132023, test>=2024)",
+      "calibration": "isotonic",
+      "validation_positives": 113,
+      "on_own_labels": {
+        "test_rows": 587,
+        "test_positives": 155,
+        "prevalence": 0.264,
+        "roc_auc": [
+          0.76,
+          0.715,
+          0.8
+        ],
+        "pr_auc": [
+          0.501,
+          0.426,
+          0.589
+        ],
+        "operating_points": [
+          {
+            "rule": "current (recall-first, precision >= 0.30)",
+            "threshold": 0.2283,
+            "recall": 0.948,
+            "precision": 0.336,
+            "f1": 0.497,
+            "alarms": 437,
+            "true_alarms": 147,
+            "false_alarms": 290,
+            "missed": 8
+          },
+          {
+            "rule": "best F1 on validation",
+            "threshold": 0.3699,
+            "recall": 0.729,
+            "precision": 0.479,
+            "f1": 0.578,
+            "alarms": 236,
+            "true_alarms": 113,
+            "false_alarms": 123,
+            "missed": 42
+          },
+          {
+            "rule": "best F0.5 on validation (precision-weighted)",
+            "threshold": 0.42,
+            "recall": 0.548,
+            "precision": 0.486,
+            "f1": 0.515,
+            "alarms": 175,
+            "true_alarms": 85,
+            "false_alarms": 90,
+            "missed": 70
+          },
+          {
+            "rule": "highest recall with precision >= 0.50 on validation",
+            "threshold": 0.3404,
+            "recall": 0.748,
+            "precision": 0.411,
+            "f1": 0.531,
+            "alarms": 282,
+            "true_alarms": 116,
+            "false_alarms": 166,
+            "missed": 39
+          }
+        ],
+        "fixed_threshold_sweep": [
+          {
+            "threshold": 0.05,
+            "recall": 1.0,
+            "precision": 0.264,
+            "alarms": 587
+          },
+          {
+            "threshold": 0.07,
+            "recall": 1.0,
+            "precision": 0.264,
+            "alarms": 587
+          },
+          {
+            "threshold": 0.1,
+            "recall": 1.0,
+            "precision": 0.264,
+            "alarms": 587
+          },
+          {
+            "threshold": 0.126,
+            "recall": 1.0,
+            "precision": 0.264,
+            "alarms": 587
+          },
+          {
+            "threshold": 0.15,
+            "recall": 0.961,
+            "precision": 0.315,
+            "alarms": 473
+          },
+          {
+            "threshold": 0.2,
+            "recall": 0.955,
+            "precision": 0.322,
+            "alarms": 460
+          },
+          {
+            "threshold": 0.3,
+            "recall": 0.813,
+            "precision": 0.385,
+            "alarms": 327
+          },
+          {
+            "threshold": 0.4,
+            "recall": 0.619,
+            "precision": 0.487,
+            "alarms": 197
+          },
+          {
+            "threshold": 0.5,
+            "recall": 0.129,
+            "precision": 0.645,
+            "alarms": 31
+          },
+          {
+            "threshold": 0.6,
+            "recall": 0.0,
+            "precision": null,
+            "alarms": 0
+          }
+        ]
+      },
+      "on_dataset_labels": {
+        "test_rows": 587,
+        "test_positives": 22,
+        "prevalence": 0.037,
+        "roc_auc": [
+          0.754,
+          0.678,
+          0.824
+        ],
+        "pr_auc": [
+          0.081,
+          0.051,
+          0.128
+        ],
+        "operating_points": [
+          {
+            "rule": "current (recall-first, precision >= 0.30)",
+            "threshold": 0.2283,
+            "recall": 0.955,
+            "precision": 0.048,
+            "f1": 0.092,
+            "alarms": 437,
+            "true_alarms": 21,
+            "false_alarms": 416,
+            "missed": 1
+          },
+          {
+            "rule": "best F1 on validation",
+            "threshold": 0.3699,
+            "recall": 0.955,
+            "precision": 0.089,
+            "f1": 0.163,
+            "alarms": 236,
+            "true_alarms": 21,
+            "false_alarms": 215,
+            "missed": 1
+          },
+          {
+            "rule": "best F0.5 on validation (precision-weighted)",
+            "threshold": 0.42,
+            "recall": 0.636,
+            "precision": 0.08,
+            "f1": 0.142,
+            "alarms": 175,
+            "true_alarms": 14,
+            "false_alarms": 161,
+            "missed": 8
+          },
+          {
+            "rule": "highest recall with precision >= 0.50 on validation",
+            "threshold": 0.3404,
+            "recall": 0.955,
+            "precision": 0.074,
+            "f1": 0.138,
+            "alarms": 282,
+            "true_alarms": 21,
+            "false_alarms": 261,
+            "missed": 1
+          }
+        ],
+        "fixed_threshold_sweep": [
+          {
+            "threshold": 0.05,
+            "recall": 1.0,
+            "precision": 0.037,
+            "alarms": 587
+          },
+          {
+            "threshold": 0.07,
+            "recall": 1.0,
+            "precision": 0.037,
+            "alarms": 587
+          },
+          {
+            "threshold": 0.1,
+            "recall": 1.0,
+            "precision": 0.037,
+            "alarms": 587
+          },
+          {
+            "threshold": 0.126,
+            "recall": 1.0,
+            "precision": 0.037,
+            "alarms": 587
+          },
+          {
+            "threshold": 0.15,
+            "recall": 0.955,
+            "precision": 0.044,
+            "alarms": 473
+          },
+          {
+            "threshold": 0.2,
+            "recall": 0.955,
+            "precision": 0.046,
+            "alarms": 460
+          },
+          {
+            "threshold": 0.3,
+            "recall": 0.955,
+            "precision": 0.064,
+            "alarms": 327
+          },
+          {
+            "threshold": 0.4,
+            "recall": 0.773,
+            "precision": 0.086,
+            "alarms": 197
+          },
+          {
+            "threshold": 0.5,
+            "recall": 0.045,
+            "precision": 0.032,
+            "alarms": 31
+          },
+          {
+            "threshold": 0.6,
+            "recall": 0.0,
+            "precision": null,
+            "alarms": 0
+          }
+        ]
+      }
+    },
+    "random/dataset": {
+      "split": "random_stratified_68_12_20 (fallback: chronological_68_12_20 had no positives)",
+      "calibration": "sigmoid",
+      "validation_positives": 34,
+      "on_own_labels": {
+        "test_rows": 586,
+        "test_positives": 56,
+        "prevalence": 0.096,
+        "roc_auc": [
+          0.899,
+          0.858,
+          0.938
+        ],
+        "pr_auc": [
+          0.525,
+          0.396,
+          0.65
+        ],
+        "operating_points": [
+          {
+            "rule": "current (recall-first, precision >= 0.30)",
+            "threshold": 0.1255,
+            "recall": 0.875,
+            "precision": 0.282,
+            "f1": 0.426,
+            "alarms": 174,
+            "true_alarms": 49,
+            "false_alarms": 125,
+            "missed": 7
+          },
+          {
+            "rule": "best F1 on validation",
+            "threshold": 0.7151,
+            "recall": 0.375,
+            "precision": 0.512,
+            "f1": 0.433,
+            "alarms": 41,
+            "true_alarms": 21,
+            "false_alarms": 20,
+            "missed": 35
+          },
+          {
+            "rule": "best F0.5 on validation (precision-weighted)",
+            "threshold": 0.7151,
+            "recall": 0.375,
+            "precision": 0.512,
+            "f1": 0.433,
+            "alarms": 41,
+            "true_alarms": 21,
+            "false_alarms": 20,
+            "missed": 35
+          },
+          {
+            "rule": "highest recall with precision >= 0.50 on validation",
+            "threshold": 0.4252,
+            "recall": 0.661,
+            "precision": 0.435,
+            "f1": 0.525,
+            "alarms": 85,
+            "true_alarms": 37,
+            "false_alarms": 48,
+            "missed": 19
+          }
+        ],
+        "fixed_threshold_sweep": [
+          {
+            "threshold": 0.05,
+            "recall": 0.911,
+            "precision": 0.218,
+            "alarms": 234
+          },
+          {
+            "threshold": 0.07,
+            "recall": 0.911,
+            "precision": 0.234,
+            "alarms": 218
+          },
+          {
+            "threshold": 0.1,
+            "recall": 0.875,
+            "precision": 0.251,
+            "alarms": 195
+          },
+          {
+            "threshold": 0.126,
+            "recall": 0.875,
+            "precision": 0.282,
+            "alarms": 174
+          },
+          {
+            "threshold": 0.15,
+            "recall": 0.875,
+            "precision": 0.312,
+            "alarms": 157
+          },
+          {
+            "threshold": 0.2,
+            "recall": 0.821,
+            "precision": 0.341,
+            "alarms": 135
+          },
+          {
+            "threshold": 0.3,
+            "recall": 0.768,
+            "precision": 0.402,
+            "alarms": 107
+          },
+          {
+            "threshold": 0.4,
+            "recall": 0.661,
+            "precision": 0.411,
+            "alarms": 90
+          },
+          {
+            "threshold": 0.5,
+            "recall": 0.625,
+            "precision": 0.467,
+            "alarms": 75
+          },
+          {
+            "threshold": 0.6,
+            "recall": 0.536,
+            "precision": 0.508,
+            "alarms": 59
+          }
+        ]
+      }
+    },
+    "random/bpbd": {
+      "split": "chronological_68_12_20",
+      "calibration": "isotonic",
+      "validation_positives": 43,
+      "on_own_labels": {
+        "test_rows": 586,
+        "test_positives": 154,
+        "prevalence": 0.263,
+        "roc_auc": [
+          0.793,
+          0.751,
+          0.83
+        ],
+        "pr_auc": [
+          0.563,
+          0.484,
+          0.647
+        ],
+        "operating_points": [
+          {
+            "rule": "current (recall-first, precision >= 0.30)",
+            "threshold": 0.2035,
+            "recall": 0.903,
+            "precision": 0.355,
+            "f1": 0.51,
+            "alarms": 391,
+            "true_alarms": 139,
+            "false_alarms": 252,
+            "missed": 15
+          },
+          {
+            "rule": "best F1 on validation",
+            "threshold": 0.2465,
+            "recall": 0.857,
+            "precision": 0.394,
+            "f1": 0.54,
+            "alarms": 335,
+            "true_alarms": 132,
+            "false_alarms": 203,
+            "missed": 22
+          },
+          {
+            "rule": "best F0.5 on validation (precision-weighted)",
+            "threshold": 0.4041,
+            "recall": 0.597,
+            "precision": 0.586,
+            "f1": 0.592,
+            "alarms": 157,
+            "true_alarms": 92,
+            "false_alarms": 65,
+            "missed": 62
+          },
+          {
+            "rule": "highest recall with precision >= 0.50 on validation",
+            "threshold": 0.3985,
+            "recall": 0.617,
+            "precision": 0.565,
+            "f1": 0.59,
+            "alarms": 168,
+            "true_alarms": 95,
+            "false_alarms": 73,
+            "missed": 59
+          }
+        ],
+        "fixed_threshold_sweep": [
+          {
+            "threshold": 0.05,
+            "recall": 1.0,
+            "precision": 0.263,
+            "alarms": 586
+          },
+          {
+            "threshold": 0.07,
+            "recall": 1.0,
+            "precision": 0.263,
+            "alarms": 586
+          },
+          {
+            "threshold": 0.1,
+            "recall": 1.0,
+            "precision": 0.267,
+            "alarms": 577
+          },
+          {
+            "threshold": 0.126,
+            "recall": 1.0,
+            "precision": 0.268,
+            "alarms": 574
+          },
+          {
+            "threshold": 0.15,
+            "recall": 0.961,
+            "precision": 0.312,
+            "alarms": 474
+          },
+          {
+            "threshold": 0.2,
+            "recall": 0.903,
+            "precision": 0.35,
+            "alarms": 397
+          },
+          {
+            "threshold": 0.3,
+            "recall": 0.786,
+            "precision": 0.484,
+            "alarms": 250
+          },
+          {
+            "threshold": 0.4,
+            "recall": 0.61,
+            "precision": 0.577,
+            "alarms": 163
+          },
+          {
+            "threshold": 0.5,
+            "recall": 0.26,
+            "precision": 0.606,
+            "alarms": 66
+          },
+          {
+            "threshold": 0.6,
+            "recall": 0.058,
+            "precision": 0.9,
+            "alarms": 10
+          }
+        ]
+      }
+    }
+  }
+}
