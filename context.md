@@ -12,7 +12,7 @@
 | Backend | FastAPI + uvicorn, port 8080 |
 | Frontend | React 18 + Vite 5 + React-Leaflet 4, port 3000 (dev); basemap Esri Gray Canvas (keyless) |
 | Database | Supabase / PostgreSQL (`supabase` client + psycopg2) |
-| ML | XGBoost + scikit-learn 1.8.0 — realtime-native bundle (`models/realtime_native_bundle/`, 17 features). Retrained 2026-10-23 with a leak-free frequency feature. Test AUC 0.904 / recall 0.893 / ECE 0.062 are optimistic: bootstrap-proxy data, random split, no field evaluation yet (see *Model & evaluation*). |
+| ML | XGBoost + scikit-learn 1.8.0 — realtime-native bundle (`models/realtime_native_bundle/`, 17 features). Retrained 2026-10-28 (leak-free frequency feature, BPBD events counted once per RW-date). Test AUC 0.899 / recall 0.875 / ECE 0.062 are optimistic: bootstrap-proxy data, random split, no field evaluation yet (see *Model & evaluation*). |
 | LLM | Groq `qwen/qwen3.8-27b` (`DEFAULT_GROQ_MODEL` in `config/llm_config.py`, override with `GROQ_MODEL`; `llama-3.3-70b-versatile` was withdrawn) for the chatbot, explanations and 3-agent crew. Not in the decision path. |
 | Deploy | Fly.io backend (`fly.toml`, app `floodai-8eclra`, region `ams`) · Vercel frontend (`vercel.json`, SPA rewrite to `index.html`) |
 
@@ -271,8 +271,9 @@ The LLM never changes the decision; it only writes explanations, with a determin
 
 | Figure | Source | Model | Caveat |
 |---|---|---|---|
-| AUC 0.904 [0.866–0.940], PR-AUC 0.528, recall 0.893, precision 0.263, Brier 0.074, ECE 0.062, threshold 0.103 | `artifacts/reports/model_evaluation.md` (`scripts/evaluate_model.py`, 95 % bootstrap CIs) | Current bundle (retrained 2026-10-23) | Random stratified split (586 test rows from 2020–2024, 56 positives), leak-free frequency feature, `bootstrap_proxy` data; optimistic |
-| AUC 0.901, recall 0.839, threshold 0.036 | git history (d06dc0c and earlier) | Previous bundle (2026-07-02) | Same split, leaky frequency feature |
+| AUC 0.899 [0.858–0.938], PR-AUC 0.525, recall 0.875, precision 0.282, Brier 0.074, ECE 0.062, threshold 0.126 | `artifacts/reports/model_evaluation.md` (`scripts/evaluate_model.py`, 95 % bootstrap CIs) | Current bundle (retrained 2026-10-28) | Random stratified split (586 test rows from 2020–2024, 56 positives), leak-free frequency feature from deduplicated BPBD events, `bootstrap_proxy` data; optimistic |
+| AUC 0.904, recall 0.893, precision 0.263, threshold 0.103 | git history (5919525 and earlier) | Bundle of 2026-10-23 | Same split; frequency feature counted each RT row as an event (7,301 instead of 4,667) |
+| AUC 0.901, recall 0.839, threshold 0.036 | git history (d06dc0c and earlier) | Bundle of 2026-07-02 | Same split, leaky frequency feature |
 | ECE 0.1962 | `artifacts/configurations/calibration_cache.json` | Older model (Apr–May 2026 predictions) | Labels derived from the model's own ranking; still read at runtime, penalty off |
 | ECE 0.3784 | `artifacts/reports/scenario_validation.json` | Older model | n = 7 hand-made scenarios |
 | AUC 0.9452 | `artifacts/reports/model_training_report_jakarta.txt` | Legacy Jakarta model (`/predict/realtime`) | Random 80:20 split, train AUC 1.0 |
@@ -283,9 +284,17 @@ The LLM never changes the decision; it only writes explanations, with a determin
 - **Leakage fixed (2026-10-23):** `kecamatan_historical_flood_freq` is computed per row from BPBD
   events in earlier years only (`events_by_year` in `data/bundled/kelurahan_flood_history.json`);
   inference uses years before the snapshot's year, so training and serving match.
+- **Event counts fixed (2026-10-28):** the BPBD workbooks list one row per RT, but
+  `rekap_kejadian_2020_2025.csv` keeps only the RW, so 2,634 rows were identical copies. The history
+  builder now counts each RW-date once: 4,667 events 2020–Mar 2026 (was 7,301). The bundle was
+  retrained on the corrected feature (serving the old bundle with it raised ECE 0.062 → 0.074).
+- **Flood records available:** BPBD monthly city recaps 2013–2020 (no kecamatan, so not usable as
+  labels) and per-RW/kelurahan records 2020–Mar 2026 (Q4 2025 missing from the quarterly export).
+  Only 2020–2024 is used for training.
 - **Honest estimate (by-year split train 2020–2022 / val 2023 / test 2024, 22 positives):**
-  AUC 0.812 [0.741–0.869], PR-AUC 0.104 (no-skill 0.037), recall 0.864 / precision 0.124 at the
-  threshold picked on 2023, ECE 0.192 (`artifacts/reports/model_evaluation.md`). Earlier sandbox runs:
+  AUC 0.826 [0.745–0.889], PR-AUC 0.124 (no-skill 0.037), recall 0.864 / precision 0.128 at the
+  threshold picked on 2023, ECE 0.169 (`artifacts/reports/model_evaluation.md`; before the event-count
+  fix: AUC 0.812, PR-AUC 0.104, ECE 0.192). Earlier sandbox runs:
   without the frequency feature AUC 0.84, leaky feature AUC 0.89. Very few 2023–2024 positives
   (11 and 22), so these are rough.
 - **Evaluation fixes (2026-10-24):** ECE now uses equal-width bins consistently (the old function
@@ -324,7 +333,7 @@ The LLM never changes the decision; it only writes explanations, with a determin
 | Fly stops/suspends the machines | Fix in `fly.toml` (2026-10-27) | `auto_stop_machines = 'off'`: with `'stop'` both machines were stopped or suspended despite `min_machines_running = 1`, halting the 15-min scheduler; live after the next `fly deploy`. The GitHub refresh workflow (needs `REFRESH_URL`, `INTERNAL_SECRET`) is the backup |
 | Groq per-minute quota | Mitigated 2026-10-27 | Free tier 8k tokens/min per model; prompt cut to ~1.8k tokens, fallback model, "busy" instead of offline. Heavy use still needs a paid tier |
 | Home "Siaga 2" count from ratios | Resolved 2026-10-27 | Gauge, Siaga line, wilayah and map now use each post's DSDA band, like the engine |
-| Model improvement | Tried 2026-10-27 | 609 variants by year (test 2024): none better at ~86 % recall; candidate (13 features, Platt on 2023) AUC 0.733 vs 0.812 → served bundle kept (`artifacts/reports/candidate_comparison.md`) |
+| Model improvement | Tried 2026-10-27 | 609 variants by year (test 2024): none better at ~86 % recall; candidate (13 features, Platt on 2023) AUC 0.796 vs 0.826 after the event-count fix (was 0.733 vs 0.812) → served bundle kept (`artifacts/reports/candidate_comparison.md`) |
 | BNPB district mapping gap | Active | Some kecamatan not mapped to kabkot; InaRISK falls back to bundled JSON |
 | Legacy TMA Selenium scraper | Disabled by design | No `TMA_PROXY_URL`; degrades to STALE |
 | BMKG slots every ~3–6 h | By design | Forecast title shows the real span (e.g. "2 hari ke depan") |

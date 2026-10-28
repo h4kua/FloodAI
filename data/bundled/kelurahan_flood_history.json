@@ -1,7 +1,7 @@
 {
   "_meta": {
     "schema_version": "2",
-    "generated_at": "2026-10-23T12:49:37.680269+00:00",
+    "generated_at": "2026-10-28T02:28:28.082119+00:00",
     "sources": [
       "data-kejadian-bencana-banjir-komponen-data.xls",
       "data-kejadian-bencana-banjir-tahun-2023-komponen-data.xls",
@@ -12,7 +12,7 @@
   },
   "kelurahan": {
     "KEMBANGAN UTARA": {
-      "event_count": 53,
+      "event_count": 50,
       "total_jiwa_terdampak": 422,
       "total_meninggal": 2,
       "total_luka": 0,
@@ -28,7 +28,7 @@
       ],
       "events_by_year": {
         "2020": 6,
-        "2021": 15,
+        "2021": 12,
         "2022": 14,
         "2023": 5,
         "2024": 4,
@@ -40,7 +40,7 @@
       "kecamatan": "KEMBANGAN"
     },
     "RAWA BUAYA": {
-      "event_count": 158,
+      "event_count": 110,
       "total_jiwa_terdampak": 808,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -55,12 +55,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 12,
-        "2021": 30,
-        "2022": 32,
-        "2023": 25,
-        "2024": 24,
-        "2025": 29,
+        "2020": 10,
+        "2021": 17,
+        "2022": 18,
+        "2023": 15,
+        "2024": 21,
+        "2025": 23,
         "2026": 6
       },
       "max_ketinggian_cm": 150.0,
@@ -68,7 +68,7 @@
       "kecamatan": "CENGKARENG"
     },
     "TEGAL ALUR": {
-      "event_count": 186,
+      "event_count": 119,
       "total_jiwa_terdampak": 388,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -84,11 +84,11 @@
       ],
       "events_by_year": {
         "2020": 8,
-        "2021": 23,
-        "2022": 82,
-        "2023": 30,
-        "2024": 26,
-        "2025": 14,
+        "2021": 13,
+        "2022": 47,
+        "2023": 18,
+        "2024": 19,
+        "2025": 11,
         "2026": 3
       },
       "max_ketinggian_cm": 150.0,
@@ -96,7 +96,7 @@
       "kecamatan": "KALIDERES"
     },
     "BINTARO": {
-      "event_count": 89,
+      "event_count": 62,
       "total_jiwa_terdampak": 1085,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -110,11 +110,11 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 22,
-        "2021": 27,
-        "2022": 18,
+        "2020": 18,
+        "2021": 19,
+        "2022": 9,
         "2024": 6,
-        "2025": 15,
+        "2025": 9,
         "2026": 1
       },
       "max_ketinggian_cm": 300.0,
@@ -122,7 +122,7 @@
       "kecamatan": "PESANGGRAHAN"
     },
     "CILANDAK BARAT": {
-      "event_count": 37,
+      "event_count": 34,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -139,7 +139,7 @@
       "events_by_year": {
         "2020": 2,
         "2021": 2,
-        "2022": 10,
+        "2022": 7,
         "2023": 2,
         "2024": 7,
         "2025": 9,
@@ -150,7 +150,7 @@
       "kecamatan": "CILANDAK"
     },
     "CILANDAK TIMUR": {
-      "event_count": 113,
+      "event_count": 102,
       "total_jiwa_terdampak": 802,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -165,12 +165,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 11,
-        "2021": 22,
-        "2022": 18,
+        "2020": 10,
+        "2021": 18,
+        "2022": 14,
         "2023": 14,
         "2024": 14,
-        "2025": 28,
+        "2025": 26,
         "2026": 6
       },
       "max_ketinggian_cm": 180.0,
@@ -178,7 +178,7 @@
       "kecamatan": "PASAR MINGGU"
     },
     "CIPETE UTARA": {
-      "event_count": 45,
+      "event_count": 25,
       "total_jiwa_terdampak": 1118,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -194,11 +194,11 @@
       ],
       "events_by_year": {
         "2020": 2,
-        "2021": 6,
-        "2022": 16,
-        "2023": 3,
-        "2024": 3,
-        "2025": 9,
+        "2021": 2,
+        "2022": 7,
+        "2023": 1,
+        "2024": 2,
+        "2025": 5,
         "2026": 6
       },
       "max_ketinggian_cm": 200.0,
@@ -206,7 +206,7 @@
       "kecamatan": "KEBAYORAN BARU"
     },
     "CIPULIR": {
-      "event_count": 44,
+      "event_count": 40,
       "total_jiwa_terdampak": 576,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -221,9 +221,9 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 12,
-        "2021": 9,
-        "2022": 7,
+        "2020": 11,
+        "2021": 7,
+        "2022": 6,
         "2023": 6,
         "2024": 4,
         "2025": 2,
@@ -234,7 +234,7 @@
       "kecamatan": "KEBAYORAN LAMA"
     },
     "KEBAYORAN LAMA UTARA": {
-      "event_count": 18,
+      "event_count": 14,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -249,9 +249,9 @@
       ],
       "events_by_year": {
         "2020": 1,
-        "2022": 5,
-        "2023": 6,
-        "2024": 3,
+        "2022": 4,
+        "2023": 4,
+        "2024": 2,
         "2025": 2,
         "2026": 1
       },
@@ -260,7 +260,7 @@
       "kecamatan": "KEBAYORAN LAMA"
     },
     "LEBAK BULUS": {
-      "event_count": 27,
+      "event_count": 26,
       "total_jiwa_terdampak": 200,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -276,7 +276,7 @@
       "events_by_year": {
         "2020": 6,
         "2021": 3,
-        "2022": 7,
+        "2022": 6,
         "2024": 7,
         "2025": 3,
         "2026": 1
@@ -286,7 +286,7 @@
       "kecamatan": "CILANDAK"
     },
     "PEJATEN TIMUR": {
-      "event_count": 152,
+      "event_count": 114,
       "total_jiwa_terdampak": 285,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -301,12 +301,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 17,
-        "2021": 28,
-        "2022": 36,
-        "2023": 12,
-        "2024": 28,
-        "2025": 23,
+        "2020": 15,
+        "2021": 20,
+        "2022": 22,
+        "2023": 10,
+        "2024": 21,
+        "2025": 18,
         "2026": 8
       },
       "max_ketinggian_cm": 370.0,
@@ -314,7 +314,7 @@
       "kecamatan": "PASAR MINGGU"
     },
     "PELA MAMPANG": {
-      "event_count": 253,
+      "event_count": 87,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -329,12 +329,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 17,
-        "2021": 67,
-        "2022": 54,
-        "2023": 20,
-        "2024": 29,
-        "2025": 61,
+        "2020": 12,
+        "2021": 11,
+        "2022": 14,
+        "2023": 7,
+        "2024": 15,
+        "2025": 23,
         "2026": 5
       },
       "max_ketinggian_cm": 200.0,
@@ -342,7 +342,7 @@
       "kecamatan": "MAMPANG PRAPATAN"
     },
     "PESANGGRAHAN": {
-      "event_count": 53,
+      "event_count": 27,
       "total_jiwa_terdampak": 145,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -355,10 +355,10 @@
         "2026"
       ],
       "events_by_year": {
-        "2022": 29,
+        "2022": 11,
         "2023": 1,
         "2024": 4,
-        "2025": 17,
+        "2025": 9,
         "2026": 2
       },
       "max_ketinggian_cm": 80.0,
@@ -366,7 +366,7 @@
       "kecamatan": "PESANGGRAHAN"
     },
     "PETOGOGAN": {
-      "event_count": 454,
+      "event_count": 77,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -382,11 +382,11 @@
       ],
       "events_by_year": {
         "2020": 8,
-        "2021": 31,
-        "2022": 182,
+        "2021": 6,
+        "2022": 22,
         "2023": 4,
-        "2024": 99,
-        "2025": 126,
+        "2024": 16,
+        "2025": 17,
         "2026": 4
       },
       "max_ketinggian_cm": 150.0,
@@ -394,7 +394,7 @@
       "kecamatan": "KEBAYORAN BARU"
     },
     "PETUKANGAN UTARA": {
-      "event_count": 26,
+      "event_count": 8,
       "total_jiwa_terdampak": 1200,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -409,8 +409,8 @@
       ],
       "events_by_year": {
         "2020": 1,
-        "2021": 12,
-        "2022": 10,
+        "2021": 3,
+        "2022": 1,
         "2024": 1,
         "2025": 1,
         "2026": 1
@@ -420,7 +420,7 @@
       "kecamatan": "PESANGGRAHAN"
     },
     "PONDOK LABU": {
-      "event_count": 39,
+      "event_count": 38,
       "total_jiwa_terdampak": 200,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -440,7 +440,7 @@
         "2022": 12,
         "2023": 1,
         "2024": 1,
-        "2025": 11,
+        "2025": 10,
         "2026": 5
       },
       "max_ketinggian_cm": 180.0,
@@ -448,7 +448,7 @@
       "kecamatan": "CILANDAK"
     },
     "PONDOK PINANG": {
-      "event_count": 136,
+      "event_count": 73,
       "total_jiwa_terdampak": 400,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -463,12 +463,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 14,
-        "2021": 39,
-        "2022": 38,
-        "2023": 9,
-        "2024": 19,
-        "2025": 14,
+        "2020": 10,
+        "2021": 19,
+        "2022": 15,
+        "2023": 5,
+        "2024": 13,
+        "2025": 8,
         "2026": 3
       },
       "max_ketinggian_cm": 160.0,
@@ -476,7 +476,7 @@
       "kecamatan": "KEBAYORAN LAMA"
     },
     "RAWAJATI": {
-      "event_count": 80,
+      "event_count": 45,
       "total_jiwa_terdampak": 137,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -490,11 +490,11 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 12,
-        "2021": 10,
-        "2022": 34,
-        "2023": 4,
-        "2025": 14,
+        "2020": 9,
+        "2021": 6,
+        "2022": 17,
+        "2023": 1,
+        "2025": 6,
         "2026": 6
       },
       "max_ketinggian_cm": 352.0,
@@ -502,7 +502,7 @@
       "kecamatan": "PANCORAN"
     },
     "TANJUNG BARAT": {
-      "event_count": 41,
+      "event_count": 39,
       "total_jiwa_terdampak": 91,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -519,7 +519,7 @@
       "events_by_year": {
         "2020": 2,
         "2021": 4,
-        "2022": 15,
+        "2022": 13,
         "2023": 2,
         "2024": 8,
         "2025": 6,
@@ -530,7 +530,7 @@
       "kecamatan": "JAGAKARSA"
     },
     "ULUJAMI": {
-      "event_count": 65,
+      "event_count": 29,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -544,9 +544,9 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 14,
-        "2021": 31,
-        "2022": 12,
+        "2020": 6,
+        "2021": 11,
+        "2022": 4,
         "2023": 1,
         "2025": 4,
         "2026": 3
@@ -556,7 +556,7 @@
       "kecamatan": "PESANGGRAHAN"
     },
     "BALEKAMBANG": {
-      "event_count": 38,
+      "event_count": 33,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -570,8 +570,8 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 12,
-        "2021": 7,
+        "2020": 8,
+        "2021": 6,
         "2022": 8,
         "2023": 1,
         "2025": 7,
@@ -582,7 +582,7 @@
       "kecamatan": "KRAMATJATI"
     },
     "BIDARA CINA": {
-      "event_count": 284,
+      "event_count": 165,
       "total_jiwa_terdampak": 559,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -597,12 +597,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 28,
-        "2021": 46,
-        "2022": 67,
-        "2023": 49,
-        "2024": 47,
-        "2025": 41,
+        "2020": 12,
+        "2021": 18,
+        "2022": 37,
+        "2023": 34,
+        "2024": 29,
+        "2025": 29,
         "2026": 6
       },
       "max_ketinggian_cm": 420.0,
@@ -610,11 +610,11 @@
       "kecamatan": "JATINEGARA"
     },
     "CAWANG": {
-      "event_count": 378,
+      "event_count": 285,
       "total_jiwa_terdampak": 860,
       "total_meninggal": 1,
       "total_luka": 0,
-      "total_pengungsi": 231,
+      "total_pengungsi": 230,
       "years_covered": [
         "2020",
         "2021",
@@ -625,12 +625,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 39,
-        "2021": 90,
-        "2022": 96,
-        "2023": 65,
-        "2024": 36,
-        "2025": 45,
+        "2020": 30,
+        "2021": 65,
+        "2022": 73,
+        "2023": 48,
+        "2024": 33,
+        "2025": 29,
         "2026": 7
       },
       "max_ketinggian_cm": 370.0,
@@ -638,7 +638,7 @@
       "kecamatan": "KRAMATJATI"
     },
     "CILILITAN": {
-      "event_count": 126,
+      "event_count": 111,
       "total_jiwa_terdampak": 256,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -653,12 +653,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 12,
-        "2021": 38,
-        "2022": 18,
-        "2023": 21,
+        "2020": 10,
+        "2021": 30,
+        "2022": 17,
+        "2023": 19,
         "2024": 13,
-        "2025": 18,
+        "2025": 16,
         "2026": 6
       },
       "max_ketinggian_cm": 370.0,
@@ -666,7 +666,7 @@
       "kecamatan": "KRAMATJATI"
     },
     "KAMPUNG MELAYU": {
-      "event_count": 714,
+      "event_count": 370,
       "total_jiwa_terdampak": 1183,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -681,12 +681,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 67,
-        "2021": 146,
-        "2022": 210,
-        "2023": 99,
-        "2024": 119,
-        "2025": 66,
+        "2020": 31,
+        "2021": 74,
+        "2022": 80,
+        "2023": 64,
+        "2024": 69,
+        "2025": 45,
         "2026": 7
       },
       "max_ketinggian_cm": 350.0,
@@ -718,7 +718,7 @@
       "kecamatan": "CILINCING"
     },
     "CENGKARENG TIMUR": {
-      "event_count": 55,
+      "event_count": 23,
       "total_jiwa_terdampak": 337,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -733,10 +733,10 @@
       ],
       "events_by_year": {
         "2020": 2,
-        "2021": 10,
-        "2022": 7,
-        "2024": 6,
-        "2025": 29,
+        "2021": 3,
+        "2022": 4,
+        "2024": 5,
+        "2025": 8,
         "2026": 1
       },
       "max_ketinggian_cm": 70.0,
@@ -744,7 +744,7 @@
       "kecamatan": "CENGKARENG"
     },
     "DURI KOSAMBI": {
-      "event_count": 83,
+      "event_count": 65,
       "total_jiwa_terdampak": 508,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -759,12 +759,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 7,
-        "2021": 17,
-        "2022": 27,
-        "2023": 6,
-        "2024": 10,
-        "2025": 13,
+        "2020": 6,
+        "2021": 15,
+        "2022": 19,
+        "2023": 4,
+        "2024": 9,
+        "2025": 9,
         "2026": 3
       },
       "max_ketinggian_cm": 150.0,
@@ -816,7 +816,7 @@
       "kecamatan": "GROGOL PETAMBURAN"
     },
     "JOGLO": {
-      "event_count": 38,
+      "event_count": 36,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -833,7 +833,7 @@
       "events_by_year": {
         "2020": 1,
         "2021": 3,
-        "2022": 7,
+        "2022": 5,
         "2023": 3,
         "2024": 13,
         "2025": 9,
@@ -868,11 +868,11 @@
       "kecamatan": "KEBON JERUK"
     },
     "KEDAUNG KALI ANGKE": {
-      "event_count": 96,
+      "event_count": 54,
       "total_jiwa_terdampak": 305,
       "total_meninggal": 0,
       "total_luka": 0,
-      "total_pengungsi": 347,
+      "total_pengungsi": 346,
       "years_covered": [
         "2020",
         "2021",
@@ -883,12 +883,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 5,
-        "2021": 5,
-        "2022": 4,
-        "2023": 11,
-        "2024": 25,
-        "2025": 40,
+        "2020": 3,
+        "2021": 3,
+        "2022": 2,
+        "2023": 7,
+        "2024": 16,
+        "2025": 17,
         "2026": 6
       },
       "max_ketinggian_cm": 80.0,
@@ -896,11 +896,11 @@
       "kecamatan": "CENGKARENG"
     },
     "KEDOYA SELATAN": {
-      "event_count": 92,
+      "event_count": 59,
       "total_jiwa_terdampak": 265,
       "total_meninggal": 0,
       "total_luka": 0,
-      "total_pengungsi": 272,
+      "total_pengungsi": 271,
       "years_covered": [
         "2020",
         "2021",
@@ -911,12 +911,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 19,
-        "2021": 10,
-        "2022": 21,
-        "2023": 14,
+        "2020": 17,
+        "2021": 6,
+        "2022": 8,
+        "2023": 6,
         "2024": 7,
-        "2025": 16,
+        "2025": 10,
         "2026": 5
       },
       "max_ketinggian_cm": 150.0,
@@ -924,7 +924,7 @@
       "kecamatan": "KEBON JERUK"
     },
     "KEDOYA UTARA": {
-      "event_count": 79,
+      "event_count": 50,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -938,11 +938,11 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 8,
-        "2021": 46,
-        "2022": 14,
-        "2023": 6,
-        "2024": 3,
+        "2020": 6,
+        "2021": 30,
+        "2022": 7,
+        "2023": 3,
+        "2024": 2,
         "2026": 2
       },
       "max_ketinggian_cm": 100.0,
@@ -950,7 +950,7 @@
       "kecamatan": "KEBON JERUK"
     },
     "KEMBANGAN SELATAN": {
-      "event_count": 83,
+      "event_count": 60,
       "total_jiwa_terdampak": 250,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -965,12 +965,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 13,
+        "2020": 11,
         "2021": 3,
-        "2022": 26,
-        "2023": 5,
-        "2024": 16,
-        "2025": 13,
+        "2022": 16,
+        "2023": 4,
+        "2024": 8,
+        "2025": 11,
         "2026": 7
       },
       "max_ketinggian_cm": 180.0,
@@ -978,7 +978,7 @@
       "kecamatan": "KEMBANGAN"
     },
     "SUKABUMI SELATAN": {
-      "event_count": 70,
+      "event_count": 64,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -994,11 +994,11 @@
       ],
       "events_by_year": {
         "2020": 5,
-        "2021": 5,
-        "2022": 6,
-        "2023": 17,
+        "2021": 4,
+        "2022": 5,
+        "2023": 15,
         "2024": 20,
-        "2025": 13,
+        "2025": 11,
         "2026": 4
       },
       "max_ketinggian_cm": 175.0,
@@ -1006,7 +1006,7 @@
       "kecamatan": "KEBON JERUK"
     },
     "DUREN TIGA": {
-      "event_count": 48,
+      "event_count": 34,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -1022,11 +1022,11 @@
       ],
       "events_by_year": {
         "2020": 4,
-        "2021": 7,
-        "2022": 8,
-        "2023": 10,
-        "2024": 5,
-        "2025": 11,
+        "2021": 4,
+        "2022": 4,
+        "2023": 5,
+        "2024": 4,
+        "2025": 10,
         "2026": 3
       },
       "max_ketinggian_cm": 170.0,
@@ -1034,7 +1034,7 @@
       "kecamatan": "PANCORAN"
     },
     "JAGAKARSA": {
-      "event_count": 35,
+      "event_count": 22,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1048,8 +1048,8 @@
       ],
       "events_by_year": {
         "2020": 3,
-        "2021": 14,
-        "2022": 15,
+        "2021": 5,
+        "2022": 11,
         "2025": 1,
         "2026": 2
       },
@@ -1058,7 +1058,7 @@
       "kecamatan": "JAGAKARSA"
     },
     "KEBON BARU": {
-      "event_count": 42,
+      "event_count": 37,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 2,
       "total_luka": 0,
@@ -1074,8 +1074,8 @@
       ],
       "events_by_year": {
         "2020": 11,
-        "2021": 6,
-        "2022": 8,
+        "2021": 5,
+        "2022": 4,
         "2023": 4,
         "2024": 5,
         "2025": 5,
@@ -1086,7 +1086,7 @@
       "kecamatan": "TEBET"
     },
     "KUNINGAN BARAT": {
-      "event_count": 171,
+      "event_count": 122,
       "total_jiwa_terdampak": 684,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1102,11 +1102,11 @@
       ],
       "events_by_year": {
         "2020": 4,
-        "2021": 31,
-        "2022": 40,
-        "2023": 31,
-        "2024": 19,
-        "2025": 42,
+        "2021": 16,
+        "2022": 22,
+        "2023": 21,
+        "2024": 18,
+        "2025": 37,
         "2026": 4
       },
       "max_ketinggian_cm": 180.0,
@@ -1114,7 +1114,7 @@
       "kecamatan": "MAMPANG PRAPATAN"
     },
     "PEJATEN BARAT": {
-      "event_count": 41,
+      "event_count": 28,
       "total_jiwa_terdampak": 423,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1129,11 +1129,11 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 12,
-        "2021": 8,
-        "2022": 7,
-        "2023": 3,
-        "2024": 8,
+        "2020": 8,
+        "2021": 5,
+        "2022": 6,
+        "2023": 2,
+        "2024": 4,
         "2025": 2,
         "2026": 1
       },
@@ -1180,7 +1180,7 @@
       "kecamatan": "CIPAYUNG"
     },
     "CIBUBUR": {
-      "event_count": 11,
+      "event_count": 9,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1193,7 +1193,7 @@
       ],
       "events_by_year": {
         "2020": 4,
-        "2022": 5,
+        "2022": 3,
         "2024": 1,
         "2026": 1
       },
@@ -1202,7 +1202,7 @@
       "kecamatan": "CIRACAS"
     },
     "CILANGKAP": {
-      "event_count": 13,
+      "event_count": 7,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1215,8 +1215,8 @@
       ],
       "events_by_year": {
         "2020": 3,
-        "2021": 4,
-        "2022": 5,
+        "2021": 2,
+        "2022": 1,
         "2026": 1
       },
       "max_ketinggian_cm": 150.0,
@@ -1224,11 +1224,11 @@
       "kecamatan": "CIPAYUNG"
     },
     "CIPINANG MELAYU": {
-      "event_count": 187,
+      "event_count": 88,
       "total_jiwa_terdampak": 69,
       "total_meninggal": 2,
       "total_luka": 0,
-      "total_pengungsi": 101,
+      "total_pengungsi": 100,
       "years_covered": [
         "2020",
         "2021",
@@ -1239,12 +1239,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 10,
-        "2021": 68,
-        "2022": 31,
-        "2023": 9,
-        "2024": 29,
-        "2025": 37,
+        "2020": 8,
+        "2021": 36,
+        "2022": 12,
+        "2023": 4,
+        "2024": 9,
+        "2025": 16,
         "2026": 3
       },
       "max_ketinggian_cm": 220.0,
@@ -1252,7 +1252,7 @@
       "kecamatan": "MAKASAR"
     },
     "CIPINANG MUARA": {
-      "event_count": 60,
+      "event_count": 52,
       "total_jiwa_terdampak": 335,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1268,8 +1268,8 @@
       ],
       "events_by_year": {
         "2020": 5,
-        "2021": 14,
-        "2022": 14,
+        "2021": 10,
+        "2022": 10,
         "2023": 5,
         "2024": 8,
         "2025": 11,
@@ -1280,7 +1280,7 @@
       "kecamatan": "JATINEGARA"
     },
     "CIRACAS": {
-      "event_count": 18,
+      "event_count": 10,
       "total_jiwa_terdampak": 306,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1292,9 +1292,9 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 12,
+        "2020": 7,
         "2022": 1,
-        "2023": 4,
+        "2023": 1,
         "2026": 1
       },
       "max_ketinggian_cm": 100.0,
@@ -1302,7 +1302,7 @@
       "kecamatan": "CIRACAS"
     },
     "DUKUH": {
-      "event_count": 17,
+      "event_count": 16,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1321,7 +1321,7 @@
         "2021": 1,
         "2022": 6,
         "2023": 1,
-        "2024": 4,
+        "2024": 3,
         "2025": 1,
         "2026": 1
       },
@@ -1348,7 +1348,7 @@
       "kecamatan": "MAKASAR"
     },
     "KEBON PALA": {
-      "event_count": 64,
+      "event_count": 29,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1362,11 +1362,11 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 22,
-        "2021": 33,
+        "2020": 14,
+        "2021": 7,
         "2022": 1,
         "2024": 2,
-        "2025": 5,
+        "2025": 4,
         "2026": 1
       },
       "max_ketinggian_cm": 120.0,
@@ -1410,7 +1410,7 @@
       "kecamatan": "CIPAYUNG"
     },
     "PEKAYON": {
-      "event_count": 12,
+      "event_count": 11,
       "total_jiwa_terdampak": 300,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1422,7 +1422,7 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 8,
+        "2020": 7,
         "2021": 2,
         "2022": 1,
         "2026": 1
@@ -1432,7 +1432,7 @@
       "kecamatan": "PASAR REBO"
     },
     "PONDOK BAMBU": {
-      "event_count": 27,
+      "event_count": 22,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -1445,9 +1445,9 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 11,
-        "2021": 9,
-        "2022": 4,
+        "2020": 9,
+        "2021": 7,
+        "2022": 3,
         "2025": 2,
         "2026": 1
       },
@@ -1456,7 +1456,7 @@
       "kecamatan": "DUREN SAWIT"
     },
     "RAMBUTAN": {
-      "event_count": 62,
+      "event_count": 57,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1471,10 +1471,10 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 23,
-        "2021": 11,
+        "2020": 21,
+        "2021": 9,
         "2022": 14,
-        "2023": 4,
+        "2023": 3,
         "2024": 6,
         "2025": 3,
         "2026": 1
@@ -1510,7 +1510,7 @@
       "kecamatan": "KRAMATJATI"
     },
     "PULAU KELAPA": {
-      "event_count": 10,
+      "event_count": 7,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1522,7 +1522,7 @@
       ],
       "events_by_year": {
         "2020": 1,
-        "2021": 8,
+        "2021": 5,
         "2026": 1
       },
       "max_ketinggian_cm": 45.0,
@@ -1568,7 +1568,7 @@
       "kecamatan": "KEPULAUAN SERIBU SELATAN"
     },
     "CENGKARENG BARAT": {
-      "event_count": 47,
+      "event_count": 20,
       "total_jiwa_terdampak": 22,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1584,11 +1584,11 @@
       ],
       "events_by_year": {
         "2020": 5,
-        "2021": 3,
-        "2022": 20,
+        "2021": 2,
+        "2022": 5,
         "2023": 1,
-        "2024": 7,
-        "2025": 10,
+        "2024": 2,
+        "2025": 4,
         "2026": 1
       },
       "max_ketinggian_cm": 80.0,
@@ -1596,7 +1596,7 @@
       "kecamatan": "CENGKARENG"
     },
     "DURI KEPA": {
-      "event_count": 30,
+      "event_count": 25,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1610,8 +1610,8 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 8,
-        "2022": 7,
+        "2020": 6,
+        "2022": 4,
         "2023": 1,
         "2024": 3,
         "2025": 9,
@@ -1638,7 +1638,7 @@
       "kecamatan": "TAMBORA"
     },
     "KAMAL": {
-      "event_count": 92,
+      "event_count": 43,
       "total_jiwa_terdampak": 722,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1654,8 +1654,8 @@
       ],
       "events_by_year": {
         "2020": 2,
-        "2021": 7,
-        "2022": 73,
+        "2021": 2,
+        "2022": 29,
         "2023": 1,
         "2024": 5,
         "2025": 1,
@@ -1666,7 +1666,7 @@
       "kecamatan": "KALIDERES"
     },
     "KAPUK": {
-      "event_count": 60,
+      "event_count": 41,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -1680,11 +1680,11 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 11,
-        "2021": 3,
-        "2022": 21,
-        "2024": 17,
-        "2025": 6,
+        "2020": 10,
+        "2021": 2,
+        "2022": 7,
+        "2024": 15,
+        "2025": 5,
         "2026": 2
       },
       "max_ketinggian_cm": 70.0,
@@ -1730,7 +1730,7 @@
       "kecamatan": "KEMBANGAN"
     },
     "PEGADUNGAN": {
-      "event_count": 20,
+      "event_count": 15,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1744,11 +1744,11 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 8,
+        "2020": 5,
         "2021": 1,
-        "2022": 2,
+        "2022": 1,
         "2024": 2,
-        "2025": 6,
+        "2025": 5,
         "2026": 1
       },
       "max_ketinggian_cm": 150.0,
@@ -1784,7 +1784,7 @@
       "kecamatan": "KEBON JERUK"
     },
     "BENDUNGAN HILIR": {
-      "event_count": 14,
+      "event_count": 12,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1798,8 +1798,8 @@
       ],
       "events_by_year": {
         "2020": 2,
-        "2021": 2,
-        "2022": 7,
+        "2021": 1,
+        "2022": 6,
         "2025": 1,
         "2026": 2
       },
@@ -1808,7 +1808,7 @@
       "kecamatan": "TANAH ABANG"
     },
     "KARET TENGSIN": {
-      "event_count": 40,
+      "event_count": 14,
       "total_jiwa_terdampak": 275,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1821,8 +1821,8 @@
       ],
       "events_by_year": {
         "2020": 2,
-        "2021": 17,
-        "2025": 19,
+        "2021": 3,
+        "2025": 7,
         "2026": 2
       },
       "max_ketinggian_cm": 150.0,
@@ -1830,7 +1830,7 @@
       "kecamatan": "TANAH ABANG"
     },
     "PETAMBURAN": {
-      "event_count": 23,
+      "event_count": 16,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 5,
       "total_luka": 0,
@@ -1844,9 +1844,9 @@
       ],
       "events_by_year": {
         "2020": 6,
-        "2021": 5,
-        "2023": 2,
-        "2025": 9,
+        "2021": 4,
+        "2023": 1,
+        "2025": 4,
         "2026": 1
       },
       "max_ketinggian_cm": 120.0,
@@ -1872,7 +1872,7 @@
       "kecamatan": "KEMAYORAN"
     },
     "GANDARIA SELATAN": {
-      "event_count": 23,
+      "event_count": 17,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1889,10 +1889,10 @@
       "events_by_year": {
         "2020": 1,
         "2021": 3,
-        "2022": 8,
+        "2022": 4,
         "2023": 1,
         "2024": 4,
-        "2025": 5,
+        "2025": 3,
         "2026": 1
       },
       "max_ketinggian_cm": 80.0,
@@ -1900,7 +1900,7 @@
       "kecamatan": "CILANDAK"
     },
     "MANGGARAI": {
-      "event_count": 61,
+      "event_count": 44,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1915,10 +1915,10 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 8,
-        "2021": 6,
-        "2022": 25,
-        "2023": 10,
+        "2020": 6,
+        "2021": 5,
+        "2022": 13,
+        "2023": 8,
         "2024": 1,
         "2025": 10,
         "2026": 1
@@ -1928,7 +1928,7 @@
       "kecamatan": "TEBET"
     },
     "PENGADEGAN": {
-      "event_count": 20,
+      "event_count": 19,
       "total_jiwa_terdampak": 260,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1948,7 +1948,7 @@
         "2022": 1,
         "2023": 1,
         "2024": 1,
-        "2025": 6,
+        "2025": 5,
         "2026": 1
       },
       "max_ketinggian_cm": 310.0,
@@ -1976,7 +1976,7 @@
       "kecamatan": "CAKUNG"
     },
     "GEDONG": {
-      "event_count": 14,
+      "event_count": 13,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1990,7 +1990,7 @@
       "events_by_year": {
         "2020": 3,
         "2024": 2,
-        "2025": 8,
+        "2025": 7,
         "2026": 1
       },
       "max_ketinggian_cm": 500.0,
@@ -1998,7 +1998,7 @@
       "kecamatan": "PASAR REBO"
     },
     "LUBANG BUAYA": {
-      "event_count": 43,
+      "event_count": 33,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2014,11 +2014,11 @@
       ],
       "events_by_year": {
         "2020": 5,
-        "2021": 17,
+        "2021": 10,
         "2022": 4,
         "2023": 1,
         "2024": 5,
-        "2025": 10,
+        "2025": 7,
         "2026": 1
       },
       "max_ketinggian_cm": 150.0,
@@ -2026,7 +2026,7 @@
       "kecamatan": "CIPAYUNG"
     },
     "MAKASAR": {
-      "event_count": 91,
+      "event_count": 41,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2041,12 +2041,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 14,
-        "2021": 18,
-        "2022": 27,
-        "2023": 3,
-        "2024": 24,
-        "2025": 4,
+        "2020": 8,
+        "2021": 7,
+        "2022": 10,
+        "2023": 2,
+        "2024": 10,
+        "2025": 3,
         "2026": 1
       },
       "max_ketinggian_cm": 150.0,
@@ -2070,7 +2070,7 @@
       "kecamatan": "MAKASAR"
     },
     "PULO GEBANG": {
-      "event_count": 8,
+      "event_count": 6,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2083,7 +2083,7 @@
       ],
       "events_by_year": {
         "2020": 2,
-        "2021": 4,
+        "2021": 2,
         "2022": 1,
         "2026": 1
       },
@@ -2092,7 +2092,7 @@
       "kecamatan": "CAKUNG"
     },
     "RAWA TERATE": {
-      "event_count": 32,
+      "event_count": 28,
       "total_jiwa_terdampak": 919,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2108,7 +2108,7 @@
       ],
       "events_by_year": {
         "2020": 3,
-        "2021": 10,
+        "2021": 6,
         "2022": 6,
         "2023": 3,
         "2024": 4,
@@ -2120,7 +2120,7 @@
       "kecamatan": "CAKUNG"
     },
     "ANCOL": {
-      "event_count": 20,
+      "event_count": 10,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -2131,8 +2131,8 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 7,
-        "2021": 12,
+        "2020": 6,
+        "2021": 3,
         "2026": 1
       },
       "max_ketinggian_cm": 80.0,
@@ -2192,7 +2192,7 @@
       "kecamatan": "PENJARINGAN"
     },
     "KAPUK MUARA": {
-      "event_count": 44,
+      "event_count": 22,
       "total_jiwa_terdampak": 97,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2206,9 +2206,9 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 9,
-        "2021": 25,
-        "2022": 3,
+        "2020": 8,
+        "2021": 5,
+        "2022": 2,
         "2024": 2,
         "2025": 2,
         "2026": 3
@@ -2218,11 +2218,11 @@
       "kecamatan": "PENJARINGAN"
     },
     "KEBON BAWANG": {
-      "event_count": 12,
+      "event_count": 7,
       "total_jiwa_terdampak": 257,
       "total_meninggal": 0,
       "total_luka": 0,
-      "total_pengungsi": 260,
+      "total_pengungsi": 258,
       "years_covered": [
         "2020",
         "2023",
@@ -2230,8 +2230,8 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 3,
-        "2023": 6,
+        "2020": 2,
+        "2023": 2,
         "2024": 2,
         "2026": 1
       },
@@ -2256,7 +2256,7 @@
       "kecamatan": "KOJA"
     },
     "MARUNDA": {
-      "event_count": 51,
+      "event_count": 47,
       "total_jiwa_terdampak": 350,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2271,9 +2271,9 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 9,
-        "2021": 3,
-        "2022": 17,
+        "2020": 8,
+        "2021": 1,
+        "2022": 16,
         "2023": 3,
         "2024": 6,
         "2025": 9,
@@ -2322,7 +2322,7 @@
       "kecamatan": "TANJUNG PRIOK"
     },
     "PLUIT": {
-      "event_count": 156,
+      "event_count": 113,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2337,12 +2337,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 12,
-        "2021": 25,
-        "2022": 38,
-        "2023": 8,
-        "2024": 31,
-        "2025": 41,
+        "2020": 6,
+        "2021": 6,
+        "2022": 27,
+        "2023": 6,
+        "2024": 29,
+        "2025": 38,
         "2026": 1
       },
       "max_ketinggian_cm": 140.0,
@@ -2350,7 +2350,7 @@
       "kecamatan": "PENJARINGAN"
     },
     "SEMPER BARAT": {
-      "event_count": 13,
+      "event_count": 12,
       "total_jiwa_terdampak": 625,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2364,7 +2364,7 @@
       ],
       "events_by_year": {
         "2020": 2,
-        "2021": 2,
+        "2021": 1,
         "2024": 5,
         "2025": 3,
         "2026": 1
@@ -2374,7 +2374,7 @@
       "kecamatan": "CILINCING"
     },
     "SEMPER TIMUR": {
-      "event_count": 20,
+      "event_count": 13,
       "total_jiwa_terdampak": 337,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2390,7 +2390,7 @@
       "events_by_year": {
         "2020": 2,
         "2021": 4,
-        "2022": 9,
+        "2022": 2,
         "2023": 2,
         "2024": 2,
         "2026": 1
@@ -2400,7 +2400,7 @@
       "kecamatan": "CILINCING"
     },
     "SUKAPURA": {
-      "event_count": 16,
+      "event_count": 7,
       "total_jiwa_terdampak": 91,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2414,7 +2414,7 @@
       "events_by_year": {
         "2020": 1,
         "2021": 3,
-        "2025": 11,
+        "2025": 2,
         "2026": 1
       },
       "max_ketinggian_cm": 100.0,
@@ -2616,7 +2616,7 @@
       "kecamatan": "PENJARINGAN"
     },
     "PENJARINGAN": {
-      "event_count": 27,
+      "event_count": 16,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2630,8 +2630,8 @@
       ],
       "events_by_year": {
         "2020": 6,
-        "2021": 5,
-        "2022": 13,
+        "2021": 3,
+        "2022": 4,
         "2023": 1,
         "2024": 2
       },
@@ -2696,7 +2696,7 @@
       "kecamatan": "GROGOL PETAMBURAN"
     },
     "KALIDERES": {
-      "event_count": 12,
+      "event_count": 11,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2709,7 +2709,7 @@
       ],
       "events_by_year": {
         "2020": 4,
-        "2022": 5,
+        "2022": 4,
         "2024": 1,
         "2025": 2
       },
@@ -2780,7 +2780,7 @@
       "kecamatan": "KEMBANGAN"
     },
     "SRENGSENG": {
-      "event_count": 16,
+      "event_count": 15,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2792,7 +2792,7 @@
         "2025"
       ],
       "events_by_year": {
-        "2020": 13,
+        "2020": 12,
         "2021": 1,
         "2024": 1,
         "2025": 1
@@ -2870,7 +2870,7 @@
       "kecamatan": "PALMERAH"
     },
     "SLIPI": {
-      "event_count": 5,
+      "event_count": 3,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 5,
       "total_luka": 0,
@@ -2881,14 +2881,14 @@
       ],
       "events_by_year": {
         "2020": 2,
-        "2021": 3
+        "2021": 1
       },
       "max_ketinggian_cm": 70.0,
       "kota": "Jakarta Barat",
       "kecamatan": "PALMERAH"
     },
     "CIPETE SELATAN": {
-      "event_count": 10,
+      "event_count": 9,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2902,7 +2902,7 @@
       "events_by_year": {
         "2020": 4,
         "2021": 2,
-        "2022": 3,
+        "2022": 2,
         "2023": 1
       },
       "max_ketinggian_cm": 100.0,
@@ -2910,7 +2910,7 @@
       "kecamatan": "CILANDAK"
     },
     "CIGANJUR": {
-      "event_count": 19,
+      "event_count": 16,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2924,17 +2924,17 @@
       ],
       "events_by_year": {
         "2020": 5,
-        "2021": 2,
-        "2022": 7,
+        "2021": 1,
+        "2022": 6,
         "2024": 1,
-        "2025": 4
+        "2025": 3
       },
       "max_ketinggian_cm": 120.0,
       "kota": "Jakarta Barat",
       "kecamatan": "JAGAKARSA"
     },
     "SRENGSENG SAWAH": {
-      "event_count": 20,
+      "event_count": 18,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2950,7 +2950,7 @@
       "events_by_year": {
         "2020": 1,
         "2021": 1,
-        "2022": 9,
+        "2022": 7,
         "2023": 2,
         "2024": 3,
         "2025": 4
@@ -2960,7 +2960,7 @@
       "kecamatan": "JAGAKARSA"
     },
     "LENTENG AGUNG": {
-      "event_count": 16,
+      "event_count": 12,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2975,18 +2975,18 @@
       ],
       "events_by_year": {
         "2020": 1,
-        "2021": 2,
-        "2022": 2,
+        "2021": 1,
+        "2022": 1,
         "2023": 2,
         "2024": 1,
-        "2025": 8
+        "2025": 6
       },
       "max_ketinggian_cm": 145.0,
       "kota": "Jakarta Barat",
       "kecamatan": "JAGAKARSA"
     },
     "CIPEDAK": {
-      "event_count": 24,
+      "event_count": 23,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -2998,7 +2998,7 @@
       ],
       "events_by_year": {
         "2020": 10,
-        "2022": 13,
+        "2022": 12,
         "2023": 1
       },
       "max_ketinggian_cm": 70.0,
@@ -3028,7 +3028,7 @@
       "kecamatan": "KEBAYORAN BARU"
     },
     "KRAMAT PELA": {
-      "event_count": 103,
+      "event_count": 19,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3043,9 +3043,9 @@
       "events_by_year": {
         "2020": 2,
         "2021": 1,
-        "2022": 26,
-        "2023": 11,
-        "2024": 63
+        "2022": 4,
+        "2023": 2,
+        "2024": 10
       },
       "max_ketinggian_cm": 150.0,
       "kota": "Jakarta Barat",
@@ -3074,7 +3074,7 @@
       "kecamatan": "KEBAYORAN BARU"
     },
     "RAWA BARAT": {
-      "event_count": 5,
+      "event_count": 4,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3085,14 +3085,14 @@
       ],
       "events_by_year": {
         "2020": 1,
-        "2022": 4
+        "2022": 3
       },
       "max_ketinggian_cm": 150.0,
       "kota": "Jakarta Barat",
       "kecamatan": "KEBAYORAN BARU"
     },
     "GROGOL SELATAN": {
-      "event_count": 10,
+      "event_count": 9,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -3105,7 +3105,7 @@
       ],
       "events_by_year": {
         "2020": 1,
-        "2022": 4,
+        "2022": 3,
         "2023": 3,
         "2025": 2
       },
@@ -3132,7 +3132,7 @@
       "kecamatan": "KEBAYORAN LAMA"
     },
     "KEBAYORAN LAMA SELATAN": {
-      "event_count": 14,
+      "event_count": 8,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3146,7 +3146,7 @@
       "events_by_year": {
         "2020": 3,
         "2021": 1,
-        "2022": 9,
+        "2022": 3,
         "2023": 1
       },
       "max_ketinggian_cm": 150.0,
@@ -3154,7 +3154,7 @@
       "kecamatan": "KEBAYORAN LAMA"
     },
     "BANGKA": {
-      "event_count": 65,
+      "event_count": 56,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3169,18 +3169,18 @@
       ],
       "events_by_year": {
         "2020": 15,
-        "2021": 21,
-        "2022": 15,
+        "2021": 18,
+        "2022": 12,
         "2023": 1,
         "2024": 2,
-        "2025": 11
+        "2025": 8
       },
       "max_ketinggian_cm": 300.0,
       "kota": "Jakarta Barat",
       "kecamatan": "MAMPANG PRAPATAN"
     },
     "MAMPANG PRAPATAN": {
-      "event_count": 7,
+      "event_count": 5,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3193,14 +3193,14 @@
       "events_by_year": {
         "2020": 2,
         "2021": 1,
-        "2022": 4
+        "2022": 2
       },
       "max_ketinggian_cm": 150.0,
       "kota": "Jakarta Barat",
       "kecamatan": "MAMPANG PRAPATAN"
     },
     "TEGAL PARANG": {
-      "event_count": 47,
+      "event_count": 25,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3214,11 +3214,11 @@
         "2025"
       ],
       "events_by_year": {
-        "2020": 3,
-        "2021": 5,
-        "2022": 20,
-        "2023": 8,
-        "2024": 8,
+        "2020": 2,
+        "2021": 2,
+        "2022": 9,
+        "2023": 4,
+        "2024": 5,
         "2025": 3
       },
       "max_ketinggian_cm": 150.0,
@@ -3270,7 +3270,7 @@
       "kecamatan": "PANCORAN"
     },
     "PANCORAN": {
-      "event_count": 29,
+      "event_count": 15,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3285,8 +3285,8 @@
       ],
       "events_by_year": {
         "2020": 1,
-        "2021": 4,
-        "2022": 20,
+        "2021": 3,
+        "2022": 7,
         "2023": 1,
         "2024": 1,
         "2025": 2
@@ -3296,7 +3296,7 @@
       "kecamatan": "PANCORAN"
     },
     "JATI PADANG": {
-      "event_count": 85,
+      "event_count": 64,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -3310,19 +3310,19 @@
         "2025"
       ],
       "events_by_year": {
-        "2020": 14,
-        "2021": 31,
-        "2022": 15,
-        "2023": 8,
-        "2024": 5,
-        "2025": 12
+        "2020": 10,
+        "2021": 25,
+        "2022": 11,
+        "2023": 6,
+        "2024": 3,
+        "2025": 9
       },
       "max_ketinggian_cm": 100.0,
       "kota": "Jakarta Barat",
       "kecamatan": "PASAR MINGGU"
     },
     "KEBAGUSAN": {
-      "event_count": 12,
+      "event_count": 10,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3335,16 +3335,16 @@
       ],
       "events_by_year": {
         "2020": 5,
-        "2022": 3,
+        "2022": 2,
         "2024": 2,
-        "2025": 2
+        "2025": 1
       },
       "max_ketinggian_cm": 160.0,
       "kota": "Jakarta Barat",
       "kecamatan": "PASAR MINGGU"
     },
     "PETUKANGAN SELATAN": {
-      "event_count": 18,
+      "event_count": 13,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3356,8 +3356,8 @@
       ],
       "events_by_year": {
         "2020": 2,
-        "2021": 4,
-        "2022": 12
+        "2021": 2,
+        "2022": 9
       },
       "max_ketinggian_cm": 80.0,
       "kota": "Jakarta Barat",
@@ -3380,7 +3380,7 @@
       "kecamatan": "SETIABUDI"
     },
     "KARET SEMANGGI": {
-      "event_count": 8,
+      "event_count": 5,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3392,7 +3392,7 @@
       ],
       "events_by_year": {
         "2020": 2,
-        "2021": 4,
+        "2021": 1,
         "2022": 2
       },
       "max_ketinggian_cm": 150.0,
@@ -3400,7 +3400,7 @@
       "kecamatan": "SETIABUDI"
     },
     "KUNINGAN TIMUR": {
-      "event_count": 4,
+      "event_count": 3,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3411,7 +3411,7 @@
       ],
       "events_by_year": {
         "2020": 1,
-        "2021": 3
+        "2021": 2
       },
       "max_ketinggian_cm": 70.0,
       "kota": "Jakarta Barat",
@@ -3434,7 +3434,7 @@
       "kecamatan": "TEBET"
     },
     "BUKIT DURI": {
-      "event_count": 15,
+      "event_count": 14,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -3449,7 +3449,7 @@
       "events_by_year": {
         "2020": 4,
         "2021": 2,
-        "2022": 3,
+        "2022": 2,
         "2023": 5,
         "2025": 1
       },
@@ -3458,7 +3458,7 @@
       "kecamatan": "TEBET"
     },
     "CAKUNG TIMUR": {
-      "event_count": 14,
+      "event_count": 9,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3471,8 +3471,8 @@
       ],
       "events_by_year": {
         "2020": 3,
-        "2021": 6,
-        "2023": 3,
+        "2021": 2,
+        "2023": 2,
         "2025": 2
       },
       "max_ketinggian_cm": 100.0,
@@ -3564,7 +3564,7 @@
       "kecamatan": "CIPAYUNG"
     },
     "SETU": {
-      "event_count": 7,
+      "event_count": 6,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3575,7 +3575,7 @@
         "2025"
       ],
       "events_by_year": {
-        "2020": 5,
+        "2020": 4,
         "2023": 1,
         "2025": 1
       },
@@ -3584,7 +3584,7 @@
       "kecamatan": "CIPAYUNG"
     },
     "SUSUKAN": {
-      "event_count": 28,
+      "event_count": 16,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3597,11 +3597,11 @@
         "2025"
       ],
       "events_by_year": {
-        "2020": 9,
-        "2022": 7,
-        "2023": 6,
+        "2020": 6,
+        "2022": 3,
+        "2023": 3,
         "2024": 2,
-        "2025": 4
+        "2025": 2
       },
       "max_ketinggian_cm": 100.0,
       "kota": "Jakarta Timur",
@@ -3642,7 +3642,7 @@
       "kecamatan": "DUREN SAWIT"
     },
     "PONDOK KELAPA": {
-      "event_count": 19,
+      "event_count": 13,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3653,7 +3653,7 @@
       ],
       "events_by_year": {
         "2020": 2,
-        "2021": 17
+        "2021": 11
       },
       "max_ketinggian_cm": 170.0,
       "kota": "Jakarta Timur",
@@ -3710,7 +3710,7 @@
       "kecamatan": "JATINEGARA"
     },
     "BALE KAMBANG": {
-      "event_count": 20,
+      "event_count": 18,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3724,7 +3724,7 @@
       ],
       "events_by_year": {
         "2020": 2,
-        "2021": 7,
+        "2021": 5,
         "2022": 2,
         "2023": 3,
         "2024": 6
@@ -3734,7 +3734,7 @@
       "kecamatan": "KRAMAT JATI"
     },
     "BATU AMPAR": {
-      "event_count": 26,
+      "event_count": 9,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -3745,14 +3745,14 @@
       ],
       "events_by_year": {
         "2020": 4,
-        "2021": 22
+        "2021": 5
       },
       "max_ketinggian_cm": 150.0,
       "kota": "Jakarta Timur",
       "kecamatan": "KRAMAT JATI"
     },
     "KRAMAT JATI": {
-      "event_count": 20,
+      "event_count": 10,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3764,7 +3764,7 @@
       ],
       "events_by_year": {
         "2020": 1,
-        "2021": 18,
+        "2021": 8,
         "2022": 1
       },
       "max_ketinggian_cm": 300.0,
@@ -3790,7 +3790,7 @@
       "kecamatan": "MAKASAR"
     },
     "KEBON MANGGIS": {
-      "event_count": 10,
+      "event_count": 7,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3801,7 +3801,7 @@
       ],
       "events_by_year": {
         "2020": 3,
-        "2021": 7
+        "2021": 4
       },
       "max_ketinggian_cm": 180.0,
       "kota": "Jakarta Timur",
@@ -3842,7 +3842,7 @@
       "kecamatan": "MATRAMAN"
     },
     "CIJANTUNG": {
-      "event_count": 5,
+      "event_count": 4,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -3853,7 +3853,7 @@
       ],
       "events_by_year": {
         "2020": 3,
-        "2021": 2
+        "2021": 1
       },
       "max_ketinggian_cm": 70.0,
       "kota": "Jakarta Timur",
@@ -4250,7 +4250,7 @@
       "kecamatan": "KOJA"
     },
     "RAWA BADAK SELATAN": {
-      "event_count": 18,
+      "event_count": 10,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -4262,7 +4262,7 @@
       ],
       "events_by_year": {
         "2020": 6,
-        "2021": 11,
+        "2021": 3,
         "2024": 1
       },
       "max_ketinggian_cm": 80.0,
@@ -4354,7 +4354,7 @@
       "kecamatan": "TAMBORA"
     },
     "RAGUNAN": {
-      "event_count": 19,
+      "event_count": 12,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -4367,7 +4367,7 @@
       ],
       "events_by_year": {
         "2020": 3,
-        "2022": 13,
+        "2022": 6,
         "2023": 2,
         "2024": 1
       },
@@ -4426,7 +4426,7 @@
       "kecamatan": "SETIABUDI"
     },
     "MENTENG ATAS": {
-      "event_count": 14,
+      "event_count": 4,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -4437,7 +4437,7 @@
       ],
       "events_by_year": {
         "2020": 3,
-        "2021": 11
+        "2021": 1
       },
       "max_ketinggian_cm": 160.0,
       "kota": "Jakarta Barat",
@@ -4626,7 +4626,7 @@
       "kecamatan": "CIPAYUNG"
     },
     "KALISARI": {
-      "event_count": 12,
+      "event_count": 7,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -4637,14 +4637,14 @@
       ],
       "events_by_year": {
         "2020": 5,
-        "2021": 7
+        "2021": 2
       },
       "max_ketinggian_cm": 80.0,
       "kota": "Jakarta Timur",
       "kecamatan": "PASAR REBO"
     },
     "TEBET BARAT": {
-      "event_count": 13,
+      "event_count": 6,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -4656,7 +4656,7 @@
       ],
       "events_by_year": {
         "2020": 1,
-        "2021": 11,
+        "2021": 4,
         "2022": 1
       },
       "max_ketinggian_cm": 130.0,
@@ -4714,7 +4714,7 @@
       "kecamatan": "KEPULAUAN SERIBU SELATAN"
     },
     "PULAU HARAPAN": {
-      "event_count": 8,
+      "event_count": 7,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -4723,7 +4723,7 @@
         "2020"
       ],
       "events_by_year": {
-        "2020": 8
+        "2020": 7
       },
       "max_ketinggian_cm": 20.0,
       "kota": "Jakarta Barat",
@@ -4794,7 +4794,7 @@
       "kecamatan": "PULO GADUNG"
     },
     "KOJA": {
-      "event_count": 6,
+      "event_count": 5,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -4806,7 +4806,7 @@
       ],
       "events_by_year": {
         "2021": 1,
-        "2022": 4,
+        "2022": 3,
         "2023": 1
       },
       "max_ketinggian_cm": 36.0,
@@ -4830,7 +4830,7 @@
       "kecamatan": "TANJUNG PRIOK"
     },
     "RAWA JATI": {
-      "event_count": 52,
+      "event_count": 30,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 1,
       "total_luka": 0,
@@ -4842,10 +4842,10 @@
         "2024"
       ],
       "events_by_year": {
-        "2021": 12,
+        "2021": 6,
         "2022": 3,
-        "2023": 12,
-        "2024": 25
+        "2023": 8,
+        "2024": 13
       },
       "max_ketinggian_cm": 300.0,
       "kota": "Jakarta Selatan",
@@ -4872,7 +4872,7 @@
       "kecamatan": "KRAMAT JATI"
     },
     "KEDAUNG KALIANGKE": {
-      "event_count": 5,
+      "event_count": 3,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -4883,14 +4883,14 @@
       ],
       "events_by_year": {
         "2021": 2,
-        "2022": 3
+        "2022": 1
       },
       "max_ketinggian_cm": 70.0,
       "kota": "Jakarta Barat",
       "kecamatan": "CENGKARENG"
     },
     "CILLITAN": {
-      "event_count": 8,
+      "event_count": 6,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -4899,14 +4899,14 @@
         "2021"
       ],
       "events_by_year": {
-        "2021": 8
+        "2021": 6
       },
       "max_ketinggian_cm": 250.0,
       "kota": "Jakarta Timur",
       "kecamatan": "KRAMAT JATI"
     },
     "HALIM PERDANA KUSUMAH": {
-      "event_count": 4,
+      "event_count": 3,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -4917,7 +4917,7 @@
       ],
       "events_by_year": {
         "2022": 1,
-        "2024": 3
+        "2024": 2
       },
       "max_ketinggian_cm": 30.0,
       "kota": "Jakarta Timur",
@@ -5004,7 +5004,7 @@
       "kecamatan": "KEC. KEBAYORAN BARU"
     },
     "JATIPADANG": {
-      "event_count": 8,
+      "event_count": 6,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -5013,7 +5013,7 @@
         "2022"
       ],
       "events_by_year": {
-        "2022": 8
+        "2022": 6
       },
       "max_ketinggian_cm": 40.0,
       "kota": "Jakarta Selatan",
@@ -5068,7 +5068,7 @@
       "kecamatan": "CAKUNG"
     },
     "BALI MESTER": {
-      "event_count": 3,
+      "event_count": 2,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -5077,7 +5077,7 @@
         "2025"
       ],
       "events_by_year": {
-        "2025": 3
+        "2025": 2
       },
       "max_ketinggian_cm": 60.0,
       "kota": "Jakarta Timur",
@@ -5087,51 +5087,51 @@
   "by_kota": {
     "Jakarta Barat": {
       "kelurahan_count": 79,
-      "total_events": 2026,
+      "total_events": 1411,
       "total_jiwa_terdampak": 4276,
       "total_meninggal": 20,
       "worst_kelurahan": "TEGAL ALUR",
-      "worst_kelurahan_events": 186
+      "worst_kelurahan_events": 119
     },
     "Jakarta Selatan": {
       "kelurahan_count": 34,
-      "total_events": 2201,
+      "total_events": 1220,
       "total_jiwa_terdampak": 7606,
       "total_meninggal": 6,
-      "worst_kelurahan": "PETOGOGAN",
-      "worst_kelurahan_events": 454
+      "worst_kelurahan": "KUNINGAN BARAT",
+      "worst_kelurahan_events": 122
     },
     "Jakarta Timur": {
       "kelurahan_count": 71,
-      "total_events": 2496,
+      "total_events": 1617,
       "total_jiwa_terdampak": 5163,
       "total_meninggal": 10,
       "worst_kelurahan": "KAMPUNG MELAYU",
-      "worst_kelurahan_events": 714
+      "worst_kelurahan_events": 370
     },
     "Jakarta Utara": {
       "kelurahan_count": 31,
-      "total_events": 450,
+      "total_events": 329,
       "total_jiwa_terdampak": 2843,
       "total_meninggal": 2,
       "worst_kelurahan": "PLUIT",
-      "worst_kelurahan_events": 156
+      "worst_kelurahan_events": 113
     },
     "Kepulauan Seribu": {
       "kelurahan_count": 3,
-      "total_events": 16,
+      "total_events": 13,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "worst_kelurahan": "PULAU KELAPA",
-      "worst_kelurahan_events": 10
+      "worst_kelurahan_events": 7
     },
     "Jakarta Pusat": {
       "kelurahan_count": 26,
-      "total_events": 112,
+      "total_events": 77,
       "total_jiwa_terdampak": 275,
       "total_meninggal": 8,
-      "worst_kelurahan": "KARET TENGSIN",
-      "worst_kelurahan_events": 40
+      "worst_kelurahan": "PETAMBURAN",
+      "worst_kelurahan_events": 16
     }
   },
   "by_kecamatan": {
@@ -5139,7 +5139,7 @@
       "kecamatan": "Kembangan",
       "kota": "Jakarta Barat",
       "kelurahan_count": 6,
-      "event_count": 203,
+      "event_count": 174,
       "years_covered": [
         "2020",
         "2021",
@@ -5150,47 +5150,21 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 36,
-        "2021": 26,
-        "2022": 49,
-        "2023": 13,
-        "2024": 34,
-        "2025": 31,
+        "2020": 33,
+        "2021": 23,
+        "2022": 37,
+        "2023": 12,
+        "2024": 26,
+        "2025": 29,
         "2026": 14
       },
       "max_ketinggian_cm": 180.0,
-      "historical_flood_frequency": 0.1903
+      "historical_flood_frequency": 0.2924
     },
     "cengkareng": {
       "kecamatan": "Cengkareng",
       "kota": "Jakarta Barat",
       "kelurahan_count": 8,
-      "event_count": 505,
-      "years_covered": [
-        "2020",
-        "2021",
-        "2022",
-        "2023",
-        "2024",
-        "2025",
-        "2026"
-      ],
-      "events_by_year": {
-        "2020": 42,
-        "2021": 70,
-        "2022": 115,
-        "2023": 43,
-        "2024": 89,
-        "2025": 127,
-        "2026": 19
-      },
-      "max_ketinggian_cm": 150.0,
-      "historical_flood_frequency": 0.4733
-    },
-    "kalideres": {
-      "kecamatan": "Kalideres",
-      "kota": "Jakarta Barat",
-      "kelurahan_count": 5,
       "event_count": 317,
       "years_covered": [
         "2020",
@@ -5202,22 +5176,22 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 25,
-        "2021": 31,
-        "2022": 163,
-        "2023": 31,
-        "2024": 36,
-        "2025": 24,
-        "2026": 7
+        "2020": 36,
+        "2021": 44,
+        "2022": 57,
+        "2023": 27,
+        "2024": 68,
+        "2025": 66,
+        "2026": 19
       },
-      "max_ketinggian_cm": 200.0,
-      "historical_flood_frequency": 0.2971
+      "max_ketinggian_cm": 150.0,
+      "historical_flood_frequency": 0.5328
     },
-    "pesanggrahan": {
-      "kecamatan": "Pesanggrahan",
-      "kota": "Jakarta Selatan",
-      "kelurahan_count": 6,
-      "event_count": 255,
+    "kalideres": {
+      "kecamatan": "Kalideres",
+      "kota": "Jakarta Barat",
+      "kelurahan_count": 5,
+      "event_count": 195,
       "years_covered": [
         "2020",
         "2021",
@@ -5228,22 +5202,48 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 39,
-        "2021": 74,
-        "2022": 85,
+        "2020": 22,
+        "2021": 16,
+        "2022": 82,
+        "2023": 19,
+        "2024": 29,
+        "2025": 20,
+        "2026": 7
+      },
+      "max_ketinggian_cm": 200.0,
+      "historical_flood_frequency": 0.3277
+    },
+    "pesanggrahan": {
+      "kecamatan": "Pesanggrahan",
+      "kota": "Jakarta Selatan",
+      "kelurahan_count": 6,
+      "event_count": 143,
+      "years_covered": [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025",
+        "2026"
+      ],
+      "events_by_year": {
+        "2020": 27,
+        "2021": 35,
+        "2022": 38,
         "2023": 2,
         "2024": 11,
-        "2025": 37,
+        "2025": 23,
         "2026": 7
       },
       "max_ketinggian_cm": 300.0,
-      "historical_flood_frequency": 0.239
+      "historical_flood_frequency": 0.2403
     },
     "cilandak": {
       "kecamatan": "Cilandak",
       "kota": "Jakarta Selatan",
       "kelurahan_count": 7,
-      "event_count": 139,
+      "event_count": 127,
       "years_covered": [
         "2020",
         "2021",
@@ -5256,20 +5256,20 @@
       "events_by_year": {
         "2020": 19,
         "2021": 13,
-        "2022": 43,
+        "2022": 34,
         "2023": 5,
         "2024": 19,
-        "2025": 28,
+        "2025": 25,
         "2026": 12
       },
       "max_ketinggian_cm": 180.0,
-      "historical_flood_frequency": 0.1303
+      "historical_flood_frequency": 0.2134
     },
     "pasarminggu": {
       "kecamatan": "Pasar Minggu",
       "kota": "Jakarta Selatan",
       "kelurahan_count": 8,
-      "event_count": 432,
+      "event_count": 338,
       "years_covered": [
         "2020",
         "2021",
@@ -5280,22 +5280,22 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 63,
-        "2021": 89,
-        "2022": 101,
-        "2023": 39,
-        "2024": 58,
-        "2025": 67,
+        "2020": 52,
+        "2021": 68,
+        "2022": 68,
+        "2023": 34,
+        "2024": 45,
+        "2025": 56,
         "2026": 15
       },
       "max_ketinggian_cm": 370.0,
-      "historical_flood_frequency": 0.4049
+      "historical_flood_frequency": 0.5681
     },
     "kebayoranbaru": {
       "kecamatan": "Kebayoran Baru",
       "kota": "Jakarta Selatan",
       "kelurahan_count": 8,
-      "event_count": 625,
+      "event_count": 143,
       "years_covered": [
         "2020",
         "2021",
@@ -5307,21 +5307,21 @@
       ],
       "events_by_year": {
         "2020": 17,
-        "2021": 40,
-        "2022": 234,
-        "2023": 21,
-        "2024": 168,
-        "2025": 135,
+        "2021": 11,
+        "2022": 42,
+        "2023": 10,
+        "2024": 31,
+        "2025": 22,
         "2026": 10
       },
       "max_ketinggian_cm": 200.0,
-      "historical_flood_frequency": 0.5858
+      "historical_flood_frequency": 0.2403
     },
     "kebayoranlama": {
       "kecamatan": "Kebayoran Lama",
       "kota": "Jakarta Selatan",
       "kelurahan_count": 6,
-      "event_count": 226,
+      "event_count": 148,
       "years_covered": [
         "2020",
         "2021",
@@ -5332,22 +5332,22 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 34,
-        "2021": 50,
-        "2022": 63,
-        "2023": 25,
-        "2024": 26,
-        "2025": 20,
+        "2020": 29,
+        "2021": 28,
+        "2022": 31,
+        "2023": 19,
+        "2024": 19,
+        "2025": 14,
         "2026": 8
       },
       "max_ketinggian_cm": 200.0,
-      "historical_flood_frequency": 0.2118
+      "historical_flood_frequency": 0.2487
     },
     "mampangprapatan": {
       "kecamatan": "Mampang Prapatan",
       "kota": "Jakarta Selatan",
       "kelurahan_count": 5,
-      "event_count": 543,
+      "event_count": 295,
       "years_covered": [
         "2020",
         "2021",
@@ -5358,22 +5358,22 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 41,
-        "2021": 125,
-        "2022": 133,
-        "2023": 60,
-        "2024": 58,
-        "2025": 117,
+        "2020": 35,
+        "2021": 48,
+        "2022": 59,
+        "2023": 33,
+        "2024": 40,
+        "2025": 71,
         "2026": 9
       },
       "max_ketinggian_cm": 300.0,
-      "historical_flood_frequency": 0.5089
+      "historical_flood_frequency": 0.4958
     },
     "pancoran": {
       "kecamatan": "Pancoran",
       "kota": "Jakarta Selatan",
       "kelurahan_count": 8,
-      "event_count": 260,
+      "event_count": 174,
       "years_covered": [
         "2020",
         "2021",
@@ -5384,22 +5384,22 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 32,
-        "2021": 39,
-        "2022": 72,
-        "2023": 31,
-        "2024": 38,
-        "2025": 38,
+        "2020": 29,
+        "2021": 25,
+        "2022": 38,
+        "2023": 19,
+        "2024": 25,
+        "2025": 28,
         "2026": 10
       },
       "max_ketinggian_cm": 352.0,
-      "historical_flood_frequency": 0.2437
+      "historical_flood_frequency": 0.2924
     },
     "jagakarsa": {
       "kecamatan": "Jagakarsa",
       "kota": "Jakarta Selatan",
       "kelurahan_count": 6,
-      "event_count": 155,
+      "event_count": 130,
       "years_covered": [
         "2020",
         "2021",
@@ -5411,21 +5411,21 @@
       ],
       "events_by_year": {
         "2020": 22,
-        "2021": 23,
-        "2022": 61,
+        "2021": 12,
+        "2022": 50,
         "2023": 7,
         "2024": 13,
-        "2025": 23,
+        "2025": 20,
         "2026": 6
       },
       "max_ketinggian_cm": 300.0,
-      "historical_flood_frequency": 0.1453
+      "historical_flood_frequency": 0.2185
     },
     "kramatjati": {
       "kecamatan": "Kramat Jati",
       "kota": "Jakarta Timur",
       "kelurahan_count": 10,
-      "event_count": 654,
+      "event_count": 509,
       "years_covered": [
         "2020",
         "2021",
@@ -5436,22 +5436,22 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 77,
-        "2021": 195,
-        "2022": 135,
-        "2023": 93,
-        "2024": 59,
-        "2025": 76,
+        "2020": 62,
+        "2021": 130,
+        "2022": 111,
+        "2023": 74,
+        "2024": 55,
+        "2025": 58,
         "2026": 19
       },
       "max_ketinggian_cm": 370.0,
-      "historical_flood_frequency": 0.6129
+      "historical_flood_frequency": 0.8555
     },
     "jatinegara": {
       "kecamatan": "Jatinegara",
       "kota": "Jakarta Timur",
       "kelurahan_count": 8,
-      "event_count": 1067,
+      "event_count": 595,
       "years_covered": [
         "2020",
         "2021",
@@ -5462,12 +5462,12 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 106,
-        "2021": 206,
-        "2022": 291,
-        "2023": 153,
-        "2024": 174,
-        "2025": 121,
+        "2020": 54,
+        "2021": 102,
+        "2022": 127,
+        "2023": 103,
+        "2024": 106,
+        "2025": 87,
         "2026": 16
       },
       "max_ketinggian_cm": 420.0,
@@ -5477,7 +5477,7 @@
       "kecamatan": "Cilincing",
       "kota": "Jakarta Utara",
       "kelurahan_count": 8,
-      "event_count": 119,
+      "event_count": 98,
       "years_covered": [
         "2020",
         "2021",
@@ -5488,16 +5488,16 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 23,
-        "2021": 15,
-        "2022": 27,
+        "2020": 22,
+        "2021": 12,
+        "2022": 19,
         "2023": 5,
         "2024": 13,
-        "2025": 24,
+        "2025": 15,
         "2026": 12
       },
       "max_ketinggian_cm": 150.0,
-      "historical_flood_frequency": 0.1115
+      "historical_flood_frequency": 0.1647
     },
     "grogolpetamburan": {
       "kecamatan": "Grogol Petamburan",
@@ -5521,13 +5521,13 @@
         "2026": 4
       },
       "max_ketinggian_cm": 150.0,
-      "historical_flood_frequency": 0.03
+      "historical_flood_frequency": 0.0538
     },
     "kebonjeruk": {
       "kecamatan": "Kebon Jeruk",
       "kota": "Jakarta Barat",
       "kelurahan_count": 7,
-      "event_count": 327,
+      "event_count": 254,
       "years_covered": [
         "2020",
         "2021",
@@ -5538,22 +5538,22 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 50,
-        "2021": 68,
-        "2022": 54,
-        "2023": 44,
-        "2024": 44,
-        "2025": 50,
+        "2020": 44,
+        "2021": 47,
+        "2022": 30,
+        "2023": 31,
+        "2024": 43,
+        "2025": 42,
         "2026": 17
       },
       "max_ketinggian_cm": 175.0,
-      "historical_flood_frequency": 0.3065
+      "historical_flood_frequency": 0.4269
     },
     "tebet": {
       "kecamatan": "Tebet",
       "kota": "Jakarta Selatan",
       "kelurahan_count": 6,
-      "event_count": 135,
+      "event_count": 105,
       "years_covered": [
         "2020",
         "2021",
@@ -5564,22 +5564,22 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 28,
-        "2021": 25,
-        "2022": 37,
-        "2023": 19,
+        "2020": 26,
+        "2021": 16,
+        "2022": 20,
+        "2023": 17,
         "2024": 6,
         "2025": 16,
         "2026": 4
       },
       "max_ketinggian_cm": 200.0,
-      "historical_flood_frequency": 0.1265
+      "historical_flood_frequency": 0.1765
     },
     "pasarrebo": {
       "kecamatan": "Pasar Rebo",
       "kota": "Jakarta Timur",
       "kelurahan_count": 5,
-      "event_count": 49,
+      "event_count": 41,
       "years_covered": [
         "2020",
         "2021",
@@ -5589,135 +5589,135 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 19,
-        "2021": 15,
+        "2020": 18,
+        "2021": 9,
         "2022": 1,
         "2024": 3,
-        "2025": 8,
+        "2025": 7,
         "2026": 3
       },
       "max_ketinggian_cm": 500.0,
-      "historical_flood_frequency": 0.0459
+      "historical_flood_frequency": 0.0689
     },
     "cipayung": {
       "kecamatan": "Cipayung",
       "kota": "Jakarta Timur",
       "kelurahan_count": 8,
-      "event_count": 79,
-      "years_covered": [
-        "2020",
-        "2021",
-        "2022",
-        "2023",
-        "2024",
-        "2025",
-        "2026"
-      ],
-      "events_by_year": {
-        "2020": 23,
-        "2021": 22,
-        "2022": 12,
-        "2023": 2,
-        "2024": 5,
-        "2025": 11,
-        "2026": 4
-      },
-      "max_ketinggian_cm": 150.0,
-      "historical_flood_frequency": 0.074
-    },
-    "ciracas": {
-      "kecamatan": "Ciracas",
-      "kota": "Jakarta Timur",
-      "kelurahan_count": 5,
-      "event_count": 125,
-      "years_covered": [
-        "2020",
-        "2021",
-        "2022",
-        "2023",
-        "2024",
-        "2025",
-        "2026"
-      ],
-      "events_by_year": {
-        "2020": 50,
-        "2021": 14,
-        "2022": 27,
-        "2023": 14,
-        "2024": 9,
-        "2025": 7,
-        "2026": 4
-      },
-      "max_ketinggian_cm": 200.0,
-      "historical_flood_frequency": 0.1172
-    },
-    "makasar": {
-      "kecamatan": "Makasar",
-      "kota": "Jakarta Timur",
-      "kelurahan_count": 7,
-      "event_count": 357,
-      "years_covered": [
-        "2020",
-        "2021",
-        "2022",
-        "2023",
-        "2024",
-        "2025",
-        "2026"
-      ],
-      "events_by_year": {
-        "2020": 53,
-        "2021": 119,
-        "2022": 60,
-        "2023": 13,
-        "2024": 58,
-        "2025": 46,
-        "2026": 8
-      },
-      "max_ketinggian_cm": 220.0,
-      "historical_flood_frequency": 0.3346
-    },
-    "durensawit": {
-      "kecamatan": "Duren Sawit",
-      "kota": "Jakarta Timur",
-      "kelurahan_count": 7,
       "event_count": 62,
       "years_covered": [
         "2020",
         "2021",
         "2022",
         "2023",
+        "2024",
         "2025",
         "2026"
       ],
       "events_by_year": {
-        "2020": 24,
-        "2021": 29,
-        "2022": 4,
+        "2020": 22,
+        "2021": 13,
+        "2022": 8,
+        "2023": 2,
+        "2024": 5,
+        "2025": 8,
+        "2026": 4
+      },
+      "max_ketinggian_cm": 150.0,
+      "historical_flood_frequency": 0.1042
+    },
+    "ciracas": {
+      "kecamatan": "Ciracas",
+      "kota": "Jakarta Timur",
+      "kelurahan_count": 5,
+      "event_count": 98,
+      "years_covered": [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025",
+        "2026"
+      ],
+      "events_by_year": {
+        "2020": 40,
+        "2021": 12,
+        "2022": 21,
+        "2023": 7,
+        "2024": 9,
+        "2025": 5,
+        "2026": 4
+      },
+      "max_ketinggian_cm": 200.0,
+      "historical_flood_frequency": 0.1647
+    },
+    "makasar": {
+      "kecamatan": "Makasar",
+      "kota": "Jakarta Timur",
+      "kelurahan_count": 7,
+      "event_count": 172,
+      "years_covered": [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025",
+        "2026"
+      ],
+      "events_by_year": {
+        "2020": 37,
+        "2021": 50,
+        "2022": 24,
+        "2023": 7,
+        "2024": 23,
+        "2025": 23,
+        "2026": 8
+      },
+      "max_ketinggian_cm": 220.0,
+      "historical_flood_frequency": 0.2891
+    },
+    "durensawit": {
+      "kecamatan": "Duren Sawit",
+      "kota": "Jakarta Timur",
+      "kelurahan_count": 7,
+      "event_count": 51,
+      "years_covered": [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2025",
+        "2026"
+      ],
+      "events_by_year": {
+        "2020": 22,
+        "2021": 21,
+        "2022": 3,
         "2023": 2,
         "2025": 2,
         "2026": 1
       },
       "max_ketinggian_cm": 170.0,
-      "historical_flood_frequency": 0.0581
+      "historical_flood_frequency": 0.0857
     },
     "kepulauanseribuutara": {
       "kecamatan": "KEPULAUAN SERIBU UTARA",
       "kota": "Kepulauan Seribu",
       "kelurahan_count": 3,
-      "event_count": 20,
+      "event_count": 16,
       "years_covered": [
         "2020",
         "2021",
         "2026"
       ],
       "events_by_year": {
-        "2020": 10,
-        "2021": 8,
+        "2020": 9,
+        "2021": 5,
         "2026": 2
       },
       "max_ketinggian_cm": 45.0,
-      "historical_flood_frequency": 0.0187
+      "historical_flood_frequency": 0.0269
     },
     "kepulauanseribuselatan": {
       "kecamatan": "KEPULAUAN SERIBU SELATAN",
@@ -5735,7 +5735,7 @@
         "2026": 1
       },
       "max_ketinggian_cm": 50.0,
-      "historical_flood_frequency": 0.0056
+      "historical_flood_frequency": 0.0101
     },
     "tambora": {
       "kecamatan": "Tambora",
@@ -5751,13 +5751,13 @@
         "2026": 1
       },
       "max_ketinggian_cm": 80.0,
-      "historical_flood_frequency": 0.0037
+      "historical_flood_frequency": 0.0067
     },
     "palmerah": {
       "kecamatan": "Palmerah",
       "kota": "Jakarta Barat",
       "kelurahan_count": 6,
-      "event_count": 25,
+      "event_count": 23,
       "years_covered": [
         "2020",
         "2021",
@@ -5766,18 +5766,18 @@
       ],
       "events_by_year": {
         "2020": 19,
-        "2021": 4,
+        "2021": 2,
         "2023": 1,
         "2026": 1
       },
       "max_ketinggian_cm": 150.0,
-      "historical_flood_frequency": 0.0234
+      "historical_flood_frequency": 0.0387
     },
     "tanahabang": {
       "kecamatan": "Tanah Abang",
       "kota": "Jakarta Pusat",
       "kelurahan_count": 4,
-      "event_count": 78,
+      "event_count": 43,
       "years_covered": [
         "2020",
         "2021",
@@ -5788,14 +5788,14 @@
       ],
       "events_by_year": {
         "2020": 11,
-        "2021": 24,
-        "2022": 7,
-        "2023": 2,
-        "2025": 29,
+        "2021": 8,
+        "2022": 6,
+        "2023": 1,
+        "2025": 12,
         "2026": 5
       },
       "max_ketinggian_cm": 150.0,
-      "historical_flood_frequency": 0.0731
+      "historical_flood_frequency": 0.0723
     },
     "kemayoran": {
       "kecamatan": "Kemayoran",
@@ -5813,13 +5813,13 @@
         "2026": 1
       },
       "max_ketinggian_cm": 100.0,
-      "historical_flood_frequency": 0.0094
+      "historical_flood_frequency": 0.0168
     },
     "cakung": {
       "kecamatan": "Cakung",
       "kota": "Jakarta Timur",
       "kelurahan_count": 8,
-      "event_count": 67,
+      "event_count": 56,
       "years_covered": [
         "2020",
         "2021",
@@ -5831,39 +5831,39 @@
       ],
       "events_by_year": {
         "2020": 18,
-        "2021": 20,
+        "2021": 10,
         "2022": 7,
-        "2023": 7,
+        "2023": 6,
         "2024": 4,
         "2025": 5,
         "2026": 6
       },
       "max_ketinggian_cm": 250.0,
-      "historical_flood_frequency": 0.0628
+      "historical_flood_frequency": 0.0941
     },
     "pademangan": {
       "kecamatan": "Pademangan",
       "kota": "Jakarta Utara",
       "kelurahan_count": 3,
-      "event_count": 23,
+      "event_count": 13,
       "years_covered": [
         "2020",
         "2021",
         "2026"
       ],
       "events_by_year": {
-        "2020": 9,
-        "2021": 12,
+        "2020": 8,
+        "2021": 3,
         "2026": 2
       },
       "max_ketinggian_cm": 80.0,
-      "historical_flood_frequency": 0.0216
+      "historical_flood_frequency": 0.0218
     },
     "penjaringan": {
       "kecamatan": "Penjaringan",
       "kota": "Jakarta Utara",
       "kelurahan_count": 5,
-      "event_count": 239,
+      "event_count": 163,
       "years_covered": [
         "2020",
         "2021",
@@ -5874,22 +5874,22 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 30,
-        "2021": 61,
-        "2022": 54,
-        "2023": 11,
-        "2024": 35,
-        "2025": 43,
+        "2020": 23,
+        "2021": 20,
+        "2022": 33,
+        "2023": 9,
+        "2024": 33,
+        "2025": 40,
         "2026": 5
       },
       "max_ketinggian_cm": 150.0,
-      "historical_flood_frequency": 0.224
+      "historical_flood_frequency": 0.2739
     },
     "tanjungpriok": {
       "kecamatan": "Tanjung Priok",
       "kota": "Jakarta Utara",
       "kelurahan_count": 7,
-      "event_count": 30,
+      "event_count": 25,
       "years_covered": [
         "2020",
         "2021",
@@ -5899,21 +5899,21 @@
         "2026"
       ],
       "events_by_year": {
-        "2020": 6,
+        "2020": 5,
         "2021": 1,
         "2022": 2,
-        "2023": 6,
+        "2023": 2,
         "2024": 9,
         "2026": 6
       },
       "max_ketinggian_cm": 60.0,
-      "historical_flood_frequency": 0.0281
+      "historical_flood_frequency": 0.042
     },
     "koja": {
       "kecamatan": "Koja",
       "kota": "Jakarta Utara",
       "kelurahan_count": 5,
-      "event_count": 28,
+      "event_count": 19,
       "years_covered": [
         "2020",
         "2021",
@@ -5924,14 +5924,14 @@
       ],
       "events_by_year": {
         "2020": 9,
-        "2021": 12,
-        "2022": 4,
+        "2021": 4,
+        "2022": 3,
         "2023": 1,
         "2024": 1,
         "2026": 1
       },
       "max_ketinggian_cm": 80.0,
-      "historical_flood_frequency": 0.0262
+      "historical_flood_frequency": 0.0319
     },
     "joharbaru": {
       "kecamatan": "Johar Baru",
@@ -5947,7 +5947,7 @@
         "2022": 1
       },
       "max_ketinggian_cm": 50.0,
-      "historical_flood_frequency": 0.0056
+      "historical_flood_frequency": 0.0101
     },
     "sawahbesar": {
       "kecamatan": "Sawah Besar",
@@ -5963,7 +5963,7 @@
         "2021": 1
       },
       "max_ketinggian_cm": 70.0,
-      "historical_flood_frequency": 0.0056
+      "historical_flood_frequency": 0.0101
     },
     "kelapagading": {
       "kecamatan": "Kelapa Gading",
@@ -5983,13 +5983,13 @@
         "2024": 3
       },
       "max_ketinggian_cm": 70.0,
-      "historical_flood_frequency": 0.0103
+      "historical_flood_frequency": 0.0185
     },
     "setiabudi": {
       "kecamatan": "Setiabudi",
       "kota": "Jakarta Barat",
       "kelurahan_count": 6,
-      "event_count": 30,
+      "event_count": 16,
       "years_covered": [
         "2020",
         "2021",
@@ -5997,17 +5997,17 @@
       ],
       "events_by_year": {
         "2020": 10,
-        "2021": 18,
+        "2021": 4,
         "2022": 2
       },
       "max_ketinggian_cm": 160.0,
-      "historical_flood_frequency": 0.0281
+      "historical_flood_frequency": 0.0269
     },
     "matraman": {
       "kecamatan": "Matraman",
       "kota": "Jakarta Timur",
       "kelurahan_count": 5,
-      "event_count": 18,
+      "event_count": 15,
       "years_covered": [
         "2020",
         "2021",
@@ -6015,11 +6015,11 @@
       ],
       "events_by_year": {
         "2020": 9,
-        "2021": 8,
+        "2021": 5,
         "2022": 1
       },
       "max_ketinggian_cm": 180.0,
-      "historical_flood_frequency": 0.0169
+      "historical_flood_frequency": 0.0252
     },
     "pulogadung": {
       "kecamatan": "Pulo Gadung",
@@ -6037,7 +6037,7 @@
         "2023": 2
       },
       "max_ketinggian_cm": 150.0,
-      "historical_flood_frequency": 0.0169
+      "historical_flood_frequency": 0.0303
     },
     "senen": {
       "kecamatan": "Senen",
@@ -6051,7 +6051,7 @@
         "2020": 3
       },
       "max_ketinggian_cm": 50.0,
-      "historical_flood_frequency": 0.0028
+      "historical_flood_frequency": 0.005
     },
     "menteng": {
       "kecamatan": "Menteng",
@@ -6065,7 +6065,7 @@
         "2020": 2
       },
       "max_ketinggian_cm": 90.0,
-      "historical_flood_frequency": 0.0019
+      "historical_flood_frequency": 0.0034
     },
     "cempakaputih": {
       "kecamatan": "Cempaka Putih",
@@ -6081,7 +6081,7 @@
         "2022": 1
       },
       "max_ketinggian_cm": 60.0,
-      "historical_flood_frequency": 0.0047
+      "historical_flood_frequency": 0.0084
     },
     "gambir": {
       "kecamatan": "Gambir",
@@ -6095,7 +6095,7 @@
         "2020": 2
       },
       "max_ketinggian_cm": 120.0,
-      "historical_flood_frequency": 0.0019
+      "historical_flood_frequency": 0.0034
     },
     "tamansari": {
       "kecamatan": "Taman Sari",
@@ -6111,7 +6111,7 @@
         "2024": 1
       },
       "max_ketinggian_cm": 40.0,
-      "historical_flood_frequency": 0.0037
+      "historical_flood_frequency": 0.0067
     }
   }
 }

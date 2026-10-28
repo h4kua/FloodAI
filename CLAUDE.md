@@ -50,15 +50,17 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   ECE function that mixed quantile and equal-width bins, fixed 2026-10-24); 0.1962 (`artifacts/configurations/calibration_cache.json`,
   labels derived from the model's own ranking) and 0.3784 (`artifacts/reports/scenario_validation.json`,
   n=7) come from older model versions.
-- Bundle retrained 2026-10-23 (`scripts/retrain_bundle.py`) with the leak-free
+- Bundle retrained 2026-10-28 (`scripts/retrain_bundle.py`) with the leak-free
   `kecamatan_historical_flood_freq` (per row, events from earlier years only; inference uses
-  years before the snapshot's year). Test AUC 0.904 / recall 0.893 / precision 0.263 /
-  threshold 0.103 (was 0.036). The previous bundle stays in git history (d06dc0c and earlier).
+  years before the snapshot's year), now from BPBD events counted once per RW-date (the workbooks
+  list one row per RT; 4,667 events 2020–Mar 2026, was 7,301). Test AUC 0.899 / recall 0.875 /
+  precision 0.282 / threshold 0.126. Previous bundles stay in git history (5919525 and earlier).
+  Changing `data/bundled/kelurahan_flood_history.json` changes a model input: retrain after rebuilding it.
 - The split is still a RANDOM stratified 68/12/20 (train 1990 / val 352 / test 586, 56 test
   positives): the chronological validation slice (May 2023–Jan 2024) has 0 positives, so training
   falls back to random (the report now says so). Test rows are spread over 2020–2024, so the
   metrics above are optimistic. By-year estimate (train 2020–2022, val 2023, test 2024 with 22
-  positives): AUC 0.81 [0.74–0.87], PR-AUC 0.10 (no-skill 0.04), ECE 0.19. Run
+  positives): AUC 0.83 [0.75–0.89], PR-AUC 0.12 (no-skill 0.04), ECE 0.17. Run
   `python scripts/evaluate_model.py` for the current figures with 95 % bootstrap CIs.
   Flood labels shrink sharply over time (117/78/54/11/22, 2020–2024).
 - No observed row-level flood labels for evaluation: `realtime_feature_history.csv` has no label
@@ -69,7 +71,8 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Model experiment 2026-10-27 (by year, test 2024): 609 variants; logistic regression without the proxy
   features ranked floods better (PR-AUC 0.27 vs 0.10) but no variant beat the served model's precision at
   ~86 % recall. The XGBoost candidate without proxies + Platt on the latest year (`scripts/train_candidate.py`,
-  `artifacts/reports/candidate_comparison.md`) is worse: AUC 0.733 vs 0.812. The served bundle stays.
+  `artifacts/reports/candidate_comparison.md`) is worse: AUC 0.796 vs 0.826 after the 2026-10-28 event-count
+  fix (was 0.733 vs 0.812). The served bundle stays.
 - Fly stopped/suspended both machines despite `min_machines_running = 1`, halting the 15-minute
   scheduler. `fly.toml` now has `auto_stop_machines = 'off'` (live after the next `fly deploy`); the
   GitHub backup cron still needs repo secrets `REFRESH_URL` + `INTERNAL_SECRET` (and `INTERNAL_SECRET` on Fly).

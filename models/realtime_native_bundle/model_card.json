@@ -23,13 +23,13 @@
   "training_dataset": "D:\\FloodAI - Copy\\data\\processed\\realtime_native_training_bootstrap.csv",
   "report_path": "D:\\FloodAI - Copy\\artifacts\\reports\\realtime_native_model_report.json",
   "threshold_path": "D:\\FloodAI - Copy\\models\\optimal_threshold_realtime_native.json",
-  "operating_threshold": 0.10274996235966682,
+  "operating_threshold": 0.1255157046020031,
   "calibration_method": "sigmoid",
   "confidence_floor_on_outlier": 0.6,
   "ood_detector": {
     "algorithm": "IsolationForest",
     "n_estimators": 200,
-    "contamination": 0.03078721745908028,
+    "contamination": 0.030007794232268122,
     "contamination_source": "observed_anomaly_rate"
   }
 }

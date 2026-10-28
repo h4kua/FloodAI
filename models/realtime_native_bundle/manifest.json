@@ -2,7 +2,7 @@
   "bundle_version": "2.0.0",
   "model_variant": "realtime_native",
   "schema_version": "2",
-  "created_at": "2026-10-24T12:27:28.979493+00:00",
+  "created_at": "2026-10-28T02:32:23.068592+00:00",
   "training_dataset_fingerprint": "sha256:be8d666585b1cf82180f27348c823dd12f6c639b1fa086ef192b8d7a773f95a1",
   "feature_schema": {
     "feature_count": 17,
@@ -47,19 +47,19 @@
     "numpy": "1.26.4"
   },
   "sha256": {
-    "model.pkl": "59cf79780a4ab793b0bf5238e4e6c3268edbe9e18bb2f99b07ae4430648d42b2",
-    "scaler.pkl": "814ceacb726ee427ffaf136c9f20ee6bad24a6a8ee318270adda92857f662f28",
-    "ood.pkl": "25507ea30fed43a20e5157ef8b2e0b23317eb37bb517005d5a4d93544f361dd0",
-    "threshold.json": "d789a48ae998ffd14f7bd15350c56730405f1471740147978e74df9c33b1e365",
-    "calibration.json": "810d1b65abdddeb541bf17732cd5d19f356ba6aab5bf0878a2070bebfbaf0b1e",
+    "model.pkl": "9c3bad835037713707deb8aa613360c0e19326d8bbf7d3c798637dc700567076",
+    "scaler.pkl": "5802daa6ce34d4f9105406a68fce0817a0115b0b65661c2b89a265b1b22fce5b",
+    "ood.pkl": "e259176e4022d944192b3cf51fc911d9f5f583698737a9fc2363d377dbd4cffe",
+    "threshold.json": "2c14588a97d85fadafd58dd2aec3973eb1fdccd51354a558f780a7c0f24bd18e",
+    "calibration.json": "7913ab7e8c4288d3aeaba6df7b3362af8a1c98efdbf755953fdd1f4fb0e2036f",
     "feature_list.json": "424339d85a53106fbc96de4f762c938a1ab5fe3904dc8d65849e34ac2e5cdadb",
-    "model_card.json": "dd109281511c6294005552f66de51a3daad614ca07bce3c158923d310261fbf3",
-    "training_stats.json": "0264bd7cfb7f7f03eccad8d136413a64861054052a5c7e3d5dbf2dfa86b01d96",
-    "xgboost_model.json": "cf8ec913710dc8b7c68758acc88d9cd653e9bef146dc53020b3a282f3b16efd4",
-    "xgboost_model_fold0.json": "cf8ec913710dc8b7c68758acc88d9cd653e9bef146dc53020b3a282f3b16efd4",
-    "xgboost_model_fold1.json": "27a11ef64465a7dbd0ba227ce56ea3f70fd9b5e1803e9b5d373e4e8d21b52877",
-    "xgboost_model_fold2.json": "b8b579a97c720eda2afb8f5e857198ac87d6ac8383561303bc88ed1d4e0357c0",
-    "xgboost_model_fold3.json": "557ba41e95e339c57532df2b828513adba64d9978f57fdb8318e6b636ff16faf",
-    "xgboost_model_fold4.json": "25b586c22bf27e25863436d5cf8b09f6a07cd6869acd42ae09e34e68d5bc0131"
+    "model_card.json": "d4c05b9da58304813ccf5cf2875b7dfb05d19a195b9999d066e6d171cd68e1dd",
+    "training_stats.json": "88b0801719e0bd5f38004198e9a28a86fde31ed9547c3901d9a98c0820f6e4d7",
+    "xgboost_model.json": "5a215b6d0baad260bb625bdf32be6dd8d49393c008ecddddf63f36e867f0c030",
+    "xgboost_model_fold0.json": "5a215b6d0baad260bb625bdf32be6dd8d49393c008ecddddf63f36e867f0c030",
+    "xgboost_model_fold1.json": "925843a783cadcd42ea80ed58d93e8af2f4b3ce5862171e5517f5d6a3d645d17",
+    "xgboost_model_fold2.json": "5e1a938d899b172c0c133da5f8be4e0ac099e3f806c0066a49e3f57066cef522",
+    "xgboost_model_fold3.json": "da213da8b4e0d8109bc91f3307dc8107019747a735b586a70cea13a889698eb8",
+    "xgboost_model_fold4.json": "49d1ff6d41cb74e5f8fcc780e1eb135f85f992a9e6a04bf7ff5f7a77c4178bf0"
   }
 }

@@ -1,52 +1,52 @@
 {
-  "generated_at": "2026-10-24T12:28:21+00:00",
+  "generated_at": "2026-10-28T02:32:31+00:00",
   "bootstrap_resamples": 1000,
   "bundle": "D:\\FloodAI - Copy\\models\\realtime_native_bundle",
   "deployed": {
     "split": "random_stratified_68_12_20 (as deployed)",
-    "threshold": 0.1027,
+    "threshold": 0.1255,
     "calibration_method": "sigmoid",
     "metrics": {
       "roc_auc": {
-        "value": 0.9036,
+        "value": 0.8994,
         "ci95": [
-          0.8658,
-          0.9397
+          0.8582,
+          0.9379
         ]
       },
       "pr_auc": {
-        "value": 0.5285,
+        "value": 0.5251,
         "ci95": [
-          0.3965,
-          0.6691
+          0.3934,
+          0.6655
         ]
       },
       "brier": {
         "value": 0.0744,
         "ci95": [
-          0.0585,
-          0.0885
+          0.059,
+          0.0889
         ]
       },
       "recall": {
-        "value": 0.8929,
+        "value": 0.875,
         "ci95": [
-          0.8103,
-          0.9649
+          0.7812,
+          0.9565
         ]
       },
       "precision": {
-        "value": 0.2632,
+        "value": 0.2816,
         "ci95": [
-          0.1989,
-          0.3274
+          0.2123,
+          0.3486
         ]
       },
-      "ece": 0.0618,
+      "ece": 0.062,
       "prevalence": 0.0956,
       "test_rows": 586,
       "test_positives": 56,
-      "flagged_share": 0.3242
+      "flagged_share": 0.2969
     }
   },
   "random": {
@@ -56,52 +56,52 @@
       352,
       586
     ],
-    "threshold": 0.1027,
+    "threshold": 0.1255,
     "threshold_selection_tier": 1,
     "calibration_method": "sigmoid",
-    "validation_recall": 0.8824,
-    "validation_precision": 0.3,
+    "validation_recall": 0.8529,
+    "validation_precision": 0.3372,
     "metrics": {
       "roc_auc": {
-        "value": 0.9036,
+        "value": 0.8994,
         "ci95": [
-          0.8658,
-          0.9397
+          0.8582,
+          0.9379
         ]
       },
       "pr_auc": {
-        "value": 0.5285,
+        "value": 0.5251,
         "ci95": [
-          0.3965,
-          0.6691
+          0.3934,
+          0.6655
         ]
       },
       "brier": {
         "value": 0.0744,
         "ci95": [
-          0.0585,
-          0.0885
+          0.059,
+          0.0889
         ]
       },
       "recall": {
-        "value": 0.8929,
+        "value": 0.875,
         "ci95": [
-          0.8103,
-          0.9649
+          0.7812,
+          0.9565
         ]
       },
       "precision": {
-        "value": 0.2632,
+        "value": 0.2816,
         "ci95": [
-          0.1989,
-          0.3274
+          0.2123,
+          0.3486
         ]
       },
-      "ece": 0.0618,
+      "ece": 0.062,
       "prevalence": 0.0956,
       "test_rows": 586,
       "test_positives": 56,
-      "flagged_share": 0.3242
+      "flagged_share": 0.2969
     }
   },
   "by_year": {
@@ -111,31 +111,31 @@
       577,
       587
     ],
-    "threshold": 0.4248,
+    "threshold": 0.347,
     "threshold_selection_tier": 3,
-    "calibration_method": "isotonic",
+    "calibration_method": "sigmoid",
     "validation_recall": 1.0,
-    "validation_precision": 0.1134,
+    "validation_precision": 0.1,
     "metrics": {
       "roc_auc": {
-        "value": 0.8125,
+        "value": 0.8259,
         "ci95": [
-          0.7407,
-          0.869
+          0.7447,
+          0.8886
         ]
       },
       "pr_auc": {
-        "value": 0.1036,
+        "value": 0.1245,
         "ci95": [
-          0.0642,
-          0.162
+          0.0746,
+          0.1988
         ]
       },
       "brier": {
-        "value": 0.0949,
+        "value": 0.0782,
         "ci95": [
-          0.0855,
-          0.1043
+          0.0696,
+          0.0876
         ]
       },
       "recall": {
@@ -146,17 +146,17 @@
         ]
       },
       "precision": {
-        "value": 0.1242,
+        "value": 0.1275,
         "ci95": [
-          0.0736,
-          0.1831
+          0.0769,
+          0.1879
         ]
       },
-      "ece": 0.192,
+      "ece": 0.1691,
       "prevalence": 0.0375,
       "test_rows": 587,
       "test_positives": 22,
-      "flagged_share": 0.2606
+      "flagged_share": 0.2538
     }
   }
 }

@@ -102,22 +102,22 @@ latih, kalibrasi sigmoid, deteksi OOD dengan IsolationForest.
 
 | Metrik (data uji) | Nilai |
 |---|---|
-| AUC / recall / precision | 0,904 / 0,893 / 0,263 |
-| PR-AUC (garis dasar 0,096) | 0,528 |
-| Brier / ECE / ambang | 0,074 / 0,062 / 0,103 |
+| AUC / recall / precision | 0,899 / 0,875 / 0,282 |
+| PR-AUC (garis dasar 0,096) | 0,525 |
+| Brier / ECE / ambang | 0,074 / 0,062 / 0,126 |
 
 **Angka di atas optimis.** Data latih adalah 2.928 baris kecamatan-bulan (2020–2024) dengan sebagian
 fitur berupa proksi (`bootstrap_proxy`), dan pembagian datanya acak terstratifikasi 68/12/20. Pada
-pembagian per tahun (uji 2024), AUC 0,81 (95 % CI 0,74–0,87). Belum ada evaluasi lapangan dengan label banjir
+pembagian per tahun (uji 2024), AUC 0,83 (95 % CI 0,75–0,89). Belum ada evaluasi lapangan dengan label banjir
 teramati. Rincian dan sumber tiap angka: [`context.md`](context.md#model--evaluation).
 
 Evaluasi lengkap dengan interval kepercayaan: `python scripts/evaluate_model.py`
 (hasil di `artifacts/reports/model_evaluation.md`). Latih ulang: `python scripts/retrain_bundle.py`.
 
 Eksperimen 2026-10-27 (609 varian, dipilih pada 2022–2023, diuji pada 2024): kalibrasi ulang di tahun
-terbaru menurunkan ECE dari 0,19 ke ~0,03, tetapi kandidat tanpa fitur proksi + kalibrasi tahun
-terbaru justru lebih buruk (AUC 0,733 vs 0,812, selisih −0,079 [−0,131; −0,026]), sehingga model yang
-dipakai tidak diganti. Ulangi: `python scripts/train_candidate.py` (hasil di
+terbaru menurunkan ECE dari ~0,17 ke ~0,02, tetapi kandidat tanpa fitur proksi + kalibrasi tahun
+terbaru tetap lebih buruk (AUC 0,796 vs 0,826, selisih −0,029 [−0,071; +0,013], diulang 2026-10-28
+setelah hitungan kejadian BPBD diperbaiki), sehingga arsitektur model yang dipakai tidak diganti. Ulangi: `python scripts/train_candidate.py` (hasil di
 `artifacts/reports/candidate_comparison.md`; bundle kandidat ke `models/candidates/`, tidak pernah
 menimpa bundle yang dipakai).
 

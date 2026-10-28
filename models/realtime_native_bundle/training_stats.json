@@ -5,20 +5,23 @@
   "validation_rows": 352,
   "test_rows": 586,
   "performance": {
-    "optimal_threshold": 0.10274996235966682,
-    "train_accuracy": 0.8460639127045986,
-    "test_accuracy": 0.7508532423208191,
-    "test_precision": 0.2631578947368421,
-    "test_recall": 0.8928571428571429,
-    "test_f1": 0.4065040650406504,
-    "test_roc_auc": 0.9036388140161724,
-    "validation_recall_at_threshold": 0.8823529411764706,
-    "validation_precision_at_threshold": 0.3
+    "optimal_threshold": 0.1255157046020031,
+    "train_accuracy": 0.8636009353078722,
+    "test_accuracy": 0.7747440273037542,
+    "test_precision": 0.28160919540229884,
+    "test_recall": 0.875,
+    "test_f1": 0.4260869565217391,
+    "test_roc_auc": 0.8994272237196764,
+    "test_pr_auc": 0.5250529606193161,
+    "test_prevalence": 0.09556313993174062,
+    "validation_recall_at_threshold": 0.8529411764705882,
+    "validation_precision_at_threshold": 0.3372093023255814
   },
   "calibration": {
     "method": "sigmoid",
-    "test_brier": 0.07437394856500205,
-    "test_ece": 0.01832730736421751
+    "fit_on": "5-fold CV on train",
+    "test_brier": 0.07435655493781684,
+    "test_ece": 0.06195638717099582
   },
   "scientific_notes": {
     "training_mode": "bootstrap_proxy_until_realtime_history_available",
@@ -28,7 +31,7 @@
       "Train cadence (monthly) berbeda dengan inference cadence (per-snapshot); metrik di sini upper-bound, recall produksi wajib diverifikasi via shadow-mode."
     ],
     "strengths": [
-      "Chronological split + scale_pos_weight + isotonic calibration menargetkan recall >= 0.80.",
+      "scale_pos_weight + SMOTE + kalibrasi (dipilih di data validasi) menargetkan recall >= 0.80.",
       "Threshold dipersist di optimal_threshold_realtime_native.json dan dibaca oleh inference.",
       "Brier + ECE diukur; auto-fallback ke sigmoid bila isotonic ECE > 0.10."
     ]

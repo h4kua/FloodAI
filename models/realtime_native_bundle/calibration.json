@@ -1,32 +1,32 @@
 {
   "method": "sigmoid",
-  "validation_recall": 0.8823529411764706,
-  "validation_precision": 0.3,
+  "validation_recall": 0.8529411764705882,
+  "validation_precision": 0.3372093023255814,
   "source": "models/realtime_native_bundle/threshold.json",
   "folds": [
     {
-      "a": -35.86380187430868,
-      "b": 30.39740764302276,
+      "a": -36.74418694296562,
+      "b": 31.112943450429476,
       "booster_file": "xgboost_model_fold0.json"
     },
     {
-      "a": -41.05016579731752,
-      "b": 34.927094132860724,
+      "a": -39.92231933702708,
+      "b": 33.98662033271823,
       "booster_file": "xgboost_model_fold1.json"
     },
     {
-      "a": -45.62423998360003,
-      "b": 38.80528207584192,
+      "a": -46.61142386574,
+      "b": 39.53993759977029,
       "booster_file": "xgboost_model_fold2.json"
     },
     {
-      "a": -43.42831775787923,
-      "b": 37.04660744012181,
+      "a": -43.06297849840565,
+      "b": 36.725576007412336,
       "booster_file": "xgboost_model_fold3.json"
     },
     {
-      "a": -48.50620817988638,
-      "b": 41.083158330856975,
+      "a": -50.57151837845929,
+      "b": 42.79117741092228,
       "booster_file": "xgboost_model_fold4.json"
     }
   ]

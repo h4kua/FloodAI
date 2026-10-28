@@ -164,8 +164,16 @@ _KEL_PREFIX_RE = re.compile(r"^(kel\.?|kelurahan)\s+", re.IGNORECASE)
 def _load_rekap_csv(per_kel: dict[str, dict]) -> None:
     if not _REKAP_CSV.exists():
         return
+    # The workbooks list one row per RT, but the parser keeps only the RW, so
+    # several RTs flooded on the same date become identical rows. Count each
+    # RW-date once; otherwise one flood counts as two or more events.
+    seen: set[tuple] = set()
     with open(_REKAP_CSV, encoding="utf-8") as fh:
         for row in csv.DictReader(fh):
+            key = tuple(row.values())
+            if key in seen:
+                continue
+            seen.add(key)
             kel = _KEL_PREFIX_RE.sub("", (row.get("kelurahan") or "").strip()).strip().upper()
             if not kel:
                 continue
