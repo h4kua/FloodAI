@@ -62,7 +62,8 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   metrics above are optimistic. By-year estimate (train 2020–2022, val 2023, test 2024 with 22
   positives): AUC 0.83 [0.75–0.89], PR-AUC 0.12 (no-skill 0.04), ECE 0.17. Run
   `python scripts/evaluate_model.py` for the current figures with 95 % bootstrap CIs.
-  Flood labels shrink sharply over time (117/78/54/11/22, 2020–2024).
+  Training flood labels shrink sharply over time (117/78/54/11/22, 2020–2024), but BPBD records do not
+  (267/147/213/113/155): the drop comes from the label source (see the label gap below).
 - No observed row-level flood labels for evaluation: `realtime_feature_history.csv` has no label
   column; `calibration_labeled.csv` labels are synthetic.
 - AUC 0.9452 belongs to the legacy Jakarta model (`flood_model_jakarta.pkl`, random 80:20 split).
@@ -81,12 +82,17 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   (`scripts/daily_flood_experiment.py`). BPBD per-kelurahan events exist from 2013 (`events_clean.csv`);
   training stops at 2020–2024 only because the features do.
 - Fly stopped/suspended both machines despite `min_machines_running = 1`, halting the 15-minute
-  scheduler. `fly.toml` now has `auto_stop_machines = 'off'` (live after the next `fly deploy`); the
-  GitHub backup cron still needs repo secrets `REFRESH_URL` + `INTERNAL_SECRET` (and `INTERNAL_SECRET` on Fly).
+  scheduler. `fly.toml` has `auto_stop_machines = 'off'` (live since 2026-10-27) and the app runs one
+  machine (`6837171a569698`, region `sin`); the GitHub backup cron still needs repo secrets `REFRESH_URL` +
+  `INTERNAL_SECRET` (and `INTERNAL_SECRET` on Fly).
 - Groq free tier: 8k tokens/min per model, so roughly 4–8 chat questions a minute across all users;
   heavier use needs a paid tier.
 
 ## Resolved
+- 2026-10-28: backend moved from `ams` to `sin` (machine cloned, old one destroyed, `primary_region = 'sin'`).
+  From Singapore: `/predict/realtime-native` median 1,012 → 573 ms (max 10.4 s → 0.95 s), `/healthz`
+  465 → 324 ms, `/readyz` 1,104 → 505 ms; status + map on a repeat visit ~0.5–0.8 s. Black-box FR1–FR10
+  all pass on production (thesis 5.2).
 - 2026-10-24: served model = trained model. The native export kept only fold 0's booster and
   applied all five calibrators to it (per-prediction gap up to 0.32); it now ships one booster per
   calibration fold (`xgboost_model_fold{i}.json`), parity < 1e-6. Calibration method is chosen on
@@ -108,8 +114,8 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   report); 3 flags hide a report; `/?report=<id>` deep links. Needs `db/migrations/111_report_interactions.sql`
   run in Supabase (until then the endpoints answer 503 and counts show 0).
 - 2026-10-27: English page fully English except the 3-agent deep analysis (prompts ask for Indonesian):
-  `/predict/realtime-native` returns `risk_interpretation_en` beside `risk_interpretation`. The map legend
-  folds on phones. Mentors removed from the About page.
+  `/predict/realtime-native` returns `risk_interpretation_en` beside `risk_interpretation`. On phones (≤ 640 px)
+  the map legend sits under the map, always open. Mentors removed from the About page.
 - 2026-10-27: Vercel `VITE_API_BASE_URL` pointed at the old `floodai.fly.dev`; it is now
   `https://floodai-8eclra.fly.dev` (type Config). `html/body` use `overflow-x: clip` so the top bar stays sticky.
 - DB CHECK-constraint naming drift (orphan `chk_eval_status` blocked `CONFLICT`/`LOW_TRUST`

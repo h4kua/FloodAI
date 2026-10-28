@@ -354,7 +354,8 @@ The LLM never changes the decision; it only writes explanations, with a determin
 | Free third-party services | Active | Esri keyless tiles, OSRM demo server and Nominatim have usage policies; production traffic needs keys or own servers |
 | No CI before 2026-10-24 | Resolved | `.github/workflows/ci.yml`: pytest + frontend build on PRs and pushes to `main` |
 | Emergency numbers | Resolved 2026-10-22 | Ambulance is 119 (or 112) everywhere, per Dinkes DKI; 118 is the older number |
-| Fly stops/suspends the machines | Fix in `fly.toml` (2026-10-27) | `auto_stop_machines = 'off'`: with `'stop'` both machines were stopped or suspended despite `min_machines_running = 1`, halting the 15-min scheduler; live after the next `fly deploy`. The GitHub refresh workflow (needs `REFRESH_URL`, `INTERNAL_SECRET`) is the backup |
+| Fly stops/suspends the machines | Fix in `fly.toml` (2026-10-27) | `auto_stop_machines = 'off'`: with `'stop'` both machines were stopped or suspended despite `min_machines_running = 1`, halting the 15-min scheduler; live since 2026-10-27, one machine. The GitHub refresh workflow (needs `REFRESH_URL`, `INTERNAL_SECRET`) is the backup |
+| Backend far from users | Resolved 2026-10-28 | Was Fly region `ams` (`/predict/realtime-native` ~1.0 s median, max 10 s from Singapore); moved to `sin`: 573 ms median, max 0.95 s; `/healthz` 324 ms; status + map ~0.5–0.8 s on a repeat visit |
 | Groq per-minute quota | Mitigated 2026-10-27 | Free tier 8k tokens/min per model; prompt cut to ~1.8k tokens, fallback model, "busy" instead of offline. Heavy use still needs a paid tier |
 | Home "Siaga 2" count from ratios | Resolved 2026-10-27 | Gauge, Siaga line, wilayah and map now use each post's DSDA band, like the engine |
 | Model improvement | Tried 2026-10-27 | 609 variants by year (test 2024): none better at ~86 % recall; candidate (13 features, Platt on 2023) AUC 0.796 vs 0.826 after the event-count fix (was 0.733 vs 0.812) → served bundle kept (`artifacts/reports/candidate_comparison.md`) |
@@ -413,7 +414,11 @@ Names only — values live in `.env` (never committed; `.env.example` holds plac
   11-step guide; one API base; model experiment + `scripts/train_candidate.py` (candidate rejected);
   Groq model swap; chatbot prompt moved server-side (~1.8k tokens), fallback model, busy state, no
   event-loop stall; chat answers render bold/lists; Home posts classified by DSDA band; `fly.toml`
-  `auto_stop_machines = 'off'`; map legend folds on phones; `/predict/realtime-native` also returns
+  `auto_stop_machines = 'off'`; map legend under the map on phones; `/predict/realtime-native` also returns
   `risk_interpretation_en`, so the English page has no Indonesian status text; mentors removed from Tentang.
+- 2026-10-28: BPBD events counted once per RW-date and the bundle retrained; Fly scaled to one machine
+  and moved from `ams` to `sin` (API ~0.4 s faster);
+  precision experiments (label gap, BPBD-label candidate rejected, stricter Danger threshold, daily
+  labels); black-box FR1–FR10 and performance measured on production (thesis 5.2 and 5.5).
 
 Full history: `git log`.
