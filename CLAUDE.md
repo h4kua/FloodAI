@@ -31,7 +31,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (582, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (17: flood roads,
+- Tests: `tests/` (589, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (19: flood roads, shelter ranking,
   post levels)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -89,6 +89,11 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   heavier use needs a paid tier.
 
 ## Resolved
+- 2026-10-28: the evacuation page offered only 11 hard-coded venues (with unverified phone numbers) and a
+  grey basemap without small streets. It now asks `GET /shelters/nearby` for ~20 of the 12,130
+  OSM/InAWARE candidates in `data/bundled/jakarta_shelters.json` (no hospitals/clinics, same-name
+  duplicates within 150 m dropped), lists those in an active flood-prone area last (`rankSheltersByFlood`),
+  keeps 3 large venues as farther options and offline fallback, and uses Esri World Street Map (zoom 19).
 - 2026-10-28: backend moved from `ams` to `sin` (machine cloned, old one destroyed, `primary_region = 'sin'`).
   From Singapore: `/predict/realtime-native` median 1,012 → 573 ms (max 10.4 s → 0.95 s), `/healthz`
   465 → 324 ms, `/readyz` 1,104 → 505 ms; status + map on a repeat visit ~0.5–0.8 s. Black-box FR1–FR10

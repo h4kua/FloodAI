@@ -1,8 +1,9 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { humanizeRiskLevel } from "../lib/humanize";
-import EvacuationMap, { DESTINATIONS, EVAC_COLORS, findNearestShelter, haversineKm } from "../components/EvacuationMap";
+import EvacuationMap, { DESTINATIONS, EVAC_COLORS, haversineKm } from "../components/EvacuationMap";
+import { API_BASE } from "../lib/api";
 import floodProneZones from "../data/floodProneZones.json";
-import { activeFloodPoints } from "../lib/floodRoads";
+import { activeFloodPoints, rankSheltersByFlood } from "../lib/floodRoads";
 import { useFloodRisk } from "../hooks/useFloodRisk";
 import ChatBot from "../components/ChatBot";
 import { useT, useApp } from "../lib/appContext";
@@ -73,6 +74,41 @@ function suggestionLabel(s) {
   const { main, sub } = formatSuggestion(s);
   return sub ? `${main}, ${sub}` : main;
 }
+
+// Shelter candidates near a point, nearest first, from the backend's
+// OSM/InAWARE dataset. null when the API cannot be reached.
+async function fetchNearbyShelters(lat, lng, signal) {
+  try {
+    const res = await fetch(`${API_BASE}/shelters/nearby?lat=${lat.toFixed(5)}&lon=${lng.toFixed(5)}&limit=20`, { signal });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (data.shelters ?? []).map((s) => ({
+      id: s.id, name: s.name, address: s.address, kind: s.kind,
+      capacity: s.capacity_est, lat: s.lat, lng: s.lon, distanceKm: s.distance_km,
+    }));
+  } catch {
+    return null;
+  }
+}
+
+// Offline fallback: the large public venues, nearest first.
+function fallbackShelters(lat, lng) {
+  return DESTINATIONS
+    .map((d) => ({ ...d, kind: "venue", distanceKm: haversineKm(lat, lng, d.lat, d.lng) }))
+    .sort((a, b) => a.distanceKm - b.distanceKm);
+}
+
+const KIND_LABEL = {
+  school: ["Sekolah", "School"], mosque: ["Masjid/musala", "Mosque"], church: ["Gereja", "Church"],
+  temple: ["Pura/vihara", "Temple"], worship: ["Tempat ibadah", "Place of worship"],
+  rw_office: ["Kantor RW", "RW office"], village_office: ["Kantor kelurahan", "Kelurahan office"],
+  subdistrict_office: ["Kantor kecamatan", "Kecamatan office"], government: ["Kantor pemerintah", "Government office"],
+  community_centre: ["Balai warga", "Community hall"], social_facility: ["Fasilitas sosial", "Social facility"],
+  shelter: ["Tempat pengungsian", "Shelter"], venue: ["Tempat umum besar", "Large public venue"],
+  other: ["Bangunan umum", "Public building"],
+};
+const kindLabel = (kind, lang) => (KIND_LABEL[kind] ?? KIND_LABEL.other)[lang === "en" ? 1 : 0];
+const formatDistance = (km) => (km < 1 ? `${Math.round(km * 1000 / 10) * 10} m` : `${km.toFixed(1)} km`);
 
 // Special entries in the destination dropdown (shelters use their ids).
 const HOME_OPTION = "__home";
@@ -167,7 +203,48 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const debounceRef = useRef(null);
 
   const config       = humanizeRiskLevel(riskLevel, lang);
-  const selectedDest = destId ? DESTINATIONS.find((d) => d.id === destId) ?? null : null;
+
+  // Flood-prone areas that count right now: BPBD points on a river whose post
+  // is at Siaga, or all of them in heavy rain.
+  const { riskData } = useFloodRisk();
+  const floodPoints = useMemo(
+    () => activeFloodPoints(floodProneZones.points, riskData?.stations ?? [], riskData?.rainfall ?? 0),
+    [riskData],
+  );
+
+  // Shelters near where the user starts: outside active flood-prone areas
+  // first, then nearest first. The first one is picked when a new list arrives.
+  const [nearbyShelters, setNearbyShelters]   = useState([]);
+  const [sheltersOffline, setSheltersOffline] = useState(false);
+  const pickFirstShelter = useRef(false);
+  useEffect(() => {
+    if (!userLocation) {
+      setNearbyShelters([]);
+      return undefined;
+    }
+    const controller = new AbortController();
+    fetchNearbyShelters(userLocation.lat, userLocation.lng, controller.signal).then((list) => {
+      if (controller.signal.aborted) return;
+      // The three nearest large venues stay as farther options, in case every
+      // nearby candidate lies in an active flood-prone area.
+      const venues = fallbackShelters(userLocation.lat, userLocation.lng);
+      setSheltersOffline(!list?.length);
+      pickFirstShelter.current = true;
+      setNearbyShelters(list?.length ? [...list, ...venues.slice(0, 3)] : venues);
+    });
+    return () => controller.abort();
+  }, [userLocation]);
+  const shelterOptions = useMemo(
+    () => rankSheltersByFlood(nearbyShelters, floodPoints),
+    [nearbyShelters, floodPoints],
+  );
+  useEffect(() => {
+    if (pickFirstShelter.current && shelterOptions.length) {
+      pickFirstShelter.current = false;
+      setDestId(shelterOptions[0].id);
+    }
+  }, [shelterOptions]);
+  const selectedDest = destId ? shelterOptions.find((d) => d.id === destId) ?? null : null;
 
   // Destination: home first (the default once saved), any place, or a shelter.
   const [destMode, setDestMode]         = useState(() => (loadHome() ? "home" : "shelter"));
@@ -180,15 +257,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const destination = { home, other, shelter: selectedDest }[destMode];
   const shelterChosen = destMode === "shelter" && selectedDest;
 
-  // Shelters nearest-first from where the user starts.
-  const shelterOptions = useMemo(() => (
-    userLocation
-      ? [...DESTINATIONS].sort((a, b) =>
-          haversineKm(userLocation.lat, userLocation.lng, a.lat, a.lng)
-          - haversineKm(userLocation.lat, userLocation.lng, b.lat, b.lng))
-      : DESTINATIONS
-  ), [userLocation]);
-  const nearestId = userLocation ? shelterOptions[0].id : null;
+  const nearestId = shelterOptions[0]?.id ?? null;
   const destValue = { home: HOME_OPTION, other: OTHER_OPTION }[destMode] ?? (destId ?? "");
 
   const handleDestChange = (e) => {
@@ -202,14 +271,6 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
       setDestId(value);
     }
   };
-
-  // Flood-prone areas that count right now: BPBD points on a river whose post
-  // is at Siaga, or all of them in heavy rain.
-  const { riskData } = useFloodRisk();
-  const floodPoints = useMemo(
-    () => activeFloodPoints(floodProneZones.points, riskData?.stations ?? [], riskData?.rainfall ?? 0),
-    [riskData],
-  );
 
   const fetchSuggestions = async (query) => {
     const data = await searchPlaces(query);
@@ -255,9 +316,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     setLocateError("");
     const lat = parseFloat(s.lat);
     const lng = parseFloat(s.lon);
-    const nearest = findNearestShelter(lat, lng);
     setUserLocation({ lat, lng, name: label });
-    setDestId(nearest.id);
   };
 
   const handleLocateMe = () => {
@@ -279,16 +338,12 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
             ? data.display_name.split(",").slice(0, 3).join(", ")
             : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
           setAddressInput(name);
-          const nearest = findNearestShelter(lat, lng);
           setUserLocation({ lat, lng, name, isGPS: true });
-          setDestId(nearest.id);
           setGeoError("");
         } catch {
           const name = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
           setAddressInput(name);
-          const nearest = findNearestShelter(lat, lng);
           setUserLocation({ lat, lng, name, isGPS: true });
-          setDestId(nearest.id);
         }
         setLocating(false);
       },
@@ -320,15 +375,11 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
         ? data.display_name.split(",").slice(0, 3).join(", ")
         : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
       setAddressInput(name);
-      const nearest = findNearestShelter(lat, lng);
       setUserLocation({ lat, lng, name });
-      setDestId(nearest.id);
     } catch {
       const name = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
       setAddressInput(name);
-      const nearest = findNearestShelter(lat, lng);
       setUserLocation({ lat, lng, name });
-      setDestId(nearest.id);
     } finally {
       setGeocoding(false);
     }
@@ -346,9 +397,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     setDestId(null);
     try {
       const loc = await geocodeAddress(addr);
-      const nearest = findNearestShelter(loc.lat, loc.lng);
       setUserLocation({ lat: loc.lat, lng: loc.lng, name: addr });
-      setDestId(nearest.id);
     } catch (e) {
       setGeoError(e.message ?? "Alamat tidak ditemukan.");
     } finally {
@@ -439,7 +488,9 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
                   <optgroup label={lang === "en" ? "Shelters (nearest first)" : "Tempat pengungsian (terdekat dulu)"}>
                     {shelterOptions.map((d) => (
                       <option key={d.id} value={d.id}>
-                        {d.id === nearestId ? `${d.name} (${lang === "en" ? "nearest" : "terdekat"})` : d.name}
+                        {`${d.name} · ${formatDistance(d.distanceKm)}`}
+                        {d.inFloodArea ? ` · ${lang === "en" ? "flood-prone area" : "area rawan banjir"}`
+                          : d.id === nearestId ? ` (${lang === "en" ? "recommended" : "disarankan"})` : ""}
                       </option>
                     ))}
                   </optgroup>
@@ -491,12 +542,20 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
             <div>
               <p><strong>{selectedDest.name}</strong>{selectedDest.address ? ` · ${selectedDest.address}` : ""}</p>
               <p className="shelter-line-meta">
-                {selectedDest.capacity && (lang === "en"
-                  ? `Room for about ${selectedDest.capacity.toLocaleString()} people`
-                  : `Muat ±${selectedDest.capacity.toLocaleString("id-ID")} orang`)}
-                {selectedDest.phone && (
-                  <> · <a href={`tel:${selectedDest.phone}`}>{selectedDest.phone}</a></>
-                )}
+                {kindLabel(selectedDest.kind, lang)} · {formatDistance(selectedDest.distanceKm)}
+                {selectedDest.inFloodArea ? (lang === "en" ? " · inside an active flood-prone area" : " · di dalam area rawan banjir aktif") : ""}
+                {selectedDest.capacity ? (lang === "en"
+                  ? ` · room for about ${selectedDest.capacity.toLocaleString()} people`
+                  : ` · muat ±${selectedDest.capacity.toLocaleString("id-ID")} orang`) : ""}
+              </p>
+              <p className="shelter-line-meta">
+                {sheltersOffline
+                  ? (lang === "en"
+                    ? "The nearby list could not be loaded, so only large public venues are shown."
+                    : "Daftar terdekat tidak bisa dimuat, jadi hanya tempat umum besar yang ditampilkan.")
+                  : (lang === "en"
+                    ? "A possible shelter from OpenStreetMap/InAWARE data. Ask your RT/RW or BPBD (112) which places are open."
+                    : "Calon tempat pengungsian dari data OpenStreetMap/InAWARE. Tanyakan ke RT/RW atau BPBD (112) tempat mana yang dibuka.")}
               </p>
             </div>
           </div>

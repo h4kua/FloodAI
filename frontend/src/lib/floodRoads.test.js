@@ -5,6 +5,8 @@ import {
   activeFloodPoints,
   distanceToSegmentM,
   googleMapsUrl,
+  inFloodArea,
+  rankSheltersByFlood,
   riversForPost,
   riversOnAlert,
   safestRouteIndex,
@@ -105,4 +107,22 @@ test("the safest alternative wins; near-ties go to the faster one", () => {
   assert.equal(safestRouteIndex([{ riskyM: 1200, duration: 600 }, { riskyM: 0, duration: 900 }]), 1);
   assert.equal(safestRouteIndex([{ riskyM: 50, duration: 600 }, { riskyM: 0, duration: 900 }]), 0);
   assert.equal(safestRouteIndex([]), -1);
+});
+
+test("a shelter within 500 m of an active flood point is in a flood area", () => {
+  assert.equal(inFloodArea(-6.2320, 106.865, [CILIWUNG_POINT]), true);   // ~220 m away
+  assert.equal(inFloodArea(-6.2400, 106.865, [CILIWUNG_POINT]), false);  // ~1.1 km away
+  assert.equal(inFloodArea(-6.2320, 106.865, []), false);
+});
+
+test("shelters outside active flood areas come first, nearest first within each group", () => {
+  const shelters = [
+    { id: "near-river", lat: -6.2302, lng: 106.8652 },
+    { id: "dry-1", lat: -6.2400, lng: 106.8650 },
+    { id: "dry-2", lat: -6.2450, lng: 106.8650 },
+  ];
+  const ranked = rankSheltersByFlood(shelters, [CILIWUNG_POINT]);
+  assert.deepEqual(ranked.map((s) => s.id), ["dry-1", "dry-2", "near-river"]);
+  assert.equal(ranked[2].inFloodArea, true);
+  assert.deepEqual(rankSheltersByFlood(shelters, []).map((s) => s.id), ["near-river", "dry-1", "dry-2"]);
 });

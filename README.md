@@ -32,7 +32,7 @@ OpenWeather (5 wilayah) ─┘   tiap 15 mnt   └─ LLM: penjelasan + chatbot 
 - **Backend**: FastAPI + uvicorn (port 8080), APScheduler untuk refresh snapshot.
 - **Pipeline agentik** (`pipeline/flood_pipeline.py`): Perception → Reasoning → Evaluation →
   Action → Routing, dipakai oleh `POST /predict/agentic`.
-- **Frontend**: React 18 + Vite 5 + React-Leaflet (peta dasar Esri Gray Canvas), dwibahasa ID/EN,
+- **Frontend**: React 18 + Vite 5 + React-Leaflet (peta dasar Esri Gray Canvas di Beranda, Esri World Street Map di Evakuasi), dwibahasa ID/EN,
   mode terang/gelap, responsif dari 360 px, panduan pengguna 11 langkah (tombol "?" di top bar).
   Rute evakuasi dari OSRM; jalan yang melewati titik rawan BPBD di sungai berstatus Siaga diwarnai merah.
 - **Deploy**: backend di Fly.io (`fly.toml`, region `ams`; `auto_stop_machines = 'off'` supaya penjadwal 15 menit tidak ikut berhenti), frontend di
@@ -69,6 +69,7 @@ Swagger UI: `http://localhost:8080/docs`.
 | `POST /predict/agentic`, `POST /predict/agentic/explain` | X-Api-Key | Pipeline 5 tahap (+ penjelasan LLM) |
 | `GET /predict/crew-realtime` | — | Analisis 3 agen atas snapshot terkini, di-cache per snapshot |
 | `POST /api/chat` | batas per IP (10/menit) | Chatbot Groq. Prompt disusun server dari `api/chat_knowledge.txt` (~1,8k token). Kuota gratis Groq 8k token/menit per model: pindah ke model cadangan, lalu 429 `ai_busy` ("AI sedang sibuk"); kegagalan lain → basis pengetahuan offline |
+| `GET /shelters/nearby` | batas per IP | ≤ 20 calon tempat pengungsian terdekat (data OSM/HOT InAWARE, tanpa rumah sakit dan duplikat) untuk halaman Evakuasi |
 | `POST /shelters/checkin` | batas per IP | Check-in tiba di pengungsian; tidak dipakai UI lagi (tombol "Saya sudah tiba" dihapus) |
 | `GET /healthz`, `GET /readyz`, `GET /metrics` | — | Liveness, readiness (cek tabel snapshot di Supabase), Prometheus |
 | `GET /predict/realtime` | — | **Dipensiunkan** — menjawab `410 Gone` dengan tautan ke `/predict/realtime-native` |
@@ -145,8 +146,8 @@ Nama saja — nilai disimpan di `.env` (lihat `.env.example`), tidak pernah di-c
 ## Tes & CI
 
 ```bash
-python -m pytest tests -q        # 582 tes backend
-cd frontend && npm test          # 17 tes: rute banjir, level pos (node --test)
+python -m pytest tests -q        # 589 tes backend
+cd frontend && npm test          # 19 tes: rute banjir, urutan pengungsian, level pos (node --test)
 ```
 
 GitHub Actions (`.github/workflows/ci.yml`) menjalankan seluruh tes backend dan build frontend pada

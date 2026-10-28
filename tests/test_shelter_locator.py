@@ -49,3 +49,30 @@ def test_load_shelters_missing_file_returns_empty(monkeypatch, tmp_path):
     monkeypatch.setattr(sl, "SHELTERS_PATH", tmp_path / "missing.json")
     assert sl.load_shelters() == ()
     sl.load_shelters.cache_clear()
+
+
+def test_shelter_kind_from_tags():
+    assert sl.shelter_kind({"amenity": "place_of_worship", "building": "mosque"}) == "mosque"
+    assert sl.shelter_kind({"amenity": "", "building": "community_group_office"}) == "rw_office"
+    assert sl.shelter_kind({"amenity": "school", "building": ""}) == "school"
+    assert sl.shelter_kind({"amenity": "hospital", "building": "school"}) == "hospital"
+    assert sl.shelter_kind({"amenity": "", "building": "yes"}) == "other"
+
+
+def test_evacuation_only_drops_hospitals():
+    pool = _SHELTERS + ({"name": "RS Dekat", "lat": -6.2001, "lon": 106.7901, "capacity_raw": "", "capacity_est": None,
+                         "amenity": "hospital", "building": "hospital"},)
+    assert sl.nearest_shelter(-6.2001, 106.7901, shelters=pool)["name"] == "RS Dekat"
+    near = sl.nearest_shelter(-6.2001, 106.7901, evacuation_only=True, shelters=pool)
+    assert near["name"] == "SDN Palmerah"
+    assert near["kind"] == "school"
+
+
+def test_same_place_listed_twice_is_returned_once():
+    pool = (
+        {"name": "SDN 08 Pagi", "lat": -6.2000, "lon": 106.8000, "capacity_est": 300, "amenity": "school"},
+        {"name": "SDN 08 Pagi ", "lat": -6.2003, "lon": 106.8002, "capacity_est": 300, "amenity": "school"},
+        {"name": "Masjid Baru", "lat": -6.2010, "lon": 106.8000, "capacity_est": 100, "amenity": "place_of_worship"},
+    )
+    names = [s["name"] for s in sl.nearest_shelters(-6.2, 106.8, limit=3, shelters=pool)]
+    assert names == ["SDN 08 Pagi", "Masjid Baru"]

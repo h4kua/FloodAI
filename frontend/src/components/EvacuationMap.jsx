@@ -10,23 +10,24 @@ import BaseTiles from "./BaseTiles";
 // route planning near borders without fighting the maxBounds constraint).
 const JAKARTA_BOUNDS = [[-6.42, 106.66], [-6.06, 107.06]];
 
+// Offline fallback when /shelters/nearby cannot be reached: large public venues
+// only, without phone numbers (none of them could be verified).
 export const DESTINATIONS = [
   // Jakarta Utara
-  { id: "kemayoran",  name: "GOR Kemayoran",            area: "Jakarta Utara",   address: "Jl. Benyamin Sueb, Kemayoran",          phone: "021-4207177", capacity: 2000, lat: -6.1528, lng: 106.8559 },
-  { id: "ancol",      name: "Taman Impian Ancol",       area: "Jakarta Utara",   address: "Jl. Lodan Timur No.7, Ancol",           phone: "021-64710618", capacity: 1500, lat: -6.1246, lng: 106.8350 },
+  { id: "kemayoran",  name: "GOR Kemayoran",            area: "Jakarta Utara",   address: "Jl. Benyamin Sueb, Kemayoran",          capacity: 2000, lat: -6.1528, lng: 106.8559 },
+  { id: "ancol",      name: "Taman Impian Ancol",       area: "Jakarta Utara",   address: "Jl. Lodan Timur No.7, Ancol",           capacity: 1500, lat: -6.1246, lng: 106.8350 },
   // Jakarta Timur
-  { id: "tmii",       name: "TMII (Pos Darurat)",       area: "Jakarta Timur",   address: "Jl. Raya Taman Mini, Cipayung",         phone: "021-8409215", capacity: 3000, lat: -6.2726, lng: 106.9020 },
-  { id: "velodrome",  name: "Velodrome Rawamangun",     area: "Jakarta Timur",   address: "Jl. Pemuda, Rawamangun",               phone: "021-4758881", capacity: 1200, lat: -6.1943, lng: 106.8912 },
+  { id: "tmii",       name: "TMII (Pos Darurat)",       area: "Jakarta Timur",   address: "Jl. Raya Taman Mini, Cipayung",         capacity: 3000, lat: -6.2726, lng: 106.9020 },
+  { id: "velodrome",  name: "Velodrome Rawamangun",     area: "Jakarta Timur",   address: "Jl. Pemuda, Rawamangun",               capacity: 1200, lat: -6.1943, lng: 106.8912 },
   // Jakarta Selatan
-  { id: "gbk",        name: "GBK Senayan",              area: "Jakarta Selatan", address: "Jl. Pintu Satu Senayan, Gelora",        phone: "021-5703755", capacity: 5000, lat: -6.2181, lng: 106.8022 },
-  { id: "cipete",     name: "Puskesmas Cipete Utara",   area: "Jakarta Selatan", address: "Jl. Cipete Raya No.12, Cipete",        phone: "021-7690521", capacity: 400,  lat: -6.2824, lng: 106.8043 },
-  { id: "ragunan",    name: "Kebun Binatang Ragunan",   area: "Jakarta Selatan", address: "Jl. Harsono RM No.1, Pasar Minggu",    phone: "021-7884053", capacity: 2000, lat: -6.3126, lng: 106.8205 },
+  { id: "gbk",        name: "GBK Senayan",              area: "Jakarta Selatan", address: "Jl. Pintu Satu Senayan, Gelora",        capacity: 5000, lat: -6.2181, lng: 106.8022 },
+  { id: "ragunan",    name: "Kebun Binatang Ragunan",   area: "Jakarta Selatan", address: "Jl. Harsono RM No.1, Pasar Minggu",    capacity: 2000, lat: -6.3126, lng: 106.8205 },
   // Jakarta Barat
-  { id: "istiqlal",  name: "GOR Cengkareng",            area: "Jakarta Barat",   address: "Jl. Kamal Raya No.1, Cengkareng",      phone: "021-5406630", capacity: 1500, lat: -6.1450, lng: 106.7420 },
-  { id: "jiexpo",    name: "JIExpo Kemayoran",           area: "Jakarta Utara",   address: "Jl. Benyamin Sueb, Kemayoran",         phone: "021-6541435", capacity: 4000, lat: -6.1598, lng: 106.8499 },
+  { id: "istiqlal",  name: "GOR Cengkareng",            area: "Jakarta Barat",   address: "Jl. Kamal Raya No.1, Cengkareng",      capacity: 1500, lat: -6.1450, lng: 106.7420 },
+  { id: "jiexpo",    name: "JIExpo Kemayoran",           area: "Jakarta Utara",   address: "Jl. Benyamin Sueb, Kemayoran",         capacity: 4000, lat: -6.1598, lng: 106.8499 },
   // Jakarta Pusat
-  { id: "monas",     name: "Lapangan Monas",             area: "Jakarta Pusat",   address: "Jl. Medan Merdeka Utara, Gambir",      phone: "021-3457603", capacity: 5000, lat: -6.1751, lng: 106.8272 },
-  { id: "gelora",    name: "Gelanggang Olahraga Ragunan",area: "Jakarta Selatan", address: "Jl. Ragunan No.1, Pasar Minggu",       phone: "021-7800062", capacity: 800,  lat: -6.2940, lng: 106.8227 },
+  { id: "monas",     name: "Lapangan Monas",             area: "Jakarta Pusat",   address: "Jl. Medan Merdeka Utara, Gambir",      capacity: 5000, lat: -6.1751, lng: 106.8272 },
+  { id: "gelora",    name: "Gelanggang Olahraga Ragunan",area: "Jakarta Selatan", address: "Jl. Ragunan No.1, Pasar Minggu",       capacity: 800,  lat: -6.2940, lng: 106.8227 },
 ];
 
 export function haversineKm(lat1, lng1, lat2, lng2) {
@@ -37,12 +38,6 @@ export function haversineKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-export function findNearestShelter(lat, lng) {
-  return DESTINATIONS.reduce((best, d) => {
-    const dist = haversineKm(lat, lng, d.lat, d.lng);
-    return dist < best.dist ? { ...d, dist } : best;
-  }, { ...DESTINATIONS[0], dist: Infinity });
-}
 
 function maneuverArrow(maneuver) {
   const type = maneuver?.type;
@@ -163,14 +158,14 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
         center={[-6.23, 106.85]}
         zoom={12}
         minZoom={11}
-        maxZoom={17}
+        maxZoom={19}
         maxBounds={JAKARTA_BOUNDS}
         maxBoundsViscosity={0.9}
         zoomControl={true}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%", minHeight: "420px", flex: 1 }}
       >
-        <BaseTiles theme={theme} />
+        <BaseTiles theme={theme} variant="street" />
         <InvalidateMapSize />
         <FitJakartaDefault />
         {onMapClick && <MapClickHandler onMapClick={onMapClick} />}

@@ -65,7 +65,7 @@ first backend start.
 | `api/routes/community_reports.py` | `GET/POST /reports`, `POST /reports/photo` (Laporan page) |
 | `api/ip_rate_limit.py` | Per-IP limits; behind Fly.io the client IP comes from `Fly-Client-IP` (trusted only when `FLY_APP_NAME` is set) |
 | `api/routes/crew_analysis.py` | 3-agent "Analisis mendalam"; rebuilds observed rain/water `features` from the pipeline result |
-| `api/routes/safe_arrival.py` | `POST /shelters/checkin` — geofenced check-in, returns `family_notified` |
+| `api/routes/safe_arrival.py` | `GET /shelters/nearby` (nearest shelter candidates); `POST /shelters/checkin` — geofenced check-in, returns `family_notified` |
 | `domain/decision.py` | Decision layers L0–L4 (source of truth) |
 | `services/decision_engine.py` | Adapter around the decision layers; calibration penalty is off |
 | `realtime_native/inference.py` | `GET /predict/realtime-native`, builds `wilayah_summary` |
@@ -80,7 +80,7 @@ first backend start.
 | `frontend/src/lib/floodAgent.js` | Chatbot client: `/api/chat` (no system prompt) + offline knowledge base; 429 = busy |
 | `frontend/src/lib/translations.js` | All UI text, ID + EN |
 | `frontend/src/styles.css` | Single stylesheet, light (default) + dark theme |
-| `frontend/src/components/BaseTiles.jsx` | Shared basemap (Esri Gray Canvas base + labels, light/dark) |
+| `frontend/src/components/BaseTiles.jsx` | Shared basemap: Esri Gray Canvas (home map) or World Street Map (`variant="street"`, evacuation map) |
 
 ---
 
@@ -95,6 +95,7 @@ first backend start.
 | `GET /predict/crew-realtime` | — | 3-agent analysis on the live snapshot, cached per snapshot |
 | `POST /predict/crew-analysis` | X-Api-Key | 3-agent analysis on a supplied snapshot |
 | `POST /api/chat`, `GET /api/chat/health` | IP rate limit (chat) | Chatbot; `FLOOD_CHAT_RATE_LIMIT` per IP per minute (default 10). Groq free tier = 8k tokens/min per model: falls back to `openai/gpt-oss-20b`, waits out a retry-after ≤ 3 s once, then 429 `ai_busy` (frontend says "busy", keeps the online status) |
+| `GET /shelters/nearby?lat&lon&limit` | IP rate limit | ≤ 20 nearest shelter candidates in Jakarta (422 outside the city) |
 | `POST /shelters/checkin` | IP rate limit | Kept in the API; the interface no longer uses it |
 | `GET /reports`, `POST /reports` | IP rate limit | Laporan page: last 6 h, unverified, never changes the status; on unless `COMMUNITY_REPORTS_ENABLED=false` |
 | `POST /reports/photo` | IP rate limit | ≤ 8 MB / 40 MP in, re-encoded JPEG ≤ 1280 px without metadata, Supabase bucket `report-photos` (migration 110) |
@@ -200,8 +201,14 @@ all use `postRiskLevel()` / `postClass()`.
 ### Evakuasi (`pages/Alert.jsx`)
 
 "Cari tempat pengungsian terdekat" CTA, then two rows: **Dari** (address with Nominatim suggestions,
-GPS, or a tap on the map) and **Tujuan** (home by default once saved in localStorage, nearest shelter,
-any listed shelter, or any address). `EvacuationMap` asks OSRM for alternatives, colours each stretch
+GPS, or a tap on the map) and **Tujuan** (home by default once saved in localStorage, one of ~20
+nearby shelter candidates from `GET /shelters/nearby` with type and distance, or any address). The
+candidates come from `data/bundled/jakarta_shelters.json` (12,130 OSM/HOT InAWARE places: schools,
+places of worship, RW/kelurahan offices; hospitals, clinics and same-name duplicates within 150 m
+dropped). `rankSheltersByFlood` puts candidates within 500 m of an active flood-prone point last, and
+the three nearest large venues (`DESTINATIONS`, no phone numbers) close the list and serve as the
+offline fallback. The evacuation map uses Esri World Street Map up to zoom 19 (dark mode inverts it
+with `.tiles-dark`); the home map keeps Gray Canvas. `EvacuationMap` asks OSRM for alternatives, colours each stretch
 green/red by whether it passes within 500 m of an active BPBD flood-prone point (its river's post at
 Siaga, or rain ≥ 20 mm/h; plus post-centred areas for Siaga posts without BPBD points), picks the
 route with the least red, and shows a one-line summary with "Buka di Google Maps" (≤ 3 waypoints; no
@@ -417,7 +424,8 @@ Names only — values live in `.env` (never committed; `.env.example` holds plac
   `auto_stop_machines = 'off'`; map legend under the map on phones; `/predict/realtime-native` also returns
   `risk_interpretation_en`, so the English page has no Indonesian status text; mentors removed from Tentang.
 - 2026-10-28: BPBD events counted once per RW-date and the bundle retrained; Fly scaled to one machine
-  and moved from `ams` to `sin` (API ~0.4 s faster);
+  and moved from `ams` to `sin` (API ~0.4 s faster); evacuation page offers nearby shelter candidates
+  from `/shelters/nearby` instead of 11 hard-coded venues (unverified phone numbers removed) on a street basemap;
   precision experiments (label gap, BPBD-label candidate rejected, stricter Danger threshold, daily
   labels); black-box FR1–FR10 and performance measured on production (thesis 5.2 and 5.5).
 

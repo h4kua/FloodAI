@@ -770,6 +770,8 @@ button, input, select, textarea { font-family: inherit; }
 .evac-col-left { display: flex; flex-direction: column; gap: 0.75rem; }
 .evac-map-panel { display: flex; flex-direction: column; flex: 1; min-height: 420px; overflow: hidden; }
 .evac-map-panel .leaflet-container { flex: 1; background: var(--panel-2); }
+/* The street basemap has no dark variant: invert it so dark mode stays dark. */
+.leaflet-tile-pane .tiles-dark { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9); }
 
 /* From / To: label column + field column, one field per row */
 .route-controls {

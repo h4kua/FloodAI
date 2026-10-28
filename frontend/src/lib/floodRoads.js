@@ -100,6 +100,20 @@ export function distanceToSegmentM(p, a, b) {
   return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
 }
 
+/** True when [lat, lng] lies within radiusM of any active flood-prone point. */
+export function inFloodArea(lat, lng, points = [], radiusM = RISK_RADIUS_M) {
+  return points.some((p) => segmentLengthM([lat, lng], [p.lat, p.lon]) <= radiusM);
+}
+
+/**
+ * Shelters outside active flood-prone areas first, each group keeping its
+ * nearest-first order; each shelter gets `inFloodArea`.
+ */
+export function rankSheltersByFlood(shelters = [], points = []) {
+  const marked = shelters.map((s) => ({ ...s, inFloodArea: inFloodArea(s.lat, s.lng, points) }));
+  return [...marked.filter((s) => !s.inFloodArea), ...marked.filter((s) => s.inFloodArea)];
+}
+
 /**
  * Split a route ([[lat, lng], …]) into runs of risky / safe stretches.
  * Returns { runs: [{ risky, positions }], riskyM, totalM, pointsHit }.

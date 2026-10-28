@@ -10,6 +10,7 @@ of raising — callers degrade gracefully (no shelter recommendation).
 
 from __future__ import annotations
 
+import heapq
 import json
 import math
 from functools import lru_cache
@@ -58,16 +59,46 @@ def load_shelters() -> tuple[dict, ...]:
         return ()
 
 
+_BUILDING_KINDS = {
+    "school": "school", "kindergarten": "school",
+    "mosque": "mosque", "church": "church", "temple": "temple",
+    "community_group_office": "rw_office",
+    "village_office": "village_office", "subdistrict_office": "subdistrict_office",
+    "government_office": "government", "government": "government", "townhall": "government",
+    "hospital": "hospital",
+}
+_AMENITY_KINDS = {
+    "shelter": "shelter", "school": "school", "kindergarten": "school",
+    "place_of_worship": "worship", "community_centre": "community_centre",
+    "social_facility": "social_facility", "townhall": "government",
+    "hospital": "hospital", "clinic": "clinic", "courthouse": "courthouse",
+}
+# Not places to wait out a flood: they serve the sick or the courts.
+_NOT_EVACUATION_KINDS = frozenset({"hospital", "clinic", "courthouse"})
+_DUPLICATE_RADIUS_M = 150.0
+
+
+def shelter_kind(shelter: dict) -> str:
+    """One short type for a shelter candidate, from its OSM amenity and building tags."""
+    amenity = (shelter.get("amenity") or "").strip()
+    building = (shelter.get("building") or "").strip()
+    if amenity in ("hospital", "clinic", "courthouse", "shelter"):
+        return _AMENITY_KINDS[amenity]
+    return _BUILDING_KINDS.get(building) or _AMENITY_KINDS.get(amenity) or "other"
+
+
 def _to_result(shelter: dict, distance_m: float) -> dict:
     return {
         "id": shelter.get("id"),
         "name": shelter.get("name"),
         "kelurahan": shelter.get("kelurahan"),
+        "address": shelter.get("address") or None,
         "lat": shelter.get("lat"),
         "lon": shelter.get("lon"),
         "capacity": shelter.get("capacity_raw") or None,
         "capacity_est": shelter.get("capacity_est"),
         "amenity": shelter.get("amenity") or None,
+        "kind": shelter_kind(shelter),
         "distance_m": round(distance_m, 1),
         "distance_km": round(distance_m / 1000.0, 2),
     }
@@ -86,26 +117,39 @@ def nearest_shelters(
     *,
     limit: int = 3,
     require_capacity: bool = False,
+    evacuation_only: bool = False,
     shelters: Optional[tuple[dict, ...]] = None,
 ) -> list[dict]:
     """
     Return up to ``limit`` nearest shelters to (lat, lon), nearest first.
 
-    ``require_capacity`` keeps only shelters with a parsed capacity estimate.
+    ``require_capacity`` keeps only shelters with a parsed capacity estimate;
+    ``evacuation_only`` drops hospitals, clinics and courts.
     Returns an empty list when no shelter data is available.
     """
     pool = shelters if shelters is not None else load_shelters()
     if not pool:
         return []
-    candidates = (
-        [s for s in pool if s.get("capacity_est")] if require_capacity else list(pool)
-    )
-    if not candidates:
-        return []
-    scored = [(_haversine_safe(lat, lon, s), s) for s in candidates]
-    scored = [(d, s) for d, s in scored if d is not None]
-    scored.sort(key=lambda pair: pair[0])
-    return [_to_result(s, d) for d, s in scored[: max(1, limit)]]
+    candidates = [
+        s for s in pool
+        if (not require_capacity or s.get("capacity_est"))
+        and (not evacuation_only or shelter_kind(s) not in _NOT_EVACUATION_KINDS)
+    ]
+    limit = max(1, limit)
+    scored = [(_haversine_safe(lat, lon, s), i, s) for i, s in enumerate(candidates)]
+    nearest = heapq.nsmallest(limit * 2, (t for t in scored if t[0] is not None))
+    # The survey lists some places twice (same name, a few metres apart): keep one.
+    kept: list[tuple[float, dict]] = []
+    for d, _, s in nearest:
+        name = (s.get("name") or "").strip().lower()
+        if any(name == (k.get("name") or "").strip().lower()
+               and haversine_m(s["lat"], s["lon"], k["lat"], k["lon"]) <= _DUPLICATE_RADIUS_M
+               for _, k in kept):
+            continue
+        kept.append((d, s))
+        if len(kept) == limit:
+            break
+    return [_to_result(s, d) for d, s in kept]
 
 
 def nearest_shelter(
@@ -113,11 +157,13 @@ def nearest_shelter(
     lon: float,
     *,
     require_capacity: bool = False,
+    evacuation_only: bool = False,
     shelters: Optional[tuple[dict, ...]] = None,
 ) -> Optional[dict]:
     """Return the single nearest shelter, or ``None`` when no data is available."""
     results = nearest_shelters(
-        lat, lon, limit=1, require_capacity=require_capacity, shelters=shelters
+        lat, lon, limit=1, require_capacity=require_capacity,
+        evacuation_only=evacuation_only, shelters=shelters,
     )
     return results[0] if results else None
 
