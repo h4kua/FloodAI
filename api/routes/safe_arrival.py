@@ -28,7 +28,7 @@ from api.ip_rate_limit import require_ip_rate_limit
 from db.community_reports_repository import create_report
 from db.family_repository import checkin_member, get_family_id
 from db.shelter_checkins_repository import create_checkin
-from services.shelter_locator import haversine_m, nearest_shelters
+from services.shelter_locator import haversine_m, nearest_bpbd_sites, nearest_shelters
 
 router = APIRouter(tags=["safe-arrival"])
 
@@ -46,6 +46,10 @@ async def shelters_nearby(
     limit: int = Query(10, ge=1, le=20),
 ) -> dict:
     shelters = nearest_shelters(lat, lon, limit=limit, evacuation_only=True)
+    # Places BPBD has used for evacuees nearby are offered even when they are
+    # not among the nearest candidates.
+    listed = {s["id"] for s in shelters}
+    shelters += [s for s in nearest_bpbd_sites(lat, lon) if s["id"] not in listed]
     return {
         "shelters": shelters,
         "count": len(shelters),

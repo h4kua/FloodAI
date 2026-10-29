@@ -49,6 +49,23 @@ def test_nearby_limits_results():
 def test_nearby_on_real_data_has_local_candidates():
     response = client.get("/shelters/nearby", params={"lat": -6.2244, "lon": 106.8667}, headers=_HEADERS)
     shelters = response.json()["shelters"]
-    assert len(shelters) == 10
+    assert len(shelters) >= 10  # the 10 nearest, plus nearby BPBD evacuation sites
     assert shelters[0]["distance_km"] < 1.0
     assert all(s["kind"] not in ("hospital", "clinic", "courthouse") for s in shelters)
+
+
+def test_nearby_flags_and_adds_bpbd_sites():
+    pool = _POOL + (
+        {"id": "D", "name": "Kantor Kelurahan Jauh", "lat": -6.2400, "lon": 106.8667, "capacity_raw": "", "capacity_est": None,
+         "amenity": "townhall", "building": "village_office", "address": "",
+         "bpbd_site": {"name": "KANTOR KELURAHAN JAUH", "kelurahan": "JAUH", "people": 204, "year": "2018"}},
+        {"id": "E", "name": "SDN Dekat 01", "lat": -6.2246, "lon": 106.8668, "capacity_raw": "", "capacity_est": None,
+         "amenity": "school", "building": "school", "address": "", "flood_prone_school": "SDN DEKAT 01 PG."},
+    )
+    with patch("services.shelter_locator.load_shelters", return_value=pool):
+        body = client.get("/shelters/nearby", params={"lat": -6.2244, "lon": 106.8667, "limit": 2}, headers=_HEADERS).json()
+    ids = [s["id"] for s in body["shelters"]]
+    assert ids == ["E", "A", "D"]  # two nearest, then the BPBD site ~1.7 km away
+    assert body["shelters"][0]["flood_prone_school"] is True
+    assert body["shelters"][2]["bpbd_site"]["people"] == 204
+    assert body["shelters"][1]["bpbd_site"] is None and body["shelters"][1]["flood_prone_school"] is False

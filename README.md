@@ -69,7 +69,7 @@ Swagger UI: `http://localhost:8080/docs`.
 | `POST /predict/agentic`, `POST /predict/agentic/explain` | X-Api-Key | Pipeline 5 tahap (+ penjelasan LLM) |
 | `GET /predict/crew-realtime` | — | Analisis 3 agen atas snapshot terkini, di-cache per snapshot |
 | `POST /api/chat` | batas per IP (10/menit) | Chatbot Groq. Prompt disusun server dari `api/chat_knowledge.txt` (~1,8k token). Kuota gratis Groq 8k token/menit per model: pindah ke model cadangan, lalu 429 `ai_busy` ("AI sedang sibuk"); kegagalan lain → basis pengetahuan offline |
-| `GET /shelters/nearby` | batas per IP | ≤ 20 calon tempat pengungsian terdekat (data OSM/HOT InAWARE, tanpa rumah sakit dan duplikat) untuk halaman Evakuasi |
+| `GET /shelters/nearby` | batas per IP | ≤ 20 calon tempat pengungsian terdekat (data OSM/HOT InAWARE, tanpa rumah sakit dan duplikat) untuk halaman Evakuasi, dengan tanda "pernah dipakai BPBD" dan "sekolah rawan banjir"; lokasi BPBD dalam 3 km ikut ditambahkan |
 | `POST /shelters/checkin` | batas per IP | Check-in tiba di pengungsian; tidak dipakai UI lagi (tombol "Saya sudah tiba" dihapus) |
 | `GET /healthz`, `GET /readyz`, `GET /metrics` | — | Liveness, readiness (cek tabel snapshot di Supabase), Prometheus |
 | `GET /predict/realtime` | — | **Dipensiunkan** — menjawab `410 Gone` dengan tautan ke `/predict/realtime-native` |
@@ -146,8 +146,8 @@ Nama saja — nilai disimpan di `.env` (lihat `.env.example`), tidak pernah di-c
 ## Tes & CI
 
 ```bash
-python -m pytest tests -q        # 589 tes backend
-cd frontend && npm test          # 19 tes: rute banjir, urutan pengungsian, level pos (node --test)
+python -m pytest tests -q        # 590 tes backend
+cd frontend && npm test          # 20 tes: rute banjir, urutan pengungsian, level pos (node --test)
 ```
 
 GitHub Actions (`.github/workflows/ci.yml`) menjalankan seluruh tes backend dan build frontend pada

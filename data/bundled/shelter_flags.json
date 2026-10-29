@@ -1,0 +1,677 @@
+{
+ "_meta": {
+  "generated_at": "2026-10-29T06:23:03+00:00",
+  "sources": [
+   "data-rekapitulasi-lokasi-pengungsi-banjir-di-provinsi-dki-jakarta-komponen-data.xls",
+   "flood_prone_schools.json"
+  ],
+  "bpbd_sites": 61,
+  "bpbd_sites_matched": 14,
+  "flood_prone_schools": 319,
+  "flood_prone_schools_matched": 112
+ },
+ "flags": {
+  "SH10106": {
+   "flood_prone_school": "SDN JELAMBAR BARU 07 PG."
+  },
+  "SH01691": {
+   "flood_prone_school": "SDN TANJUNG DUREN UTARA 02 PG."
+  },
+  "SH01764": {
+   "flood_prone_school": "SMP TUNAS HARAPAN"
+  },
+  "SH04856": {
+   "flood_prone_school": "SDN CIPINANG CEMPEDAK 05 PG."
+  },
+  "SH00734": {
+   "flood_prone_school": "SDN JOHAR BARU 10 PG."
+  },
+  "SH09282": {
+   "flood_prone_school": "SDN LAGOA 11 PG."
+  },
+  "SH09602": {
+   "flood_prone_school": "SDN RAWA BADAK UTARA 03 PG."
+  },
+  "SH10024": {
+   "flood_prone_school": "SDN TUGU UTARA 14 PG."
+  },
+  "SH07284": {
+   "flood_prone_school": "SDN KALIDERES 05 PG."
+  },
+  "SH04037": {
+   "flood_prone_school": "SDN KAMAL 06 PG."
+  },
+  "SH07898": {
+   "flood_prone_school": "SDN PEGADUNGAN 05 PG."
+  },
+  "SH03006": {
+   "flood_prone_school": "SDN PEGADUNGAN 15 PT."
+  },
+  "SH07994": {
+   "flood_prone_school": "SDN PEGADUNGAN 14 PG."
+  },
+  "SH01646": {
+   "flood_prone_school": "SDN SEMANAN 13 PT."
+  },
+  "SH10527": {
+   "flood_prone_school": "SDN GANDARIA UTARA 01 PG."
+  },
+  "SH10534": {
+   "flood_prone_school": "SDN GANDARIA UTARA 11 PG."
+  },
+  "SH10792": {
+   "flood_prone_school": "SDN CIPULIR 11 PG."
+  },
+  "SH08545": {
+   "flood_prone_school": "SDN DURI KEPA 03 PG."
+  },
+  "SH07369": {
+   "flood_prone_school": "SDN SUKABUMI UTARA 04 PG."
+  },
+  "SH07368": {
+   "flood_prone_school": "SDN SUKABUMI UTARA 09 PG."
+  },
+  "SH04503": {
+   "flood_prone_school": "SDN CEMPAKA BARU 11 PG."
+  },
+  "SH04504": {
+   "flood_prone_school": "SDN CEMPAKA BARU 14 PG."
+  },
+  "SH06454": {
+   "flood_prone_school": "SDN KEMAYORAN 14 PT."
+  },
+  "SH07337": {
+   "flood_prone_school": "SDN SUMUR BATU 03 PG."
+  },
+  "SH05090": {
+   "flood_prone_school": "SDN KAMPUNG TENGAH 09 PG."
+  },
+  "SH03940": {
+   "flood_prone_school": "SDN CIPINANG MELAYU 09 PG."
+  },
+  "SH00194": {
+   "flood_prone_school": "SDN HALIM 01 PG."
+  },
+  "SH04272": {
+   "flood_prone_school": "SDN BANGKA 05 PG."
+  },
+  "SH04948": {
+   "flood_prone_school": "SDS KEMALA BHAYANGKARI 4"
+  },
+  "SH04738": {
+   "flood_prone_school": "SDN CEMPAKA PUTIH BARAT 17 PG."
+  },
+  "SH03667": {
+   "flood_prone_school": "SDN CENGKARENG BARAT 07 PG."
+  },
+  "SH01741": {
+   "flood_prone_school": "SDN CENGKARENG BARAT 13 PG."
+  },
+  "SH01742": {
+   "flood_prone_school": "SDN CENGKARENG BARAT 14 PG."
+  },
+  "SH09707": {
+   "flood_prone_school": "SDN CENGKARENG BARAT 19 PG."
+  },
+  "SH09967": {
+   "flood_prone_school": "SDN CENGKARENG TIMUR 15 PG."
+  },
+  "SH09968": {
+   "flood_prone_school": "SDN CENGKARENG TIMUR 15 PG."
+  },
+  "SH01721": {
+   "flood_prone_school": "SDN DURI KOSAMBI 06 PG."
+  },
+  "SH10724": {
+   "flood_prone_school": "SDN KAPUK 06 PG."
+  },
+  "SH10721": {
+   "flood_prone_school": "SDN KAPUK 11 PG."
+  },
+  "SH10272": {
+   "flood_prone_school": "SDN KEDAUNG KALI ANGKE 03 PG."
+  },
+  "SH10289": {
+   "flood_prone_school": "SDN KEDAUNG KALI ANGKE 05 PG"
+  },
+  "SH03052": {
+   "flood_prone_school": "SDN KEDAUNG KALI ANGKE 07 PT."
+  },
+  "SH10271": {
+   "flood_prone_school": "SDN KEDAUNG KALI ANGKE 08 PG."
+  },
+  "SH10276": {
+   "flood_prone_school": "SDN KEDAUNG KALI ANGKE 11 PG."
+  },
+  "SH03128": {
+   "flood_prone_school": "SDN KEDAUNG KALI ANGKE 12 PG."
+  },
+  "SH08985": {
+   "flood_prone_school": "SDN RAWA BUAYA 04 PT."
+  },
+  "SH09139": {
+   "flood_prone_school": "SDN RAWA BUAYA 10 PT."
+  },
+  "SH08627": {
+   "flood_prone_school": "SDN CILANDAK BARAT 12 PG."
+  },
+  "SH00459": {
+   "flood_prone_school": "SDN CILINCING 05 PG."
+  },
+  "SH00458": {
+   "flood_prone_school": "SDN CILINCING 09 PG."
+  },
+  "SH10777": {
+   "flood_prone_school": "SDN ROROTAN 03 PG."
+  },
+  "SH11245": {
+   "flood_prone_school": "SDN SEMPER BARAT 09 PG."
+  },
+  "SH02856": {
+   "flood_prone_school": "SMP NURUL FALAH"
+  },
+  "SH11285": {
+   "flood_prone_school": "SDS PANTAI INDAH"
+  },
+  "SH09782": {
+   "flood_prone_school": "SDN JELAMBAR 06 PG."
+  },
+  "SH08716": {
+   "flood_prone_school": "SMP WIDURI JAYA"
+  },
+  "SH00432": {
+   "flood_prone_school": "SMP AL ISLAMIYAH"
+  },
+  "SH10353": {
+   "flood_prone_school": "SMP AL ISLAMIYAH"
+  },
+  "SH06626": {
+   "flood_prone_school": "SMP NURUL IMAN"
+  },
+  "SH09940": {
+   "flood_prone_school": "SMP NURUL IMAN"
+  },
+  "SH09908": {
+   "flood_prone_school": "SMP PERINTIS NASIONAL"
+  },
+  "SH10690": {
+   "flood_prone_school": "SMP PERINTIS NASIONAL"
+  },
+  "SH10886": {
+   "flood_prone_school": "SMA NURUL FALAH"
+  },
+  "SH06251": {
+   "flood_prone_school": "SMK TUNAS MARKATIN"
+  },
+  "SH11688": {
+   "flood_prone_school": "SMA DHARMA PUTRA JAKARTA"
+  },
+  "SH09324": {
+   "flood_prone_school": "SMK KIMIA TUNAS HARAPAN"
+  },
+  "SH10852": {
+   "flood_prone_school": "SDN PADEMANGAN BARAT 01 PG."
+  },
+  "SH06505": {
+   "flood_prone_school": "SDN JATI PULO 07 PG."
+  },
+  "SH06498": {
+   "flood_prone_school": "SDN JATI PULO 08 PG."
+  },
+  "SH01637": {
+   "flood_prone_school": "SDN KOTA BAMBU 01 PG."
+  },
+  "SH05737": {
+   "flood_prone_school": "SDN PALMERAH 22 PG."
+  },
+  "SH05806": {
+   "flood_prone_school": "SDN PALMERAH 23 PG."
+  },
+  "SH04961": {
+   "flood_prone_school": "SDN DUREN TIGA 13 PG."
+  },
+  "SH04834": {
+   "flood_prone_school": "SDN PANCORAN 07 PG."
+  },
+  "SH01830": {
+   "flood_prone_school": "SDN PANCORAN 10 PG."
+  },
+  "SH02865": {
+   "flood_prone_school": "SDN RAWAJATI 07 PG.",
+   "bpbd_site": {
+    "name": "SDN 07 RAWAJATI",
+    "kelurahan": "RAWAJATI",
+    "people": null,
+    "year": "2018"
+   }
+  },
+  "SH03991": {
+   "flood_prone_school": "SDN PASAR MINGGU 04 PG."
+  },
+  "SH00185": {
+   "flood_prone_school": "SDN PEJATEN TIMUR 15 PG."
+  },
+  "SH10996": {
+   "flood_prone_school": "SDN KAPUK MUARA 01 PG."
+  },
+  "SH11091": {
+   "flood_prone_school": "SDN PEJAGALAN 03"
+  },
+  "SH10141": {
+   "flood_prone_school": "SDN BINTARO 05 PG."
+  },
+  "SH01162": {
+   "flood_prone_school": "SDN PISANGAN TIMUR 13 PG."
+  },
+  "SH04896": {
+   "flood_prone_school": "SDN KEBON BARU 07 PG."
+  },
+  "SH11509": {
+   "flood_prone_school": "SDN MANGGA BESAR 07 PG."
+  },
+  "SH06353": {
+   "flood_prone_school": "SDN TAMBORA 03 PG."
+  },
+  "SH01574": {
+   "flood_prone_school": "SDN TANAH SEREAL 01 PG."
+  },
+  "SH06351": {
+   "flood_prone_school": "SDS ISLAM TAMBORA"
+  },
+  "SH06409": {
+   "flood_prone_school": "SDN PETAMBURAN 06 PT."
+  },
+  "SH11208": {
+   "flood_prone_school": "SDN SUNTER AGUNG 05 PG."
+  },
+  "SH00424": {
+   "flood_prone_school": "SDN SUNTER AGUNG 07 PG."
+  },
+  "SH11464": {
+   "flood_prone_school": "SDN SUNTER AGUNG 09 PG."
+  },
+  "SH11184": {
+   "flood_prone_school": "SDN SUNTER AGUNG 12 PG."
+  },
+  "SH00376": {
+   "flood_prone_school": "SDN SUNTER AGUNG 13 PG."
+  },
+  "SH09223": {
+   "flood_prone_school": "SDS MAS INTAN"
+  },
+  "SH11048": {
+   "flood_prone_school": "SMP KASIH IMMANUEL"
+  },
+  "SH00451": {
+   "flood_prone_school": "SMP MANBA'UL HIKMAH"
+  },
+  "SH11153": {
+   "flood_prone_school": "SMP MANBA'UL HIKMAH"
+  },
+  "SH01314": {
+   "flood_prone_school": "SMP DEWI SARTIKA"
+  },
+  "SH04089": {
+   "flood_prone_school": "SMP DEWI SARTIKA"
+  },
+  "SH09256": {
+   "flood_prone_school": "SMP AL-IRSYAD AL-ISLAMIYAH"
+  },
+  "SH10046": {
+   "flood_prone_school": "SMP MUHAMMADIYAH 14"
+  },
+  "SH08359": {
+   "flood_prone_school": "SMP AL MU'MIN"
+  },
+  "SH08427": {
+   "flood_prone_school": "SMP PGRI 39"
+  },
+  "SH00042": {
+   "flood_prone_school": "SMP ABDI SISWA"
+  },
+  "SH08396": {
+   "flood_prone_school": "SMP RASA SAYANG"
+  },
+  "SH01848": {
+   "bpbd_site": {
+    "name": "KANTOR KELURAHAN PENGADEGAN",
+    "kelurahan": "PENGADEGAN",
+    "people": 204,
+    "year": "2018"
+   }
+  },
+  "SH03492": {
+   "bpbd_site": {
+    "name": "MUSHOLA AL HIDAYAH",
+    "kelurahan": "PENGADEGAN",
+    "people": 235,
+    "year": "2018"
+   }
+  },
+  "SH02099": {
+   "bpbd_site": {
+    "name": "SDN 05 RAWAJATI",
+    "kelurahan": "RAWAJATI",
+    "people": 957,
+    "year": "2018"
+   }
+  },
+  "SH04707": {
+   "bpbd_site": {
+    "name": "SEKRETARIAT RW 010",
+    "kelurahan": "MANGGARAI",
+    "people": 285,
+    "year": "2018"
+   }
+  },
+  "SH08016": {
+   "bpbd_site": {
+    "name": "SEKRETARIAT RW. 06",
+    "kelurahan": "PEJATEN TIMUR",
+    "people": 761,
+    "year": "2018"
+   }
+  },
+  "SH04366": {
+   "bpbd_site": {
+    "name": "KANTOR KELURAHAN BIDARA CINA",
+    "kelurahan": "BIDARA CINA",
+    "people": 150,
+    "year": "2018"
+   }
+  },
+  "SH01415": {
+   "bpbd_site": {
+    "name": "SDN 05 BIDARA CINA",
+    "kelurahan": "BIDARA CINA",
+    "people": 35,
+    "year": "2018"
+   }
+  },
+  "SH04610": {
+   "bpbd_site": {
+    "name": "MASJID AL ABROR",
+    "kelurahan": "BIDARA CINA",
+    "people": 50,
+    "year": "2018"
+   }
+  },
+  "SH01079": {
+   "bpbd_site": {
+    "name": "AULA MASJID RUHUL ISLAM RW 07",
+    "kelurahan": "KAMPUNG MELAYU",
+    "people": 80,
+    "year": "2018"
+   }
+  },
+  "SH01081": {
+   "bpbd_site": {
+    "name": "AULA KANTOR KEL. KAMPUNG MELAYU",
+    "kelurahan": "KAMPUNG MELAYU",
+    "people": 35,
+    "year": "2018"
+   }
+  },
+  "SH07321": {
+   "bpbd_site": {
+    "name": "MASJID AL HIDAYAH",
+    "kelurahan": "BALEKAMBANG",
+    "people": 17,
+    "year": "2018"
+   }
+  },
+  "SH00031": {
+   "bpbd_site": {
+    "name": "SDN 01 KEBON MANGGIS",
+    "kelurahan": "KEBON MANGGIS",
+    "people": null,
+    "year": "2018"
+   }
+  },
+  "SH00097": {
+   "bpbd_site": {
+    "name": "STADION TUGU",
+    "kelurahan": "TUGU SELATAN",
+    "people": 0,
+    "year": "2018"
+   }
+  }
+ },
+ "bpbd_sites_unmatched": [
+  {
+   "name": "KANTOR KECAMATAN PENGADEGAN",
+   "kelurahan": "PENGADEGAN",
+   "kecamatan": "PANCORAN"
+  },
+  {
+   "name": "SDN 03 PENGADEGAN",
+   "kelurahan": "PENGADEGAN",
+   "kecamatan": "PANCORAN"
+  },
+  {
+   "name": "TOWN HOUSE RT 05",
+   "kelurahan": "PENGADEGAN",
+   "kecamatan": "PANCORAN"
+  },
+  {
+   "name": "RUMAH WARGA RT 03/01",
+   "kelurahan": "PENGADEGAN",
+   "kecamatan": "PANCORAN"
+  },
+  {
+   "name": "RUMAH WARGA RT 8 /01",
+   "kelurahan": "PENGADEGAN",
+   "kecamatan": "PANCORAN"
+  },
+  {
+   "name": "RUMAH BIDAN TIWAN",
+   "kelurahan": "RAWAJATI",
+   "kecamatan": "PANCORAN"
+  },
+  {
+   "name": "MASJID HISBUL WATON",
+   "kelurahan": "RAWAJATI",
+   "kecamatan": "PANCORAN"
+  },
+  {
+   "name": "PUSKESMAS RAWAJATI I",
+   "kelurahan": "RAWAJATI",
+   "kecamatan": "PANCORAN"
+  },
+  {
+   "name": "RUMAH PENAMPUNGAN TKW",
+   "kelurahan": "RAWAJATI",
+   "kecamatan": "PANCORAN"
+  },
+  {
+   "name": "RUMAH KOSONG WARGA RT.005 RW.07",
+   "kelurahan": "RAWAJATI",
+   "kecamatan": "PANCORAN"
+  },
+  {
+   "name": "BAWAH FLY OVER CILIWUNG RT.001 RW.07",
+   "kelurahan": "RAWAJATI",
+   "kecamatan": "PANCORAN"
+  },
+  {
+   "name": "MESS YWKA RT 001",
+   "kelurahan": "MANGGARAI",
+   "kecamatan": "TEBET"
+  },
+  {
+   "name": "MUSHOLLA ALMUNIER",
+   "kelurahan": "MANGGARAI",
+   "kecamatan": "TEBET"
+  },
+  {
+   "name": "TK RIS RT.002/010",
+   "kelurahan": "KEBON BARU",
+   "kecamatan": "TEBET"
+  },
+  {
+   "name": "DATARAN TINGGI",
+   "kelurahan": "PEJATEN TIMUR",
+   "kecamatan": "PASAR MINGGU"
+  },
+  {
+   "name": "SMPN 46, MUSHOLA JMAITUL KHAIR",
+   "kelurahan": "PEJATEN TIMUR",
+   "kecamatan": "PASAR MINGGU"
+  },
+  {
+   "name": "MASJID AL-MAKMUR & RUMAH KETUA RT.016/07",
+   "kelurahan": "PEJATEN TIMUR",
+   "kecamatan": "PASAR MINGGU"
+  },
+  {
+   "name": "MASJID AL-MAKMUR",
+   "kelurahan": "PEJATEN TIMUR",
+   "kecamatan": "PASAR MINGGU"
+  },
+  {
+   "name": "MAJLIS TAKLIM",
+   "kelurahan": "PEJATEN TIMUR",
+   "kecamatan": "PASAR MINGGU"
+  },
+  {
+   "name": "DATARAN TINGGI",
+   "kelurahan": "PEJATEN TIMUR",
+   "kecamatan": "PASAR MINGGU"
+  },
+  {
+   "name": "POSKO GOR OTISTA",
+   "kelurahan": "BIDARA CINA",
+   "kecamatan": "JATINEGARA"
+  },
+  {
+   "name": "GEREJA PENABUR",
+   "kelurahan": "BIDARA CINA",
+   "kecamatan": "JATINEGARA"
+  },
+  {
+   "name": "RPTRA PERMATA INTAN",
+   "kelurahan": "BIDARA CINA",
+   "kecamatan": "JATINEGARA"
+  },
+  {
+   "name": "PUSKESMAS BIDARA CINA",
+   "kelurahan": "BIDARA CINA",
+   "kecamatan": "JATINEGARA"
+  },
+  {
+   "name": "GEDUNG SASANA KRIDA KARANG TARUNA",
+   "kelurahan": "BIDARA CINA",
+   "kecamatan": "JATINEGARA"
+  },
+  {
+   "name": "POS RW 07",
+   "kelurahan": "KAMPUNG MELAYU",
+   "kecamatan": "JATINEGARA"
+  },
+  {
+   "name": "AULA MASJID ITTIHADUL IKHWAN RW 08",
+   "kelurahan": "KAMPUNG MELAYU",
+   "kecamatan": "JATINEGARA"
+  },
+  {
+   "name": "SMPN 26 JAKARTA (RW 05)",
+   "kelurahan": "KAMPUNG MELAYU",
+   "kecamatan": "JATINEGARA"
+  },
+  {
+   "name": "PUSKESMAS KAMPUNG MELAYU (RW 05)",
+   "kelurahan": "KAMPUNG MELAYU",
+   "kecamatan": "JATINEGARA"
+  },
+  {
+   "name": "SUDINKES JAKARTA TIMUR",
+   "kelurahan": "KAMPUNG MELAYU",
+   "kecamatan": "JATINEGARA"
+  },
+  {
+   "name": "RUSUNAWA JATINEGARA BARAT",
+   "kelurahan": "KAMPUNG MELAYU",
+   "kecamatan": "JATINEGARA"
+  },
+  {
+   "name": "MUSHOLLA KHAIRUL ANA",
+   "kelurahan": "KAMPUNG MELAYU",
+   "kecamatan": "JATINEGARA"
+  },
+  {
+   "name": "MASJID ATTAWWABIN",
+   "kelurahan": "KAMPUNG MELAYU",
+   "kecamatan": "JATINEGARA"
+  },
+  {
+   "name": "GEDUNG EXS. SUARA PEMBARUAN",
+   "kelurahan": "CAWANG",
+   "kecamatan": "KRAMAT JATI"
+  },
+  {
+   "name": "LAPANGAN TENIS",
+   "kelurahan": "CAWANG",
+   "kecamatan": "KRAMAT JATI"
+  },
+  {
+   "name": "KAMPUS BINAWAN",
+   "kelurahan": "CAWANG",
+   "kecamatan": "KRAMAT JATI"
+  },
+  {
+   "name": "MUSHOLAH AL-ISHLAH",
+   "kelurahan": "CAWANG",
+   "kecamatan": "KRAMAT JATI"
+  },
+  {
+   "name": "STIEKES BINAWAN",
+   "kelurahan": "CILILITAN",
+   "kecamatan": "KRAMAT JATI"
+  },
+  {
+   "name": "TK MAMBAUL'ULA",
+   "kelurahan": "CILILITAN",
+   "kecamatan": "KRAMAT JATI"
+  },
+  {
+   "name": "SDN 03 CILIWUNG",
+   "kelurahan": "CILILITAN",
+   "kecamatan": "KRAMAT JATI"
+  },
+  {
+   "name": "BALAI RAKYAT/MASJID DARUSSALAM",
+   "kelurahan": "BALEKAMBANG",
+   "kecamatan": "KRAMAT JATI"
+  },
+  {
+   "name": "MASJID TAPAK SUNAN",
+   "kelurahan": "BALEKAMBANG",
+   "kecamatan": "KRAMAT JATI"
+  },
+  {
+   "name": "MUSHOLLA HAQUL YAKIN",
+   "kelurahan": "BALEKAMBANG",
+   "kecamatan": "KRAMAT JATI"
+  },
+  {
+   "name": "MUSHOLA NURUL ILMI RW 7",
+   "kelurahan": "CAKUNG BARAT",
+   "kecamatan": "CAKUNG"
+  },
+  {
+   "name": "SDN 04 RW 3",
+   "kelurahan": "CAKUNG BARAT",
+   "kecamatan": "CAKUNG"
+  },
+  {
+   "name": "POSYANDU RT 07/10",
+   "kelurahan": "SUKA PURA",
+   "kecamatan": "CILINCING"
+  },
+  {
+   "name": "GKI TUBAGUS ANGKE",
+   "kelurahan": "WIJAYA KUSUMA",
+   "kecamatan": "GROGOL PETAMBURAN"
+  }
+ ]
+}

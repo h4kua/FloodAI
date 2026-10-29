@@ -126,3 +126,13 @@ test("shelters outside active flood areas come first, nearest first within each 
   assert.equal(ranked[2].inFloodArea, true);
   assert.deepEqual(rankSheltersByFlood(shelters, []).map((s) => s.id), ["near-river", "dry-1", "dry-2"]);
 });
+
+test("BPBD evacuation sites within 1 km come first; flood-prone schools go last", () => {
+  const shelters = [
+    { id: "school-floods", lat: -6.2400, lng: 106.8650, distanceKm: 0.1, floodProneSchool: true },
+    { id: "mosque", lat: -6.2410, lng: 106.8650, distanceKm: 0.2 },
+    { id: "bpbd-near", lat: -6.2420, lng: 106.8650, distanceKm: 0.8, bpbdSite: { people: 204 } },
+    { id: "bpbd-far", lat: -6.2500, lng: 106.8650, distanceKm: 2.4, bpbdSite: { people: 50 } },
+  ];
+  assert.deepEqual(rankSheltersByFlood(shelters, []).map((s) => s.id), ["bpbd-near", "mosque", "bpbd-far", "school-floods"]);
+});

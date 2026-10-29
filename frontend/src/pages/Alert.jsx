@@ -85,6 +85,7 @@ async function fetchNearbyShelters(lat, lng, signal) {
     return (data.shelters ?? []).map((s) => ({
       id: s.id, name: s.name, address: s.address, kind: s.kind,
       capacity: s.capacity_est, lat: s.lat, lng: s.lon, distanceKm: s.distance_km,
+      bpbdSite: s.bpbd_site ?? null, floodProneSchool: Boolean(s.flood_prone_school),
     }));
   } catch {
     return null;
@@ -490,7 +491,9 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
                       <option key={d.id} value={d.id}>
                         {`${d.name} · ${formatDistance(d.distanceKm)}`}
                         {d.inFloodArea ? ` · ${lang === "en" ? "flood-prone area" : "area rawan banjir"}`
-                          : d.id === nearestId ? ` (${lang === "en" ? "recommended" : "disarankan"})` : ""}
+                          : d.floodProneSchool ? ` · ${lang === "en" ? "school prone to flooding" : "sekolah rawan banjir"}`
+                          : d.bpbdSite ? ` · ${lang === "en" ? "used by BPBD" : "pernah dipakai BPBD"}` : ""}
+                        {d.id === nearestId && !d.inFloodArea && !d.floodProneSchool ? ` (${lang === "en" ? "recommended" : "disarankan"})` : ""}
                       </option>
                     ))}
                   </optgroup>
@@ -544,6 +547,10 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
               <p className="shelter-line-meta">
                 {kindLabel(selectedDest.kind, lang)} · {formatDistance(selectedDest.distanceKm)}
                 {selectedDest.inFloodArea ? (lang === "en" ? " · inside an active flood-prone area" : " · di dalam area rawan banjir aktif") : ""}
+                {selectedDest.floodProneSchool ? (lang === "en" ? " · BPBD lists this school as prone to flooding" : " · BPBD mencatat sekolah ini rawan banjir") : ""}
+                {selectedDest.bpbdSite ? (lang === "en"
+                  ? ` · BPBD used it as an evacuation site (${selectedDest.bpbdSite.year ?? "2018"}${selectedDest.bpbdSite.people ? `, ${selectedDest.bpbdSite.people} people` : ""})`
+                  : ` · pernah dipakai BPBD untuk mengungsi (${selectedDest.bpbdSite.year ?? "2018"}${selectedDest.bpbdSite.people ? `, ${selectedDest.bpbdSite.people} jiwa` : ""})`) : ""}
                 {selectedDest.capacity ? (lang === "en"
                   ? ` · room for about ${selectedDest.capacity.toLocaleString()} people`
                   : ` · muat ±${selectedDest.capacity.toLocaleString("id-ID")} orang`) : ""}

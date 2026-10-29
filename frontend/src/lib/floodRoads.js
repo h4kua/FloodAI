@@ -105,13 +105,24 @@ export function inFloodArea(lat, lng, points = [], radiusM = RISK_RADIUS_M) {
   return points.some((p) => segmentLengthM([lat, lng], [p.lat, p.lon]) <= radiusM);
 }
 
+// A place BPBD has used for evacuees goes first when it is this close.
+export const BPBD_SITE_FIRST_KM = 1;
+
 /**
- * Shelters outside active flood-prone areas first, each group keeping its
- * nearest-first order; each shelter gets `inFloodArea`.
+ * Shelter order: BPBD evacuation sites within BPBD_SITE_FIRST_KM, then the other
+ * safe candidates, then those inside an active flood-prone area or on BPBD's
+ * list of flood-prone schools. Each group keeps its nearest-first order; each
+ * shelter gets `inFloodArea`.
  */
 export function rankSheltersByFlood(shelters = [], points = []) {
   const marked = shelters.map((s) => ({ ...s, inFloodArea: inFloodArea(s.lat, s.lng, points) }));
-  return [...marked.filter((s) => !s.inFloodArea), ...marked.filter((s) => s.inFloodArea)];
+  const risky = (s) => s.inFloodArea || s.floodProneSchool;
+  const preferred = (s) => !risky(s) && s.bpbdSite && s.distanceKm <= BPBD_SITE_FIRST_KM;
+  return [
+    ...marked.filter(preferred),
+    ...marked.filter((s) => !risky(s) && !preferred(s)),
+    ...marked.filter(risky),
+  ];
 }
 
 /**

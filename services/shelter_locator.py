@@ -23,6 +23,8 @@ _log = get_logger("flood.shelter_locator")
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SHELTERS_PATH = _PROJECT_ROOT / "data" / "bundled" / "jakarta_shelters.json"
+# BPBD flags per shelter id, built by scripts/build_shelter_flags.py (optional).
+FLAGS_PATH = _PROJECT_ROOT / "data" / "bundled" / "shelter_flags.json"
 
 _EARTH_RADIUS_M = 6_371_000.0
 
@@ -48,8 +50,9 @@ def load_shelters() -> tuple[dict, ...]:
             return ()
         payload = json.loads(SHELTERS_PATH.read_text(encoding="utf-8"))
         shelters = payload.get("shelters", [])
+        flags = _load_flags()
         usable = tuple(
-            s for s in shelters
+            {**s, **flags.get(s.get("id"), {})} for s in shelters
             if isinstance(s.get("lat"), (int, float)) and isinstance(s.get("lon"), (int, float))
         )
         _log.info("shelters_loaded", count=len(usable))
@@ -57,6 +60,15 @@ def load_shelters() -> tuple[dict, ...]:
     except (OSError, ValueError) as exc:
         _log.warning("shelters_load_failed", error=str(exc), path=str(SHELTERS_PATH))
         return ()
+
+
+def _load_flags() -> dict:
+    """{shelter_id: {"bpbd_site": {...}, "flood_prone_school": name}}; {} when absent."""
+    try:
+        return json.loads(FLAGS_PATH.read_text(encoding="utf-8")).get("flags", {})
+    except (OSError, ValueError) as exc:
+        _log.warning("shelter_flags_load_failed", error=str(exc), path=str(FLAGS_PATH))
+        return {}
 
 
 _BUILDING_KINDS = {
@@ -99,6 +111,9 @@ def _to_result(shelter: dict, distance_m: float) -> dict:
         "capacity_est": shelter.get("capacity_est"),
         "amenity": shelter.get("amenity") or None,
         "kind": shelter_kind(shelter),
+        # BPBD used it as a flood evacuation site / lists it as a flood-prone school.
+        "bpbd_site": shelter.get("bpbd_site") or None,
+        "flood_prone_school": bool(shelter.get("flood_prone_school")),
         "distance_m": round(distance_m, 1),
         "distance_km": round(distance_m / 1000.0, 2),
     }
@@ -166,6 +181,21 @@ def nearest_shelter(
         evacuation_only=evacuation_only, shelters=shelters,
     )
     return results[0] if results else None
+
+
+def nearest_bpbd_sites(
+    lat: float,
+    lon: float,
+    *,
+    radius_m: float = 3000.0,
+    limit: int = 2,
+    shelters: Optional[tuple[dict, ...]] = None,
+) -> list[dict]:
+    """Nearest places BPBD has used as flood evacuation sites, within ``radius_m``."""
+    pool = shelters if shelters is not None else load_shelters()
+    scored = [(d, i, s) for i, s in enumerate(pool) if s.get("bpbd_site")
+              for d in [_haversine_safe(lat, lon, s)] if d is not None and d <= radius_m]
+    return [_to_result(s, d) for d, _, s in heapq.nsmallest(limit, scored)]
 
 
 if __name__ == "__main__":

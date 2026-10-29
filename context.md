@@ -205,10 +205,14 @@ GPS, or a tap on the map) and **Tujuan** (home by default once saved in localSto
 nearby shelter candidates from `GET /shelters/nearby` with type and distance, or any address). The
 candidates come from `data/bundled/jakarta_shelters.json` (12,130 OSM/HOT InAWARE places: schools,
 places of worship, RW/kelurahan offices; hospitals, clinics and same-name duplicates within 150 m
-dropped). `rankSheltersByFlood` puts candidates within 500 m of an active flood-prone point last, and
+dropped). `data/bundled/shelter_flags.json` (`scripts/build_shelter_flags.py`) marks 14 places BPBD used
+as evacuation sites (2018) and 105 schools on BPBD's flood-prone list; the endpoint also adds BPBD sites
+within 3 km. `rankSheltersByFlood` puts BPBD sites within 1 km first and candidates within 500 m of an
+active flood-prone point, or on the flood-prone school list, last, and
 the three nearest large venues (`DESTINATIONS`, no phone numbers) close the list and serve as the
 offline fallback. The evacuation map uses Esri World Street Map up to zoom 19 (dark mode inverts it
-with `.tiles-dark`); the home map keeps Gray Canvas. `EvacuationMap` asks OSRM for alternatives, colours each stretch
+with `.tiles-dark`); the home map keeps Gray Canvas, with a "Peta jalan" switch in its legend
+(remembered in localStorage `deflood.homeMapStreets`). `EvacuationMap` asks OSRM for alternatives, colours each stretch
 green/red by whether it passes within 500 m of an active BPBD flood-prone point (its river's post at
 Siaga, or rain ≥ 20 mm/h; plus post-centred areas for Siaga posts without BPBD points), picks the
 route with the least red, and shows a one-line summary with "Buka di Google Maps" (≤ 3 waypoints; no
