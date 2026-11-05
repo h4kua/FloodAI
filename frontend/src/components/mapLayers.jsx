@@ -3,23 +3,17 @@
    these components, so the same post has the same colour on both, and every
    red area names the post that made it active.
 */
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Circle, CircleMarker, Polyline, Popup } from "react-leaflet";
 import { useApp } from "../lib/appContext";
 import { RISK_RADIUS_M, areasByPost, riverForPost } from "../lib/floodRoads";
 import { postClass } from "../lib/dashboardHelpers";
+import postRivers from "../data/postRivers.json";
 
 export const AREA_COLOR = "#c8102e";
 // The river of an open post.
 const RIVER_COLOR = "#1d4ed8";
 
-// River lines per post (scripts/build_post_rivers.py), loaded the first time a
-// post opens so the 70 KB stay out of the first page load.
-let riverTable = null;
-const loadRiverTable = () => {
-  riverTable ??= import("../data/postRivers.json").then((m) => m.default).catch(() => ({}));
-  return riverTable;
-};
 
 // Post colour by its ratio to Siaga 1 (same bands as the map legend).
 const POST_COLOR = { s1: "#c8102e", s2: "#c2410c", wsp: "#e0a400", ok: "#15803d" };
@@ -40,14 +34,10 @@ export function StationMarkers({ stations = [], floodPoints = [], small = false 
   const { theme, lang } = useApp();
   const isId = lang === "id";
   const [openPost, setOpenPost] = useState(null);
-  const [rivers, setRivers] = useState(null);
-  useEffect(() => {
-    if (openPost && !rivers) loadRiverTable().then(setRivers);
-  }, [openPost, rivers]);
   const byPost = useMemo(() => areasByPost(floodPoints), [floodPoints]);
   const placed = stations.filter((s) => s.lat != null && s.lon != null);
   const open = placed.find((s) => s.nama === openPost);
-  const openRiver = open ? riverForPost(open.nama, rivers || {}) : null;
+  const openRiver = open ? riverForPost(open, postRivers) : null;
 
   const lines = (openRiver?.lines || []).map((line, i) => (
     <Polyline key={`rv-${i}`} positions={line} interactive={false}
@@ -91,9 +81,13 @@ export function StationMarkers({ stations = [], floodPoints = [], small = false 
                   : `Water ${Math.round(s.tinggi_air)} cm · ${Math.round(s.ratio * 100)}% of the Siaga 1 limit (${Math.round(s.tinggi_air / s.ratio)} cm)`)
                 : (isId ? `Air ${Math.round(s.tinggi_air)} cm` : `Water ${Math.round(s.tinggi_air)} cm`)}
             </p>
-            {river && (
+            {river?.rivers?.length > 0 && (
               <p style={{ fontSize: 12, color: RIVER_COLOR, fontWeight: 600, margin: "4px 0 0" }}>
-                {isId ? "Sungai" : "River"}: {river.rivers.join(" & ")} {isId ? "(garis biru)" : "(blue line)"}
+                {isId ? "Sungai" : "River"}: {river.rivers.join(" & ")}{" "}
+                {river.lines.length
+                  ? (isId ? "(garis biru)" : "(blue line)")
+                  // Upstream posts (Bogor, Depok) lie outside the Jakarta waterway map.
+                  : (isId ? "(di luar peta sungai Jakarta, tidak digambar)" : "(outside the Jakarta river map, not drawn)")}
               </p>
             )}
             {activated > 0 && (
@@ -131,6 +125,14 @@ export function ActiveFloodAreas({ points = [] }) {
             {p.rivers?.length > 0 && (
               <p style={{ fontSize: 11, color: "var(--muted)", marginBottom: 4 }}>
                 {isId ? "Sungai" : "River"}: {p.rivers.map(titleCase).join(", ")}
+              </p>
+            )}
+            {p.relocated && (
+              // scripts/check_flood_prone_points.py: BPBD's coordinates lay far outside this kelurahan
+              <p style={{ fontSize: 11, color: "var(--muted)", fontStyle: "italic", marginBottom: 4 }}>
+                {isId
+                  ? "Lokasi diperkirakan (tengah kelurahan): koordinat dari BPBD berada jauh di luar kelurahan ini."
+                  : "Place estimated (kelurahan centre): BPBD's coordinates lay far outside this kelurahan."}
               </p>
             )}
             <p style={{ fontSize: 12, color: AREA_COLOR, fontWeight: 600, margin: 0 }}>

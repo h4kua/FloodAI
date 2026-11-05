@@ -269,7 +269,20 @@ _COORD_JSON_TEMPLATE = (
 # ---------------------------------------------------------------------------
 
 
-def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
+# The English page asks for English; the agents' instructions stay in Indonesian.
+_LANGUAGE = {"id": "Bahasa Indonesia", "en": "simple English (B1-B2 level)"}
+
+
+def _system(prompt: str, lang: str) -> str:
+    if lang != "en":
+        return prompt
+    # With only the rule in the user message, the coordinator kept answering in Indonesian.
+    return (prompt.replace("Balas HANYA dalam Bahasa Indonesia.", "")
+            + " Write every sentence in simple English (B1-B2 level), even though these instructions"
+              " are in Indonesian. Keep place and post names as they are.")
+
+
+def run_flood_crew(snapshot: dict, prediction: dict, lang: str = "id") -> dict:
     """
     Run the 3-agent flood analysis using sequential Groq API calls.
     Designed to be called via asyncio.to_thread from async endpoints.
@@ -294,6 +307,8 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
         or "Jakarta"
     )
 
+    language = _LANGUAGE.get(lang, _LANGUAGE["id"])
+
     try:
         client = Groq(api_key=groq_api_key, timeout=_TIMEOUT)
 
@@ -308,13 +323,13 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
             temperature=_TEMPERATURE,
             max_tokens=_MAX_TOKENS_EXPERT,
             messages=[
-                {"role": "system", "content": _WEATHER_SYSTEM},
+                {"role": "system", "content": _system(_WEATHER_SYSTEM, lang)},
                 {
                     "role": "user",
                     "content": (
                         f"Analisis kondisi atmosfer di {location} berdasarkan data berikut:\n\n"
                         f"{weather_ctx}\n\n"
-                        "Tulis analisis 3-4 kalimat dalam Bahasa Indonesia, dengan angka dari data: "
+                        f"Tulis analisis 3-4 kalimat dalam {language}, dengan angka dari data: "
                         "intensitas hujan sekarang dan 3 jam terakhir (mm), kelembaban, prakiraan "
                         "beberapa jam ke depan, dan apakah peringatan BMKG memperburuk risiko banjir. "
                         "Kalau data kosong, katakan tidak ada data — jangan mengarang. Kalimat aktif dan jelas."
@@ -330,14 +345,14 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
             temperature=_TEMPERATURE,
             max_tokens=_MAX_TOKENS_EXPERT,
             messages=[
-                {"role": "system", "content": _HYDRO_SYSTEM},
+                {"role": "system", "content": _system(_HYDRO_SYSTEM, lang)},
                 {
                     "role": "user",
                     "content": (
                         f"Analisis kondisi hidrologi di {location} berdasarkan data berikut:\n\n"
                         f"{hydro_ctx}\n\n"
                         f"Konteks cuaca dari Ahli Cuaca: {analisis_cuaca}\n\n"
-                        "Tulis analisis 3-4 kalimat dalam Bahasa Indonesia, dengan angka dari data: "
+                        f"Tulis analisis 3-4 kalimat dalam {language}, dengan angka dari data: "
                         "pos air dengan status siaga tertinggi beserta tinggi airnya (cm) dan wilayahnya, "
                         "seberapa dekat ke batas siaga berikutnya, tren naik atau turun, dan apakah air "
                         "kiriman dari hulu atau pasang laut ikut berperan. Jangan mengarang angka."
@@ -354,7 +369,7 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
             temperature=_TEMPERATURE,
             max_tokens=_MAX_TOKENS_COORD,
             messages=[
-                {"role": "system", "content": _COORD_SYSTEM},
+                {"role": "system", "content": _system(_COORD_SYSTEM, lang)},
                 {
                     "role": "user",
                     "content": (
@@ -366,6 +381,7 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
                         f"{hist_block}\n\n"
                         f"Buat laporan risiko banjir dalam format JSON berikut:\n{_COORD_JSON_TEMPLATE}\n\n"
                         "Aturan wajib:\n"
+                        f"- Semua teks di JSON ditulis dalam {language}; status_banjir tetap AMAN, WASPADA atau BAHAYA\n"
                         "- status_banjir harus sesuai risk_level: SAFE→AMAN, WARNING/PRE_ALERT→WASPADA, DANGER→BAHAYA\n"
                         "- Larang kata: berdasarkan, terdapat, diketahui, signifikan, komprehensif\n"
                         "- Kalimat pendek (maksimal 20 kata), langsung dan aktif\n"

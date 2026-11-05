@@ -4,6 +4,7 @@ import { useApp, useT } from "../lib/appContext";
 import InvalidateMapSize from "./InvalidateMapSize";
 import BaseTiles from "./BaseTiles";
 import floodProneZones from "../data/floodProneZones.json";
+import postRivers from "../data/postRivers.json";
 import { activeFloodPoints } from "../lib/floodRoads";
 import { ActiveFloodAreas, AREA_COLOR, StationMarkers } from "./mapLayers";
 
@@ -76,9 +77,9 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
   );
   const hasRealStations = mappedStations.length > 0;
   const pronePoints = floodProneZones.points ?? [];
-  // Same rule as the evacuation map: points on a river whose post is at Siaga, or all in heavy rain.
+  // Same rule as the evacuation map: points along the river stretch of a post at Siaga, or all in heavy rain.
   const floodPoints = useMemo(
-    () => activeFloodPoints(pronePoints, stations, rainfall),
+    () => activeFloodPoints(pronePoints, stations, rainfall, postRivers),
     [pronePoints, stations, rainfall],
   );
 

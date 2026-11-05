@@ -40,7 +40,7 @@ _CREW_TIMEOUT_S = float(os.getenv("CREW_TIMEOUT_S", "45"))
 # A single-entry cache keyed on fetched_at_utc covers the only "current" snapshot;
 # the lock serializes concurrent first-time builds so the crew runs once, not
 # once per click.
-_crew_cache: dict = {"key": None, "result": None}
+_crew_cache: dict[str, dict] = {}  # "<fetched_at_utc>|<lang>" -> result, current snapshot only
 _crew_cache_lock = asyncio.Lock()
 
 _EXAMPLE_PAYLOAD = {
@@ -95,6 +95,7 @@ async def _run_crew_on_snapshot(
     snapshot: dict,
     origin: Optional[str] = None,
     destination: Optional[str] = None,
+    lang: str = "id",
 ) -> dict:
     """Run pipeline + crew on a pre-validated snapshot dict. Shared by both endpoints."""
     pipeline = getattr(request.app.state, "pipeline", None)
@@ -121,7 +122,7 @@ async def _run_crew_on_snapshot(
 
     try:
         crew_output = await asyncio.wait_for(
-            run_in_threadpool(run_flood_crew, snapshot, prediction),
+            run_in_threadpool(run_flood_crew, snapshot, prediction, lang),
             timeout=_CREW_TIMEOUT_S,
         )
     except asyncio.TimeoutError:
@@ -153,7 +154,7 @@ async def _run_crew_on_snapshot(
     "/predict/crew-realtime",
     summary="Multi-agent CrewAI analysis on the current live snapshot (no API key required).",
 )
-async def predict_crew_realtime_endpoint(request: Request) -> dict:
+async def predict_crew_realtime_endpoint(request: Request, lang: str = "id") -> dict:
     """
     Run the 3-agent FloodAnalysisCrew on the server's current cached snapshot.
 
@@ -171,20 +172,24 @@ async def predict_crew_realtime_endpoint(request: Request) -> dict:
     except Exception as exc:
         raise HTTPException(status_code=503, detail="snapshot_unreadable") from exc
 
-    cache_key = snapshot.get("fetched_at_utc")
+    lang = "en" if lang == "en" else "id"
+    # One entry per language: the English page asks the agents to answer in English.
+    cache_key = f"{snapshot['fetched_at_utc']}|{lang}" if snapshot.get("fetched_at_utc") else None
     # Fast path: this snapshot has already been analysed — return it without
     # burning three more LLM calls.
-    if cache_key and _crew_cache["key"] == cache_key and _crew_cache["result"] is not None:
-        return _crew_cache["result"]
+    if cache_key and cache_key in _crew_cache:
+        return _crew_cache[cache_key]
 
     async with _crew_cache_lock:
         # Re-check under the lock: a concurrent request may have just filled it.
-        if cache_key and _crew_cache["key"] == cache_key and _crew_cache["result"] is not None:
-            return _crew_cache["result"]
-        result = await _run_crew_on_snapshot(request, snapshot)
+        if cache_key and cache_key in _crew_cache:
+            return _crew_cache[cache_key]
+        result = await _run_crew_on_snapshot(request, snapshot, lang=lang)
         if cache_key:
-            _crew_cache["key"] = cache_key
-            _crew_cache["result"] = result
+            snapshot_key = cache_key.split("|")[0]
+            for old in [k for k in _crew_cache if not k.startswith(f"{snapshot_key}|")]:
+                del _crew_cache[old]  # a newer snapshot replaces both languages
+            _crew_cache[cache_key] = result
         return result
 
 

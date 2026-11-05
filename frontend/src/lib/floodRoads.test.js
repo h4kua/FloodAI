@@ -165,9 +165,32 @@ test("live post names find their river entry", () => {
     katulampa: { rivers: ["Kali Ciliwung"] },
   };
   assert.equal(postKey("P.A. Marina Ancol 1 (Laut)"), "marinaancol");
+  assert.equal(postKey("P.S. Krukut Hulu 2"), "krukuthulu");
+  assert.equal(postKey("PS. Bendung Katulampa"), "katulampa");
+  assert.equal(postKey("Pompa Kali Duri (Kalijodo)"), "kaliduri");
   assert.deepEqual(riverForPost("P.A. Cengkareng Drain", table).rivers, ["Kali Cengkareng Drain", "Kali Angke"]);
   assert.deepEqual(riverForPost("P.A. Hek Kramat Jati 1", table).rivers, ["Kali Baru Timur"]);
   assert.deepEqual(riverForPost("P.A. Kaliduri 1", table).rivers, ["Kali Duri Ledeng"]);
   assert.deepEqual(riverForPost("PS. Bendung Katulampa", table).rivers, ["Kali Ciliwung"]);
   assert.equal(riverForPost("P.A. Marina Ancol 1 (Laut)", table), null);
+});
+
+test("a live post is matched to its river by place before name", () => {
+  const table = {
+    flusingancol: { post: "P.A. Flusing Ancol", at: [-6.12559, 106.83015], rivers: ["Kali Ancol"] },
+    kampungrambutan: { post: "Kampung Rambutan (Baru)", at: [-6.3084, 106.88084], rivers: ["Kali Cipinang"] },
+  };
+  assert.deepEqual(riverForPost({ nama: "P.A. Ancol Flushing 1", lat: -6.1256, lon: 106.8302 }, table).rivers, ["Kali Ancol"]);
+  assert.deepEqual(riverForPost({ nama: "Waduk Kampung Rambutan 1", lat: -6.3085, lon: 106.8809 }, table).rivers, ["Kali Cipinang"]);
+  assert.equal(riverForPost({ nama: "Pos jauh", lat: -6.2, lon: 106.7 }, table), null);
+});
+
+test("a Siaga post only activates the flood-prone points near its drawn river stretch", () => {
+  const drain = { ...post("P.A. Cengkareng Drain", "Siaga 3"), lat: -6.1537, lon: 106.748 };
+  const near = { kelurahan: "KAPUK", lat: -6.131, lon: 106.746, rivers: ["ANGKE"] };
+  const far = { kelurahan: "SEMANAN", lat: -6.149, lon: 106.70, rivers: ["ANGKE"] };
+  const table = { cengkarengdrain: { at: [-6.1537, 106.748], rivers: ["Kali Angke"], lines: [[[-6.1537, 106.748], [-6.12, 106.746]]] } };
+  assert.deepEqual(activeFloodPoints([near, far], [drain], 0, table).map((p) => p.kelurahan), ["KAPUK"]);
+  // Without river lines (an upstream post off the map) the whole river still counts.
+  assert.equal(activeFloodPoints([near, far], [drain], 0, {}).length, 2);
 });

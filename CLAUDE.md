@@ -31,7 +31,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (620, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (23: flood roads, shelter ranking,
+- Tests: `tests/` (621, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (25: flood roads, shelter ranking,
   post levels)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -112,6 +112,14 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   heavier use needs a paid tier.
 
 ## Resolved
+- 2026-11-05: map rivers and flood-prone areas. A clicked post lights up its river (`frontend/src/data/postRivers.json`
+  from `scripts/build_post_rivers.py`: traced on the OSM waterway network from the piece touching the post, 8 km,
+  connected only; upstream posts outside the map get none). A Siaga post now activates only the BPBD points within
+  1 km of that drawn stretch (`activeFloodPoints(..., riverTable)`), not every point on its river (Cengkareng
+  Drain 10 -> 5). 8 of 154 BPBD points lay 3.4-11 km from their own kelurahan (Srengseng in Kalideres); they sit at
+  the kelurahan centre now, marked `relocated` (`scripts/check_flood_prone_points.py`, Nominatim cache in
+  data/raw/). English page: wilayah names (North ... East), forecast columns as days, 3-agent analysis in English
+  (`/predict/crew-realtime?lang=en`, cache per language).
 - 2026-11-05: chat sometimes looped on unrelated text ("Selalu tanyakan kapan kamu membutuhkan ..."): replies now use
   temperature 0.3, a reply that repeats a sentence goes to the fallback model (`_looks_degenerate` in
   `api/routes/chat.py`), looping replies are dropped from the history, and posts carry their wilayah. The 3-agent

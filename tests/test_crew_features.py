@@ -51,3 +51,24 @@ def test_hydrology_context_lists_the_most_critical_dsda_posts_by_name():
                         "batas Siaga 3/2/1 = 190/270/310 cm")
     assert lines[1].startswith("  - P.A. Manggarai 2 (Jakarta Selatan): 520 cm, Normal")
     assert "Unknown" not in "\n".join(lines)
+
+
+def test_english_page_asks_the_agents_for_english(monkeypatch):
+    from types import SimpleNamespace
+    from unittest.mock import MagicMock
+
+    from agents.crew import flood_crew
+
+    client = MagicMock()
+    reply = '{"status_banjir":"WASPADA","penjelasan":"Watch.","tindakan":["Watch the river"],"tingkat_kepercayaan":"70%"}'
+    client.chat.completions.create.return_value = SimpleNamespace(
+        choices=[SimpleNamespace(message=SimpleNamespace(content=reply))])
+    monkeypatch.setenv("GROQ_API_KEY", "test")
+    monkeypatch.setattr("groq.Groq", lambda **kw: client)
+    flood_crew.run_flood_crew({"poskobanjir": []}, {"risk_level": "PRE_ALERT", "features": {}}, lang="en")
+    calls = client.chat.completions.create.call_args_list
+    assert len(calls) == 3
+    weather_system = calls[0].kwargs["messages"][0]["content"]
+    assert "Write every sentence in simple English" in weather_system and "Bahasa Indonesia" not in weather_system
+    assert "Write every sentence in simple English" in calls[2].kwargs["messages"][0]["content"]
+    assert all("simple English" in c.kwargs["messages"][1]["content"] for c in calls)

@@ -3,6 +3,7 @@ import { humanizeRiskLevel } from "../lib/humanize";
 import EvacuationMap, { DESTINATIONS, EVAC_COLORS, haversineKm } from "../components/EvacuationMap";
 import { API_BASE } from "../lib/api";
 import floodProneZones from "../data/floodProneZones.json";
+import postRivers from "../data/postRivers.json";
 import { activeFloodPoints, rankSheltersByFlood } from "../lib/floodRoads";
 import { useFloodRisk } from "../hooks/useFloodRisk";
 import ChatBot from "../components/ChatBot";
@@ -212,7 +213,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   // is at Siaga, or all of them in heavy rain.
   const { riskData } = useFloodRisk();
   const floodPoints = useMemo(
-    () => activeFloodPoints(floodProneZones.points, riskData?.stations ?? [], riskData?.rainfall ?? 0),
+    () => activeFloodPoints(floodProneZones.points, riskData?.stations ?? [], riskData?.rainfall ?? 0, postRivers),
     [riskData],
   );
 

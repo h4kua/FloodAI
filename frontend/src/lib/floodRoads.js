@@ -52,13 +52,32 @@ export function riversOnAlert(stations = []) {
  * Flood-prone points that count right now, each with the reason it is active
  * and, for a river, the posts that caused it (`causes`, each post once).
  */
-export function activeFloodPoints(points = [], stations = [], rainfallMmH = 0) {
+export const NEAR_RIVER_M = 1000;
+
+/** True when [lat, lng] lies within radiusM of any of the lines ([[lat, lng], …]). */
+export function nearLines(lat, lng, lines = [], radiusM = NEAR_RIVER_M) {
+  return lines.some((line) => line.some((a, i) => i > 0 && distanceToSegmentM([lat, lng], line[i - 1], a) <= radiusM));
+}
+
+/**
+ * Flood-prone points that count right now. With `riverTable`
+ * (src/data/postRivers.json), a post at Siaga only activates the points within
+ * NEAR_RIVER_M of the river stretch drawn for it, not every point on that river:
+ * Semanan, on the Angke far from where Cengkareng Drain measures, stayed red for
+ * that post. A post with no stretch on the map (Katulampa, Depok: upstream,
+ * their water reaches all of the river downstream) keeps the whole river.
+ */
+export function activeFloodPoints(points = [], stations = [], rainfallMmH = 0, riverTable = null) {
   const byRiver = postsOnAlert(stations);
+  const reaches = (post, p) => {
+    const lines = riverTable ? riverForPost(post, riverTable)?.lines : null;
+    return !lines?.length || nearLines(p.lat, p.lon, lines);
+  };
   const active = rainfallMmH >= HEAVY_RAIN_MM_H
     ? points.map((p) => ({ ...p, reason: "rain", causes: [] }))
     : points.flatMap((p) => {
         const causes = [...new Map(
-          (p.rivers || []).flatMap((r) => byRiver.get(r) || []).map((s) => [s.nama, s]),
+          (p.rivers || []).flatMap((r) => byRiver.get(r) || []).filter((s) => reaches(s, p)).map((s) => [s.nama, s]),
         ).values()];
         return causes.length ? [{ ...p, reason: "river", causes }] : [];
       });
@@ -74,21 +93,39 @@ export function activeFloodPoints(points = [], stations = [], rainfallMmH = 0) {
 }
 
 /**
- * "P.A. Marina Ancol 1 (Laut)" -> "marinaancol": the key of the post's river in
- * src/data/postRivers.json (same rule as scripts/build_post_rivers.py).
+ * "P.A. Marina Ancol 1 (Laut)" -> "marinaancol", "P.S. Krukut Hulu 2" -> "krukuthulu":
+ * the key of the post's river in src/data/postRivers.json (same rule as
+ * post_key in scripts/build_post_rivers.py).
  */
 export function postKey(name) {
   return (name || "").toLowerCase()
-    .replace(/\(.*?\)/g, "")
-    .replace(/\b(p\.?\s*a\.?|ps\.?|pompa|bendung|baru|bubble)\b/g, " ")
+    .replace(/\(.*?\)/g, " ")
+    .replace(/^\s*(p\.?\s*[as]\.?|pompa)\s+/, " ")
+    .replace(/\b(bendung|baru|bubble)\b/g, " ")
     .replace(/[^a-z]/g, "");
 }
 
-/** The river entry of a live post: the longest table key its own key starts with. */
-export function riverForPost(name, table = {}) {
-  const key = postKey(name);
+export const POST_MATCH_M = 1500;
+
+/**
+ * The river entry of a live post ({ nama, lat, lon }): by name first (the longest
+ * table key the post's own key starts with; Flusing Ancol and Marina Ancol stand
+ * 100 m apart), else the nearest table post within POST_MATCH_M, for names the
+ * feed spells differently ("Ancol Flushing" for "Flusing Ancol").
+ */
+export function riverForPost(station, table = {}) {
+  const key = postKey(station?.nama ?? station);
   const hit = Object.keys(table).filter((k) => k && key.startsWith(k)).sort((a, b) => b.length - a.length)[0];
-  return hit ? table[hit] : null;
+  if (hit) return table[hit];
+  if (station?.lat == null || station?.lon == null) return null;
+  let best = null;
+  let bestM = POST_MATCH_M;
+  for (const e of Object.values(table)) {
+    if (!e.at) continue;
+    const m = segmentLengthM([station.lat, station.lon], e.at);
+    if (m <= bestM) { best = e; bestM = m; }
+  }
+  return best;
 }
 
 /** {post name: the active flood-prone points that name it as a cause}. */
