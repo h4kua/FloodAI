@@ -1,0 +1,162 @@
+{
+  "generated_at": "2026-11-05T02:14:14+00:00",
+  "source": "openmeteo",
+  "rows": 88200,
+  "flood_rows": 2561,
+  "floods_per_year": {
+    "2020": 704,
+    "2021": 323,
+    "2022": 544,
+    "2023": 213,
+    "2024": 424,
+    "2025": 353
+  },
+  "record_storm_check": {
+    "max_d0_mm": 31.3,
+    "max_1h_mm": 2.9
+  },
+  "runs": [
+    {
+      "split": "train 2020\u20132021, test 2022 (complete dates)",
+      "model": "logistic",
+      "features": "daily",
+      "test_rows": 15330,
+      "test_floods": 544,
+      "prevalence": 0.0355,
+      "roc_auc": 0.667,
+      "pr_auc": 0.07,
+      "precision_at_recall_50": 0.057
+    },
+    {
+      "split": "train 2020\u20132021, test 2022 (complete dates)",
+      "model": "logistic",
+      "features": "hourly",
+      "test_rows": 15330,
+      "test_floods": 544,
+      "prevalence": 0.0355,
+      "roc_auc": 0.68,
+      "pr_auc": 0.068,
+      "precision_at_recall_50": 0.061,
+      "hourly_minus_daily_95ci": {
+        "roc_auc": [
+          -0.001,
+          0.028
+        ],
+        "pr_auc": [
+          -0.015,
+          0.007
+        ]
+      }
+    },
+    {
+      "split": "train 2020\u20132021, test 2022 (complete dates)",
+      "model": "xgboost",
+      "features": "daily",
+      "test_rows": 15330,
+      "test_floods": 544,
+      "prevalence": 0.0355,
+      "roc_auc": 0.744,
+      "pr_auc": 0.099,
+      "precision_at_recall_50": 0.078
+    },
+    {
+      "split": "train 2020\u20132021, test 2022 (complete dates)",
+      "model": "xgboost",
+      "features": "hourly",
+      "test_rows": 15330,
+      "test_floods": 544,
+      "prevalence": 0.0355,
+      "roc_auc": 0.755,
+      "pr_auc": 0.099,
+      "precision_at_recall_50": 0.086,
+      "hourly_minus_daily_95ci": {
+        "roc_auc": [
+          -0.008,
+          0.029
+        ],
+        "pr_auc": [
+          -0.02,
+          0.016
+        ]
+      }
+    },
+    {
+      "split": "train 2020\u20132021, test 2022 (complete dates)",
+      "model": "rain alone",
+      "features": "d0 vs max3h",
+      "roc_auc_d0": 0.591,
+      "roc_auc_max3h": 0.605
+    },
+    {
+      "split": "train 2020\u20132022, test 2023\u2013Sep 2025 (partial dates)",
+      "model": "logistic",
+      "features": "daily",
+      "test_rows": 42168,
+      "test_floods": 990,
+      "prevalence": 0.0235,
+      "roc_auc": 0.798,
+      "pr_auc": 0.094,
+      "precision_at_recall_50": 0.085
+    },
+    {
+      "split": "train 2020\u20132022, test 2023\u2013Sep 2025 (partial dates)",
+      "model": "logistic",
+      "features": "hourly",
+      "test_rows": 42168,
+      "test_floods": 990,
+      "prevalence": 0.0235,
+      "roc_auc": 0.795,
+      "pr_auc": 0.103,
+      "precision_at_recall_50": 0.083,
+      "hourly_minus_daily_95ci": {
+        "roc_auc": [
+          -0.01,
+          0.004
+        ],
+        "pr_auc": [
+          -0.005,
+          0.026
+        ]
+      }
+    },
+    {
+      "split": "train 2020\u20132022, test 2023\u2013Sep 2025 (partial dates)",
+      "model": "xgboost",
+      "features": "daily",
+      "test_rows": 42168,
+      "test_floods": 990,
+      "prevalence": 0.0235,
+      "roc_auc": 0.798,
+      "pr_auc": 0.087,
+      "precision_at_recall_50": 0.082
+    },
+    {
+      "split": "train 2020\u20132022, test 2023\u2013Sep 2025 (partial dates)",
+      "model": "xgboost",
+      "features": "hourly",
+      "test_rows": 42168,
+      "test_floods": 990,
+      "prevalence": 0.0235,
+      "roc_auc": 0.789,
+      "pr_auc": 0.078,
+      "precision_at_recall_50": 0.076,
+      "hourly_minus_daily_95ci": {
+        "roc_auc": [
+          -0.017,
+          -0.0
+        ],
+        "pr_auc": [
+          -0.026,
+          0.001
+        ]
+      }
+    },
+    {
+      "split": "train 2020\u20132022, test 2023\u2013Sep 2025 (partial dates)",
+      "model": "rain alone",
+      "features": "d0 vs max3h",
+      "roc_auc_d0": 0.701,
+      "roc_auc_max3h": 0.698
+    }
+  ]
+}

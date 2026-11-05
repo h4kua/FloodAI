@@ -31,7 +31,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (594, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (20: flood roads, shelter ranking,
+- Tests: `tests/` (608, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (20: flood roads, shelter ranking,
   post levels)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -72,6 +72,12 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   Older history is only the local `realtime_feature_history.csv`: 1,192 rows on six days (24–26 Apr,
   9–10 May, 16 May 2026), none on the May 2026 BPBD flood days. `FEATURE_HISTORY_DB_ENABLED=false` on Fly,
   so the model's lag features still start empty (as before).
+- Hourly rain (2026-11-05, `scripts/hourly_rain_experiment.py`, kecamatan-days 2020–Sep 2025 vs BPBD dates):
+  with ERA5 hourly (Open-Meteo) the wettest-hour features add nothing over daily totals (95 % CIs
+  include 0; ROC-AUC ~0.75–0.80, PR-AUC ~0.09). ERA5 gives 31 mm on 1 Jan 2020 (Halim measured 377 mm),
+  so the run on GPM IMERG (`scripts/fetch_imerg_history.py`, `EARTHDATA_TOKEN` in .env) is the real test.
+  Giovanni's time-series API answered 500 even for its own tutorial example and OPeNDAP data reads 401
+  until the Earthdata account approves the "NASA GESDISC DATA ARCHIVE" application.
 - 2026 flood events: `data/processed/bpbd_updates_2026.csv` holds BPBD flooded-RT figures per kelurahan
   quoted by news (1–25 May 2026 only); bpbd.jakarta.go.id posted no genangan updates 24 Apr–5 Nov 2026.
 - AUC 0.9452 belongs to the legacy Jakarta model (`flood_model_jakarta.pkl`, random 80:20 split).
