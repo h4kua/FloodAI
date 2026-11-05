@@ -1140,6 +1140,13 @@ button, input, select, textarea { font-family: inherit; }
   margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.375rem;
   font-size: 0.875rem; line-height: 1.55; color: var(--muted);
 }
+.crew-section { display: flex; flex-direction: column; gap: 0.25rem; max-width: 70ch; }
+.crew-section h4 {
+  margin: 0; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--muted-2);
+}
+.crew-section p { margin: 0; font-size: 0.875rem; line-height: 1.6; color: var(--muted); }
+.crew-section-officer p { font-style: italic; }
 .crew-result-foot {
   display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
   font-size: 0.75rem; color: var(--muted-2);

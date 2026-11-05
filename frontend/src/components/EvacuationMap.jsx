@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { MapContainer, CircleMarker, Polyline, Popup, useMap, useMapEvents } from "react-leaflet";
 import { useApp, useT } from "../lib/appContext";
-import { googleMapsUrl, safestRouteIndex, splitRouteByRisk } from "../lib/floodRoads";
+import { googleMapsUrl, riskyOnlyAtEnds, safestRouteIndex, splitRouteByRisk } from "../lib/floodRoads";
 import { ActiveFloodAreas, StationMarkers } from "./mapLayers";
 import InvalidateMapSize from "./InvalidateMapSize";
 import BaseTiles from "./BaseTiles";
@@ -292,7 +292,11 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
                   {isId
                     ? `${metersToKm(chosen.riskyM)} melewati area rawan banjir`
                     : `${metersToKm(chosen.riskyM)} passes flood-prone areas`}
-                  {scored.length > 1 && (isId ? " — rute lain lebih rawan." : " — the other routes are riskier.")}
+                  {riskyOnlyAtEnds(chosen.runs)
+                    ? (isId
+                      ? " — hanya di dekat titik awal atau tujuan, yang sendiri berada di area rawan, jadi tidak bisa dihindari."
+                      : " — only near the start or the destination, which lie in a flood-prone area themselves, so it cannot be avoided.")
+                    : scored.length > 1 && (isId ? " — rute lain lebih rawan." : " — the other routes are riskier.")}
                 </p>
               ) : (
                 <p className="route-summary-safe">

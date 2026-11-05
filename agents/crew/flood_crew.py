@@ -38,8 +38,8 @@ _REQUIRED_KEYS = (
 
 _MODEL = os.getenv("GROQ_MODEL", DEFAULT_GROQ_MODEL)
 _TEMPERATURE = 0.1
-_MAX_TOKENS_EXPERT = 200   # AhliCuaca / AhliHidrologi — short analysis only
-_MAX_TOKENS_COORD  = 512   # KoordinatorRisiko — JSON output
+_MAX_TOKENS_EXPERT = 350   # AhliCuaca / AhliHidrologi — 3-4 sentences with numbers
+_MAX_TOKENS_COORD  = 900   # KoordinatorRisiko — JSON output with a 4-5 sentence explanation
 _TIMEOUT = 20              # per-call HTTP timeout (seconds)
 
 
@@ -92,6 +92,37 @@ def _build_weather_context(snapshot: dict, prediction: dict) -> str:
     return "\n".join(lines)
 
 
+_SIAGA_RANK = {"siaga 1": 3, "siaga 2": 2, "siaga 3": 1}
+
+
+def _siaga_rank(status: object) -> int:
+    text = str(status or "").lower()
+    return next((rank for label, rank in _SIAGA_RANK.items() if label in text), 0)
+
+
+def _critical_stations(stations: list, limit: int = 6) -> list[dict]:
+    """DSDA posts, highest Siaga first, then closest to their Siaga 1 limit.
+    (The context used to read keys the DSDA feed does not have, so every post
+    came out as "Unknown ... (Normal)" and only the first six were shown.)"""
+    def key(s: dict) -> tuple:
+        top = _safe_float(s.get("siaga1"))
+        ratio = _safe_float(s.get("tinggi_air")) / top if top > 0 else 0.0
+        return (_siaga_rank(s.get("status_siaga")), ratio)
+
+    return sorted((s for s in stations if isinstance(s, dict)), key=key, reverse=True)[:limit]
+
+
+def _station_line(s: dict) -> str:
+    name = s.get("nama_pintu_air") or s.get("lokasi") or "Pos tanpa nama"
+    kota = str(s.get("file_export") or "").replace("KOTA ", "").title()
+    status = str(s.get("status_siaga") or "Normal").replace("Status : ", "")
+    now, before = _safe_float(s.get("tinggi_air")), _safe_float(s.get("tinggi_air_sebelumnya"))
+    trend = f", sebelumnya {before:.0f} cm" if before > 0 else ""
+    limits = "/".join(str(s.get(k)) for k in ("siaga3", "siaga2", "siaga1") if s.get(k))
+    return (f"  - {name}{f' ({kota})' if kota else ''}: {now:.0f} cm{trend}, {status}"
+            f"{f'; batas Siaga 3/2/1 = {limits} cm' if limits else ''}")
+
+
 def _build_hydrology_context(snapshot: dict, prediction: dict) -> str:
     features = prediction.get("features") or {}
 
@@ -100,14 +131,7 @@ def _build_hydrology_context(snapshot: dict, prediction: dict) -> str:
     water_lag1 = _safe_float(features.get("water_level_lag_1"))
     hydro_index = _safe_float(features.get("hydro_meteorological_index"))
 
-    stations = snapshot.get("poskobanjir") or []
-    station_lines: list[str] = []
-    for s in stations[:6]:
-        if isinstance(s, dict):
-            wilayah = s.get("wilayah") or s.get("station_name") or "Unknown"
-            tinggi = s.get("tinggi_air") or s.get("tinggi_air_cm") or 0
-            status = s.get("status") or s.get("siaga_level") or "Normal"
-            station_lines.append(f"  - {wilayah}: {tinggi} cm ({status})")
+    station_lines = [_station_line(s) for s in _critical_stations(snapshot.get("poskobanjir") or [])]
 
     lines = [
         f"Water level ratio   : {water_ratio:.3f}  (>=0.90 = SIAGA kritis)",
@@ -226,14 +250,16 @@ _COORD_SYSTEM = (
 _COORD_JSON_TEMPLATE = (
     "{\n"
     '  "status_banjir": "AMAN" atau "WASPADA" atau "BAHAYA",\n'
-    '  "penjelasan": "2-3 kalimat untuk warga — sebut nama wilayah & kelurahan spesifik, '
-    'sebutkan estimasi kedalaman air dari data historis jika relevan",\n'
-    '  "tindakan": ["aksi 1", "aksi 2", "aksi 3"],\n'
+    '  "penjelasan": "4-5 kalimat untuk warga: (1) status sekarang dan alasan utamanya, '
+    '(2) pos air atau wilayah yang paling perlu diawasi beserta angkanya, (3) apa yang mungkin '
+    'terjadi 3-6 jam ke depan, (4) kapan warga perlu mulai bertindak; sebut estimasi kedalaman '
+    'dari data historis jika relevan",\n'
+    '  "tindakan": ["aksi 1", "aksi 2", "aksi 3", "aksi 4 (opsional)"],\n'
     '  "populasi_terdampak": "estimasi jiwa atau null",\n'
     '  "tingkat_kepercayaan": "misal 72%",\n'
-    '  "pesan_petugas": "1 kalimat perintah untuk petugas lapangan",\n'
-    '  "analisis_cuaca": "1 kalimat ringkasan analisis cuaca",\n'
-    '  "analisis_hidrologi": "1 kalimat ringkasan analisis hidrologi"\n'
+    '  "pesan_petugas": "1-2 kalimat perintah untuk petugas lapangan",\n'
+    '  "analisis_cuaca": "salin analisis Ahli Cuaca",\n'
+    '  "analisis_hidrologi": "salin analisis Ahli Hidrologi"\n'
     "}"
 )
 
@@ -288,9 +314,10 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
                     "content": (
                         f"Analisis kondisi atmosfer di {location} berdasarkan data berikut:\n\n"
                         f"{weather_ctx}\n\n"
-                        "Tulis analisis SINGKAT (2-3 kalimat) dalam Bahasa Indonesia. "
-                        "Sebutkan intensitas hujan, kondisi kelembaban, dan apakah alert BMKG "
-                        "memperburuk risiko banjir. Gunakan kalimat aktif yang ringkas."
+                        "Tulis analisis 3-4 kalimat dalam Bahasa Indonesia, dengan angka dari data: "
+                        "intensitas hujan sekarang dan 3 jam terakhir (mm), kelembaban, prakiraan "
+                        "beberapa jam ke depan, dan apakah peringatan BMKG memperburuk risiko banjir. "
+                        "Kalau data kosong, katakan tidak ada data — jangan mengarang. Kalimat aktif dan jelas."
                     ),
                 },
             ],
@@ -310,9 +337,10 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
                         f"Analisis kondisi hidrologi di {location} berdasarkan data berikut:\n\n"
                         f"{hydro_ctx}\n\n"
                         f"Konteks cuaca dari Ahli Cuaca: {analisis_cuaca}\n\n"
-                        "Tulis analisis SINGKAT (2-3 kalimat) dalam Bahasa Indonesia. "
-                        "Sebutkan water level ratio, status siaga stasiun-stasiun kritis, "
-                        "dan tren kenaikan atau penurunan air. Gunakan kalimat aktif yang ringkas."
+                        "Tulis analisis 3-4 kalimat dalam Bahasa Indonesia, dengan angka dari data: "
+                        "pos air dengan status siaga tertinggi beserta tinggi airnya (cm) dan wilayahnya, "
+                        "seberapa dekat ke batas siaga berikutnya, tren naik atau turun, dan apakah air "
+                        "kiriman dari hulu atau pasang laut ikut berperan. Jangan mengarang angka."
                     ),
                 },
             ],
@@ -340,8 +368,9 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
                         "Aturan wajib:\n"
                         "- status_banjir harus sesuai risk_level: SAFE→AMAN, WARNING/PRE_ALERT→WASPADA, DANGER→BAHAYA\n"
                         "- Larang kata: berdasarkan, terdapat, diketahui, signifikan, komprehensif\n"
-                        "- Kalimat maksimal 15 kata — langsung dan aktif\n"
-                        "- tindakan pakai kata kerja: evakuasi, siapkan, hubungi, pantau, pindahkan\n"
+                        "- Kalimat pendek (maksimal 20 kata), langsung dan aktif\n"
+                        "- tindakan: 3-4 langkah dengan kata kerja (evakuasi, siapkan, hubungi, pantau, pindahkan), "
+                        "masing-masing menyebut apa, di mana, atau kapan\n"
                         "- Sebut nama wilayah/kelurahan yang spesifik, bukan hanya 'Jakarta'\n"
                         "- Kalau ada data historis, sebutkan estimasi kedalaman banjir (misal '50-100 cm')\n"
                         "- PROPORSIONAL — sesuaikan nada dengan tingkat risiko:\n"
@@ -368,6 +397,9 @@ def run_flood_crew(snapshot: dict, prediction: dict) -> dict:
             )
             return _fallback_crew_output(prediction)
 
+        # Keep each expert's own analysis: the coordinator tends to shrink them to one line.
+        validated["analisis_cuaca"] = analisis_cuaca or validated.get("analisis_cuaca")
+        validated["analisis_hidrologi"] = analisis_hidrologi or validated.get("analisis_hidrologi")
         validated["_crew_used"] = True
         return validated
 

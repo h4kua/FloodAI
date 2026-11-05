@@ -47,9 +47,12 @@ export function StationMarkers({ stations = [], small = false }) {
             <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{s.nama}</p>
             <p style={{ fontSize: 12, color, fontWeight: 700, marginBottom: 4 }}>{s.status_siaga}</p>
             <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>
-              {isId
-                ? `Air ${Math.round(s.ratio * 100)}% dari batas siaga (${Math.round(s.tinggi_air)} cm)`
-                : `Water at ${Math.round(s.ratio * 100)}% of the alert limit (${Math.round(s.tinggi_air)} cm)`}
+              {/* ratio = water / the Siaga 1 (top) limit; say so, a bare "alert limit" read as Siaga 3 */}
+              {s.ratio > 0
+                ? (isId
+                  ? `Air ${Math.round(s.tinggi_air)} cm · ${Math.round(s.ratio * 100)}% dari batas Siaga 1 (${Math.round(s.tinggi_air / s.ratio)} cm)`
+                  : `Water ${Math.round(s.tinggi_air)} cm · ${Math.round(s.ratio * 100)}% of the Siaga 1 limit (${Math.round(s.tinggi_air / s.ratio)} cm)`)
+                : (isId ? `Air ${Math.round(s.tinggi_air)} cm` : `Water ${Math.round(s.tinggi_air)} cm`)}
             </p>
           </div>
         </Popup>

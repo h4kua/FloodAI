@@ -679,6 +679,7 @@ function compactStations(stations = []) {
     .map((s) => ({
       nama: s.nama,
       lokasi: s.lokasi,
+      wilayah: s.wilayah_jakarta,
       status_siaga: s.status_siaga,
       ratio: s.ratio,
       tinggi_air: s.tinggi_air,

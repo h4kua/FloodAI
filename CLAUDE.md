@@ -31,7 +31,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (610, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (20: flood roads, shelter ranking,
+- Tests: `tests/` (620, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (21: flood roads, shelter ranking,
   post levels)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -112,6 +112,14 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   heavier use needs a paid tier.
 
 ## Resolved
+- 2026-11-05: chat sometimes looped on unrelated text ("Selalu tanyakan kapan kamu membutuhkan ..."): replies now use
+  temperature 0.3, a reply that repeats a sentence goes to the fallback model (`_looks_degenerate` in
+  `api/routes/chat.py`), looping replies are dropped from the history, and posts carry their wilayah. The 3-agent
+  analysis was 1-2 short lines: its hydrology context read keys the DSDA feed lacks (every post "Unknown ...
+  (Normal)", first six only); it now lists the most critical posts by name, kota, trend and Siaga limits, the
+  experts write 3-4 sentences with numbers and the panel shows them. The evacuation list opens with the best 5
+  shelters plus "+ N tempat lain"; the route notes when red stretches only touch a start or end inside a
+  flood-prone area. Local `.env` still sets GROQ_MODEL to the withdrawn llama model (Fly does not).
 - 2026-11-05: `scripts/parse_rekap_kejadian_banjir.py` dropped every row under a "KAB. ADM. KEP. SERIBU"
   header (64 rows in Nov–Dec 2025, 15 in 2024) and filed 23 island rows of 2020–2021 under Jakarta
   Barat/Timur. Fixed (needs openpyxl, not in requirements.txt), island names unified ("P. Pari" →

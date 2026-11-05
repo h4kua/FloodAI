@@ -150,6 +150,16 @@ export function splitRouteByRisk(coords, points, radiusM = RISK_RADIUS_M) {
   return { runs, riskyM, totalM, pointsHit: [...hit] };
 }
 
+/**
+ * True when every risky run touches the start or the end of the route: the start
+ * or the destination itself lies in an active flood-prone area, so no road can
+ * avoid those stretches.
+ */
+export function riskyOnlyAtEnds(runs = []) {
+  const risky = runs.map((r, i) => (r.risky ? i : -1)).filter((i) => i >= 0);
+  return risky.length > 0 && risky.every((i) => i === 0 || i === runs.length - 1);
+}
+
 // Google Maps URLs accept at most 3 waypoints on mobile browsers (9 elsewhere);
 // more than that and phones may drop the route.
 export const GMAPS_MAX_STOPS = 3;

@@ -1,7 +1,8 @@
 /* ── CrewAnalysisPanel — opt-in "Analisis Mendalam" inside the AI card ─────
    Calls GET /predict/crew-realtime (public, no API key), which runs 3
-   specialist agents server-side. The UI keeps it minimal: one button, then
-   one explanation + at most 3 actions. Per-agent breakdowns stay out of view.
+   specialist agents server-side. One button, then the coordinator's
+   explanation, the weather and water-level experts' own analyses, up to four
+   steps and the note for officers.
 */
 import { useState, useEffect, useRef } from "react";
 import { useApp } from "../../lib/appContext";
@@ -42,7 +43,11 @@ export function CrewAnalysisPanel() {
 
   const crew       = data?.analisis_crew;
   const isFallback = crew?._crew_fallback === true;
-  const actions    = (crew?.tindakan ?? []).slice(0, 3);
+  const actions    = (crew?.tindakan ?? []).slice(0, 4);
+  const sections   = [
+    [isId ? "Cuaca" : "Weather", crew?.analisis_cuaca],
+    [isId ? "Air sungai dan laut" : "Rivers and sea", crew?.analisis_hidrologi],
+  ].filter(([, text]) => text);
 
   return (
     <div className="crew-deep">
@@ -73,10 +78,27 @@ export function CrewAnalysisPanel() {
         <div className="crew-result">
           <p className="crew-result-text">{crew.penjelasan}</p>
 
+          {sections.map(([title, text]) => (
+            <div key={title} className="crew-section">
+              <h4>{title}</h4>
+              <p>{text}</p>
+            </div>
+          ))}
+
           {actions.length > 0 && (
-            <ul className="crew-actions">
-              {actions.map((act, i) => <li key={i}>{act}</li>)}
-            </ul>
+            <div className="crew-section">
+              <h4>{isId ? "Yang perlu dilakukan" : "What to do"}</h4>
+              <ul className="crew-actions">
+                {actions.map((act, i) => <li key={i}>{act}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {crew.pesan_petugas && (
+            <div className="crew-section crew-section-officer">
+              <h4>{isId ? "Untuk petugas" : "For officers"}</h4>
+              <p>{crew.pesan_petugas}</p>
+            </div>
           )}
 
           <div className="crew-result-foot">

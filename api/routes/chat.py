@@ -27,6 +27,10 @@ _MAX_MESSAGE_CHARS = 1800
 _MAX_CONTEXT_CHARS = 1800
 _MAX_TOPIC_CHARS = 2200           # knowledge sections picked for the question
 _MAX_REPLY_TOKENS = 500
+# Low temperature: at the provider default Qwen sometimes drifted into unrelated
+# text and repeated it ("Selalu tanyakan kapan kamu membutuhkan ...") for a
+# simple "daerah mana yang rawan banjir?".
+_TEMPERATURE = 0.3
 _GROQ_TIMEOUT_S = 20.0
 _MAX_RETRY_WAIT_S = 3.0        # one wait on Groq's retry-after before answering "busy"
 # Tried in order; Groq rate limits are per model, so the fallback has its own budget.
@@ -154,6 +158,22 @@ def _knowledge_for(message: str) -> str:
     return "\n\n".join(core + picked)
 
 
+_SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+|\n+")
+
+
+def _looks_degenerate(text: str) -> bool:
+    """True when a reply repeats a whole sentence, the mark of a model stuck in a loop."""
+    seen: set[str] = set()
+    for sentence in _SENTENCE_SPLIT.split(text or ""):
+        key = re.sub(r"[^a-z0-9 ]", "", sentence.lower()).strip()
+        if len(key) < 25:
+            continue
+        if key in seen:
+            return True
+        seen.add(key)
+    return False
+
+
 def _sanitize_history(history: list[dict]) -> list[dict]:
     clean: list[dict] = []
     for item in history[-_MAX_HISTORY_MESSAGES:]:
@@ -163,6 +183,9 @@ def _sanitize_history(history: list[dict]) -> list[dict]:
         if role not in {"user", "assistant"}:
             continue
         content = _clip(item.get("content"), _MAX_HISTORY_CHARS)
+        # A looping answer left in the history pulls the next answer into the same loop.
+        if role == "assistant" and _looks_degenerate(content):
+            continue
         if content:
             clean.append({"role": role, "content": content})
     return clean
@@ -177,6 +200,8 @@ def _top_stations(stations: list[dict], limit: int = 5) -> list[dict]:
         result.append({
             "name": station.get("nama") or station.get("nama_pintu_air"),
             "area": station.get("lokasi") or station.get("file_export"),
+            # Without it the model guessed the region from the name (Cengkareng Drain "in North Jakarta").
+            "wilayah": station.get("wilayah") or station.get("wilayah_jakarta"),
             "status": station.get("status_siaga"),
             "ratio_pct": round(ratio(station) * 100),
             "height": station.get("tinggi_air"),
@@ -286,6 +311,10 @@ def _build_messages(req: ChatRequest) -> list[dict]:
     ]
 
 
+class DegenerateReplyError(RuntimeError):
+    """The model answered with a loop; the next model is asked instead."""
+
+
 def _complete(messages: list[dict]) -> str:
     """Ask the primary model, then the fallback when the first fails.
 
@@ -303,10 +332,14 @@ def _complete(messages: list[dict]) -> str:
             model=model,
             messages=messages,
             max_tokens=_MAX_REPLY_TOKENS + (300 if reasoning else 0),  # gpt-oss also spends tokens reasoning
+            temperature=_TEMPERATURE,
             timeout=_GROQ_TIMEOUT_S,
             extra_body={"reasoning_effort": "low"} if reasoning else None,
         )
-        return response.choices[0].message.content
+        reply = response.choices[0].message.content
+        if _looks_degenerate(reply):
+            raise DegenerateReplyError(model)
+        return reply
 
     for i, model in enumerate(models):
         try:

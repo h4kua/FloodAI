@@ -8,10 +8,19 @@ import {
   inFloodArea,
   rankSheltersByFlood,
   riversForPost,
+  riskyOnlyAtEnds,
   riversOnAlert,
   safestRouteIndex,
   splitRouteByRisk,
 } from "./floodRoads.js";
+
+test("risk only at the ends of a route is flagged as unavoidable", () => {
+  const run = (risky) => ({ risky, positions: [] });
+  assert.equal(riskyOnlyAtEnds([run(true), run(false), run(true)]), true);
+  assert.equal(riskyOnlyAtEnds([run(false), run(true)]), true);
+  assert.equal(riskyOnlyAtEnds([run(false), run(true), run(false)]), false);
+  assert.equal(riskyOnlyAtEnds([run(false)]), false);
+});
 
 const ANGKE_POINT = { kelurahan: "KAPUK", lat: -6.14, lon: 106.74, rivers: ["ANGKE"] };
 const CILIWUNG_POINT = { kelurahan: "BIDARA CINA", lat: -6.23, lon: 106.865, rivers: ["CILIWUNG"] };
