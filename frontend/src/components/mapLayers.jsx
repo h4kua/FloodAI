@@ -3,15 +3,23 @@
    these components, so the same post has the same colour on both, and every
    red area names the post that made it active.
 */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Circle, CircleMarker, Polyline, Popup } from "react-leaflet";
 import { useApp } from "../lib/appContext";
-import { RISK_RADIUS_M, areasByPost } from "../lib/floodRoads";
+import { RISK_RADIUS_M, areasByPost, riverForPost } from "../lib/floodRoads";
 import { postClass } from "../lib/dashboardHelpers";
 
 export const AREA_COLOR = "#c8102e";
-// Lines from an open post to the flood-prone areas it activates.
-const LINK_COLOR = "#1d4ed8";
+// The river of an open post.
+const RIVER_COLOR = "#1d4ed8";
+
+// River lines per post (scripts/build_post_rivers.py), loaded the first time a
+// post opens so the 70 KB stay out of the first page load.
+let riverTable = null;
+const loadRiverTable = () => {
+  riverTable ??= import("../data/postRivers.json").then((m) => m.default).catch(() => ({}));
+  return riverTable;
+};
 
 // Post colour by its ratio to Siaga 1 (same bands as the map legend).
 const POST_COLOR = { s1: "#c8102e", s2: "#c2410c", wsp: "#e0a400", ok: "#15803d" };
@@ -24,30 +32,34 @@ const popupPad = { autoPan: true, autoPanPaddingTopLeft: [8, 64], autoPanPadding
 
 /**
  * Monitoring posts with validated coordinates, coloured by their DSDA band.
- * While a post's popup is open, blue lines run from it to each active
- * flood-prone area it activates (`floodPoints`, see activeFloodPoints).
+ * While a post's popup is open, the river it measures is drawn in blue around it
+ * (src/data/postRivers.json), and the popup counts the active flood-prone areas
+ * (`floodPoints`) the post makes active.
  */
 export function StationMarkers({ stations = [], floodPoints = [], small = false }) {
   const { theme, lang } = useApp();
   const isId = lang === "id";
   const [openPost, setOpenPost] = useState(null);
+  const [rivers, setRivers] = useState(null);
+  useEffect(() => {
+    if (openPost && !rivers) loadRiverTable().then(setRivers);
+  }, [openPost, rivers]);
   const byPost = useMemo(() => areasByPost(floodPoints), [floodPoints]);
   const placed = stations.filter((s) => s.lat != null && s.lon != null);
   const open = placed.find((s) => s.nama === openPost);
-  const links = open ? (byPost.get(open.nama) || []) : [];
+  const openRiver = open ? riverForPost(open.nama, rivers || {}) : null;
 
-  const lines = links.flatMap((p, i) => [
-    <Polyline key={`ln-${i}`} positions={[[open.lat, open.lon], [p.lat, p.lon]]} interactive={false}
-      pathOptions={{ color: LINK_COLOR, weight: 2.5, opacity: 0.85, dashArray: "6 6" }} />,
-    <Circle key={`lc-${i}`} center={[p.lat, p.lon]} radius={RISK_RADIUS_M} interactive={false}
-      pathOptions={{ color: LINK_COLOR, weight: 2, opacity: 0.8, fill: false }} />,
-  ]);
+  const lines = (openRiver?.lines || []).map((line, i) => (
+    <Polyline key={`rv-${i}`} positions={line} interactive={false}
+      pathOptions={{ color: RIVER_COLOR, weight: 5, opacity: 0.75, lineCap: "round", lineJoin: "round" }} />
+  ));
 
   const markers = placed.map((s) => {
     const cls = postClass(s);
     const color = POST_COLOR[cls];
     const radius = (cls === "s1" || cls === "s2" ? 11 : 8) - (small ? 2 : 0);
     const activated = (byPost.get(s.nama) || []).length;
+    const river = s.nama === openPost ? openRiver : null;
     return (
       <CircleMarker
         key={`st-${s.nama}`}
@@ -79,11 +91,16 @@ export function StationMarkers({ stations = [], floodPoints = [], small = false 
                   : `Water ${Math.round(s.tinggi_air)} cm · ${Math.round(s.ratio * 100)}% of the Siaga 1 limit (${Math.round(s.tinggi_air / s.ratio)} cm)`)
                 : (isId ? `Air ${Math.round(s.tinggi_air)} cm` : `Water ${Math.round(s.tinggi_air)} cm`)}
             </p>
+            {river && (
+              <p style={{ fontSize: 12, color: RIVER_COLOR, fontWeight: 600, margin: "4px 0 0" }}>
+                {isId ? "Sungai" : "River"}: {river.rivers.join(" & ")} {isId ? "(garis biru)" : "(blue line)"}
+              </p>
+            )}
             {activated > 0 && (
-              <p style={{ fontSize: 12, color: LINK_COLOR, fontWeight: 600, margin: "4px 0 0" }}>
+              <p style={{ fontSize: 12, color: "var(--muted)", margin: "4px 0 0" }}>
                 {isId
-                  ? `Mengaktifkan ${activated} area rawan di sungainya (garis biru)`
-                  : `Activates ${activated} flood-prone area${activated > 1 ? "s" : ""} on its river (blue lines)`}
+                  ? `Membuat ${activated} area rawan di sungainya aktif`
+                  : `Makes ${activated} flood-prone area${activated > 1 ? "s" : ""} on its river active`}
               </p>
             )}
           </div>

@@ -73,6 +73,24 @@ export function activeFloodPoints(points = [], stations = [], rainfallMmH = 0) {
   return [...active, ...postAreas];
 }
 
+/**
+ * "P.A. Marina Ancol 1 (Laut)" -> "marinaancol": the key of the post's river in
+ * src/data/postRivers.json (same rule as scripts/build_post_rivers.py).
+ */
+export function postKey(name) {
+  return (name || "").toLowerCase()
+    .replace(/\(.*?\)/g, "")
+    .replace(/\b(p\.?\s*a\.?|ps\.?|pompa|bendung|baru|bubble)\b/g, " ")
+    .replace(/[^a-z]/g, "");
+}
+
+/** The river entry of a live post: the longest table key its own key starts with. */
+export function riverForPost(name, table = {}) {
+  const key = postKey(name);
+  const hit = Object.keys(table).filter((k) => k && key.startsWith(k)).sort((a, b) => b.length - a.length)[0];
+  return hit ? table[hit] : null;
+}
+
 /** {post name: the active flood-prone points that name it as a cause}. */
 export function areasByPost(points = []) {
   const byPost = new Map();

@@ -4,6 +4,8 @@ import assert from "node:assert/strict";
 import {
   activeFloodPoints,
   areasByPost,
+  postKey,
+  riverForPost,
   distanceToSegmentM,
   googleMapsUrl,
   inFloodArea,
@@ -153,4 +155,19 @@ test("each post maps to the active areas it activates; rain-only areas map to no
   const byPost = areasByPost(points);
   assert.deepEqual(byPost.get("P.A. Cengkareng Drain").map((p) => p.kelurahan), ["KAPUK"]);
   assert.equal(areasByPost(activeFloodPoints(POINTS, [], 30)).size, 0);
+});
+
+test("live post names find their river entry", () => {
+  const table = {
+    cengkarengdrain: { rivers: ["Kali Cengkareng Drain", "Kali Angke"] },
+    hek: { rivers: ["Kali Baru Timur"] },
+    kaliduri: { rivers: ["Kali Duri Ledeng"] },
+    katulampa: { rivers: ["Kali Ciliwung"] },
+  };
+  assert.equal(postKey("P.A. Marina Ancol 1 (Laut)"), "marinaancol");
+  assert.deepEqual(riverForPost("P.A. Cengkareng Drain", table).rivers, ["Kali Cengkareng Drain", "Kali Angke"]);
+  assert.deepEqual(riverForPost("P.A. Hek Kramat Jati 1", table).rivers, ["Kali Baru Timur"]);
+  assert.deepEqual(riverForPost("P.A. Kaliduri 1", table).rivers, ["Kali Duri Ledeng"]);
+  assert.deepEqual(riverForPost("PS. Bendung Katulampa", table).rivers, ["Kali Ciliwung"]);
+  assert.equal(riverForPost("P.A. Marina Ancol 1 (Laut)", table), null);
 });
