@@ -1,0 +1,800 @@
+{
+  "generated_at": "2026-11-05T05:40:46+00:00",
+  "split": "train 2020\u20132022, validate 2023, test 2024",
+  "runs": {
+    "served": {
+      "rain": "dataset",
+      "features": [
+        "rainfall_mm",
+        "rainfall_lag_1",
+        "rainfall_lag_2",
+        "rainfall_roll3_mean",
+        "humidity_pct",
+        "temperature_c",
+        "bmkg_certainty_score",
+        "bmkg_weighted_score",
+        "water_level_lag_1",
+        "water_level_delta",
+        "hydro_meteorological_index",
+        "monsoon_season",
+        "rainfall_wlr_interaction",
+        "wlr_acceleration",
+        "wlr_roll3_max",
+        "rainfall_intensity_ratio",
+        "kecamatan_historical_flood_freq"
+      ],
+      "calibration": "sigmoid",
+      "threshold": 0.347,
+      "on_dataset_labels": {
+        "test_rows": 587,
+        "test_positives": 22,
+        "prevalence": 0.037,
+        "roc_auc": [
+          0.826,
+          0.745,
+          0.889
+        ],
+        "pr_auc": [
+          0.124,
+          0.078,
+          0.192
+        ],
+        "operating_points": [
+          {
+            "rule": "current (recall-first, precision >= 0.30)",
+            "threshold": 0.347,
+            "recall": 0.864,
+            "precision": 0.128,
+            "f1": 0.222,
+            "alarms": 149,
+            "true_alarms": 19,
+            "false_alarms": 130,
+            "missed": 3
+          },
+          {
+            "rule": "best F1 on validation",
+            "threshold": 0.5336,
+            "recall": 0.045,
+            "precision": 0.026,
+            "f1": 0.033,
+            "alarms": 38,
+            "true_alarms": 1,
+            "false_alarms": 37,
+            "missed": 21
+          },
+          {
+            "rule": "best F0.5 on validation (precision-weighted)",
+            "threshold": 0.5336,
+            "recall": 0.045,
+            "precision": 0.026,
+            "f1": 0.033,
+            "alarms": 38,
+            "true_alarms": 1,
+            "false_alarms": 37,
+            "missed": 21
+          }
+        ],
+        "fixed_threshold_sweep": [
+          {
+            "threshold": 0.05,
+            "recall": 0.955,
+            "precision": 0.046,
+            "alarms": 459
+          },
+          {
+            "threshold": 0.07,
+            "recall": 0.955,
+            "precision": 0.048,
+            "alarms": 440
+          },
+          {
+            "threshold": 0.1,
+            "recall": 0.955,
+            "precision": 0.057,
+            "alarms": 367
+          },
+          {
+            "threshold": 0.126,
+            "recall": 0.955,
+            "precision": 0.066,
+            "alarms": 319
+          },
+          {
+            "threshold": 0.15,
+            "recall": 0.955,
+            "precision": 0.077,
+            "alarms": 274
+          },
+          {
+            "threshold": 0.2,
+            "recall": 0.909,
+            "precision": 0.1,
+            "alarms": 201
+          },
+          {
+            "threshold": 0.3,
+            "recall": 0.864,
+            "precision": 0.109,
+            "alarms": 174
+          },
+          {
+            "threshold": 0.4,
+            "recall": 0.682,
+            "precision": 0.136,
+            "alarms": 110
+          },
+          {
+            "threshold": 0.5,
+            "recall": 0.182,
+            "precision": 0.075,
+            "alarms": 53
+          },
+          {
+            "threshold": 0.6,
+            "recall": 0.0,
+            "precision": null,
+            "alarms": 0
+          }
+        ]
+      },
+      "on_bpbd_labels": {
+        "test_rows": 587,
+        "test_positives": 155,
+        "prevalence": 0.264,
+        "roc_auc": [
+          0.76,
+          0.715,
+          0.802
+        ],
+        "pr_auc": [
+          0.555,
+          0.48,
+          0.638
+        ],
+        "operating_points": [
+          {
+            "rule": "current (recall-first, precision >= 0.30)",
+            "threshold": 0.347,
+            "recall": 0.51,
+            "precision": 0.53,
+            "f1": 0.52,
+            "alarms": 149,
+            "true_alarms": 79,
+            "false_alarms": 70,
+            "missed": 76
+          },
+          {
+            "rule": "best F1 on validation",
+            "threshold": 0.5336,
+            "recall": 0.174,
+            "precision": 0.711,
+            "f1": 0.28,
+            "alarms": 38,
+            "true_alarms": 27,
+            "false_alarms": 11,
+            "missed": 128
+          },
+          {
+            "rule": "best F0.5 on validation (precision-weighted)",
+            "threshold": 0.5336,
+            "recall": 0.174,
+            "precision": 0.711,
+            "f1": 0.28,
+            "alarms": 38,
+            "true_alarms": 27,
+            "false_alarms": 11,
+            "missed": 128
+          }
+        ],
+        "fixed_threshold_sweep": [
+          {
+            "threshold": 0.05,
+            "recall": 0.968,
+            "precision": 0.327,
+            "alarms": 459
+          },
+          {
+            "threshold": 0.07,
+            "recall": 0.935,
+            "precision": 0.33,
+            "alarms": 440
+          },
+          {
+            "threshold": 0.1,
+            "recall": 0.845,
+            "precision": 0.357,
+            "alarms": 367
+          },
+          {
+            "threshold": 0.126,
+            "recall": 0.813,
+            "precision": 0.395,
+            "alarms": 319
+          },
+          {
+            "threshold": 0.15,
+            "recall": 0.755,
+            "precision": 0.427,
+            "alarms": 274
+          },
+          {
+            "threshold": 0.2,
+            "recall": 0.587,
+            "precision": 0.453,
+            "alarms": 201
+          },
+          {
+            "threshold": 0.3,
+            "recall": 0.535,
+            "precision": 0.477,
+            "alarms": 174
+          },
+          {
+            "threshold": 0.4,
+            "recall": 0.426,
+            "precision": 0.6,
+            "alarms": 110
+          },
+          {
+            "threshold": 0.5,
+            "recall": 0.219,
+            "precision": 0.642,
+            "alarms": 53
+          },
+          {
+            "threshold": 0.6,
+            "recall": 0.0,
+            "precision": null,
+            "alarms": 0
+          }
+        ]
+      }
+    },
+    "imerg_all": {
+      "rain": "imerg",
+      "features": [
+        "rainfall_mm",
+        "rainfall_lag_1",
+        "rainfall_lag_2",
+        "rainfall_roll3_mean",
+        "humidity_pct",
+        "temperature_c",
+        "bmkg_certainty_score",
+        "bmkg_weighted_score",
+        "water_level_lag_1",
+        "water_level_delta",
+        "hydro_meteorological_index",
+        "monsoon_season",
+        "rainfall_wlr_interaction",
+        "wlr_acceleration",
+        "wlr_roll3_max",
+        "rainfall_intensity_ratio",
+        "kecamatan_historical_flood_freq"
+      ],
+      "calibration": "isotonic",
+      "threshold": 0.116,
+      "on_dataset_labels": {
+        "test_rows": 587,
+        "test_positives": 22,
+        "prevalence": 0.037,
+        "roc_auc": [
+          0.711,
+          0.624,
+          0.791
+        ],
+        "pr_auc": [
+          0.084,
+          0.047,
+          0.167
+        ],
+        "operating_points": [
+          {
+            "rule": "current (recall-first, precision >= 0.30)",
+            "threshold": 0.116,
+            "recall": 0.909,
+            "precision": 0.056,
+            "f1": 0.105,
+            "alarms": 360,
+            "true_alarms": 20,
+            "false_alarms": 340,
+            "missed": 2
+          },
+          {
+            "rule": "best F1 on validation",
+            "threshold": 0.5372,
+            "recall": 0.227,
+            "precision": 0.045,
+            "f1": 0.076,
+            "alarms": 110,
+            "true_alarms": 5,
+            "false_alarms": 105,
+            "missed": 17
+          },
+          {
+            "rule": "best F0.5 on validation (precision-weighted)",
+            "threshold": 0.5372,
+            "recall": 0.227,
+            "precision": 0.045,
+            "f1": 0.076,
+            "alarms": 110,
+            "true_alarms": 5,
+            "false_alarms": 105,
+            "missed": 17
+          }
+        ],
+        "fixed_threshold_sweep": [
+          {
+            "threshold": 0.05,
+            "recall": 1.0,
+            "precision": 0.052,
+            "alarms": 427
+          },
+          {
+            "threshold": 0.07,
+            "recall": 0.955,
+            "precision": 0.052,
+            "alarms": 401
+          },
+          {
+            "threshold": 0.1,
+            "recall": 0.955,
+            "precision": 0.056,
+            "alarms": 372
+          },
+          {
+            "threshold": 0.126,
+            "recall": 0.909,
+            "precision": 0.059,
+            "alarms": 340
+          },
+          {
+            "threshold": 0.15,
+            "recall": 0.864,
+            "precision": 0.059,
+            "alarms": 324
+          },
+          {
+            "threshold": 0.2,
+            "recall": 0.864,
+            "precision": 0.069,
+            "alarms": 274
+          },
+          {
+            "threshold": 0.3,
+            "recall": 0.5,
+            "precision": 0.056,
+            "alarms": 197
+          },
+          {
+            "threshold": 0.4,
+            "recall": 0.364,
+            "precision": 0.053,
+            "alarms": 152
+          },
+          {
+            "threshold": 0.5,
+            "recall": 0.227,
+            "precision": 0.042,
+            "alarms": 118
+          },
+          {
+            "threshold": 0.6,
+            "recall": 0.227,
+            "precision": 0.074,
+            "alarms": 68
+          }
+        ]
+      },
+      "on_bpbd_labels": {
+        "test_rows": 587,
+        "test_positives": 155,
+        "prevalence": 0.264,
+        "roc_auc": [
+          0.728,
+          0.683,
+          0.772
+        ],
+        "pr_auc": [
+          0.494,
+          0.413,
+          0.578
+        ],
+        "operating_points": [
+          {
+            "rule": "current (recall-first, precision >= 0.30)",
+            "threshold": 0.116,
+            "recall": 0.794,
+            "precision": 0.342,
+            "f1": 0.478,
+            "alarms": 360,
+            "true_alarms": 123,
+            "false_alarms": 237,
+            "missed": 32
+          },
+          {
+            "rule": "best F1 on validation",
+            "threshold": 0.5372,
+            "recall": 0.31,
+            "precision": 0.436,
+            "f1": 0.362,
+            "alarms": 110,
+            "true_alarms": 48,
+            "false_alarms": 62,
+            "missed": 107
+          },
+          {
+            "rule": "best F0.5 on validation (precision-weighted)",
+            "threshold": 0.5372,
+            "recall": 0.31,
+            "precision": 0.436,
+            "f1": 0.362,
+            "alarms": 110,
+            "true_alarms": 48,
+            "false_alarms": 62,
+            "missed": 107
+          }
+        ],
+        "fixed_threshold_sweep": [
+          {
+            "threshold": 0.05,
+            "recall": 0.884,
+            "precision": 0.321,
+            "alarms": 427
+          },
+          {
+            "threshold": 0.07,
+            "recall": 0.852,
+            "precision": 0.329,
+            "alarms": 401
+          },
+          {
+            "threshold": 0.1,
+            "recall": 0.813,
+            "precision": 0.339,
+            "alarms": 372
+          },
+          {
+            "threshold": 0.126,
+            "recall": 0.787,
+            "precision": 0.359,
+            "alarms": 340
+          },
+          {
+            "threshold": 0.15,
+            "recall": 0.768,
+            "precision": 0.367,
+            "alarms": 324
+          },
+          {
+            "threshold": 0.2,
+            "recall": 0.735,
+            "precision": 0.416,
+            "alarms": 274
+          },
+          {
+            "threshold": 0.3,
+            "recall": 0.606,
+            "precision": 0.477,
+            "alarms": 197
+          },
+          {
+            "threshold": 0.4,
+            "recall": 0.432,
+            "precision": 0.441,
+            "alarms": 152
+          },
+          {
+            "threshold": 0.5,
+            "recall": 0.316,
+            "precision": 0.415,
+            "alarms": 118
+          },
+          {
+            "threshold": 0.6,
+            "recall": 0.245,
+            "precision": 0.559,
+            "alarms": 68
+          }
+        ]
+      }
+    },
+    "imerg_no_proxy": {
+      "rain": "imerg",
+      "features": [
+        "rainfall_mm",
+        "rainfall_lag_1",
+        "rainfall_lag_2",
+        "rainfall_roll3_mean",
+        "water_level_lag_1",
+        "water_level_delta",
+        "hydro_meteorological_index",
+        "monsoon_season",
+        "rainfall_wlr_interaction",
+        "wlr_acceleration",
+        "wlr_roll3_max",
+        "rainfall_intensity_ratio",
+        "kecamatan_historical_flood_freq"
+      ],
+      "calibration": "isotonic",
+      "threshold": 0.2273,
+      "on_dataset_labels": {
+        "test_rows": 587,
+        "test_positives": 22,
+        "prevalence": 0.037,
+        "roc_auc": [
+          0.715,
+          0.608,
+          0.808
+        ],
+        "pr_auc": [
+          0.077,
+          0.046,
+          0.136
+        ],
+        "operating_points": [
+          {
+            "rule": "current (recall-first, precision >= 0.30)",
+            "threshold": 0.2273,
+            "recall": 0.636,
+            "precision": 0.077,
+            "f1": 0.137,
+            "alarms": 182,
+            "true_alarms": 14,
+            "false_alarms": 168,
+            "missed": 8
+          },
+          {
+            "rule": "best F1 on validation",
+            "threshold": 0.2711,
+            "recall": 0.5,
+            "precision": 0.085,
+            "f1": 0.145,
+            "alarms": 130,
+            "true_alarms": 11,
+            "false_alarms": 119,
+            "missed": 11
+          },
+          {
+            "rule": "best F0.5 on validation (precision-weighted)",
+            "threshold": 0.2711,
+            "recall": 0.5,
+            "precision": 0.085,
+            "f1": 0.145,
+            "alarms": 130,
+            "true_alarms": 11,
+            "false_alarms": 119,
+            "missed": 11
+          }
+        ],
+        "fixed_threshold_sweep": [
+          {
+            "threshold": 0.05,
+            "recall": 1.0,
+            "precision": 0.043,
+            "alarms": 517
+          },
+          {
+            "threshold": 0.07,
+            "recall": 1.0,
+            "precision": 0.048,
+            "alarms": 461
+          },
+          {
+            "threshold": 0.1,
+            "recall": 0.864,
+            "precision": 0.049,
+            "alarms": 387
+          },
+          {
+            "threshold": 0.126,
+            "recall": 0.818,
+            "precision": 0.055,
+            "alarms": 330
+          },
+          {
+            "threshold": 0.15,
+            "recall": 0.773,
+            "precision": 0.057,
+            "alarms": 297
+          },
+          {
+            "threshold": 0.2,
+            "recall": 0.682,
+            "precision": 0.072,
+            "alarms": 208
+          },
+          {
+            "threshold": 0.3,
+            "recall": 0.318,
+            "precision": 0.071,
+            "alarms": 98
+          },
+          {
+            "threshold": 0.4,
+            "recall": 0.182,
+            "precision": 0.077,
+            "alarms": 52
+          },
+          {
+            "threshold": 0.5,
+            "recall": 0.045,
+            "precision": 0.05,
+            "alarms": 20
+          },
+          {
+            "threshold": 0.6,
+            "recall": 0.0,
+            "precision": 0.0,
+            "alarms": 11
+          }
+        ]
+      },
+      "on_bpbd_labels": {
+        "test_rows": 587,
+        "test_positives": 155,
+        "prevalence": 0.264,
+        "roc_auc": [
+          0.787,
+          0.745,
+          0.826
+        ],
+        "pr_auc": [
+          0.612,
+          0.533,
+          0.682
+        ],
+        "operating_points": [
+          {
+            "rule": "current (recall-first, precision >= 0.30)",
+            "threshold": 0.2273,
+            "recall": 0.587,
+            "precision": 0.5,
+            "f1": 0.54,
+            "alarms": 182,
+            "true_alarms": 91,
+            "false_alarms": 91,
+            "missed": 64
+          },
+          {
+            "rule": "best F1 on validation",
+            "threshold": 0.2711,
+            "recall": 0.471,
+            "precision": 0.562,
+            "f1": 0.512,
+            "alarms": 130,
+            "true_alarms": 73,
+            "false_alarms": 57,
+            "missed": 82
+          },
+          {
+            "rule": "best F0.5 on validation (precision-weighted)",
+            "threshold": 0.2711,
+            "recall": 0.471,
+            "precision": 0.562,
+            "f1": 0.512,
+            "alarms": 130,
+            "true_alarms": 73,
+            "false_alarms": 57,
+            "missed": 82
+          }
+        ],
+        "fixed_threshold_sweep": [
+          {
+            "threshold": 0.05,
+            "recall": 0.994,
+            "precision": 0.298,
+            "alarms": 517
+          },
+          {
+            "threshold": 0.07,
+            "recall": 0.974,
+            "precision": 0.328,
+            "alarms": 461
+          },
+          {
+            "threshold": 0.1,
+            "recall": 0.897,
+            "precision": 0.359,
+            "alarms": 387
+          },
+          {
+            "threshold": 0.126,
+            "recall": 0.852,
+            "precision": 0.4,
+            "alarms": 330
+          },
+          {
+            "threshold": 0.15,
+            "recall": 0.806,
+            "precision": 0.421,
+            "alarms": 297
+          },
+          {
+            "threshold": 0.2,
+            "recall": 0.665,
+            "precision": 0.495,
+            "alarms": 208
+          },
+          {
+            "threshold": 0.3,
+            "recall": 0.381,
+            "precision": 0.602,
+            "alarms": 98
+          },
+          {
+            "threshold": 0.4,
+            "recall": 0.258,
+            "precision": 0.769,
+            "alarms": 52
+          },
+          {
+            "threshold": 0.5,
+            "recall": 0.123,
+            "precision": 0.95,
+            "alarms": 20
+          },
+          {
+            "threshold": 0.6,
+            "recall": 0.065,
+            "precision": 0.909,
+            "alarms": 11
+          }
+        ]
+      }
+    }
+  },
+  "rain_check": {
+    "corr_max_rainfall": 0.392,
+    "corr_avg_rainfall": 0.859,
+    "dataset_max_rainfall_median": 49.1,
+    "imerg_max_median": 46.2,
+    "dataset_avg_rainfall_median": 23.6,
+    "imerg_mean_median": 7.9
+  },
+  "vs_served": {
+    "imerg_all": {
+      "dataset": {
+        "roc_auc": [
+          -0.185,
+          -0.049
+        ],
+        "pr_auc": [
+          -0.088,
+          0.014
+        ]
+      },
+      "bpbd": {
+        "roc_auc": [
+          -0.067,
+          0.004
+        ],
+        "pr_auc": [
+          -0.127,
+          0.016
+        ]
+      }
+    },
+    "imerg_no_proxy": {
+      "dataset": {
+        "roc_auc": [
+          -0.223,
+          -0.01
+        ],
+        "pr_auc": [
+          -0.098,
+          0.009
+        ]
+      },
+      "bpbd": {
+        "roc_auc": [
+          -0.022,
+          0.079
+        ],
+        "pr_auc": [
+          -0.031,
+          0.146
+        ]
+      }
+    }
+  }
+}

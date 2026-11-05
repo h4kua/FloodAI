@@ -31,7 +31,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (608, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (20: flood roads, shelter ranking,
+- Tests: `tests/` (610, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (20: flood roads, shelter ranking,
   post levels)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -80,6 +80,13 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   `scripts/fetch_imerg_history.py` (Giovanni time-series API, `EARTHDATA_TOKEN` in .env; the Earthdata
   account must approve "NASA GESDISC DATA ARCHIVE"), cached in data/raw/imerg/. IMERG Final lags ~3.5
   months (V07B ends 2025-09-30); serving would need IMERG Early (~4 h latency).
+- IMERG candidate (2026-11-05, `scripts/train_imerg_candidate.py`, `artifacts/reports/imerg_candidate.md`): the
+  served pipeline retrained by year with the cleaned dataset's two rain columns swapped for IMERG. On the
+  dataset label IMERG is worse (AUC 0.71 vs 0.83; the dataset's max_rainfall correlates only 0.39 with
+  IMERG, so that label likely follows the dataset's own rain). On BPBD labels IMERG without the proxy
+  features is the best point estimate (AUC 0.787 vs 0.760, PR-AUC 0.61 vs 0.56; at the served Danger rule
+  recall 0.59 / precision 0.50 / 182 alarms vs 0.51 / 0.53 / 149) but the paired 95 % CIs include 0.
+  The served bundle stays.
 - 2026 flood events: `data/processed/bpbd_updates_2026.csv` holds BPBD flooded-RT figures per kelurahan
   quoted by news (1–25 May 2026 only); bpbd.jakarta.go.id posted no genangan updates 24 Apr–5 Nov 2026.
 - AUC 0.9452 belongs to the legacy Jakarta model (`flood_model_jakarta.pkl`, random 80:20 split).
