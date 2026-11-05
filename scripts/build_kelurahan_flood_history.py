@@ -71,7 +71,16 @@ _CANONICAL_KECAMATAN = [
 _KECAMATAN_SLUG_ALIASES = {
     "ciliincing": "cilincing",
     "mampang": "mampangprapatan",
+    # The older exports abbreviate Kepulauan Seribu as "Kep. Seribu".
+    "kepseribuselatan": "kepulauanseribuselatan",
+    "kepseribuutara": "kepulauanseribuutara",
 }
+# ... and island kelurahan as "P. Pari"; the per-RW workbooks write "Pulau Pari".
+_PULAU_ABBR_RE = re.compile(r"^P\.\s*")
+
+
+def _kel_name(raw: str) -> str:
+    return _PULAU_ABBR_RE.sub("PULAU ", raw.strip().upper())
 
 
 def _slug(text: str) -> str:
@@ -132,7 +141,7 @@ def _load_html_sources(per_kel: dict[str, dict]) -> None:
             c = [x.get_text(strip=True) for x in tr.find_all(["td", "th"])]
             if len(c) < len(hdr):
                 continue
-            kel = cell(c, "kelurahan").strip().upper()
+            kel = _kel_name(cell(c, "kelurahan"))
             if not kel:
                 continue
             periode = cell(c, "periode_data").strip()
@@ -174,7 +183,7 @@ def _load_rekap_csv(per_kel: dict[str, dict]) -> None:
             if key in seen:
                 continue
             seen.add(key)
-            kel = _KEL_PREFIX_RE.sub("", (row.get("kelurahan") or "").strip()).strip().upper()
+            kel = _kel_name(_KEL_PREFIX_RE.sub("", (row.get("kelurahan") or "").strip()))
             if not kel:
                 continue
             a = per_kel[kel]

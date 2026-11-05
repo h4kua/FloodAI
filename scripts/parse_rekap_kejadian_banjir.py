@@ -19,7 +19,7 @@ Output: data/raw/rekap_kejadian_2020_2025.csv
   jumlah_luka_berat, ketinggian_air, jumlah_meninggal
   (lama_genangan is left blank — not available at this granularity.)
 
-Run:
+Run (needs openpyxl, which the server does not install):
     python scripts/parse_rekap_kejadian_banjir.py
 """
 
@@ -99,7 +99,10 @@ def _clean(val) -> str:
 
 
 def _is_city_header(kec_num_val: str, kel_num_val: str) -> bool:
-    return bool(kec_num_val) and not kel_num_val and "jakarta" in kec_num_val.lower()
+    # "KAB. ADM. KEP. SERIBU" has no "jakarta"; it opens the Nov/Dec 2025 sheets, so
+    # missing it dropped every Kepulauan Seribu row before the first Jakarta city.
+    text = kec_num_val.lower()
+    return bool(kec_num_val) and not kel_num_val and ("jakarta" in text or "seribu" in text)
 
 
 _HEADER_ECHO = {"kecamatan", "kelurahan", "wilayah"}

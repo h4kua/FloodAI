@@ -31,7 +31,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (590, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (20: flood roads, shelter ranking,
+- Tests: `tests/` (594, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (20: flood roads, shelter ranking,
   post levels)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -66,6 +66,14 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   (267/147/213/113/155): the drop comes from the label source (see the label gap below).
 - No observed row-level flood labels for evaluation: `realtime_feature_history.csv` has no label
   column; `calibration_labeled.csv` labels are synthetic.
+- Live history: until 2026-11-05 the server kept only `realtime_snapshot_store` id `latest` (the history
+  writers need `DB_*` secrets that Fly lacks). Each refresh now also upserts a compact
+  `history:<fetched_at_utc>` row there (~12 KB, ~220 MB per 6 months: watch the free 500 MB quota).
+  Older history is only the local `realtime_feature_history.csv`: 1,192 rows on six days (24–26 Apr,
+  9–10 May, 16 May 2026), none on the May 2026 BPBD flood days. `FEATURE_HISTORY_DB_ENABLED=false` on Fly,
+  so the model's lag features still start empty (as before).
+- 2026 flood events: `data/processed/bpbd_updates_2026.csv` holds BPBD flooded-RT figures per kelurahan
+  quoted by news (1–25 May 2026 only); bpbd.jakarta.go.id posted no genangan updates 24 Apr–5 Nov 2026.
 - AUC 0.9452 belongs to the legacy Jakarta model (`flood_model_jakarta.pkl`, random 80:20 split).
   Its endpoint `/predict/realtime` was retired 2026-10-24 (410 Gone); the UI uses `/predict/realtime-native`.
 - BNPB district mapping gap (kecamatan write-back); InaRISK falls back to bundled static JSON.
@@ -89,6 +97,10 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   heavier use needs a paid tier.
 
 ## Resolved
+- 2026-11-05: `scripts/parse_rekap_kejadian_banjir.py` dropped every row under a "KAB. ADM. KEP. SERIBU"
+  header (64 rows in Nov–Dec 2025, 15 in 2024) and filed 23 island rows of 2020–2021 under Jakarta
+  Barat/Timur. Fixed (needs openpyxl, not in requirements.txt), island names unified ("P. Pari" →
+  "PULAU PARI"). The 42 model kecamatan keep the same flood frequency, so no retrain.
 - 2026-10-28: the evacuation page offered only 11 hard-coded venues (with unverified phone numbers) and a
   grey basemap without small streets. It now asks `GET /shelters/nearby` for ~20 of the 12,130
   OSM/InAWARE candidates in `data/bundled/jakarta_shelters.json` (no hospitals/clinics, same-name

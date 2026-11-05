@@ -8,6 +8,12 @@ primary_region = 'sin'
 
 [build]
 
+[env]
+  # No direct Postgres connection on Fly (no DB_* secrets), so the feature-history
+  # write failed every run. History now lives in realtime_snapshot_store
+  # ('history:' rows, written over HTTPS); the lag features still start empty.
+  FEATURE_HISTORY_DB_ENABLED = 'false'
+
 [http_service]
   internal_port = 8080
   force_https = true

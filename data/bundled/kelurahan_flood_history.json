@@ -1,7 +1,7 @@
 {
   "_meta": {
     "schema_version": "2",
-    "generated_at": "2026-10-28T02:28:28.082119+00:00",
+    "generated_at": "2026-11-05T01:52:29.566980+00:00",
     "sources": [
       "data-kejadian-bencana-banjir-komponen-data.xls",
       "data-kejadian-bencana-banjir-tahun-2023-komponen-data.xls",
@@ -1510,7 +1510,7 @@
       "kecamatan": "KRAMATJATI"
     },
     "PULAU KELAPA": {
-      "event_count": 7,
+      "event_count": 23,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1518,11 +1518,15 @@
       "years_covered": [
         "2020",
         "2021",
+        "2024",
+        "2025",
         "2026"
       ],
       "events_by_year": {
         "2020": 1,
         "2021": 5,
+        "2024": 2,
+        "2025": 14,
         "2026": 1
       },
       "max_ketinggian_cm": 45.0,
@@ -1530,17 +1534,21 @@
       "kecamatan": "KEPULAUAN SERIBU UTARA"
     },
     "PULAU PANGGANG": {
-      "event_count": 2,
+      "event_count": 12,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
       "total_pengungsi": 0,
       "years_covered": [
         "2020",
+        "2024",
+        "2025",
         "2026"
       ],
       "events_by_year": {
         "2020": 1,
+        "2024": 3,
+        "2025": 7,
         "2026": 1
       },
       "max_ketinggian_cm": 40.0,
@@ -1548,7 +1556,7 @@
       "kecamatan": "KEPULAUAN SERIBU UTARA"
     },
     "PULAU PARI": {
-      "event_count": 4,
+      "event_count": 13,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
@@ -1556,11 +1564,15 @@
       "years_covered": [
         "2020",
         "2021",
+        "2024",
+        "2025",
         "2026"
       ],
       "events_by_year": {
         "2020": 1,
         "2021": 2,
+        "2024": 1,
+        "2025": 8,
         "2026": 1
       },
       "max_ketinggian_cm": 50.0,
@@ -4682,51 +4694,61 @@
       "kecamatan": "KEBAYORAN BARU"
     },
     "PULAU UNTUNG JAWA": {
-      "event_count": 1,
+      "event_count": 6,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
       "total_pengungsi": 0,
       "years_covered": [
-        "2020"
+        "2020",
+        "2024",
+        "2025"
       ],
       "events_by_year": {
-        "2020": 1
+        "2020": 1,
+        "2024": 1,
+        "2025": 4
       },
       "max_ketinggian_cm": 45.0,
-      "kota": "Jakarta Barat",
+      "kota": "Kepulauan Seribu",
       "kecamatan": "KEPULAUAN SERIBU SELATAN"
     },
     "PULAU TIDUNG": {
-      "event_count": 1,
+      "event_count": 8,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
       "total_pengungsi": 0,
       "years_covered": [
-        "2020"
+        "2020",
+        "2025"
       ],
       "events_by_year": {
-        "2020": 1
+        "2020": 1,
+        "2025": 7
       },
       "max_ketinggian_cm": 50.0,
-      "kota": "Jakarta Barat",
+      "kota": "Kepulauan Seribu",
       "kecamatan": "KEPULAUAN SERIBU SELATAN"
     },
     "PULAU HARAPAN": {
-      "event_count": 7,
+      "event_count": 18,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "total_luka": 0,
       "total_pengungsi": 0,
       "years_covered": [
-        "2020"
+        "2020",
+        "2024",
+        "2025"
       ],
       "events_by_year": {
-        "2020": 7
+        "2020": 7,
+        "2024": 2,
+        "2025": 9
       },
       "max_ketinggian_cm": 20.0,
-      "kota": "Jakarta Barat",
+      "kota": "Kepulauan Seribu",
       "kecamatan": "KEPULAUAN SERIBU UTARA"
     },
     "PINANGSIA": {
@@ -5086,8 +5108,8 @@
   },
   "by_kota": {
     "Jakarta Barat": {
-      "kelurahan_count": 79,
-      "total_events": 1411,
+      "kelurahan_count": 76,
+      "total_events": 1402,
       "total_jiwa_terdampak": 4276,
       "total_meninggal": 20,
       "worst_kelurahan": "TEGAL ALUR",
@@ -5118,12 +5140,12 @@
       "worst_kelurahan_events": 113
     },
     "Kepulauan Seribu": {
-      "kelurahan_count": 3,
-      "total_events": 13,
+      "kelurahan_count": 6,
+      "total_events": 80,
       "total_jiwa_terdampak": 0,
       "total_meninggal": 0,
       "worst_kelurahan": "PULAU KELAPA",
-      "worst_kelurahan_events": 7
+      "worst_kelurahan_events": 23
     },
     "Jakarta Pusat": {
       "kelurahan_count": 26,
@@ -5705,37 +5727,45 @@
       "kecamatan": "KEPULAUAN SERIBU UTARA",
       "kota": "Kepulauan Seribu",
       "kelurahan_count": 3,
-      "event_count": 16,
+      "event_count": 53,
       "years_covered": [
         "2020",
         "2021",
+        "2024",
+        "2025",
         "2026"
       ],
       "events_by_year": {
         "2020": 9,
         "2021": 5,
+        "2024": 7,
+        "2025": 30,
         "2026": 2
       },
       "max_ketinggian_cm": 45.0,
-      "historical_flood_frequency": 0.0269
+      "historical_flood_frequency": 0.0891
     },
     "kepulauanseribuselatan": {
       "kecamatan": "KEPULAUAN SERIBU SELATAN",
       "kota": "Kepulauan Seribu",
       "kelurahan_count": 3,
-      "event_count": 6,
+      "event_count": 27,
       "years_covered": [
         "2020",
         "2021",
+        "2024",
+        "2025",
         "2026"
       ],
       "events_by_year": {
         "2020": 3,
         "2021": 2,
+        "2024": 2,
+        "2025": 19,
         "2026": 1
       },
       "max_ketinggian_cm": 50.0,
-      "historical_flood_frequency": 0.0101
+      "historical_flood_frequency": 0.0454
     },
     "tambora": {
       "kecamatan": "Tambora",
