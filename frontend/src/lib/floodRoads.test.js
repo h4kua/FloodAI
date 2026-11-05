@@ -193,4 +193,7 @@ test("a Siaga post only activates the flood-prone points near its drawn river st
   assert.deepEqual(activeFloodPoints([near, far], [drain], 0, table).map((p) => p.kelurahan), ["KAPUK"]);
   // Without river lines (an upstream post off the map) the whole river still counts.
   assert.equal(activeFloodPoints([near, far], [drain], 0, {}).length, 2);
+  // An upstream post (outside Jakarta) has a line but still feeds the whole river.
+  const up = { cengkarengdrain: { ...table.cengkarengdrain, upstream: true } };
+  assert.equal(activeFloodPoints([near, far], [drain], 0, up).length, 2);
 });

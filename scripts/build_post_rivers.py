@@ -16,8 +16,11 @@ Per post, the stretch is traced on the waterway network, not looked up by name:
      they stay within RADIUS_KM of the post: a named piece only when its name matches the
      post's river or a seed's, an unnamed river/canal only as an end-to-end continuation, so
      the line never jumps onto a crossing river.
-A post with no waterway within SEED_M (the upstream posts in Bogor, Depok and Tangerang lie
-outside this map) gets no line; the frontend names its river without drawing one.
+If the stretch comes out shorter than MIN_KM (Kali Duri sits on a 40 m unnamed piece beside
+"Kali Ireng"), it is traced again from every river/canal within SEED_M. A post with no
+waterway within SEED_M (the upstream posts in Bogor, Depok and Tangerang lie outside this map)
+is traced on OpenStreetMap waterways fetched around it from the Overpass API (cached in
+data/raw/overpass/); if that fails too it gets no line and the frontend says so.
 Lines are thinned (Douglas-Peucker, about 15 m) and rounded to 5 decimals.
 
 Run:  python scripts/build_post_rivers.py
@@ -28,6 +31,9 @@ from __future__ import annotations
 import json
 import math
 import re
+import time
+import urllib.parse
+import urllib.request
 from collections import defaultdict, deque
 from pathlib import Path
 
@@ -36,6 +42,11 @@ STATIONS = _ROOT / "data" / "bundled" / "awlr_stations.json"
 WATERWAYS = _ROOT / "data" / "raw" / "jakarta_waterways.geojson"
 OUT = _ROOT / "frontend" / "src" / "data" / "postRivers.json"
 SEED_M = 150.0
+TOUCH_M = 40.0       # re-trace: only the waterways the post actually sits on
+UPSTREAM_SEED_M = 1000.0  # Overpass: DSDA puts Cipinang Hulu 800 m off the mapped Kali Cipinang
+MIN_KM = 1.0
+OVERPASS_DIR = _ROOT / "data" / "raw" / "overpass"
+OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 RADIUS_KM = 8.0
 TOLERANCE_DEG = 0.00015
 MAIN_TYPES = {"river", "canal"}
@@ -120,7 +131,7 @@ def clip(line: list, centre: list) -> list[list]:
     return [r for r in runs if len(r) >= 2]
 
 
-def connected_to_post(lines: list[list], centre: list) -> list[list]:
+def connected_to_post(lines: list[list], centre: list, seed_m: float = SEED_M) -> list[list]:
     """Only the lines linked (through shared points) to one that touches the post: a river
     that winds out of the radius and back would otherwise leave loose pieces."""
     owners = defaultdict(set)
@@ -128,7 +139,7 @@ def connected_to_post(lines: list[list], centre: list) -> list[list]:
         for q in line:
             owners[tuple(q)].add(i)
     start = [i for i, line in enumerate(lines)
-             if any(seg_km(centre, a, b) * 1000 <= SEED_M for a, b in zip(line, line[1:]))]
+             if any(seg_km(centre, a, b) * 1000 <= seed_m for a, b in zip(line, line[1:]))]
     seen, queue = set(start), deque(start)
     while queue:
         cur = queue.popleft()
@@ -150,14 +161,17 @@ def load_waterways() -> list[dict]:
     return ways
 
 
-def trace(ways: list[dict], by_vertex: dict, centre: list, rivers: list[str]) -> list[int]:
-    """Indexes of the waterways that form the post's river stretch."""
+def trace(ways: list[dict], by_vertex: dict, centre: list, rivers: list[str], all_seeds: bool = False,
+          seed_m: float = SEED_M) -> list[int]:
+    """Indexes of the waterways that form the post's river stretch. all_seeds: start from every
+    river/canal touching the post, not only the one named like its river."""
     wanted = {river_key(r) for r in rivers}
     near = [(min(seg_km(centre, w["coords"][i], w["coords"][i + 1]) for i in range(len(w["coords"]) - 1)), i)
             for i, w in enumerate(ways)]
-    near = sorted((d, i) for d, i in near if d * 1000 <= SEED_M)
+    near = sorted((d, i) for d, i in near if d * 1000 <= seed_m)
     named = [i for _, i in near if any(names_match(k, r) for k in ways[i]["keys"] for r in wanted)]
-    seeds = named or [i for _, i in near if ways[i]["type"] in MAIN_TYPES][:1]
+    main = [i for d, i in near if ways[i]["type"] in MAIN_TYPES and d * 1000 <= min(seed_m, TOUCH_M if all_seeds else SEED_M)]
+    seeds = sorted(set(named) | set(main)) if all_seeds else (named or main[:1])
     if not seeds:
         return []
     allowed = wanted | {k for i in seeds for k in ways[i]["keys"]}
@@ -183,13 +197,60 @@ def trace(ways: list[dict], by_vertex: dict, centre: list, rivers: list[str]) ->
     return sorted(seen)
 
 
-def build() -> dict:
-    stations = json.loads(STATIONS.read_text(encoding="utf-8"))["stations"]
-    ways = load_waterways()
+def index_vertices(ways: list[dict]) -> dict:
     by_vertex = defaultdict(set)
     for i, w in enumerate(ways):
         for q in w["coords"]:
             by_vertex[tuple(q)].add(i)
+    return by_vertex
+
+
+def overpass_ways(centre: list) -> list[dict]:
+    """OpenStreetMap waterways within RADIUS_KM of an upstream post, cached per post."""
+    OVERPASS_DIR.mkdir(parents=True, exist_ok=True)
+    cache = OVERPASS_DIR / f"{centre[0]:.4f}_{centre[1]:.4f}.json"
+    if not cache.exists():
+        query = (f"[out:json][timeout:90];way(around:{int(RADIUS_KM * 1000)},{centre[0]},{centre[1]})"
+                 '["waterway"~"^(river|canal|stream|drain)$"];out geom;')
+        url = f"{OVERPASS_URL}?{urllib.parse.urlencode({'data': query})}"
+        req = urllib.request.Request(url, headers={"User-Agent": "deFlood-thesis-data/1.0"})
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(req, timeout=120) as resp:
+                    cache.write_bytes(resp.read())
+                break
+            except OSError:
+                if attempt == 2:
+                    return []
+                time.sleep(10 * (attempt + 1))
+    ways = []
+    for el in json.loads(cache.read_text(encoding="utf-8")).get("elements", []):
+        coords = [[g["lat"], g["lon"]] for g in el.get("geometry") or []]
+        if len(coords) < 2:
+            continue
+        tags = el.get("tags", {})
+        keys = {river_key(tags.get(k)) for k in ("name", "alt_name", "name:en") if tags.get(k)}
+        ways.append({"coords": coords, "keys": keys - {""}, "type": tags.get("waterway"),
+                     "ends": {tuple(coords[0]), tuple(coords[-1])}})
+    return ways
+
+
+def stretch(ways: list[dict], by_vertex: dict, centre: list, rivers: list[str], seed_m: float = SEED_M) -> list[list]:
+    """The post's river lines: clipped, connected to the post, re-traced if too short."""
+    def lines_for(all_seeds: bool) -> list[list]:
+        picked = trace(ways, by_vertex, centre, rivers, all_seeds, seed_m)
+        return connected_to_post([run for i in picked for run in clip(ways[i]["coords"], centre)], centre, seed_m)
+
+    lines = lines_for(False)
+    if sum(km(a, b) for line in lines for a, b in zip(line, line[1:])) < MIN_KM:
+        lines = lines_for(True)
+    return lines
+
+
+def build() -> dict:
+    stations = json.loads(STATIONS.read_text(encoding="utf-8"))["stations"]
+    ways = load_waterways()
+    by_vertex = index_vertices(ways)
 
     out = {}
     for s in stations:
@@ -197,16 +258,29 @@ def build() -> dict:
         rivers = [r for r in rivers if r.lower() not in SKIP]
         centre = [s["lat"], s["lon"]]
         # A sea or reservoir gauge (no river in the DSDA list) gets no line.
-        picked = trace(ways, by_vertex, centre, rivers) if rivers else []
-        lines = connected_to_post([run for i in picked for run in clip(ways[i]["coords"], centre)], centre)
+        lines = stretch(ways, by_vertex, centre, rivers) if rivers else []
+        upstream = False
+        if rivers and not lines:  # outside the Jakarta map: OSM around the post itself
+            local = overpass_ways(centre)
+            lines = stretch(local, index_vertices(local), centre, rivers, UPSTREAM_SEED_M) if local else []
+            upstream = True
         out[post_key(s["station_name"])] = {
             "post": s["station_name"],
             # The live feed spells some posts differently ("Ancol Flushing" vs "Flusing
             # Ancol"), so the frontend matches a post by place first.
             "at": [round(s["lat"], 5), round(s["lon"], 5)],
             "rivers": rivers,
+            # Upstream (outside the Jakarta map): its water reaches the whole river in Jakarta,
+            # so the frontend lets it activate every flood-prone point on that river.
+            "upstream": upstream,
             "lines": [[[round(lat, 5), round(lon, 5)] for lat, lon in thin(line, TOLERANCE_DEG)] for line in lines],
         }
+        # A post that stands off its mapped channel gets a dashed link to the nearest point of it.
+        if lines:
+            gap = min(seg_km(centre, q, r) for line in lines for q, r in zip(line, line[1:]))
+            near = min((q for line in lines for q in line), key=lambda q: km(centre, q))
+            if gap * 1000 > SEED_M:
+                out[post_key(s["station_name"])]["link"] = [[round(c, 5) for c in centre], [round(c, 5) for c in near]]
     return out
 
 

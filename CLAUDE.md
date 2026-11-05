@@ -114,7 +114,10 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 ## Resolved
 - 2026-11-05: map rivers and flood-prone areas. A clicked post lights up its river (`frontend/src/data/postRivers.json`
   from `scripts/build_post_rivers.py`: traced on the OSM waterway network from the piece touching the post, 8 km,
-  connected only; upstream posts outside the map get none). A Siaga post now activates only the BPBD points within
+  connected only; a stretch under 1 km is re-traced from every waterway within 40 m of the post, as Kaliduri's was
+  40 m; upstream posts outside the Jakarta map come from Overpass around the post, cached in data/raw/overpass/, and
+  are marked `upstream`, so they still activate their whole river; Cipinang Hulu stands ~800 m off its channel and
+  gets a dashed `link`; only Pompa Pluit has no line). A Siaga post now activates only the BPBD points within
   1 km of that drawn stretch (`activeFloodPoints(..., riverTable)`), not every point on its river (Cengkareng
   Drain 10 -> 5). 8 of 154 BPBD points lay 3.4-11 km from their own kelurahan (Srengseng in Kalideres); they sit at
   the kelurahan centre now, marked `relocated` (`scripts/check_flood_prone_points.py`, Nominatim cache in

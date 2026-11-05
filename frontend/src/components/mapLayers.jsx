@@ -3,7 +3,7 @@
    these components, so the same post has the same colour on both, and every
    red area names the post that made it active.
 */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Circle, CircleMarker, Polyline, Popup } from "react-leaflet";
 import { useApp } from "../lib/appContext";
 import { RISK_RADIUS_M, areasByPost, riverForPost } from "../lib/floodRoads";
@@ -34,6 +34,12 @@ export function StationMarkers({ stations = [], floodPoints = [], small = false 
   const { theme, lang } = useApp();
   const isId = lang === "id";
   const [openPost, setOpenPost] = useState(null);
+  const openPopup = useRef(null);
+  // The river line is added to the popup after it opens, so Leaflet's auto-pan
+  // measured a shorter popup and left the top cut off: lay it out and pan again.
+  useEffect(() => {
+    if (openPost && openPopup.current?.isOpen()) openPopup.current.update();
+  }, [openPost]);
   const byPost = useMemo(() => areasByPost(floodPoints), [floodPoints]);
   const placed = stations.filter((s) => s.lat != null && s.lon != null);
   const open = placed.find((s) => s.nama === openPost);
@@ -43,6 +49,11 @@ export function StationMarkers({ stations = [], floodPoints = [], small = false 
     <Polyline key={`rv-${i}`} positions={line} interactive={false}
       pathOptions={{ color: RIVER_COLOR, weight: 5, opacity: 0.75, lineCap: "round", lineJoin: "round" }} />
   ));
+  // A post that stands away from the channel (Cipinang Hulu, ~800 m): dashed line to it.
+  if (openRiver?.link) {
+    lines.push(<Polyline key="rv-link" positions={openRiver.link} interactive={false}
+      pathOptions={{ color: RIVER_COLOR, weight: 3, opacity: 0.75, dashArray: "6 6" }} />);
+  }
 
   const markers = placed.map((s) => {
     const cls = postClass(s);
@@ -56,7 +67,7 @@ export function StationMarkers({ stations = [], floodPoints = [], small = false 
         center={[s.lat, s.lon]}
         radius={radius}
         eventHandlers={{
-          popupopen: () => setOpenPost(s.nama),
+          popupopen: (e) => { openPopup.current = e.popup; setOpenPost(s.nama); },
           popupclose: () => setOpenPost((cur) => (cur === s.nama ? null : cur)),
         }}
         pathOptions={{
@@ -85,7 +96,9 @@ export function StationMarkers({ stations = [], floodPoints = [], small = false 
               <p style={{ fontSize: 12, color: RIVER_COLOR, fontWeight: 600, margin: "4px 0 0" }}>
                 {isId ? "Sungai" : "River"}: {river.rivers.join(" & ")}{" "}
                 {river.lines.length
-                  ? (isId ? "(garis biru)" : "(blue line)")
+                  ? (river.upstream
+                    ? (isId ? "(garis biru; pos hulu, airnya mengalir ke seluruh sungai di Jakarta)" : "(blue line; upstream post, its water flows down the whole river in Jakarta)")
+                    : (isId ? "(garis biru)" : "(blue line)"))
                   // Upstream posts (Bogor, Depok) lie outside the Jakarta waterway map.
                   : (isId ? "(di luar peta sungai Jakarta, tidak digambar)" : "(outside the Jakarta river map, not drawn)")}
               </p>

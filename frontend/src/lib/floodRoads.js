@@ -64,14 +64,15 @@ export function nearLines(lat, lng, lines = [], radiusM = NEAR_RIVER_M) {
  * (src/data/postRivers.json), a post at Siaga only activates the points within
  * NEAR_RIVER_M of the river stretch drawn for it, not every point on that river:
  * Semanan, on the Angke far from where Cengkareng Drain measures, stayed red for
- * that post. A post with no stretch on the map (Katulampa, Depok: upstream,
- * their water reaches all of the river downstream) keeps the whole river.
+ * that post. An upstream post (`upstream`: Katulampa, Depok, outside Jakarta;
+ * their water reaches all of the river downstream) or one with no stretch keeps
+ * the whole river.
  */
 export function activeFloodPoints(points = [], stations = [], rainfallMmH = 0, riverTable = null) {
   const byRiver = postsOnAlert(stations);
   const reaches = (post, p) => {
-    const lines = riverTable ? riverForPost(post, riverTable)?.lines : null;
-    return !lines?.length || nearLines(p.lat, p.lon, lines);
+    const entry = riverTable ? riverForPost(post, riverTable) : null;
+    return !entry?.lines?.length || entry.upstream || nearLines(p.lat, p.lon, entry.lines);
   };
   const active = rainfallMmH >= HEAVY_RAIN_MM_H
     ? points.map((p) => ({ ...p, reason: "rain", causes: [] }))
