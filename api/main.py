@@ -487,7 +487,7 @@ async def _scheduled_refresh() -> None:
     Rebuild the realtime snapshot and persist it to Supabase. Never raises — every
     failure is logged so a bad run cannot kill the scheduler or the event loop.
     """
-    from db.snapshot_repository import save_snapshot
+    from db.snapshot_repository import save_history, save_snapshot
     from services.snapshot_refresh import build_fresh_snapshot
 
     started = time.perf_counter()
@@ -499,6 +499,8 @@ async def _scheduled_refresh() -> None:
         if not saved:
             _log.warning(f"snapshot built but save failed (duration_ms={duration_ms})")
             return
+        # History is best-effort: a failed write is logged and never fails the refresh.
+        await save_history(snapshot)
         _log.info(f"scheduled_refresh_finish (duration_ms={duration_ms})")
     except Exception as exc:  # noqa: BLE001 — scheduled job must never raise.
         duration_ms = int((time.perf_counter() - started) * 1000)
@@ -706,7 +708,7 @@ async def refresh_snapshot(
     if not x_internal_secret or not hmac.compare_digest(x_internal_secret, expected):
         raise HTTPException(status_code=401, detail="invalid internal secret")
 
-    from db.snapshot_repository import load_latest_snapshot, save_snapshot
+    from db.snapshot_repository import load_latest_snapshot, save_history, save_snapshot
     from services.snapshot_refresh import build_fresh_snapshot, summarize_sources
 
     # Rate limit: reject if the stored snapshot is younger than the min interval.
@@ -734,6 +736,8 @@ async def refresh_snapshot(
     # Only persist when at least one source produced real data, so a failed build
     # never clobbers the last good snapshot in Supabase.
     saved = await save_snapshot(snapshot) if sources["ok"] else False
+    if saved:
+        await save_history(snapshot)
     duration_ms = int((time.perf_counter() - started) * 1000)
 
     if not sources["ok"]:
