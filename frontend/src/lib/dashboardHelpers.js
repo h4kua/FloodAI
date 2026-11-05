@@ -353,6 +353,17 @@ export function inferWilayah(lat, lon) {
 export const JAKARTA_WILAYAH = ["Jakarta Utara", "Jakarta Barat", "Jakarta Pusat", "Jakarta Selatan", "Jakarta Timur"];
 export const UPSTREAM_GROUP = "upstream";
 
+const WILAYAH_EN = { Utara: "North", Barat: "West", Pusat: "Central", Selatan: "South", Timur: "East" };
+
+/** "Jakarta Utara" -> "Utara" / "North" (short) or "Jakarta Utara" / "North Jakarta". */
+export function wilayahLabel(name, isId, { short = true } = {}) {
+  const part = (name || "").replace(/^Jakarta\s+/, "");
+  if (isId) return short ? part : name;
+  const en = WILAYAH_EN[part];
+  if (!en) return name;
+  return short ? en : `${en} Jakarta`;
+}
+
 export function stationWilayah(s) {
   if ("wilayah_jakarta" in s) return s.wilayah_jakarta ?? UPSTREAM_GROUP;
   const raw = (s.wilayah || "").toUpperCase();

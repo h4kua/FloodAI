@@ -4,7 +4,7 @@
    Only what a resident cares about: sky, temperature, and rain.
 */
 import { useApp } from "../../lib/appContext";
-import { weatherCond, weatherLabel } from "../../lib/dashboardHelpers";
+import { weatherCond, weatherLabel, wilayahLabel } from "../../lib/dashboardHelpers";
 import { WeatherGlyph } from "./primitives";
 
 function WeatherWilayahCard({ entry, isId }) {
@@ -66,7 +66,7 @@ export function WeatherCurrentCard({ riskData }) {
   const WILAYAH_ORDER = ["Jakarta Utara","Jakarta Barat","Jakarta Selatan","Jakarta Timur","Jakarta Pusat"];
   const wilayahEntries = WILAYAH_ORDER
     .filter(w => owWilayah[w])
-    .map(w => ({ wilayah: w, short: w.replace("Jakarta ", ""), ow: owWilayah[w] }));
+    .map(w => ({ wilayah: w, short: wilayahLabel(w, isId), ow: owWilayah[w] }));
 
   return (
     <div className="panel panel-body fade-in">

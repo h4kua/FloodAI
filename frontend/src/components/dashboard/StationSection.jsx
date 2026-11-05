@@ -7,7 +7,7 @@
 import { useApp } from "../../lib/appContext";
 import {
   postClass, postRiskLevel, cleanStationName, stationKecamatan,
-  groupStationsByWilayah, UPSTREAM_GROUP,
+  groupStationsByWilayah, UPSTREAM_GROUP, wilayahLabel,
 } from "../../lib/dashboardHelpers";
 import { RiskBadge } from "./primitives";
 
@@ -43,7 +43,7 @@ export function StationPanel({ stations }) {
 
   const groupLabel = (key) => key === UPSTREAM_GROUP
     ? (isId ? "Luar Jakarta (hulu)" : "Outside Jakarta (upstream)")
-    : key;
+    : wilayahLabel(key, isId, { short: false });
 
   return (
     <div className="panel panel-body fade-in">

@@ -1,6 +1,6 @@
 import { useApp } from "../../lib/appContext";
 import {
-  JAKARTA_WILAYAH, groupStationsByWilayah, postRiskLevel, postClass, dataAgeMinutes, STALE_STATUS_MIN,
+  JAKARTA_WILAYAH, groupStationsByWilayah, postRiskLevel, postClass, dataAgeMinutes, STALE_STATUS_MIN, wilayahLabel,
 } from "../../lib/dashboardHelpers";
 import { RiskBadge } from "./primitives";
 
@@ -32,7 +32,7 @@ export default function WilayahStatus({ riskData }) {
       <ul className="wilayah-status-list">
         {groups.map((g) => (
           <li key={g.key} className={`wilayah-status-cell tone-${g.worst ? postClass(g.worst) : "none"}`}>
-            <span className="wilayah-status-name">{g.key.replace("Jakarta ", "")}</span>
+            <span className="wilayah-status-name">{wilayahLabel(g.key, isId)}</span>
             {g.worst ? (
               <>
                 <RiskBadge level={postRiskLevel(g.worst)} />

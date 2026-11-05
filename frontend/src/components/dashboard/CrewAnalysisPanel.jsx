@@ -19,6 +19,8 @@ export function CrewAnalysisPanel() {
   const timerRef = useRef(null);
 
   useEffect(() => () => clearInterval(timerRef.current), []);
+  // An analysis in the other language stays out of view after a language switch.
+  useEffect(() => { setStatus("idle"); setData(null); setErrMsg(null); }, [lang]);
 
   const run = async () => {
     setStatus("loading");
@@ -27,7 +29,7 @@ export function CrewAnalysisPanel() {
     setErrMsg(null);
     timerRef.current = setInterval(() => setElapsed(v => v + 1), 1000);
     try {
-      const res = await fetch(`${API_BASE}/predict/crew-realtime`);
+      const res = await fetch(`${API_BASE}/predict/crew-realtime?lang=${isId ? "id" : "en"}`);
       if (!res.ok) throw new Error(`${res.status}`);
       setData(await res.json());
       setStatus("success");

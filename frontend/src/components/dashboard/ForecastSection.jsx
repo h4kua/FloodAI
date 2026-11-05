@@ -3,7 +3,7 @@
    and the flat BMKG forecast fallback panel.
 */
 import { useApp } from "../../lib/appContext";
-import { weatherCond, weatherLabel } from "../../lib/dashboardHelpers";
+import { weatherCond, weatherLabel, wilayahLabel } from "../../lib/dashboardHelpers";
 import { WeatherGlyph } from "./primitives";
 
 /* ── Wilayah Forecast Grid — compact 12-hour BMKG timeline ──
@@ -42,12 +42,20 @@ export function WilayahForecastGrid({ wilayahSummary }) {
     if (!slot?.local_datetime) return i === 0 ? (isId ? "Skrg" : "Now") : `+${i * 6}j`;
     const h = hoursAhead(slot);
     if (h <= 1) return isId ? "Skrg" : "Now";
+    // BMKG's per-wilayah slots are often one a day (min–max temperature), so a day
+    // name reads better than "+48h".
+    if (h >= 12) {
+      return new Date(slot.local_datetime).toLocaleDateString(isId ? "id-ID" : "en-GB",
+        { weekday: "short", day: "numeric", month: "short" });
+    }
     return isId ? `+${h} jam` : `+${h}h`;
   };
 
   // Most at-risk wilayah first
   const sorted = [...wilayahSummary].sort((a, b) => (b.worst_rank ?? 0) - (a.worst_rank ?? 0));
   const timeSlots = (sorted[0]?.forecast || []).slice(0, 4);
+  // As many columns as there are slots (the backend sends three), not a fixed four.
+  const cols = [...Array(Math.max(1, timeSlots.length)).keys()];
 
   // Title follows the slots actually shown — BMKG slots are ~3-6 h apart and
   // can start well after "now", so a fixed "12 jam" would be wrong.
@@ -67,10 +75,10 @@ export function WilayahForecastGrid({ wilayahSummary }) {
         {isId ? "Sumber: BMKG. Ikon biru berarti hujan." : "Source: BMKG. Blue icons mean rain."}
       </p>
 
-      <div className="forecast-table">
+      <div className="forecast-table" style={{ "--fct-cols": cols.length }}>
         <div className="forecast-table-header">
           <div className="fct-label-cell" />
-          {[0, 1, 2, 3].map((i) => (
+          {cols.map((i) => (
             <div key={i} className="fct-time-header">
               {timeSlots[i] ? getTimeLabel(timeSlots[i], i) : "—"}
             </div>
@@ -83,11 +91,11 @@ export function WilayahForecastGrid({ wilayahSummary }) {
             <div key={w.wilayah} className="forecast-table-row">
               <div className="fct-label-cell">
                 <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text)" }}>
-                  {w.wilayah.replace("Jakarta ", "")}
+                  {wilayahLabel(w.wilayah, isId)}
                 </div>
               </div>
 
-              {[0, 1, 2, 3].map((i) => {
+              {cols.map((i) => {
                 const slot = slots[i];
                 if (!slot) {
                   return <div key={i} className="fct-cell fct-cell-empty"><span>—</span></div>;

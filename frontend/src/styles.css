@@ -1177,7 +1177,7 @@ button, input, select, textarea { font-family: inherit; }
   overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; min-width: 0;
 }
 .forecast-table-header,
-.forecast-table-row { display: grid; grid-template-columns: 120px repeat(4, 1fr); gap: 0; align-items: stretch; }
+.forecast-table-row { display: grid; grid-template-columns: 120px repeat(var(--fct-cols, 4), 1fr); gap: 0; align-items: stretch; }
 .forecast-table-header { border-bottom: 1px solid var(--line-2); margin-bottom: 0.25rem; }
 .forecast-table-row { border-top: 1px solid var(--line); }
 .forecast-table-row:first-of-type { border-top: none; }
@@ -1319,7 +1319,7 @@ button, input, select, textarea { font-family: inherit; }
   .about-hero { padding: 1.25rem; gap: 1rem; }
   .wilayah-grid { grid-template-columns: repeat(3, 1fr); }
   .forecast-table-header,
-  .forecast-table-row { grid-template-columns: 90px repeat(4, 1fr); }
+  .forecast-table-row { grid-template-columns: 90px repeat(var(--fct-cols, 4), 1fr); }
   .fct-label-cell { padding-right: 0.375rem; margin-right: 0.125rem; }
   .fct-icon { font-size: 1.1rem; }
   .fct-desc { font-size: 0.72rem; }
