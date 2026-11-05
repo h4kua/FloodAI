@@ -73,6 +73,15 @@ export function activeFloodPoints(points = [], stations = [], rainfallMmH = 0) {
   return [...active, ...postAreas];
 }
 
+/** {post name: the active flood-prone points that name it as a cause}. */
+export function areasByPost(points = []) {
+  const byPost = new Map();
+  for (const p of points) {
+    for (const s of p.causes || []) byPost.set(s.nama, [...(byPost.get(s.nama) || []), p]);
+  }
+  return byPost;
+}
+
 // Equirectangular metres around Jakarta's latitude — accurate to well under 1 %
 // over a few kilometres, which is all a 500 m buffer needs.
 const M_PER_DEG_LAT = 111_320;

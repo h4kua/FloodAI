@@ -3,12 +3,15 @@
    these components, so the same post has the same colour on both, and every
    red area names the post that made it active.
 */
-import { Circle, CircleMarker, Popup } from "react-leaflet";
+import { useMemo, useState } from "react";
+import { Circle, CircleMarker, Polyline, Popup } from "react-leaflet";
 import { useApp } from "../lib/appContext";
-import { RISK_RADIUS_M } from "../lib/floodRoads";
+import { RISK_RADIUS_M, areasByPost } from "../lib/floodRoads";
 import { postClass } from "../lib/dashboardHelpers";
 
 export const AREA_COLOR = "#c8102e";
+// Lines from an open post to the flood-prone areas it activates.
+const LINK_COLOR = "#1d4ed8";
 
 // Post colour by its ratio to Siaga 1 (same bands as the map legend).
 const POST_COLOR = { s1: "#c8102e", s2: "#c2410c", wsp: "#e0a400", ok: "#15803d" };
@@ -19,19 +22,41 @@ const titleCase = (s) => (s || "").toLowerCase().split(" ").map((w) => w.charAt(
 const siagaWord = (status) => (status || "").replace(/^Status\s*:\s*/i, "");
 const popupPad = { autoPan: true, autoPanPaddingTopLeft: [8, 64], autoPanPaddingBottomRight: [8, 8] };
 
-/** Monitoring posts with validated coordinates, coloured by their DSDA band. */
-export function StationMarkers({ stations = [], small = false }) {
+/**
+ * Monitoring posts with validated coordinates, coloured by their DSDA band.
+ * While a post's popup is open, blue lines run from it to each active
+ * flood-prone area it activates (`floodPoints`, see activeFloodPoints).
+ */
+export function StationMarkers({ stations = [], floodPoints = [], small = false }) {
   const { theme, lang } = useApp();
   const isId = lang === "id";
-  return stations.filter((s) => s.lat != null && s.lon != null).map((s) => {
+  const [openPost, setOpenPost] = useState(null);
+  const byPost = useMemo(() => areasByPost(floodPoints), [floodPoints]);
+  const placed = stations.filter((s) => s.lat != null && s.lon != null);
+  const open = placed.find((s) => s.nama === openPost);
+  const links = open ? (byPost.get(open.nama) || []) : [];
+
+  const lines = links.flatMap((p, i) => [
+    <Polyline key={`ln-${i}`} positions={[[open.lat, open.lon], [p.lat, p.lon]]} interactive={false}
+      pathOptions={{ color: LINK_COLOR, weight: 2.5, opacity: 0.85, dashArray: "6 6" }} />,
+    <Circle key={`lc-${i}`} center={[p.lat, p.lon]} radius={RISK_RADIUS_M} interactive={false}
+      pathOptions={{ color: LINK_COLOR, weight: 2, opacity: 0.8, fill: false }} />,
+  ]);
+
+  const markers = placed.map((s) => {
     const cls = postClass(s);
     const color = POST_COLOR[cls];
     const radius = (cls === "s1" || cls === "s2" ? 11 : 8) - (small ? 2 : 0);
+    const activated = (byPost.get(s.nama) || []).length;
     return (
       <CircleMarker
         key={`st-${s.nama}`}
         center={[s.lat, s.lon]}
         radius={radius}
+        eventHandlers={{
+          popupopen: () => setOpenPost(s.nama),
+          popupclose: () => setOpenPost((cur) => (cur === s.nama ? null : cur)),
+        }}
         pathOptions={{
           fillColor: color,
           fillOpacity: 0.95,
@@ -54,11 +79,19 @@ export function StationMarkers({ stations = [], small = false }) {
                   : `Water ${Math.round(s.tinggi_air)} cm · ${Math.round(s.ratio * 100)}% of the Siaga 1 limit (${Math.round(s.tinggi_air / s.ratio)} cm)`)
                 : (isId ? `Air ${Math.round(s.tinggi_air)} cm` : `Water ${Math.round(s.tinggi_air)} cm`)}
             </p>
+            {activated > 0 && (
+              <p style={{ fontSize: 12, color: LINK_COLOR, fontWeight: 600, margin: "4px 0 0" }}>
+                {isId
+                  ? `Mengaktifkan ${activated} area rawan di sungainya (garis biru)`
+                  : `Activates ${activated} flood-prone area${activated > 1 ? "s" : ""} on its river (blue lines)`}
+              </p>
+            )}
           </div>
         </Popup>
       </CircleMarker>
     );
   });
+  return [...lines, ...markers];
 }
 
 /** Active flood-prone areas (500 m), each naming the post or rain that activated it. */

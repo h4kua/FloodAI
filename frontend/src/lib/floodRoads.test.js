@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   activeFloodPoints,
+  areasByPost,
   distanceToSegmentM,
   googleMapsUrl,
   inFloodArea,
@@ -144,4 +145,12 @@ test("BPBD evacuation sites within 1 km come first; flood-prone schools go last"
     { id: "bpbd-far", lat: -6.2500, lng: 106.8650, distanceKm: 2.4, bpbdSite: { people: 50 } },
   ];
   assert.deepEqual(rankSheltersByFlood(shelters, []).map((s) => s.id), ["bpbd-near", "mosque", "bpbd-far", "school-floods"]);
+});
+
+test("each post maps to the active areas it activates; rain-only areas map to no post", () => {
+  const angke = post("P.A. Cengkareng Drain", "Siaga 3");
+  const points = activeFloodPoints(POINTS, [angke], 0);
+  const byPost = areasByPost(points);
+  assert.deepEqual(byPost.get("P.A. Cengkareng Drain").map((p) => p.kelurahan), ["KAPUK"]);
+  assert.equal(areasByPost(activeFloodPoints(POINTS, [], 30)).size, 0);
 });

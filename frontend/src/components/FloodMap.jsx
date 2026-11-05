@@ -171,7 +171,7 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
 
         {/* Active flood-prone areas, then the posts on top (shared with the evacuation map) */}
         <ActiveFloodAreas points={floodPoints} />
-        <StationMarkers stations={mappedStations} />
+        <StationMarkers stations={mappedStations} floodPoints={floodPoints} />
       </MapContainer>
 
       <div className={`map-legend${legendOpen ? "" : " is-collapsed"}`}>

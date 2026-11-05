@@ -173,7 +173,7 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
 
         {/* Active flood-prone areas and the posts that drive them (shared with the water-level map) */}
         <ActiveFloodAreas points={floodPoints} />
-        <StationMarkers stations={stations} small />
+        <StationMarkers stations={stations} floodPoints={floodPoints} small />
 
         {/* Other alternatives, faint; the chosen route on top in green/red runs */}
         {scored.map((r, i) => i !== chosenIdx && (
