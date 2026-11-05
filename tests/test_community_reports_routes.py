@@ -39,6 +39,17 @@ def test_submit_report_success():
     assert body["report"]["id"] == "r-1"
 
 
+def test_submit_report_answers_503_when_nothing_was_stored():
+    with patch("api.routes.community_reports.create_report", return_value=None):
+        response = client.post(
+            "/reports",
+            json={"severity": "alert", "message": "Air naik di Kemayoran", "lat": -6.15, "lon": 106.85},
+            headers=_HEADERS,
+        )
+    assert response.status_code == 503
+    assert response.json()["detail"]["error"] == "report_store_unavailable"
+
+
 def test_submit_report_rejects_invalid_severity():
     response = client.post(
         "/reports",

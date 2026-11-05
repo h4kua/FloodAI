@@ -173,8 +173,11 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0, focusRepo
     } catch (err) {
       setFormError(err.message === "rate"
         ? (isId ? "Terlalu banyak laporan dari jaringan ini. Coba lagi beberapa menit lagi." : "Too many reports from this network. Try again in a few minutes.")
-        : /^\d+$/.test(err.message) || !err.message
-        ? (isId ? "Laporan gagal dikirim. Coba lagi." : "The report could not be sent. Try again.")
+        : /^\d+$/.test(err.message)
+        // The status code tells a 422 (rejected data) from a 503 (store down) in a screenshot.
+        ? (isId ? `Laporan gagal dikirim (kode ${err.message}). Coba lagi.` : `The report could not be sent (code ${err.message}). Try again.`)
+        : !err.message || err.name === "TypeError"
+        ? (isId ? "Laporan gagal dikirim: server tidak terjangkau. Periksa internet lalu coba lagi." : "The report could not be sent: the server could not be reached. Check your connection and try again.")
         : err.message);
     } finally {
       setSubmitting(false);

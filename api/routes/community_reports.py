@@ -196,7 +196,10 @@ async def submit_report(payload: CommunityReportIn) -> dict:
         location_label=payload.location_label,
         photo_url=payload.photo_url,
     )
-    return {"report": report, "saved": report is not None}
+    if report is None:
+        # A 200 with saved=false read as "sent" in the app while nothing was stored.
+        raise HTTPException(status_code=503, detail={"error": "report_store_unavailable"})
+    return {"report": report, "saved": True}
 
 
 @router.get(
