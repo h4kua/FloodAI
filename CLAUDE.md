@@ -73,11 +73,13 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   9–10 May, 16 May 2026), none on the May 2026 BPBD flood days. `FEATURE_HISTORY_DB_ENABLED=false` on Fly,
   so the model's lag features still start empty (as before).
 - Hourly rain (2026-11-05, `scripts/hourly_rain_experiment.py`, kecamatan-days 2020–Sep 2025 vs BPBD dates):
-  with ERA5 hourly (Open-Meteo) the wettest-hour features add nothing over daily totals (95 % CIs
-  include 0; ROC-AUC ~0.75–0.80, PR-AUC ~0.09). ERA5 gives 31 mm on 1 Jan 2020 (Halim measured 377 mm),
-  so the run on GPM IMERG (`scripts/fetch_imerg_history.py`, `EARTHDATA_TOKEN` in .env) is the real test.
-  Giovanni's time-series API answered 500 even for its own tutorial example and OPeNDAP data reads 401
-  until the Earthdata account approves the "NASA GESDISC DATA ARCHIVE" application.
+  the wettest-hour features add nothing over daily totals, with ERA5 or with GPM IMERG (95 % CIs
+  include 0). The rain SOURCE matters: on the same rows IMERG beats ERA5 (`scripts/rain_source_comparison.py`;
+  test 2023–Sep 2025 PR-AUC 0.09 → 0.17, ROC-AUC 0.80 → 0.83–0.84, CIs exclude 0 in 3 of 4 runs).
+  On 1 Jan 2020 ERA5 gives 31 mm, IMERG 101 mm (Halim gauge 377 mm). IMERG comes from
+  `scripts/fetch_imerg_history.py` (Giovanni time-series API, `EARTHDATA_TOKEN` in .env; the Earthdata
+  account must approve "NASA GESDISC DATA ARCHIVE"), cached in data/raw/imerg/. IMERG Final lags ~3.5
+  months (V07B ends 2025-09-30); serving would need IMERG Early (~4 h latency).
 - 2026 flood events: `data/processed/bpbd_updates_2026.csv` holds BPBD flooded-RT figures per kelurahan
   quoted by news (1–25 May 2026 only); bpbd.jakarta.go.id posted no genangan updates 24 Apr–5 Nov 2026.
 - AUC 0.9452 belongs to the legacy Jakarta model (`flood_model_jakarta.pkl`, random 80:20 split).

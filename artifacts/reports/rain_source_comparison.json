@@ -1,0 +1,89 @@
+{
+  "generated_at": "2026-11-05T02:31:54+00:00",
+  "rows": 88200,
+  "features": [
+    "d0",
+    "d1",
+    "d3prev",
+    "up_bogor_d0",
+    "up_bogor_d1",
+    "up_depok_d0",
+    "month_sin",
+    "month_cos",
+    "hist_rate"
+  ],
+  "runs": [
+    {
+      "split": "train 2020\u20132021, test 2022 (complete dates)",
+      "model": "logistic",
+      "era5_roc_auc": 0.667,
+      "imerg_roc_auc": 0.729,
+      "era5_pr_auc": 0.07,
+      "imerg_pr_auc": 0.108,
+      "imerg_minus_era5_95ci": {
+        "roc_auc": [
+          0.021,
+          0.1
+        ],
+        "pr_auc": [
+          0.013,
+          0.067
+        ]
+      }
+    },
+    {
+      "split": "train 2020\u20132021, test 2022 (complete dates)",
+      "model": "xgboost",
+      "era5_roc_auc": 0.744,
+      "imerg_roc_auc": 0.754,
+      "era5_pr_auc": 0.099,
+      "imerg_pr_auc": 0.104,
+      "imerg_minus_era5_95ci": {
+        "roc_auc": [
+          -0.036,
+          0.055
+        ],
+        "pr_auc": [
+          -0.031,
+          0.036
+        ]
+      }
+    },
+    {
+      "split": "train 2020\u20132022, test 2023\u2013Sep 2025 (partial dates)",
+      "model": "logistic",
+      "era5_roc_auc": 0.798,
+      "imerg_roc_auc": 0.837,
+      "era5_pr_auc": 0.094,
+      "imerg_pr_auc": 0.168,
+      "imerg_minus_era5_95ci": {
+        "roc_auc": [
+          0.019,
+          0.062
+        ],
+        "pr_auc": [
+          0.034,
+          0.107
+        ]
+      }
+    },
+    {
+      "split": "train 2020\u20132022, test 2023\u2013Sep 2025 (partial dates)",
+      "model": "xgboost",
+      "era5_roc_auc": 0.798,
+      "imerg_roc_auc": 0.827,
+      "era5_pr_auc": 0.087,
+      "imerg_pr_auc": 0.177,
+      "imerg_minus_era5_95ci": {
+        "roc_auc": [
+          0.01,
+          0.051
+        ],
+        "pr_auc": [
+          0.041,
+          0.138
+        ]
+      }
+    }
+  ]
+}
