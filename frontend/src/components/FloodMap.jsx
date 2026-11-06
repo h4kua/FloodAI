@@ -7,13 +7,7 @@ import floodProneZones from "../data/floodProneZones.json";
 import postRivers from "../data/postRivers.json";
 import { activeFloodPoints } from "../lib/floodRoads";
 import { ActiveFloodAreas, AREA_COLOR, StationMarkers } from "./mapLayers";
-import WeatherLayer, { WEATHER_FILL, WeatherPatterns, useWilayahWeather } from "./WeatherLayer";
-
-const WEATHER_KEY_ROWS = [
-  ["cloudy", "Berawan", "Cloudy"],
-  ["rain", "Hujan", "Rain"],
-  ["heavy", "Hujan lebat", "Heavy rain"],
-];
+import WeatherLayer, { WeatherPatterns, useWilayahWeather, weatherKey } from "./WeatherLayer";
 
 
 // Single muted slate-blue for ALL historical BNPB flood-prone points so the
@@ -92,7 +86,7 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
 
   return (
     <div className="flood-map-wrap" style={{ position: "relative", flex: 1, minHeight: "clamp(340px, 58vh, 600px)" }}>
-      {showWeather && <WeatherPatterns />}
+      {showWeather && <WeatherPatterns weather={weather} />}
       <MapContainer
         center={[-6.23, 106.85]}
         zoom={12}
@@ -263,8 +257,9 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
           </button>
           {showWeather && (
             <div className="wx-key">
-              {WEATHER_KEY_ROWS.map(([kind, idText, enText]) => (
-                <span key={kind}><i style={{ background: WEATHER_FILL[kind] }} />{isId ? idText : enText}</span>
+              {/* Only the states on the map now; tap a kota's card for its details */}
+              {weatherKey(weather, lang, theme === "dark").map(({ id, name, color }) => (
+                <span key={id}><i style={{ background: color }} />{name}</span>
               ))}
             </div>
           )}

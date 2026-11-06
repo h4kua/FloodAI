@@ -1426,38 +1426,83 @@ button, input, select, textarea { font-family: inherit; }
 }
 
 /* Weather per wilayah on the home map (components/WeatherLayer.jsx) */
-.wx-marker { pointer-events: none !important; }
-.wx-badge {
-  position: absolute; transform: translate(-50%, -50%);
-  display: flex; flex-direction: column; align-items: center; gap: 0;
-  pointer-events: none; white-space: nowrap;
-}
-.wx-badge svg { filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.25)); }
-.wx-badge span {
-  font-size: 11px; font-weight: 600; line-height: 1.2;
-  color: var(--text); background: color-mix(in srgb, var(--panel) 82%, transparent);
-  border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px;
-}
-.wx-badge.wx-rain span, .wx-badge.wx-heavy span { color: var(--cyan); border-color: var(--cyan-border); }
-.wx-badge.wx-heavy span { font-weight: 700; }
-@media (max-width: 640px) {
-  .wx-badge svg { width: 34px; height: 25px; }
-  .wx-badge span { font-size: 10px; padding: 0 5px; }
-}
-.wx-key { display: flex; flex-wrap: wrap; gap: 2px 10px; padding: 0 0 4px 15px; font-size: 0.72rem; color: var(--muted); }
+.wx-key { display: flex; flex-wrap: wrap; gap: 2px 10px; padding: 0 0 4px 15px; max-width: 190px; font-size: 0.72rem; color: var(--muted); }
 .wx-key span { display: inline-flex; align-items: center; gap: 4px; }
-.wx-key i { width: 10px; height: 10px; border-radius: 2px; opacity: 0.8; }
-/* Moving weather textures (WeatherPatterns) and the small pictures */
-.leaflet-container path.wx-anim-drizzle { fill: url(#wx-drizzle); }
-.leaflet-container path.wx-anim-rain  { fill: url(#wx-rain); }
-.leaflet-container path.wx-anim-heavy { fill: url(#wx-rain-heavy); }
-.leaflet-container path.wx-anim-cloud { fill: url(#wx-cloud); }
-@keyframes wx-float { 0%, 100% { transform: translateX(-2px); } 50% { transform: translateX(3px); } }
-@keyframes wx-drop  { from { transform: translateY(-2px); opacity: 1; } to { transform: translateY(4px); opacity: 0; } }
+.wx-key i { width: 10px; height: 10px; border-radius: 3px; opacity: 0.85; }
+
+/* Moving textures: each layer class fills its kota with a pattern from WeatherPatterns */
+.leaflet-container path.wx-t-sun               { fill: url(#wx-p-sun); }
+.leaflet-container path.wx-t-stars             { fill: url(#wx-p-stars); }
+.leaflet-container path.wx-t-cloud-far         { fill: url(#wx-p-cloud-far); }
+.leaflet-container path.wx-t-cloud-near        { fill: url(#wx-p-cloud-near); }
+.leaflet-container path.wx-t-cloud-near-sparse { fill: url(#wx-p-cloud-near-sparse); }
+.leaflet-container path.wx-t-fog               { fill: url(#wx-p-fog); }
+.leaflet-container path.wx-t-rain-far          { fill: url(#wx-p-rain-far); }
+.leaflet-container path.wx-t-drizzle           { fill: url(#wx-p-drizzle); }
+.leaflet-container path.wx-t-rain              { fill: url(#wx-p-rain); }
+.leaflet-container path.wx-t-heavy             { fill: url(#wx-p-heavy); }
+/* Thunderstorm: a soft glow now and then, never more than twice in a row (no strobing) */
+.leaflet-container path.wx-t-flash { fill: #e0e7ff; fill-opacity: 0; animation: wx-flash 11s ease-out infinite; }
+@keyframes wx-flash {
+  0%, 90%, 100% { fill-opacity: 0; }
+  91% { fill-opacity: 0.18; }
+  93% { fill-opacity: 0.02; }
+  94.5% { fill-opacity: 0.12; }
+  97% { fill-opacity: 0; }
+}
+
+/* The kota cards: glass, tappable, with a gently moving picture */
+.wx-marker { background: none; border: 0; }
+.wx-card {
+  position: absolute; transform: translate(-50%, -50%);
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 10px 3px 5px; white-space: nowrap; cursor: pointer;
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel) 74%, transparent);
+  -webkit-backdrop-filter: blur(8px) saturate(1.3); backdrop-filter: blur(8px) saturate(1.3);
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.16);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.wx-card:hover { transform: translate(-50%, calc(-50% - 2px)); box-shadow: 0 8px 20px rgba(15, 23, 42, 0.22); }
+.wx-ico { display: flex; }
+.wx-ico svg { filter: drop-shadow(0 1px 1.5px rgba(15, 23, 42, 0.25)); overflow: visible; }
+.wx-txt { display: flex; flex-direction: column; line-height: 1.15; }
+.wx-txt b { font-size: 12px; font-weight: 700; }
+.wx-txt small { font-size: 11px; color: var(--muted); font-weight: 500; }
+.wx-k-drizzle .wx-txt small, .wx-k-rain .wx-txt small, .wx-k-heavy .wx-txt small, .wx-k-storm .wx-txt small { color: var(--cyan); font-weight: 600; }
+
+@keyframes wx-bob   { 0%, 100% { transform: translateX(-1.2px); } 50% { transform: translateX(1.6px); } }
+@keyframes wx-drop  { 0% { transform: translateY(-2px); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateY(3px); opacity: 0; } }
 @keyframes wx-spin  { to { transform: rotate(360deg); } }
-.wx-badge svg { animation: wx-float 6s ease-in-out infinite; }
-.wx-badge .wx-d { animation: wx-drop 0.8s linear infinite; }
-.wx-badge .wx-rays { transform-box: view-box; transform-origin: 23px 16px; animation: wx-spin 24s linear infinite; }
+@keyframes wx-mist  { 0%, 100% { transform: translateX(-1.5px); opacity: 0.7; } 50% { transform: translateX(1.5px); opacity: 1; } }
+@keyframes wx-bolt  { 0%, 88%, 100% { opacity: 0.35; } 90% { opacity: 1; } 93% { opacity: 0.5; } 95% { opacity: 1; } }
+.wx-card .wx-bob  { animation: wx-bob 7s ease-in-out infinite; }
+.wx-card .wx-drop { animation: wx-drop 1.1s ease-in infinite; }
+.wx-card .wx-rays { transform-box: view-box; animation: wx-spin 30s linear infinite; }
+.wx-card .wx-mist { animation: wx-mist 6s ease-in-out infinite; }
+.wx-card .wx-bolt { animation: wx-bolt 11s linear infinite; }
+
+/* The details opened from a card */
+.wx-detail { min-width: 210px; }
+.wx-detail-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.wx-detail-name { font-weight: 700; font-size: 13px; margin: 0; }
+.wx-detail-state { font-size: 12px; color: var(--muted); margin: 0; }
+.wx-detail dl { margin: 0; display: grid; gap: 2px; }
+.wx-detail dl div { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+.wx-detail dt { color: var(--muted); }
+.wx-detail dd { margin: 0; font-weight: 600; text-align: right; }
+.wx-detail-note { font-size: 10.5px; color: var(--muted-2); margin: 6px 0 0; line-height: 1.35; }
+
+@media (max-width: 640px) {
+  .wx-key { max-width: none; }
+  .wx-card { gap: 4px; padding: 2px 8px 2px 4px; border-radius: 12px; }
+  .wx-ico svg { width: 26px; height: 22px; }
+  .wx-txt b { font-size: 11px; }
+  .wx-txt small { font-size: 10px; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .wx-badge svg, .wx-badge .wx-d, .wx-badge .wx-rays { animation: none; }
+  .wx-card, .wx-card * { animation: none !important; transition: none !important; }
+  .leaflet-container path.wx-t-flash { animation: none; }
 }

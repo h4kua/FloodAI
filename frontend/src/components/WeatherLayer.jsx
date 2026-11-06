@@ -1,98 +1,198 @@
 /* ── Weather per wilayah on the home map ──────────────────────────────────
-   Each kota is filled with its weather's colour (grey cloud, blue rain, deep
-   blue heavy rain; clear stays uncoloured) and gets a small picture (sun,
-   cloud, cloud with rain) with a label such as "Barat · Berawan".
-   Moving texture on top: rain streaks fall in rainy kota, soft clouds drift
-   over cloudy ones (SVG patterns in <WeatherPatterns>, still for people who
-   ask their system for reduced motion).
-   Nothing here takes clicks, so the posts under it stay clickable.
+   Each kota is tinted by its weather (eight states, from warm clear to indigo
+   thunderstorm) and carries a slow, layered texture: a breathing sun glow or
+   stars at night, clouds that drift with the live wind (a faint far layer and
+   a nearer one), mist bands, rain in two depths, a soft lightning glow. A
+   small glass card names the kota, its temperature and weather; tapping it
+   opens the details. Everything holds still for people who ask their system
+   for reduced motion, and pauses while the map is off screen.
+   The tints and textures take no clicks, so the posts stay clickable.
 */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
-import { Marker, Pane, Polygon } from "react-leaflet";
+import { Marker, Pane, Polygon, Popup } from "react-leaflet";
 import wilayahShapes from "../data/wilayahShapes.json";
-import { WEATHER_REFRESH_MS, WILAYAH, describeWeather, fetchWilayahWeather } from "../lib/wilayahWeather";
+import {
+  KINDS, WEATHER_REFRESH_MS, WILAYAH, cloudDrift, describeWeather, fetchWilayahWeather,
+} from "../lib/wilayahWeather";
 
-export const WEATHER_FILL = { cloudy: "#64748b", rain: "#3b82f6", heavy: "#1e40af" };
-// On the dark basemap a dark grey vanished, so clouds there are a light grey.
-const CLOUD_DARK = "#cbd5e1";
-// Grey thickens with the cloud cover (30 % → 0.31, 100 % → 0.45); rain is a fixed, stronger blue.
-const fillOpacity = (info, dark) => (info.kind === "cloudy"
-  ? (dark ? 0.12 + 0.18 * info.cloud : 0.25 + 0.2 * info.cloud)
-  : info.kind === "rain" ? 0.42 : 0.52);
+// Tint per state: [colour, opacity on the light basemap, opacity on the dark one].
+const TINT = {
+  clear:   ["#fbbf24", 0.10, 0.04],  // warmth comes mostly from the glow texture; more turned muddy on dark
+  night:   ["#6366f1", 0.08, 0.12],
+  partly:  ["#94a3b8", 0.16, 0.10],
+  cloudy:  ["#64748b", 0.30, 0.20],
+  fog:     ["#e2e8f0", 0.38, 0.18],
+  drizzle: ["#60a5fa", 0.26, 0.24],
+  rain:    ["#3b82f6", 0.36, 0.34],
+  heavy:   ["#1d4ed8", 0.46, 0.44],
+  storm:   ["#4338ca", 0.50, 0.48],
+};
+// Light-grey clouds on the dark basemap, where dark grey vanished.
+const DARK_SWAP = { partly: "#cbd5e1", cloudy: "#cbd5e1" };
 
-const CLOUD = '<path d="M13 22h20a6.5 6.5 0 0 0 .6-13A9 9 0 0 0 16.3 8 7 7 0 0 0 13 22z" fill="#fff" fill-opacity="0.95" stroke="#7b8698" stroke-width="1.4"/>';
-const DROPS = (n) => Array.from({ length: n }, (_, i) => {
-  const x = 15 + i * (16 / Math.max(1, n - 1));
-  return `<line class="wx-d" style="animation-delay:-${(i * 0.27).toFixed(2)}s" x1="${x}" y1="25" x2="${x - 2}" y2="31" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>`;
-}).join("");
-const SUN = '<circle cx="23" cy="16" r="6" fill="#f59e0b"/><g class="wx-rays" stroke="#f59e0b" stroke-width="1.6" stroke-linecap="round">'
-  + [0, 45, 90, 135, 180, 225, 270, 315].map((a) => {
-    const r = (a * Math.PI) / 180;
-    return `<line x1="${23 + Math.cos(r) * 8.5}" y1="${16 + Math.sin(r) * 8.5}" x2="${23 + Math.cos(r) * 11}" y2="${16 + Math.sin(r) * 11}"/>`;
-  }).join("") + "</g>";
-
-function picture(kind) {
-  const art = kind === "clear" ? SUN : kind === "rain" ? CLOUD + DROPS(3) : kind === "heavy" ? CLOUD + DROPS(5) : CLOUD;
-  return `<svg width="46" height="34" viewBox="0 0 46 34" aria-hidden="true">${art}</svg>`;
+export function tintOf(kind, isDay = true, dark = false) {
+  const key = kind === "clear" && !isDay ? "night" : kind;
+  const [color, light, darkOpacity] = TINT[key] ?? TINT.cloudy;
+  return { color: (dark && DARK_SWAP[key]) || color, opacity: dark ? darkOpacity : light };
 }
+
+// Texture layers per state, back to front (each a pattern below, or the flash).
+const LAYERS = {
+  clear:   ["sun"],
+  night:   ["stars"],
+  partly:  ["cloud-near-sparse"],
+  cloudy:  ["cloud-far", "cloud-near"],
+  fog:     ["fog"],
+  drizzle: ["cloud-far", "drizzle"],
+  rain:    ["rain-far", "rain"],
+  heavy:   ["rain-far", "heavy"],
+  storm:   ["rain-far", "heavy", "flash"],
+};
+const layersOf = (info) => LAYERS[info.kind === "clear" && !info.isDay ? "night" : info.kind];
 
 const reducedMotion = () => {
   try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; }
 };
 
+/* ── Small pictures (inline SVG, gradients from <WeatherPatterns>) ── */
+const CLOUD_PATH = "M10 21a6 6 0 0 1-.6-12 8 8 0 0 1 15.2-1.6A6.5 6.5 0 1 1 25 21z";
+const cloud = (fill = "url(#wx-g-cloud)") => `<path d="${CLOUD_PATH}" fill="${fill}" stroke="rgba(15,23,42,.22)" stroke-width=".8"/>`;
+const drops = (n, x0 = 11, span = 12) => Array.from({ length: n }, (_, i) => {
+  const x = x0 + (n > 1 ? (i * span) / (n - 1) : span / 2);
+  return `<line class="wx-drop" style="animation-delay:-${(i * 0.23).toFixed(2)}s" x1="${x}" y1="23" x2="${x - 1.4}" y2="27" stroke="#93c5fd" stroke-width="1.8" stroke-linecap="round"/>`;
+}).join("");
+const rays = (cx, cy, r1, r2) => `<g class="wx-rays" style="transform-origin:${cx}px ${cy}px" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round">${
+  [0, 45, 90, 135, 180, 225, 270, 315].map((a) => {
+    const t = (a * Math.PI) / 180;
+    return `<line x1="${(cx + Math.cos(t) * r1).toFixed(1)}" y1="${(cy + Math.sin(t) * r1).toFixed(1)}" x2="${(cx + Math.cos(t) * r2).toFixed(1)}" y2="${(cy + Math.sin(t) * r2).toFixed(1)}"/>`;
+  }).join("")}</g>`;
+const ART = {
+  clear: `<circle cx="17" cy="14" r="6.5" fill="url(#wx-g-sun)"/>${rays(17, 14, 9, 12)}`,
+  night: '<path d="M21 5.5a8.5 8.5 0 1 0 6.5 12.6A7 7 0 0 1 21 5.5z" fill="url(#wx-g-moon)"/>',
+  partly: `<circle cx="12" cy="10" r="5.5" fill="url(#wx-g-sun)"/>${rays(12, 10, 7.5, 9.8)}<g class="wx-bob">${cloud()}</g>`,
+  cloudy: `<g class="wx-bob">${cloud()}</g>`,
+  fog: `<g class="wx-bob">${cloud()}</g><g class="wx-mist" stroke="#cbd5e1" stroke-width="1.6" stroke-linecap="round"><line x1="6" y1="24" x2="24" y2="24"/><line x1="10" y1="27" x2="29" y2="27"/></g>`,
+  drizzle: `<g class="wx-bob">${cloud("url(#wx-g-raincloud)")}</g>${drops(2, 12, 9)}`,
+  rain: `<g class="wx-bob">${cloud("url(#wx-g-raincloud)")}</g>${drops(3)}`,
+  heavy: `<g class="wx-bob">${cloud("url(#wx-g-stormcloud)")}</g>${drops(5, 9, 16)}`,
+  storm: `<g class="wx-bob">${cloud("url(#wx-g-stormcloud)")}</g><path class="wx-bolt" d="M18 18l-4 6h3l-2 5 6-7h-3l2-4z" fill="url(#wx-g-bolt)"/>${drops(2, 10, 14)}`,
+};
+export const weatherPicture = (kind, isDay = true, size = 34) =>
+  `<svg width="${size}" height="${Math.round(size * 0.85)}" viewBox="0 0 34 29" aria-hidden="true">${ART[kind === "clear" && !isDay ? "night" : kind] ?? ART.cloudy}</svg>`;
+
 /**
- * The moving textures, referenced by the weather polygons as url(#wx-…).
- * Rendered once next to the map; the loops are seamless because each one
- * moves by exactly one pattern tile.
+ * Gradients for the pictures and the moving textures, referenced as
+ * url(#wx-…) by the weather layers. Rendered once next to the map; every loop
+ * moves by exactly one pattern tile, so it never jumps.
  */
-export function WeatherPatterns() {
+export function WeatherPatterns({ weather = {} }) {
+  const svgRef = useRef(null);
   const still = useMemo(reducedMotion, []);
-  const move = (to, dur) => (still ? null : (
-    <animateTransform attributeName="patternTransform" type="translate" from="0 0" to={to} dur={dur} repeatCount="indefinite" />
+  const drift = useMemo(() => cloudDrift(Object.values(weather)), [weather]);
+
+  // Pause every loop while the map is scrolled out of view.
+  useEffect(() => {
+    const svg = svgRef.current;
+    const box = svg?.parentElement;
+    if (!svg || !box || typeof IntersectionObserver === "undefined") return undefined;
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) svg.unpauseAnimations?.(); else svg.pauseAnimations?.();
+    });
+    io.observe(box);
+    return () => io.disconnect();
+  }, []);
+
+  const move = (w, h, dx, dy, seconds) => (still ? null : (
+    <animateTransform attributeName="patternTransform" type="translate" from="0 0"
+      to={`${dx * w} ${dy * h}`} dur={`${seconds}s`} repeatCount="indefinite" />
   ));
-  const streak = (x, y, len = 9) => <line key={`${x}-${y}`} x1={x} y1={y} x2={x - len / 3} y2={y + len} />;
+  const breathe = (values, seconds) => (still ? null : (
+    <animate attributeName="opacity" values={values} dur={`${seconds}s`} repeatCount="indefinite" calcMode="spline"
+      keySplines="0.45 0 0.55 1;0.45 0 0.55 1" keyTimes="0;0.5;1" />
+  ));
+  // Streaks with varied length and strength look like rain, not a grid.
+  const streaks = (list, opacity, width) => (
+    <g stroke="#ffffff" strokeWidth={width} strokeLinecap="round">
+      {list.map(([x, y, len, o], i) => (
+        <line key={i} x1={x} y1={y} x2={x - len * 0.28} y2={y + len} strokeOpacity={opacity * o} />
+      ))}
+    </g>
+  );
+  const puffs = (list, opacity) => (
+    <g fill="#ffffff" fillOpacity={opacity} filter="url(#wx-blur)">
+      {list.map(([cx, cy, rx, ry], i) => <ellipse key={i} cx={cx} cy={cy} rx={rx} ry={ry} />)}
+    </g>
+  );
+  const { dx, dy, seconds } = drift;
+
   return (
-    <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true" focusable="false">
+    <svg ref={svgRef} width="0" height="0" style={{ position: "absolute" }} aria-hidden="true" focusable="false">
       <defs>
-        <filter id="wx-blur" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="9" /></filter>
-        <pattern id="wx-drizzle" width="40" height="40" patternUnits="userSpaceOnUse">
-          <g stroke="#ffffff" strokeOpacity="0.45" strokeWidth="1.2" strokeLinecap="round">
-            {[streak(10, 4, 5), streak(30, 24, 5)]}
+        <radialGradient id="wx-g-sun"><stop offset="0" stopColor="#fde68a" /><stop offset="1" stopColor="#f59e0b" /></radialGradient>
+        <linearGradient id="wx-g-moon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#eef2ff" /><stop offset="1" stopColor="#a5b4fc" /></linearGradient>
+        <linearGradient id="wx-g-cloud" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ffffff" /><stop offset="1" stopColor="#dbe3ee" /></linearGradient>
+        <linearGradient id="wx-g-raincloud" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#e2e8f0" /><stop offset="1" stopColor="#94a3b8" /></linearGradient>
+        <linearGradient id="wx-g-stormcloud" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#94a3b8" /><stop offset="1" stopColor="#475569" /></linearGradient>
+        <linearGradient id="wx-g-bolt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fef08a" /><stop offset="1" stopColor="#f59e0b" /></linearGradient>
+        <filter id="wx-blur" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="10" /></filter>
+        <radialGradient id="wx-g-glow"><stop offset="0" stopColor="#fff7d6" stopOpacity="0.9" /><stop offset="1" stopColor="#fff7d6" stopOpacity="0" /></radialGradient>
+
+        {/* Clear day: warm light that slowly breathes */}
+        <pattern id="wx-p-sun" width="420" height="320" patternUnits="userSpaceOnUse">
+          <g opacity="0.35">
+            <circle cx="120" cy="90" r="110" fill="url(#wx-g-glow)" />
+            <circle cx="330" cy="240" r="80" fill="url(#wx-g-glow)" />
+            {breathe("0.25;0.55;0.25", 9)}
           </g>
-          {move("0 40", "1.4s")}
         </pattern>
-        <pattern id="wx-rain" width="28" height="28" patternUnits="userSpaceOnUse">
-          <g stroke="#ffffff" strokeOpacity="0.55" strokeWidth="1.3" strokeLinecap="round">
-            {[streak(8, 1), streak(22, 12), streak(14, 18, 7)]}
-          </g>
-          {move("0 28", "0.7s")}
+        {/* Clear night: a few stars that twinkle out of step */}
+        <pattern id="wx-p-stars" width="160" height="140" patternUnits="userSpaceOnUse">
+          {[[20, 30, 1.1, 3.1], [90, 18, 0.8, 4.3], [130, 76, 1.2, 5.2], [52, 104, 0.9, 3.7], [110, 128, 0.7, 4.9]].map(([cx, cy, r, s], i) => (
+            <circle key={i} cx={cx} cy={cy} r={r} fill="#e0e7ff" opacity="0.6">
+              {still ? null : <animate attributeName="opacity" values="0.2;0.85;0.2" dur={`${s}s`} repeatCount="indefinite" />}
+            </circle>
+          ))}
         </pattern>
-        <pattern id="wx-rain-heavy" width="18" height="18" patternUnits="userSpaceOnUse">
-          <g stroke="#ffffff" strokeOpacity="0.7" strokeWidth="1.5" strokeLinecap="round">
-            {[streak(5, 0, 8), streak(14, 6, 9), streak(9, 10, 6)]}
-          </g>
-          {move("0 18", "0.42s")}
+        {/* Clouds, drifting where the live wind blows: a faint, slow far layer and a nearer one */}
+        <pattern id="wx-p-cloud-far" width="300" height="200" patternUnits="userSpaceOnUse">
+          {puffs([[70, 60, 46, 16], [210, 150, 56, 18], [250, 40, 30, 11]], 0.16)}
+          {move(300, 200, dx, dy, Math.round(seconds * 1.6))}
         </pattern>
-        <pattern id="wx-cloud" width="260" height="170" patternUnits="userSpaceOnUse">
-          <g fill="#ffffff" fillOpacity="0.3" filter="url(#wx-blur)">
-            <ellipse cx="62" cy="52" rx="38" ry="16" />
-            <ellipse cx="82" cy="44" rx="24" ry="14" />
-            <ellipse cx="178" cy="118" rx="52" ry="18" />
-            <ellipse cx="200" cy="108" rx="28" ry="15" />
-          </g>
-          {move("260 0", "70s")}
+        <pattern id="wx-p-cloud-near" width="380" height="260" patternUnits="userSpaceOnUse">
+          {puffs([[90, 70, 62, 22], [120, 60, 36, 18], [270, 190, 72, 24], [300, 178, 40, 18]], 0.3)}
+          {move(380, 260, dx, dy, seconds)}
+        </pattern>
+        <pattern id="wx-p-cloud-near-sparse" width="460" height="320" patternUnits="userSpaceOnUse">
+          {puffs([[110, 90, 58, 20], [140, 80, 32, 16], [340, 240, 50, 18]], 0.26)}
+          {move(460, 320, dx, dy, seconds)}
+        </pattern>
+        {/* Fog: long soft bands sliding sideways */}
+        <pattern id="wx-p-fog" width="560" height="110" patternUnits="userSpaceOnUse">
+          {puffs([[150, 30, 140, 9], [420, 80, 150, 10]], 0.4)}
+          {move(560, 110, 1, 0, 120)}
+        </pattern>
+        {/* Rain in two depths: far streaks are thin and slow, near ones longer */}
+        <pattern id="wx-p-rain-far" width="34" height="46" patternUnits="userSpaceOnUse">
+          {streaks([[8, 4, 7, 1], [26, 26, 6, 0.8]], 0.32, 1)}
+          {move(34, 46, 0, 1, 2.4)}
+        </pattern>
+        <pattern id="wx-p-drizzle" width="46" height="56" patternUnits="userSpaceOnUse">
+          {streaks([[12, 6, 5, 1], [36, 32, 4, 0.8]], 0.45, 1.1)}
+          {move(46, 56, 0, 1, 2.2)}
+        </pattern>
+        <pattern id="wx-p-rain" width="38" height="52" patternUnits="userSpaceOnUse">
+          {streaks([[9, 2, 11, 1], [27, 18, 9, 0.75], [19, 36, 10, 0.9]], 0.45, 1.2)}
+          {move(38, 52, 0, 1, 1.25)}
+        </pattern>
+        <pattern id="wx-p-heavy" width="30" height="44" patternUnits="userSpaceOnUse">
+          {streaks([[6, 0, 13, 1], [21, 10, 12, 0.85], [14, 24, 13, 0.95], [27, 32, 10, 0.7]], 0.5, 1.3)}
+          {move(30, 44, 0, 1, 0.85)}
         </pattern>
       </defs>
     </svg>
   );
 }
-
-const TEXTURE = { cloudy: "wx-anim-cloud", rain: "wx-anim-rain", heavy: "wx-anim-heavy" };
-// Drizzle is drawn sparser and slower than rain, so the strength shows.
-const texture = (info) => (info.word === "drizzle" ? "wx-anim-drizzle" : TEXTURE[info.kind]);
-
-const escapeHtml = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
 /** Fetches the weather for the five kota every 15 minutes; {} until (or unless) it arrives. */
 export function useWilayahWeather() {
@@ -111,32 +211,107 @@ export function useWilayahWeather() {
   return weather;
 }
 
-// Its own pane between the basemap (200) and the flood areas and posts (400),
-// so weather that arrives late is still drawn under them.
+const COMPASS = {
+  id: ["utara", "timur laut", "timur", "tenggara", "selatan", "barat daya", "barat", "barat laut"],
+  en: ["north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"],
+};
+const compass = (deg, lang) => COMPASS[lang === "en" ? "en" : "id"][Math.round((((deg % 360) + 360) % 360) / 45) % 8];
+const fmt = (v, lang, d = 0) => (v == null ? "–" : v.toLocaleString(lang === "en" ? "en-US" : "id-ID", { maximumFractionDigits: d }));
+const escapeHtml = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+function Details({ name, w, info, lang }) {
+  const en = lang === "en";
+  const rows = [
+    [en ? "Temperature" : "Suhu", `${fmt(w.tempC, lang)}°C${w.feelsC != null ? (en ? ` (feels ${fmt(w.feelsC, lang)}°)` : ` (terasa ${fmt(w.feelsC, lang)}°)`) : ""}`],
+    [en ? "Humidity" : "Kelembapan", `${fmt(w.humidity, lang)}%`],
+    [en ? "Cloud cover" : "Tutupan awan", `${fmt(w.cloud, lang)}%`],
+    [en ? "Rain" : "Curah hujan", `${fmt(w.rainMm, lang, 1)} mm`],
+    [en ? "Wind" : "Angin", `${fmt(w.windKmh, lang)} km/${en ? "h" : "jam"} ${en ? "from the" : "dari"} ${compass(w.windFrom, lang)}`],
+  ];
+  const time = (w.time || "").slice(11, 16);
+  return (
+    <div className="wx-detail">
+      <div className="wx-detail-head">
+        <span dangerouslySetInnerHTML={{ __html: weatherPicture(info.kind, info.isDay, 40) }} />
+        <div>
+          <p className="wx-detail-name">{name}</p>
+          <p className="wx-detail-state">{info.temp ? `${info.temp} · ` : ""}{info.text}</p>
+        </div>
+      </div>
+      <dl>{rows.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+      <p className="wx-detail-note">
+        {en
+          ? `Open-Meteo weather model${time ? `, ${time} WIB` : ""}. An estimate for the area, not radar; it does not change the flood status.`
+          : `Model cuaca Open-Meteo${time ? `, pukul ${time} WIB` : ""}. Perkiraan untuk wilayah ini, bukan radar; tidak mengubah status banjir.`}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * The tints and textures sit in a pane between the basemap (200) and the flood
+ * areas and posts (400); the cards in one above (450), so they can be tapped.
+ */
 export default function WeatherLayer({ weather = {}, lang = "id", theme = "light" }) {
   const dark = theme === "dark";
-  const isEn = lang === "en";
+  const en = lang === "en";
   const items = useMemo(() => WILAYAH.map((w) => ({ ...w, info: describeWeather(weather[w.key], lang) })), [weather, lang]);
-  return <Pane name="weather" style={{ zIndex: 350, pointerEvents: "none" }}>{items.flatMap(({ key, id, en, lat, lng, info }) => {
+
+  const areas = items.flatMap(({ key, info }) => {
     if (!info) return [];
-    const layers = [];
-    if (info.kind !== "clear") {
-      layers.push(
-        <Polygon key={`wx-area-${key}`} positions={wilayahShapes[key] || []} interactive={false}
-          pathOptions={{ color: "#ffffff", weight: 1.5, opacity: 0.7, fillColor: dark && info.kind === "cloudy" ? CLOUD_DARK : WEATHER_FILL[info.kind], fillOpacity: fillOpacity(info, dark) }} />,
-        // Same outline again, filled with the moving texture (fill set in CSS). Leaflet
-        // sets a class only once, so a change of texture makes a new layer.
-        <Polygon key={`wx-move-${key}-${texture(info)}`} positions={wilayahShapes[key] || []} interactive={false}
-          pathOptions={{ stroke: false, fillOpacity: 1, className: texture(info) }} />,
-      );
-    }
-    const label = `${isEn ? en : id} · ${info.text}`;
+    const positions = wilayahShapes[key] || [];
+    const tint = tintOf(info.kind, info.isDay, dark);
+    return [
+      <Polygon key={`wx-area-${key}`} positions={positions} interactive={false}
+        pathOptions={{ color: "#ffffff", weight: 1.2, opacity: dark ? 0.35 : 0.75, fillColor: tint.color, fillOpacity: tint.opacity }} />,
+      // Leaflet sets a class only once, so the texture is part of the key: a
+      // change of weather at the 15-minute refresh makes new layers.
+      ...layersOf(info).map((layer) => (
+        <Polygon key={`wx-${layer}-${key}`} positions={positions} interactive={false}
+          pathOptions={{ stroke: false, fillOpacity: 1, className: `wx-t wx-t-${layer}` }} />
+      )),
+    ];
+  });
+
+  const cards = items.flatMap(({ key, id, en: enName, lat, lng, info }) => {
+    if (!info) return [];
+    const name = en ? enName : id;
     const icon = L.divIcon({
       className: "wx-marker",
-      html: `<div class="wx-badge wx-${info.kind}">${picture(info.kind)}<span>${escapeHtml(label)}</span></div>`,
+      html: `<div class="wx-card wx-k-${info.kind}" role="button" aria-label="${escapeHtml(`${name}: ${info.text}`)}">`
+        + `<span class="wx-ico">${weatherPicture(info.kind, info.isDay)}</span>`
+        + `<span class="wx-txt"><b>${escapeHtml(name)}</b><small>${info.temp ? `${escapeHtml(info.temp)} · ` : ""}${escapeHtml(info.text)}</small></span></div>`,
       iconSize: [0, 0],
     });
-    layers.push(<Marker key={`wx-icon-${key}`} position={[lat, lng]} icon={icon} interactive={false} keyboard={false} />);
-    return layers;
-  })}</Pane>;
+    const fullName = en ? `${enName} Jakarta` : `Jakarta ${id}`;
+    return [
+      <Marker key={`wx-card-${key}-${info.kind}-${info.text}-${info.temp}`} position={[lat, lng]} icon={icon} keyboard={false}>
+        <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>
+          <Details name={fullName} w={weather[key]} info={info} lang={lang} />
+        </Popup>
+      </Marker>,
+    ];
+  });
+
+  return (
+    <>
+      <Pane name="weather" style={{ zIndex: 350, pointerEvents: "none" }}>{areas}</Pane>
+      <Pane name="weather-cards" style={{ zIndex: 450 }}>{cards}</Pane>
+    </>
+  );
+}
+
+/** The states on the map right now, for the legend: [{ id, name, color }]. */
+export function weatherKey(weather = {}, lang = "id", dark = false) {
+  const seen = new Map();
+  for (const w of WILAYAH) {
+    const info = describeWeather(weather[w.key], lang);
+    if (!info) continue;
+    const id = info.kind === "clear" && !info.isDay ? "night" : info.kind;
+    if (!seen.has(id)) {
+      const name = id === "night" ? (lang === "en" ? "Clear night" : "Cerah (malam)") : KINDS[info.kind][lang === "en" ? "en" : "id"];
+      seen.set(id, { id, name, color: tintOf(info.kind, info.isDay, dark).color });
+    }
+  }
+  return [...seen.values()];
 }
