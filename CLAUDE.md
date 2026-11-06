@@ -31,8 +31,8 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (621, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (25: flood roads, shelter ranking,
-  post levels)
+- Tests: `tests/` (621, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (28: flood roads, shelter ranking,
+  post levels, weather per wilayah)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
 
@@ -112,6 +112,11 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   heavier use needs a paid tier.
 
 ## Resolved
+- 2026-11-06: home map weather per wilayah ("Cuaca per wilayah" switch, on by default): Open-Meteo current
+  cloud cover / rain / WMO code for the 5 mainland kota (`frontend/src/lib/wilayahWeather.js`, every 15 min, browser
+  calls it directly), a thin haze over each kota (`frontend/src/data/wilayahShapes.json` from
+  `scripts/build_wilayah_shapes.py`, OSM via Nominatim) and a sun/cloud/rain picture with a label, in a pane under
+  the posts. A model estimate on a coarse grid, not radar; it does not feed the flood status.
 - 2026-11-05: map rivers and flood-prone areas. A clicked post lights up its river (`frontend/src/data/postRivers.json`
   from `scripts/build_post_rivers.py`: traced on the OSM waterway network from the piece touching the post, 8 km,
   connected only; a stretch under 1 km is re-traced from every waterway within 40 m of the post, as Kaliduri's was

@@ -1424,3 +1424,23 @@ button, input, select, textarea { font-family: inherit; }
   .chatbot-panel { left: 0.375rem; right: 0.375rem; height: 68vh; max-height: 480px; }
   .ow-wilayah-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* Weather per wilayah on the home map (components/WeatherLayer.jsx) */
+.wx-marker { pointer-events: none !important; }
+.wx-badge {
+  position: absolute; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  pointer-events: none; white-space: nowrap;
+}
+.wx-badge svg { filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.25)); }
+.wx-badge span {
+  font-size: 11px; font-weight: 600; line-height: 1.2;
+  color: var(--text); background: color-mix(in srgb, var(--panel) 82%, transparent);
+  border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px;
+}
+.wx-badge.wx-rain span, .wx-badge.wx-heavy span { color: var(--cyan); border-color: var(--cyan-border); }
+.wx-badge.wx-heavy span { font-weight: 700; }
+@media (max-width: 640px) {
+  .wx-badge svg { width: 34px; height: 25px; }
+  .wx-badge span { font-size: 10px; padding: 0 5px; }
+}

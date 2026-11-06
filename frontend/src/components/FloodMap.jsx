@@ -7,6 +7,7 @@ import floodProneZones from "../data/floodProneZones.json";
 import postRivers from "../data/postRivers.json";
 import { activeFloodPoints } from "../lib/floodRoads";
 import { ActiveFloodAreas, AREA_COLOR, StationMarkers } from "./mapLayers";
+import WeatherLayer, { useWilayahWeather } from "./WeatherLayer";
 
 
 // Single muted slate-blue for ALL historical BNPB flood-prone points so the
@@ -26,6 +27,7 @@ function titleCase(s) {
 }
 
 const STREETS_KEY = "deflood.homeMapStreets";
+const WEATHER_KEY = "deflood.homeMapWeather";
 
 // Tight DKI Jakarta administrative boundary.
 const JAKARTA_BOUNDS = [[-6.375, 106.695], [-6.095, 107.005]];
@@ -66,6 +68,15 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
     try { localStorage.setItem(STREETS_KEY, on ? "0" : "1"); } catch { /* private mode */ }
     return !on;
   });
+  // Weather per wilayah (Open-Meteo): on by default, the choice is remembered.
+  const [showWeather, setShowWeather] = useState(() => {
+    try { return localStorage.getItem(WEATHER_KEY) !== "0"; } catch { return true; }
+  });
+  const toggleWeather = () => setShowWeather((on) => {
+    try { localStorage.setItem(WEATHER_KEY, on ? "0" : "1"); } catch { /* private mode */ }
+    return !on;
+  });
+  const weather = useWilayahWeather();
   // Desktop: the legend floats on the map and can be folded. Phones: CSS puts
   // it under the map, always open, so it neither covers the map nor hides.
   const [legendOpen, setLegendOpen] = useState(true);
@@ -99,6 +110,8 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
         <BaseTiles theme={theme} variant={streets ? "street" : "canvas"} />
         <FitJakarta />
         <InvalidateMapSize />
+
+        {showWeather && <WeatherLayer weather={weather} lang={lang} />}
 
         {/* District reference circles — shown faintly as geographic labels only.
             When real sensor stations are on the map these are barely visible.
@@ -225,6 +238,29 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
             }} />
             <span style={{ flex: 1, textAlign: "left" }}>
               {isId ? "Daerah pernah banjir" : "Previously flooded areas"}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={toggleWeather}
+            aria-pressed={showWeather}
+            style={{
+              display: "flex", alignItems: "center", gap: 6, width: "100%", minHeight: 32,
+              background: "transparent", border: "none", padding: "4px 0", cursor: "pointer",
+              color: "var(--muted)", fontSize: "0.78rem",
+            }}
+            title={isId
+              ? "Awan dan hujan saat ini per wilayah (perkiraan model cuaca Open-Meteo, bukan radar)"
+              : "Current cloud and rain per area (Open-Meteo weather model estimate, not radar)"}
+          >
+            <span style={{
+              width: 9, height: 9, borderRadius: 2,
+              border: `1.5px solid ${showWeather ? "#64748b" : "var(--line-2)"}`,
+              background: showWeather ? "#64748b" : "transparent",
+              flexShrink: 0,
+            }} />
+            <span style={{ flex: 1, textAlign: "left" }}>
+              {isId ? "Cuaca per wilayah" : "Weather per area"}
             </span>
           </button>
           <button
