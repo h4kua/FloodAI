@@ -1444,3 +1444,20 @@ button, input, select, textarea { font-family: inherit; }
   .wx-badge svg { width: 34px; height: 25px; }
   .wx-badge span { font-size: 10px; padding: 0 5px; }
 }
+.wx-key { display: flex; flex-wrap: wrap; gap: 2px 10px; padding: 0 0 4px 15px; font-size: 0.72rem; color: var(--muted); }
+.wx-key span { display: inline-flex; align-items: center; gap: 4px; }
+.wx-key i { width: 10px; height: 10px; border-radius: 2px; opacity: 0.8; }
+/* Moving weather textures (WeatherPatterns) and the small pictures */
+.leaflet-container path.wx-anim-drizzle { fill: url(#wx-drizzle); }
+.leaflet-container path.wx-anim-rain  { fill: url(#wx-rain); }
+.leaflet-container path.wx-anim-heavy { fill: url(#wx-rain-heavy); }
+.leaflet-container path.wx-anim-cloud { fill: url(#wx-cloud); }
+@keyframes wx-float { 0%, 100% { transform: translateX(-2px); } 50% { transform: translateX(3px); } }
+@keyframes wx-drop  { from { transform: translateY(-2px); opacity: 1; } to { transform: translateY(4px); opacity: 0; } }
+@keyframes wx-spin  { to { transform: rotate(360deg); } }
+.wx-badge svg { animation: wx-float 6s ease-in-out infinite; }
+.wx-badge .wx-d { animation: wx-drop 0.8s linear infinite; }
+.wx-badge .wx-rays { transform-box: view-box; transform-origin: 23px 16px; animation: wx-spin 24s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .wx-badge svg, .wx-badge .wx-d, .wx-badge .wx-rays { animation: none; }
+}

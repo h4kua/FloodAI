@@ -7,7 +7,13 @@ import floodProneZones from "../data/floodProneZones.json";
 import postRivers from "../data/postRivers.json";
 import { activeFloodPoints } from "../lib/floodRoads";
 import { ActiveFloodAreas, AREA_COLOR, StationMarkers } from "./mapLayers";
-import WeatherLayer, { useWilayahWeather } from "./WeatherLayer";
+import WeatherLayer, { WEATHER_FILL, WeatherPatterns, useWilayahWeather } from "./WeatherLayer";
+
+const WEATHER_KEY_ROWS = [
+  ["cloudy", "Berawan", "Cloudy"],
+  ["rain", "Hujan", "Rain"],
+  ["heavy", "Hujan lebat", "Heavy rain"],
+];
 
 
 // Single muted slate-blue for ALL historical BNPB flood-prone points so the
@@ -26,7 +32,6 @@ function titleCase(s) {
   return (s || "").toLowerCase().split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 }
 
-const STREETS_KEY = "deflood.homeMapStreets";
 const WEATHER_KEY = "deflood.homeMapWeather";
 
 // Tight DKI Jakarta administrative boundary.
@@ -59,15 +64,6 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
   const { theme, lang } = useApp();
   const isId = lang === "id";
   const [showProne, setShowProne] = useState(false); // off by default — it buries the post markers
-  // Grey basemap by default so status colours stand out; the street map is
-  // one tap away and remembered in this browser.
-  const [streets, setStreets] = useState(() => {
-    try { return localStorage.getItem(STREETS_KEY) === "1"; } catch { return false; }
-  });
-  const toggleStreets = () => setStreets((on) => {
-    try { localStorage.setItem(STREETS_KEY, on ? "0" : "1"); } catch { /* private mode */ }
-    return !on;
-  });
   // Weather per wilayah (Open-Meteo): on by default, the choice is remembered.
   const [showWeather, setShowWeather] = useState(() => {
     try { return localStorage.getItem(WEATHER_KEY) !== "0"; } catch { return true; }
@@ -96,6 +92,7 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
 
   return (
     <div className="flood-map-wrap" style={{ position: "relative", flex: 1, minHeight: "clamp(340px, 58vh, 600px)" }}>
+      {showWeather && <WeatherPatterns />}
       <MapContainer
         center={[-6.23, 106.85]}
         zoom={12}
@@ -107,11 +104,12 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%", minHeight: "clamp(340px, 58vh, 600px)" }}
       >
-        <BaseTiles theme={theme} variant={streets ? "street" : "canvas"} />
+        {/* Grey basemap only: the weather colours each kota, a street map underneath was too busy. */}
+        <BaseTiles theme={theme} variant="canvas" />
         <FitJakarta />
         <InvalidateMapSize />
 
-        {showWeather && <WeatherLayer weather={weather} lang={lang} />}
+        {showWeather && <WeatherLayer weather={weather} lang={lang} theme={theme} />}
 
         {/* District reference circles — shown faintly as geographic labels only.
             When real sensor stations are on the map these are barely visible.
@@ -263,27 +261,13 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
               {isId ? "Cuaca per wilayah" : "Weather per area"}
             </span>
           </button>
-          <button
-            type="button"
-            onClick={toggleStreets}
-            aria-pressed={streets}
-            style={{
-              display: "flex", alignItems: "center", gap: 6, width: "100%", minHeight: 32,
-              background: "transparent", border: "none", padding: "4px 0", cursor: "pointer",
-              color: "var(--muted)", fontSize: "0.78rem",
-            }}
-            title={isId ? "Tampilkan nama jalan di peta" : "Show street names on the map"}
-          >
-            <span style={{
-              width: 9, height: 9, borderRadius: 2,
-              border: `1.5px solid ${streets ? "var(--text)" : "var(--line-2)"}`,
-              background: streets ? "var(--text)" : "transparent",
-              flexShrink: 0,
-            }} />
-            <span style={{ flex: 1, textAlign: "left" }}>
-              {isId ? "Peta jalan" : "Street map"}
-            </span>
-          </button>
+          {showWeather && (
+            <div className="wx-key">
+              {WEATHER_KEY_ROWS.map(([kind, idText, enText]) => (
+                <span key={kind}><i style={{ background: WEATHER_FILL[kind] }} />{isId ? idText : enText}</span>
+              ))}
+            </div>
+          )}
         </div>
         </>}
       </div>

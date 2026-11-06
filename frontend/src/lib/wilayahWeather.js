@@ -9,7 +9,7 @@
 // away from the clusters of water-level posts.
 export const WILAYAH = [
   { key: "Utara",   id: "Utara",   en: "North",   lat: -6.150, lng: 106.925 },
-  { key: "Barat",   id: "Barat",   en: "West",    lat: -6.160, lng: 106.705 },
+  { key: "Barat",   id: "Barat",   en: "West",    lat: -6.195, lng: 106.765 },
   { key: "Pusat",   id: "Pusat",   en: "Central", lat: -6.163, lng: 106.858 },
   { key: "Selatan", id: "Selatan", en: "South",   lat: -6.290, lng: 106.800 },
   { key: "Timur",   id: "Timur",   en: "East",    lat: -6.250, lng: 106.915 },

@@ -114,9 +114,10 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 ## Resolved
 - 2026-11-06: home map weather per wilayah ("Cuaca per wilayah" switch, on by default): Open-Meteo current
   cloud cover / rain / WMO code for the 5 mainland kota (`frontend/src/lib/wilayahWeather.js`, every 15 min, browser
-  calls it directly), a thin haze over each kota (`frontend/src/data/wilayahShapes.json` from
-  `scripts/build_wilayah_shapes.py`, OSM via Nominatim) and a sun/cloud/rain picture with a label, in a pane under
-  the posts. A model estimate on a coarse grid, not radar; it does not feed the flood status.
+  calls it directly), each kota filled grey (cloud) / blue (rain) / deep blue (heavy rain) (`frontend/src/data/wilayahShapes.json`
+  from `scripts/build_wilayah_shapes.py`, OSM via Nominatim) with moving SVG-pattern textures (falling streaks,
+  drifting clouds; still under prefers-reduced-motion) and a sun/cloud/rain picture with a label, in a pane under
+  the posts. The home map's street-map switch was removed (grey basemap only). A model estimate on a coarse grid, not radar; it does not feed the flood status.
 - 2026-11-05: map rivers and flood-prone areas. A clicked post lights up its river (`frontend/src/data/postRivers.json`
   from `scripts/build_post_rivers.py`: traced on the OSM waterway network from the piece touching the post, 8 km,
   connected only; a stretch under 1 km is re-traced from every waterway within 40 m of the post, as Kaliduri's was

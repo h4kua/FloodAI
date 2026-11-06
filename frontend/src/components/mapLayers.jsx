@@ -45,10 +45,13 @@ export function StationMarkers({ stations = [], floodPoints = [], small = false 
   const open = placed.find((s) => s.nama === openPost);
   const openRiver = open ? riverForPost(open, postRivers) : null;
 
-  const lines = (openRiver?.lines || []).map((line, i) => (
+  // A white casing under the blue keeps the river readable on a blue "rain" kota.
+  const lines = (openRiver?.lines || []).flatMap((line, i) => [
+    <Polyline key={`rv-case-${i}`} positions={line} interactive={false}
+      pathOptions={{ color: "#ffffff", weight: 8, opacity: 0.85, lineCap: "round", lineJoin: "round" }} />,
     <Polyline key={`rv-${i}`} positions={line} interactive={false}
-      pathOptions={{ color: RIVER_COLOR, weight: 5, opacity: 0.75, lineCap: "round", lineJoin: "round" }} />
-  ));
+      pathOptions={{ color: RIVER_COLOR, weight: 5, opacity: 0.9, lineCap: "round", lineJoin: "round" }} />,
+  ]);
   // A post that stands away from the channel (Cipinang Hulu, ~800 m): dashed line to it.
   if (openRiver?.link) {
     lines.push(<Polyline key="rv-link" positions={openRiver.link} interactive={false}
