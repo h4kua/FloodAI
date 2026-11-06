@@ -266,9 +266,14 @@ export default function WeatherLayer({ weather = {}, lang = "id", theme = "light
         pathOptions={{ color: "#ffffff", weight: 1.2, opacity: dark ? 0.35 : 0.75, fillColor: tint.color, fillOpacity: tint.opacity }} />,
       // Leaflet sets a class only once, so the texture is part of the key: a
       // change of weather at the 15-minute refresh makes new layers.
+      // The pattern goes in the fill attribute, which resolves in the page. In the
+      // production stylesheet (an external file) fill: url(#…) was looked up in
+      // that file, found nothing, and Leaflet's default solid blue showed.
       ...layersOf(info).map((layer) => (
         <Polygon key={`wx-${layer}-${key}`} positions={positions} interactive={false}
-          pathOptions={{ stroke: false, fillOpacity: 1, className: `wx-t wx-t-${layer}` }} />
+          pathOptions={layer === "flash"
+            ? { stroke: false, fillColor: "#e0e7ff", fillOpacity: 0, className: "wx-t wx-t-flash" }
+            : { stroke: false, fillColor: `url(#wx-p-${layer})`, fillOpacity: 1, className: "wx-t" }} />
       )),
     ];
   });

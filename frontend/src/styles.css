@@ -1430,19 +1430,10 @@ button, input, select, textarea { font-family: inherit; }
 .wx-key span { display: inline-flex; align-items: center; gap: 4px; }
 .wx-key i { width: 10px; height: 10px; border-radius: 3px; opacity: 0.85; }
 
-/* Moving textures: each layer class fills its kota with a pattern from WeatherPatterns */
-.leaflet-container path.wx-t-sun               { fill: url(#wx-p-sun); }
-.leaflet-container path.wx-t-stars             { fill: url(#wx-p-stars); }
-.leaflet-container path.wx-t-cloud-far         { fill: url(#wx-p-cloud-far); }
-.leaflet-container path.wx-t-cloud-near        { fill: url(#wx-p-cloud-near); }
-.leaflet-container path.wx-t-cloud-near-sparse { fill: url(#wx-p-cloud-near-sparse); }
-.leaflet-container path.wx-t-fog               { fill: url(#wx-p-fog); }
-.leaflet-container path.wx-t-rain-far          { fill: url(#wx-p-rain-far); }
-.leaflet-container path.wx-t-drizzle           { fill: url(#wx-p-drizzle); }
-.leaflet-container path.wx-t-rain              { fill: url(#wx-p-rain); }
-.leaflet-container path.wx-t-heavy             { fill: url(#wx-p-heavy); }
+/* Moving textures: WeatherLayer puts url(#wx-p-…) in each shape's fill attribute.
+   Not here: in the built (external) stylesheet a url(#…) is looked up in the CSS file. */
 /* Thunderstorm: a soft glow now and then, never more than twice in a row (no strobing) */
-.leaflet-container path.wx-t-flash { fill: #e0e7ff; fill-opacity: 0; animation: wx-flash 11s ease-out infinite; }
+.leaflet-container path.wx-t-flash { animation: wx-flash 11s ease-out infinite; }
 @keyframes wx-flash {
   0%, 90%, 100% { fill-opacity: 0; }
   91% { fill-opacity: 0.18; }
