@@ -1,50 +1,43 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { WILAYAH, cloudDrift, describeWeather, openMeteoUrl, parseOpenMeteo, weatherKind } from "./wilayahWeather.js";
+import { byWilayahKey, cloudDrift, describeWeather, weatherKind } from "./wilayahWeather.js";
 
-test("one Open-Meteo request asks for all five kota", () => {
-  const url = new URL(openMeteoUrl());
-  assert.equal(url.searchParams.get("latitude").split(",").length, 5);
-  assert.match(url.searchParams.get("current"), /weather_code/);
-  assert.match(url.searchParams.get("current"), /wind_direction_10m/);
+const ow = (over) => ({ weather_main: "Clouds", weather_desc: "awan mendung", clouds: 100, rainfall_1h: 0, temp: 34.9, weather_icon: "04d", ...over });
+
+test("the backend's per-kota readings are keyed like the map", () => {
+  const keyed = byWilayahKey({ "Jakarta Selatan": ow(), "Jakarta Utara": ow({ temp: 30 }) });
+  assert.deepEqual(Object.keys(keyed).sort(), ["Selatan", "Utara"]);
+  assert.equal(keyed.Utara.temp, 30);
 });
 
-test("the answer is read per kota, in request order", () => {
-  const data = WILAYAH.map((_, i) => ({ current: { cloud_cover: i * 20, precipitation: 0, weather_code: 3, temperature_2m: 30 + i, is_day: 0 } }));
-  const parsed = parseOpenMeteo(data);
-  assert.equal(parsed.Utara.cloud, 0);
-  assert.equal(parsed.Timur.cloud, 80);
-  assert.equal(parsed.Timur.tempC, 34);
-  assert.equal(parsed.Utara.isDay, false);
-  assert.deepEqual(Object.keys(parseOpenMeteo([{}])), []);
+test("every state comes from the OpenWeather reading", () => {
+  assert.equal(weatherKind(ow({ weather_main: "Clear", clouds: 5 })), "clear");
+  assert.equal(weatherKind(ow({ weather_main: "Clouds", clouds: 40 })), "partly");
+  assert.equal(weatherKind(ow()), "cloudy");
+  assert.equal(weatherKind(ow({ weather_main: "Haze" })), "fog");
+  assert.equal(weatherKind(ow({ weather_main: "Drizzle" })), "drizzle");
+  assert.equal(weatherKind(ow({ weather_main: "Rain", weather_desc: "hujan ringan", rainfall_1h: 0.1 })), "light");
+  assert.equal(weatherKind(ow({ weather_main: "Rain", weather_desc: "hujan sedang", rainfall_1h: 3 })), "rain");
+  assert.equal(weatherKind(ow({ weather_main: "Rain", weather_desc: "hujan", rainfall_1h: 9 })), "heavy");
+  assert.equal(weatherKind(ow({ weather_main: "Thunderstorm" })), "storm");
+  assert.equal(weatherKind(undefined), null);
 });
 
-test("all eight weather states come from the WMO code and cloud cover", () => {
-  assert.equal(weatherKind({ code: 0, cloud: 5 }), "clear");
-  assert.equal(weatherKind({ code: 1, cloud: 40 }), "partly");
-  assert.equal(weatherKind({ code: 3, cloud: 98 }), "cloudy");
-  assert.equal(weatherKind({ code: 45, cloud: 100 }), "fog");
-  assert.equal(weatherKind({ code: 53, cloud: 90 }), "drizzle");
-  assert.equal(weatherKind({ code: 63, cloud: 90 }), "rain");
-  assert.equal(weatherKind({ code: 65, cloud: 100 }), "heavy");
-  assert.equal(weatherKind({ code: 95, cloud: 100 }), "storm");
-});
-
-test("labels say the state, the rain and the temperature", () => {
-  assert.equal(describeWeather({ code: 3, cloud: 98 }).text, "Berawan");
-  assert.equal(describeWeather({ code: 3, cloud: 98 }, "en").text, "Cloudy");
-  assert.equal(describeWeather({ code: 61, cloud: 90, rainMm: 1.2 }).text, "Hujan 1,2 mm");
-  assert.equal(describeWeather({ code: 0, cloud: 0, rainMm: 0.3 }).text, "Cerah");  // no rain shown when it is not raining
-  assert.equal(describeWeather({ code: 0, cloud: 0, tempC: 31.6 }).temp, "32°");
-  assert.equal(describeWeather(undefined), null);
+test("map labels use the card's own words and units", () => {
+  assert.equal(describeWeather(ow()).text, "Awan mendung");
+  assert.equal(describeWeather(ow({ weather_main: "Rain", weather_desc: "hujan ringan", rainfall_1h: 0.1 })).text, "Hujan ringan · 0,1 mm/jam");
+  // The backend's words are Indonesian; the English page translates them like the card does.
+  assert.equal(describeWeather(ow({ weather_main: "Rain", weather_desc: "hujan ringan", rainfall_1h: 0.1 }), "en").text, "Light rain · 0.1 mm/h");
+  assert.equal(describeWeather(ow(), "en").text, "Overcast");
+  assert.equal(describeWeather(ow()).temp, "35°");
+  assert.equal(describeWeather(ow({ weather_icon: "04n" })).isDay, false);
 });
 
 test("clouds drift where the wind blows to, slowly", () => {
   // Wind from the north-north-west (341°) blows to the south: down the screen.
-  assert.deepEqual(cloudDrift([{ windFrom: 341, windKmh: 11 }]), { dx: 0, dy: 1, seconds: 83 });
-  // From the west → to the east.
-  assert.equal(cloudDrift([{ windFrom: 270, windKmh: 0 }]).dx, 1);
-  assert.equal(cloudDrift([{ windFrom: 270, windKmh: 60 }]).seconds, 35);
+  assert.deepEqual(cloudDrift([{ wind_deg: 341, wind_speed: 3 }]), { dx: 0, dy: 1, seconds: 83 });
+  assert.equal(cloudDrift([{ wind_deg: 270, wind_speed: 0 }]).dx, 1);
+  assert.equal(cloudDrift([{ wind_deg: 270, wind_speed: 20 }]).seconds, 35);
   assert.deepEqual(cloudDrift([]), { dx: 1, dy: 0, seconds: 80 });
 });

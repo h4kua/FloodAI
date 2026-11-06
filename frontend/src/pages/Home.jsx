@@ -38,6 +38,21 @@ export default function Home({ setRiskContext, riskLevel }) {
   const level = riskData?.level ?? riskLevel ?? "waspada";
   const score = riskData?.riskScore ?? 45;
   const [detailTab, setDetailTab] = useState("ai");
+  const [detailOpen, setDetailOpen] = useState(false);
+  // A weather card tapped on the map opens the Weather tab below it, on that kota.
+  const [pick, setPick] = useState(null);  // { wilayah, at }: a new object per tap
+  const pickedWilayah = pick?.wilayah ?? null;
+  const pickWeather = (wilayah) => {
+    setPick({ wilayah, at: Date.now() });
+    setDetailOpen(true);
+    setDetailTab("weather");
+  };
+  // After the section and tab are drawn, bring the tapped kota's card into view.
+  useEffect(() => {
+    if (!pick) return;
+    document.getElementById(`ow-card-${pick.wilayah.replace(/\s+/g, "-")}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [pick]);
 
   // WAI-ARIA tabs: arrow keys / Home / End move between tabs (roving tabindex).
   const onTabKeyDown = (e) => {
@@ -101,7 +116,8 @@ export default function Home({ setRiskContext, riskLevel }) {
         <div className="panel-body" style={{ paddingBottom: "0.75rem" }}>
           <p className="panel-title" style={{ marginBottom: 0 }}>{t("map.title")}</p>
         </div>
-        <FloodMap riskScore={score} stations={stations} rainfall={riskData?.rainfall ?? 0} />
+        <FloodMap riskScore={score} stations={stations} rainfall={riskData?.rainfall ?? 0}
+          weatherWilayah={riskData?.openweatherWilayah} onWeatherPick={pickWeather} pickedWilayah={pickedWilayah} />
       </div>
 
       {/* Progressive disclosure — one collapsed section, one tab visible at a time */}
@@ -111,6 +127,8 @@ export default function Home({ setRiskContext, riskLevel }) {
         iconColor="var(--cyan)"
         title={t("section.detail")}
         subtitle={t("section.detailSub")}
+        open={detailOpen}
+        onToggle={setDetailOpen}
       >
         <div className="detail-tabs" role="tablist" aria-label={t("section.detail")} onKeyDown={onTabKeyDown}>
           {DETAIL_TABS.map((tab) => (
@@ -141,7 +159,7 @@ export default function Home({ setRiskContext, riskLevel }) {
 
           {detailTab === "weather" && (
             <>
-              <WeatherCurrentCard riskData={riskData} />
+              <WeatherCurrentCard riskData={riskData} picked={pickedWilayah} />
               <WilayahForecastGrid wilayahSummary={riskData?.wilayahSummary} />
               {(!riskData?.wilayahSummary?.length) && <ForecastPanel forecast={riskData?.bmkgForecast} />}
             </>

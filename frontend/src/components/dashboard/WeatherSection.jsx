@@ -1,19 +1,34 @@
 /* ── Weather section ──────────────────────────────────────────────────────
    OpenWeather current conditions: one card per wilayah (5 administrative
    cities), or a single Jakarta card when per-wilayah data is missing.
-   Only what a resident cares about: sky, temperature, and rain.
+   Sky, temperature and rain first, then feels-like, humidity, cloud and wind.
+   The map's weather cards show the same readings in the same words; tapping
+   one opens this tab with that kota's card highlighted (`picked`).
 */
 import { useApp } from "../../lib/appContext";
 import { weatherCond, weatherLabel, wilayahLabel } from "../../lib/dashboardHelpers";
 import { WeatherGlyph } from "./primitives";
 
-function WeatherWilayahCard({ entry, isId }) {
+const COMPASS = {
+  id: ["utara", "timur laut", "timur", "tenggara", "selatan", "barat daya", "barat", "barat laut"],
+  en: ["north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"],
+};
+const fromDir = (deg, isId) => COMPASS[isId ? "id" : "en"][Math.round((((deg % 360) + 360) % 360) / 45) % 8];
+
+function WeatherWilayahCard({ entry, isId, picked }) {
   const ow = entry.ow;
+  const details = [
+    ow.feels_like != null && [isId ? "Terasa" : "Feels like", `${Math.round(ow.feels_like)}°C`],
+    ow.humidity != null && [isId ? "Kelembapan" : "Humidity", `${ow.humidity}%`],
+    ow.clouds != null && [isId ? "Awan" : "Cloud", `${ow.clouds}%`],
+    ow.wind_speed != null && [isId ? "Angin" : "Wind",
+      `${Math.round(ow.wind_speed * 3.6)} km/${isId ? "jam" : "h"}${ow.wind_deg != null ? ` ${isId ? "dari" : "from"} ${fromDir(ow.wind_deg, isId)}` : ""}`],
+  ].filter(Boolean);
   const isRain = ow.rainfall_1h > 0 || ow.weather_main === "Rain" || ow.weather_main === "Drizzle";
   const desc = ow.weather_desc ? weatherLabel(ow.weather_desc, isId) : (isId ? "Berawan" : "Cloudy");
 
   return (
-    <div className={`ow-wilayah-card${isRain ? " rain" : ""}`}>
+    <div id={`ow-card-${entry.wilayah.replace(/\s+/g, "-")}`} className={`ow-wilayah-card${isRain ? " rain" : ""}${picked ? " picked" : ""}`}>
       <div className="ow-wilayah-card-header">
         <div className="ow-wilayah-name">{entry.short}</div>
         <div className="ow-wilayah-icon" style={{ color: isRain ? "var(--cyan)" : "var(--muted)" }}>
@@ -22,13 +37,18 @@ function WeatherWilayahCard({ entry, isId }) {
       </div>
       {ow.temp != null && <div className="ow-wilayah-temp">{Math.round(ow.temp)}°C</div>}
       <div className={`ow-wilayah-desc${isRain ? " rain" : ""}`}>
-        {desc}{isRain && ow.rainfall_1h > 0 ? ` · ${ow.rainfall_1h.toFixed(1)} ${isId ? "mm/j" : "mm/h"}` : ""}
+        {desc}{isRain && ow.rainfall_1h > 0 ? ` · ${ow.rainfall_1h.toLocaleString(isId ? "id-ID" : "en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${isId ? "mm/jam" : "mm/h"}` : ""}
       </div>
+      {details.length > 0 && (
+        <dl className="ow-wilayah-details">
+          {details.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
+        </dl>
+      )}
     </div>
   );
 }
 
-export function WeatherCurrentCard({ riskData }) {
+export function WeatherCurrentCard({ riskData, picked = null }) {
   const { lang } = useApp();
   const isId     = lang === "id";
   const owWilayah = riskData?.openweatherWilayah ?? {};
@@ -73,9 +93,14 @@ export function WeatherCurrentCard({ riskData }) {
       <p className="station-title">{isId ? "Cuaca sekarang per wilayah" : "Weather now by area"}</p>
       <div className="ow-wilayah-grid" style={{ marginTop: "0.75rem" }}>
         {wilayahEntries.map((entry) => (
-          <WeatherWilayahCard key={entry.wilayah} entry={entry} isId={isId} />
+          <WeatherWilayahCard key={entry.wilayah} entry={entry} isId={isId} picked={picked === entry.wilayah} />
         ))}
       </div>
+      <p className="station-sub" style={{ marginTop: "0.75rem", marginBottom: 0 }}>
+        {isId
+          ? "OpenWeather, satu titik pengukuran per kota. Sama dengan cuaca di peta; tidak mengubah status banjir."
+          : "OpenWeather, one point per city. The same readings as the map; weather does not change the flood status."}
+      </p>
     </div>
   );
 }

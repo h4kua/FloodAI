@@ -7,7 +7,8 @@ import floodProneZones from "../data/floodProneZones.json";
 import postRivers from "../data/postRivers.json";
 import { activeFloodPoints } from "../lib/floodRoads";
 import { ActiveFloodAreas, AREA_COLOR, StationMarkers } from "./mapLayers";
-import WeatherLayer, { WeatherPatterns, useWilayahWeather, weatherKey } from "./WeatherLayer";
+import WeatherLayer, { WeatherPatterns, weatherKey } from "./WeatherLayer";
+import { byWilayahKey } from "../lib/wilayahWeather";
 
 
 // Single muted slate-blue for ALL historical BNPB flood-prone points so the
@@ -53,12 +54,14 @@ function FitJakarta() {
 // stations: real DSDADKI readings from /predict/realtime-native response.
 // riskScore: passed through only for the fallback district tint when no
 // station coords are available — NOT used when real stations are shown.
-export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }) {
+// weatherWilayah: the backend's OpenWeather reading per kota (riskData.openweatherWilayah),
+// the same data as the "Weather now by area" cards; onWeatherPick(kota) opens those cards.
+export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0, weatherWilayah = {}, onWeatherPick, pickedWilayah = null }) {
   const t = useT();
   const { theme, lang } = useApp();
   const isId = lang === "id";
   const [showProne, setShowProne] = useState(false); // off by default — it buries the post markers
-  // Weather per wilayah (Open-Meteo): on by default, the choice is remembered.
+  // Weather per wilayah: on by default, the choice is remembered.
   const [showWeather, setShowWeather] = useState(() => {
     try { return localStorage.getItem(WEATHER_KEY) !== "0"; } catch { return true; }
   });
@@ -66,7 +69,7 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
     try { localStorage.setItem(WEATHER_KEY, on ? "0" : "1"); } catch { /* private mode */ }
     return !on;
   });
-  const weather = useWilayahWeather(showWeather);
+  const weather = useMemo(() => byWilayahKey(weatherWilayah), [weatherWilayah]);
   // Desktop: the legend floats on the map and can be folded. Phones: CSS puts
   // it under the map, always open, so it neither covers the map nor hides.
   const [legendOpen, setLegendOpen] = useState(true);
@@ -103,7 +106,7 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
         <FitJakarta />
         <InvalidateMapSize />
 
-        {showWeather && <WeatherLayer weather={weather} lang={lang} theme={theme} />}
+        {showWeather && <WeatherLayer weather={weather} lang={lang} theme={theme} onPick={onWeatherPick} picked={pickedWilayah} />}
 
         {/* District reference circles — shown faintly as geographic labels only.
             When real sensor stations are on the map these are barely visible.
@@ -242,8 +245,8 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
               color: "var(--muted)", fontSize: "0.78rem",
             }}
             title={isId
-              ? "Awan dan hujan saat ini per wilayah (perkiraan model cuaca Open-Meteo, bukan radar)"
-              : "Current cloud and rain per area (Open-Meteo weather model estimate, not radar)"}
+              ? "Awan dan hujan saat ini per wilayah (OpenWeather, satu titik per kota). Ketuk kartu wilayah untuk detail di bawah peta."
+              : "Current cloud and rain per area (OpenWeather, one point per city). Tap an area's card for details under the map."}
           >
             <span style={{
               width: 9, height: 9, borderRadius: 2,

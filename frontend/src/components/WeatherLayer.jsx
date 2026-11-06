@@ -1,20 +1,20 @@
 /* ── Weather per wilayah on the home map ──────────────────────────────────
-   Each kota is tinted by its weather (eight states, from warm clear to indigo
+   Each kota is tinted by its weather (nine states, from warm clear to indigo
    thunderstorm) and carries a slow, layered texture: a breathing sun glow or
    stars at night, clouds that drift with the live wind (a faint far layer and
    a nearer one), mist bands, rain in two depths, a soft lightning glow. A
-   small glass card names the kota, its temperature and weather; tapping it
-   opens the details. Everything holds still for people who ask their system
-   for reduced motion, and pauses while the map is off screen.
-   The tints and textures take no clicks, so the posts stay clickable.
+   small glass card names the kota, its temperature and weather in the same
+   words as the "Weather now by area" cards (both read the backend's
+   OpenWeather data); tapping it opens those cards under the map. Everything
+   holds still for people who ask their system for reduced motion, and pauses
+   while the map is off screen. The tints and textures take no clicks, so the
+   posts stay clickable.
 */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import L from "leaflet";
-import { Marker, Pane, Polygon, Popup } from "react-leaflet";
+import { Marker, Pane, Polygon } from "react-leaflet";
 import wilayahShapes from "../data/wilayahShapes.json";
-import {
-  KINDS, WEATHER_REFRESH_MS, WILAYAH, cloudDrift, describeWeather, fetchWilayahWeather,
-} from "../lib/wilayahWeather";
+import { KINDS, WILAYAH, cloudDrift, describeWeather } from "../lib/wilayahWeather";
 
 // Tint per state: [colour, opacity on the light basemap, opacity on the dark one].
 const TINT = {
@@ -24,6 +24,7 @@ const TINT = {
   cloudy:  ["#64748b", 0.30, 0.20],
   fog:     ["#e2e8f0", 0.38, 0.18],
   drizzle: ["#60a5fa", 0.26, 0.24],
+  light:   ["#60a5fa", 0.30, 0.28],
   rain:    ["#3b82f6", 0.36, 0.34],
   heavy:   ["#1d4ed8", 0.46, 0.44],
   storm:   ["#4338ca", 0.50, 0.48],
@@ -45,6 +46,7 @@ const LAYERS = {
   cloudy:  ["cloud-far", "cloud-near"],
   fog:     ["fog"],
   drizzle: ["cloud-far", "drizzle"],
+  light:   ["rain-far", "drizzle"],
   rain:    ["rain-far", "rain"],
   heavy:   ["rain-far", "heavy"],
   storm:   ["rain-far", "heavy", "flash"],
@@ -82,7 +84,8 @@ const ART = {
   cloudy: `<g class="wx-bob">${cloud()}</g>`,
   fog: `<g class="wx-bob">${cloud()}</g><g class="wx-mist" stroke="#cbd5e1" stroke-width="1.6" stroke-linecap="round"><line x1="6" y1="24" x2="24" y2="24"/><line x1="10" y1="27" x2="29" y2="27"/></g>`,
   drizzle: `<g class="wx-bob">${cloud("url(#wx-g-raincloud)")}</g>${drops(2, 12, 9)}`,
-  rain: `<g class="wx-bob">${cloud("url(#wx-g-raincloud)")}</g>${drops(3)}`,
+  light: `<g class="wx-bob">${cloud("url(#wx-g-raincloud)")}</g>${drops(3)}`,
+  rain: `<g class="wx-bob">${cloud("url(#wx-g-raincloud)")}</g>${drops(4, 10, 14)}`,
   heavy: `<g class="wx-bob">${cloud("url(#wx-g-stormcloud)")}</g>${drops(5, 9, 16)}`,
   storm: `<g class="wx-bob">${cloud("url(#wx-g-stormcloud)")}</g><path class="wx-bolt" d="M18 18l-4 6h3l-2 5 6-7h-3l2-4z" fill="url(#wx-g-bolt)"/>${drops(2, 10, 14)}`,
 };
@@ -202,86 +205,28 @@ export function WeatherPatterns({ weather = {} }) {
   );
 }
 
-/** Fetches the weather for the five kota every 15 minutes; {} until (or unless) it arrives. */
-export function useWilayahWeather(enabled = true) {
-  const [weather, setWeather] = useState({});
-  useEffect(() => {
-    if (!enabled) return undefined;  // nothing is drawn, so nothing is fetched
-    let controller = new AbortController();
-    const load = () => {
-      controller.abort();
-      controller = new AbortController();
-      fetchWilayahWeather(controller.signal).then(setWeather).catch(() => { /* layer stays as it was */ });
-    };
-    load();
-    const timer = setInterval(load, WEATHER_REFRESH_MS);
-    return () => { clearInterval(timer); controller.abort(); };
-  }, [enabled]);
-  return weather;
-}
-
-const COMPASS = {
-  id: ["utara", "timur laut", "timur", "tenggara", "selatan", "barat daya", "barat", "barat laut"],
-  en: ["north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"],
-};
-const compass = (deg, lang) => COMPASS[lang === "en" ? "en" : "id"][Math.round((((deg % 360) + 360) % 360) / 45) % 8];
-const fmt = (v, lang, d = 0) => (v == null ? "–" : v.toLocaleString(lang === "en" ? "en-US" : "id-ID", { maximumFractionDigits: d }));
 const escapeHtml = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
-function Details({ name, w, info, lang }) {
-  const en = lang === "en";
-  const rows = [
-    [en ? "Temperature" : "Suhu", `${fmt(w.tempC, lang)}°C${w.feelsC != null ? (en ? ` (feels ${fmt(w.feelsC, lang)}°)` : ` (terasa ${fmt(w.feelsC, lang)}°)`) : ""}`],
-    [en ? "Humidity" : "Kelembapan", `${fmt(w.humidity, lang)}%`],
-    [en ? "Cloud cover" : "Tutupan awan", `${fmt(w.cloud, lang)}%`],
-    [en ? "Rain" : "Curah hujan", `${fmt(w.rainMm, lang, 1)} mm`],
-    [en ? "Wind" : "Angin", `${fmt(w.windKmh, lang)} km/${en ? "h" : "jam"} ${en ? "from the" : "dari"} ${compass(w.windFrom, lang)}`],
-  ];
-  const time = (w.time || "").slice(11, 16);
-  return (
-    <div className="wx-detail">
-      <div className="wx-detail-head">
-        <span dangerouslySetInnerHTML={{ __html: weatherPicture(info.kind, info.isDay, 40) }} />
-        <div>
-          <p className="wx-detail-name">{name}</p>
-          <p className="wx-detail-state">{info.temp ? `${info.temp} · ` : ""}{info.text}</p>
-        </div>
-      </div>
-      <dl>{rows.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
-      <p className="wx-detail-note">
-        {en
-          ? `Open-Meteo weather model${time ? `, ${time} WIB` : ""}. An estimate for the area, not radar; it does not change the flood status.`
-          : `Model cuaca Open-Meteo${time ? `, pukul ${time} WIB` : ""}. Perkiraan untuk wilayah ini, bukan radar; tidak mengubah status banjir.`}
-      </p>
-    </div>
-  );
-}
-
 /**
- * One kota's card. Its key survives the 15-minute refresh, so a new temperature
- * swaps the icon and leaves an open detail card open. Leaflet makes the card
- * focusable (Tab, then Enter opens the details) and names it with the title,
- * but sets that only once, so later titles are written here.
+ * One kota's card. Tapping it (or Tab, then Enter: Leaflet makes it focusable)
+ * calls onPick; the details sit under the map, not in a popup over it. Leaflet
+ * sets the title only once, so later titles are written here.
  */
-function WeatherCard({ position, icon, title, children }) {
+function WeatherCard({ position, icon, title, onPick }) {
   const ref = useRef(null);
   useEffect(() => {
     if (!ref.current) return;
     ref.current.options.title = title;  // used again when a new icon is set
     ref.current.getElement()?.setAttribute("title", title);
   }, [title]);
-  return (
-    <Marker ref={ref} position={position} icon={icon} title={title}>
-      <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>{children}</Popup>
-    </Marker>
-  );
+  return <Marker ref={ref} position={position} icon={icon} title={title} eventHandlers={{ click: onPick }} />;
 }
 
 /**
  * The tints and textures sit in a pane between the basemap (200) and the flood
  * areas and posts (400); the cards in one above (450), so they can be tapped.
  */
-export default function WeatherLayer({ weather = {}, lang = "id", theme = "light" }) {
+export default function WeatherLayer({ weather = {}, lang = "id", theme = "light", onPick, picked = null }) {
   const dark = theme === "dark";
   const en = lang === "en";
   const items = useMemo(() => WILAYAH.map((w) => ({ ...w, info: describeWeather(weather[w.key], lang) })), [weather, lang]);
@@ -308,22 +253,20 @@ export default function WeatherLayer({ weather = {}, lang = "id", theme = "light
     ];
   });
 
-  const cards = items.flatMap(({ key, id, en: enName, lat, lng, info }) => {
+  const cards = items.flatMap(({ key, name: wilayah, id, en: enName, lat, lng, info }) => {
     if (!info) return [];
     const name = en ? enName : id;
     const icon = L.divIcon({
       className: "wx-marker",
-      html: `<div class="wx-card wx-k-${info.kind}">`
+      html: `<div class="wx-card wx-k-${info.kind}${picked === wilayah ? " is-picked" : ""}">`
         + `<span class="wx-ico">${weatherPicture(info.kind, info.isDay)}</span>`
         + `<span class="wx-txt"><b>${escapeHtml(name)}</b><small>${info.temp ? `${escapeHtml(info.temp)} · ` : ""}${escapeHtml(info.text)}</small></span></div>`,
       iconSize: [0, 0],
     });
     const fullName = en ? `${enName} Jakarta` : `Jakarta ${id}`;
     return [
-      <WeatherCard key={`wx-card-${key}`} position={[lat, lng]} icon={icon}
-        title={`${fullName}: ${info.temp ? `${info.temp}, ` : ""}${info.text}`}>
-        <Details name={fullName} w={weather[key]} info={info} lang={lang} />
-      </WeatherCard>,
+      <WeatherCard key={`wx-card-${key}`} position={[lat, lng]} icon={icon} onPick={() => onPick?.(wilayah)}
+        title={`${fullName}: ${info.temp ? `${info.temp}, ` : ""}${info.text}${en ? " (details below the map)" : " (detail di bawah peta)"}`} />,
     ];
   });
 

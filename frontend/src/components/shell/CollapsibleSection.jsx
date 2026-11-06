@@ -12,21 +12,22 @@ export default function CollapsibleSection({
   title,
   subtitle,
   defaultOpen = false,
+  open: openProp,   // optional: pass it (with onToggle) to open the section from outside
   onToggle,
+  id,
   children,
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [openState, setOpen] = useState(defaultOpen);
+  const open = openProp ?? openState;
 
   const toggle = () => {
-    setOpen((prev) => {
-      const next = !prev;
-      onToggle?.(next);
-      return next;
-    });
+    const next = !open;
+    if (openProp === undefined) setOpen(next);
+    onToggle?.(next);
   };
 
   return (
-    <section className="collapsible-section">
+    <section className="collapsible-section" id={id}>
       <button
         className="panel panel-body section-teaser"
         aria-expanded={open}
