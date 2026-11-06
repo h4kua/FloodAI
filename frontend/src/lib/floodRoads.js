@@ -1,5 +1,5 @@
 /* ── Flood-aware route colouring — pure, UI-agnostic ───────────────────────
-   Marks each stretch of a driving route as "rawan" (red) or "relatif aman"
+   Marks each stretch of a route (walked or driven) as "rawan" (red) or "relatif aman"
    (green). This is an estimate, not a road-level flood forecast — there is no
    per-road flood data for Jakarta. A stretch is red when it passes within
    RISK_RADIUS_M of a BPBD flood-prone point that is active right now:
@@ -227,18 +227,31 @@ export function riskyOnlyAtEnds(runs = []) {
 // more than that and phones may drop the route.
 export const GMAPS_MAX_STOPS = 3;
 
+// Evacuees walk: a shelter 30 m away came out as a 1.3 km drive around one-way
+// streets. Farther trips (a home across town) stay a drive.
+export const WALK_MAX_KM = 3;
+export const ROUTERS = {
+  walking: "https://routing.openstreetmap.de/routed-foot/route/v1/driving",
+  driving: "https://router.project-osrm.org/route/v1/driving",
+};
+
+/** "walking" when the destination lies within WALK_MAX_KM in a straight line, else "driving". */
+export function travelMode(origin, dest) {
+  return segmentLengthM([origin.lat, origin.lng], [dest.lat, dest.lng]) <= WALK_MAX_KM * 1000 ? "walking" : "driving";
+}
+
 /**
  * A Google Maps directions link that follows the given route: up to `stops`
  * evenly spaced points along it are passed as waypoints, so Google does not
  * pick its own (possibly flooded) way between the two ends. A GPS start is left
  * out so Google navigates from the phone's live position.
  */
-export function googleMapsUrl(origin, dest, coords = [], stops = GMAPS_MAX_STOPS) {
+export function googleMapsUrl(origin, dest, coords = [], stops = GMAPS_MAX_STOPS, mode = travelMode(origin, dest)) {
   const ll = ([lat, lng]) => `${lat.toFixed(5)},${lng.toFixed(5)}`;
   const params = new URLSearchParams({ api: "1" });
   if (!origin.isGPS) params.set("origin", ll([origin.lat, origin.lng]));
   params.set("destination", ll([dest.lat, dest.lng]));
-  params.set("travelmode", "driving");
+  params.set("travelmode", mode);
   stops = Math.min(stops, GMAPS_MAX_STOPS);
   if (coords.length > 2 && stops > 0) {
     const picks = Array.from({ length: stops }, (_, i) =>

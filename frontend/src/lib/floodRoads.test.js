@@ -8,6 +8,7 @@ import {
   riverForPost,
   distanceToSegmentM,
   googleMapsUrl,
+  travelMode,
   inFloodArea,
   nearestShelters,
   riversForPost,
@@ -108,6 +109,13 @@ test("a GPS start is left to Google's live location", () => {
   const url = new URL(googleMapsUrl({ lat: -6.1, lng: 106.7, isGPS: true }, { lat: -6.2, lng: 106.8 }, []));
   assert.equal(url.searchParams.get("origin"), null);
   assert.equal(url.searchParams.get("destination"), "-6.20000,106.80000");
+});
+
+test("a nearby destination is walked, a far one driven", () => {
+  const start = { lat: -6.2255, lng: 106.8665 };
+  assert.equal(travelMode(start, { lat: -6.2253, lng: 106.8668 }), "walking");  // ~40 m
+  assert.equal(travelMode(start, { lat: -6.1528, lng: 106.8559 }), "driving");  // ~8 km
+  assert.equal(new URL(googleMapsUrl(start, { lat: -6.2253, lng: 106.8668 })).searchParams.get("travelmode"), "walking");
 });
 
 test("a two-point route needs no waypoints", () => {

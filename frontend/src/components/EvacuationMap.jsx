@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { MapContainer, CircleMarker, Polyline, Popup, useMap, useMapEvents } from "react-leaflet";
 import { useApp, useT } from "../lib/appContext";
-import { googleMapsUrl, riskyOnlyAtEnds, safestRouteIndex, splitRouteByRisk } from "../lib/floodRoads";
+import { ROUTERS, googleMapsUrl, riskyOnlyAtEnds, safestRouteIndex, splitRouteByRisk, travelMode } from "../lib/floodRoads";
 import { ActiveFloodAreas, StationMarkers } from "./mapLayers";
 import InvalidateMapSize from "./InvalidateMapSize";
 import BaseTiles from "./BaseTiles";
@@ -119,12 +119,19 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
     setLoading(true); setError(null); setRoutes([]);
     try {
       // Ask for alternatives so a drier road can be chosen over the fastest one.
-      const url = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson&steps=true&alternatives=3`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("OSRM " + res.status);
-      const data = await res.json();
-      if (!data.routes?.length) throw new Error("no route");
-      setRoutes(data.routes.map((r) => ({
+      // A walk that cannot be routed (foot server down) falls back to a drive.
+      const query = `${origin.lng},${origin.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson&steps=true&alternatives=3`;
+      const ask = async (mode) => {
+        const res = await fetch(`${ROUTERS[mode]}/${query}`);
+        if (!res.ok) throw new Error("OSRM " + res.status);
+        const data = await res.json();
+        if (!data.routes?.length) throw new Error("no route");
+        return data.routes.map((r) => ({ ...r, mode }));
+      };
+      const wanted = travelMode(origin, dest);
+      const found = await ask(wanted).catch((err) => (wanted === "walking" ? ask("driving") : Promise.reject(err)));
+      setRoutes(found.map((r) => ({
+        mode: r.mode,
         coords: r.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
         distance: r.distance,
         duration: r.duration,
@@ -285,7 +292,9 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
             <>
               <div style={{ display: "flex", gap: "1rem" }}>
                 <span style={{ color: "var(--cyan)", fontWeight: 700 }}>{metersToKm(chosen.distance)}</span>
-                <span style={{ color: "var(--muted)" }}>{secToMin(chosen.duration)}</span>
+                <span style={{ color: "var(--muted)" }}>
+                  {secToMin(chosen.duration)} {chosen.mode === "walking" ? (isId ? "jalan kaki" : "on foot") : (isId ? "berkendara" : "by car")}
+                </span>
               </div>
               {chosen.riskyM > 0 ? (
                 <p className="route-summary-risk">
@@ -309,7 +318,7 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
                 </p>
               )}
               {/* Hand the chosen route to Google Maps for turn-by-turn navigation */}
-              <a className="route-gmaps" href={googleMapsUrl(origin, dest, chosen.coords)} target="_blank" rel="noopener noreferrer">
+              <a className="route-gmaps" href={googleMapsUrl(origin, dest, chosen.coords, undefined, chosen.mode)} target="_blank" rel="noopener noreferrer">
                 {isId ? "Buka di Google Maps" : "Open in Google Maps"} ↗
               </a>
             </>
