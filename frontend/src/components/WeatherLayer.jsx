@@ -49,7 +49,15 @@ const LAYERS = {
   heavy:   ["rain-far", "heavy"],
   storm:   ["rain-far", "heavy", "flash"],
 };
-const layersOf = (info) => LAYERS[info.kind === "clear" && !info.isDay ? "night" : info.kind];
+// Phones draw only the front texture of each state: every animated layer is a
+// repaint of most of the map, every frame.
+const compactScreen = () => {
+  try { return window.matchMedia("(max-width: 640px)").matches; } catch { return false; }
+};
+const layersOf = (info, compact) => {
+  const list = LAYERS[info.kind === "clear" && !info.isDay ? "night" : info.kind];
+  return compact ? list.slice(-1) : list;
+};
 
 const reducedMotion = () => {
   try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; }
@@ -195,9 +203,10 @@ export function WeatherPatterns({ weather = {} }) {
 }
 
 /** Fetches the weather for the five kota every 15 minutes; {} until (or unless) it arrives. */
-export function useWilayahWeather() {
+export function useWilayahWeather(enabled = true) {
   const [weather, setWeather] = useState({});
   useEffect(() => {
+    if (!enabled) return undefined;  // nothing is drawn, so nothing is fetched
     let controller = new AbortController();
     const load = () => {
       controller.abort();
@@ -207,7 +216,7 @@ export function useWilayahWeather() {
     load();
     const timer = setInterval(load, WEATHER_REFRESH_MS);
     return () => { clearInterval(timer); controller.abort(); };
-  }, []);
+  }, [enabled]);
   return weather;
 }
 
@@ -249,6 +258,26 @@ function Details({ name, w, info, lang }) {
 }
 
 /**
+ * One kota's card. Its key survives the 15-minute refresh, so a new temperature
+ * swaps the icon and leaves an open detail card open. Leaflet makes the card
+ * focusable (Tab, then Enter opens the details) and names it with the title,
+ * but sets that only once, so later titles are written here.
+ */
+function WeatherCard({ position, icon, title, children }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    ref.current.options.title = title;  // used again when a new icon is set
+    ref.current.getElement()?.setAttribute("title", title);
+  }, [title]);
+  return (
+    <Marker ref={ref} position={position} icon={icon} title={title}>
+      <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>{children}</Popup>
+    </Marker>
+  );
+}
+
+/**
  * The tints and textures sit in a pane between the basemap (200) and the flood
  * areas and posts (400); the cards in one above (450), so they can be tapped.
  */
@@ -256,6 +285,7 @@ export default function WeatherLayer({ weather = {}, lang = "id", theme = "light
   const dark = theme === "dark";
   const en = lang === "en";
   const items = useMemo(() => WILAYAH.map((w) => ({ ...w, info: describeWeather(weather[w.key], lang) })), [weather, lang]);
+  const compact = useMemo(compactScreen, []);
 
   const areas = items.flatMap(({ key, info }) => {
     if (!info) return [];
@@ -269,7 +299,7 @@ export default function WeatherLayer({ weather = {}, lang = "id", theme = "light
       // The pattern goes in the fill attribute, which resolves in the page. In the
       // production stylesheet (an external file) fill: url(#…) was looked up in
       // that file, found nothing, and Leaflet's default solid blue showed.
-      ...layersOf(info).map((layer) => (
+      ...layersOf(info, compact).map((layer) => (
         <Polygon key={`wx-${layer}-${key}`} positions={positions} interactive={false}
           pathOptions={layer === "flash"
             ? { stroke: false, fillColor: "#e0e7ff", fillOpacity: 0, className: "wx-t wx-t-flash" }
@@ -283,18 +313,17 @@ export default function WeatherLayer({ weather = {}, lang = "id", theme = "light
     const name = en ? enName : id;
     const icon = L.divIcon({
       className: "wx-marker",
-      html: `<div class="wx-card wx-k-${info.kind}" role="button" aria-label="${escapeHtml(`${name}: ${info.text}`)}">`
+      html: `<div class="wx-card wx-k-${info.kind}">`
         + `<span class="wx-ico">${weatherPicture(info.kind, info.isDay)}</span>`
         + `<span class="wx-txt"><b>${escapeHtml(name)}</b><small>${info.temp ? `${escapeHtml(info.temp)} · ` : ""}${escapeHtml(info.text)}</small></span></div>`,
       iconSize: [0, 0],
     });
     const fullName = en ? `${enName} Jakarta` : `Jakarta ${id}`;
     return [
-      <Marker key={`wx-card-${key}-${info.kind}-${info.text}-${info.temp}`} position={[lat, lng]} icon={icon} keyboard={false}>
-        <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>
-          <Details name={fullName} w={weather[key]} info={info} lang={lang} />
-        </Popup>
-      </Marker>,
+      <WeatherCard key={`wx-card-${key}`} position={[lat, lng]} icon={icon}
+        title={`${fullName}: ${info.temp ? `${info.temp}, ` : ""}${info.text}`}>
+        <Details name={fullName} w={weather[key]} info={info} lang={lang} />
+      </WeatherCard>,
     ];
   });
 

@@ -4,7 +4,7 @@
    red area names the post that made it active.
 */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Circle, CircleMarker, Polyline, Popup } from "react-leaflet";
+import { Circle, CircleMarker, Pane, Polyline, Popup } from "react-leaflet";
 import { useApp } from "../lib/appContext";
 import { RISK_RADIUS_M, areasByPost, riverForPost } from "../lib/floodRoads";
 import { postClass } from "../lib/dashboardHelpers";
@@ -118,7 +118,9 @@ export function StationMarkers({ stations = [], floodPoints = [], small = false 
       </CircleMarker>
     );
   });
-  return [...lines, ...markers];
+  // Posts get their own pane above everything else drawn on the map (the home
+  // map's weather cards sit at 450), so a card can never cover or swallow a post.
+  return [...lines, <Pane key="posts" name="posts" style={{ zIndex: 460 }}>{markers}</Pane>];
 }
 
 /** Active flood-prone areas (500 m), each naming the post or rain that activated it. */

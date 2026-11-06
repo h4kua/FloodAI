@@ -66,7 +66,7 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0 }
     try { localStorage.setItem(WEATHER_KEY, on ? "0" : "1"); } catch { /* private mode */ }
     return !on;
   });
-  const weather = useWilayahWeather();
+  const weather = useWilayahWeather(showWeather);
   // Desktop: the legend floats on the map and can be folded. Phones: CSS puts
   // it under the map, always open, so it neither covers the map nor hides.
   const [legendOpen, setLegendOpen] = useState(true);

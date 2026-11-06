@@ -229,14 +229,21 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
       if (controller.signal.aborted) return;
       setSheltersOffline(!list?.length);
       pickFirstShelter.current = true;
-      setNearbyShelters(list?.length ? list : fallbackShelters(userLocation.lat, userLocation.lng));
+      // The three nearest large venues join as farther options: nearestShelters
+      // reaches them only when fewer than five nearby places are safe.
+      const venues = fallbackShelters(userLocation.lat, userLocation.lng);
+      setNearbyShelters(list?.length ? [...list, ...venues.slice(0, 3)] : venues);
     });
     return () => controller.abort();
   }, [userLocation]);
-  const shelterOptions = useMemo(
-    () => nearestShelters(nearbyShelters, floodPoints),
-    [nearbyShelters, floodPoints],
-  );
+  // The nearest safe few, plus the chosen one if a refresh pushed it out (its
+  // area turned active): the route must not vanish while someone follows it.
+  const shelterOptions = useMemo(() => {
+    const shown = nearestShelters(nearbyShelters, floodPoints);
+    if (!destId || shown.some((d) => d.id === destId)) return shown;
+    const chosen = nearestShelters(nearbyShelters, floodPoints, nearbyShelters.length).find((d) => d.id === destId);
+    return chosen ? [...shown, chosen] : shown;
+  }, [nearbyShelters, floodPoints, destId]);
   useEffect(() => {
     if (pickFirstShelter.current && shelterOptions.length) {
       pickFirstShelter.current = false;

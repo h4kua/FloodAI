@@ -114,7 +114,11 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
   const [error, setError]           = useState(null);
   const [flyTarget, setFlyTarget]   = useState(null);
 
+  // Each request gets a number; an older answer arriving late (the walk fell
+  // back to a drive) is dropped instead of drawing the route to the old place.
+  const routeRequest = useRef(0);
   const fetchRoute = useCallback(async () => {
+    const request = ++routeRequest.current;
     if (!origin || !dest) { setRoutes([]); setError(null); return; }
     setLoading(true); setError(null); setRoutes([]);
     try {
@@ -130,6 +134,7 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
       };
       const wanted = travelMode(origin, dest);
       const found = await ask(wanted).catch((err) => (wanted === "walking" ? ask("driving") : Promise.reject(err)));
+      if (request !== routeRequest.current) return;
       setRoutes(found.map((r) => ({
         mode: r.mode,
         coords: r.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
@@ -137,8 +142,11 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
         duration: r.duration,
         steps: r.legs?.[0]?.steps ?? [],
       })));
-    } catch { setError(t("evac.noroute")); }
-    finally { setLoading(false); }
+    } catch {
+      if (request === routeRequest.current) setError(t("evac.noroute"));
+    } finally {
+      if (request === routeRequest.current) setLoading(false);
+    }
   }, [origin?.lat, origin?.lng, dest?.lat, dest?.lng]);
 
   useEffect(() => { fetchRoute(); }, [fetchRoute]);

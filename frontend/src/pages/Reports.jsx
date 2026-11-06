@@ -127,6 +127,10 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0, focusRepo
     setPhoto(null);
   };
 
+  // fetch that throws Error("network") when the server cannot be reached, so a
+  // bug elsewhere (a TypeError) is not shown as a connection problem.
+  const send = (url, options) => fetch(url, options).catch(() => { throw new Error("network"); });
+
   // Uploads the chosen photo; returns its URL, or throws an Error whose message
   // is the text to show.
   const uploadPhoto = async () => {
@@ -134,7 +138,7 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0, focusRepo
     if (!blob) throw new Error(isId ? "Foto tidak bisa dibaca. Pilih foto lain." : "The photo could not be read. Choose another one.");
     const form = new FormData();
     form.append("photo", blob, "laporan.jpg");
-    const res = await fetch(`${API_BASE}/reports/photo`, { method: "POST", body: form });
+    const res = await send(`${API_BASE}/reports/photo`, { method: "POST", body: form });
     if (res.status === 429) throw new Error("rate");
     if (!res.ok) throw new Error(isId ? "Foto gagal diunggah. Hapus fotonya untuk mengirim tanpa foto." : "The photo could not be uploaded. Remove it to send without a photo.");
     return (await res.json()).photo_url;
@@ -150,7 +154,7 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0, focusRepo
     setFormError("");
     try {
       const photoUrl = photo ? await uploadPhoto() : null;
-      const res = await fetch(`${API_BASE}/reports`, {
+      const res = await send(`${API_BASE}/reports`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -169,14 +173,15 @@ export default function Reports({ riskLevel = "waspada", rainfall = 0, focusRepo
       removePhoto();
       setShowForm(false);
       setSent(true);
-      await fetchReports();
+      // The report is stored; a failed list reload must not say it was not sent.
+      fetchReports().catch(() => {});
     } catch (err) {
       setFormError(err.message === "rate"
         ? (isId ? "Terlalu banyak laporan dari jaringan ini. Coba lagi beberapa menit lagi." : "Too many reports from this network. Try again in a few minutes.")
         : /^\d+$/.test(err.message)
         // The status code tells a 422 (rejected data) from a 503 (store down) in a screenshot.
         ? (isId ? `Laporan gagal dikirim (kode ${err.message}). Coba lagi.` : `The report could not be sent (code ${err.message}). Try again.`)
-        : !err.message || err.name === "TypeError"
+        : !err.message || err.message === "network"
         ? (isId ? "Laporan gagal dikirim: server tidak terjangkau. Periksa internet lalu coba lagi." : "The report could not be sent: the server could not be reached. Check your connection and try again.")
         : err.message);
     } finally {
