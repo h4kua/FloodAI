@@ -9,7 +9,7 @@ import {
   distanceToSegmentM,
   googleMapsUrl,
   inFloodArea,
-  rankSheltersByFlood,
+  nearestShelters,
   riversForPost,
   riskyOnlyAtEnds,
   riversOnAlert,
@@ -127,26 +127,21 @@ test("a shelter within 500 m of an active flood point is in a flood area", () =>
   assert.equal(inFloodArea(-6.2320, 106.865, []), false);
 });
 
-test("shelters outside active flood areas come first, nearest first within each group", () => {
+test("only the nearest safe shelters are offered, nearest first", () => {
   const shelters = [
-    { id: "near-river", lat: -6.2302, lng: 106.8652 },
-    { id: "dry-1", lat: -6.2400, lng: 106.8650 },
-    { id: "dry-2", lat: -6.2450, lng: 106.8650 },
+    { id: "dry-2", lat: -6.2450, lng: 106.8650, distanceKm: 0.9 },
+    { id: "near-river", lat: -6.2302, lng: 106.8652, distanceKm: 0.1 },
+    { id: "school-floods", lat: -6.2410, lng: 106.8650, distanceKm: 0.2, floodProneSchool: true },
+    { id: "dry-1", lat: -6.2400, lng: 106.8650, distanceKm: 0.5 },
+    { id: "dry-3", lat: -6.2500, lng: 106.8650, distanceKm: 1.4 },
   ];
-  const ranked = rankSheltersByFlood(shelters, [CILIWUNG_POINT]);
-  assert.deepEqual(ranked.map((s) => s.id), ["dry-1", "dry-2", "near-river"]);
-  assert.equal(ranked[2].inFloodArea, true);
-  assert.deepEqual(rankSheltersByFlood(shelters, []).map((s) => s.id), ["near-river", "dry-1", "dry-2"]);
-});
-
-test("BPBD evacuation sites within 1 km come first; flood-prone schools go last", () => {
-  const shelters = [
-    { id: "school-floods", lat: -6.2400, lng: 106.8650, distanceKm: 0.1, floodProneSchool: true },
-    { id: "mosque", lat: -6.2410, lng: 106.8650, distanceKm: 0.2 },
-    { id: "bpbd-near", lat: -6.2420, lng: 106.8650, distanceKm: 0.8, bpbdSite: { people: 204 } },
-    { id: "bpbd-far", lat: -6.2500, lng: 106.8650, distanceKm: 2.4, bpbdSite: { people: 50 } },
-  ];
-  assert.deepEqual(rankSheltersByFlood(shelters, []).map((s) => s.id), ["bpbd-near", "mosque", "bpbd-far", "school-floods"]);
+  assert.deepEqual(nearestShelters(shelters, [CILIWUNG_POINT], 2).map((s) => s.id), ["dry-1", "dry-2"]);
+  // Without active areas the riverside one is simply the nearest.
+  assert.deepEqual(nearestShelters(shelters, [], 2).map((s) => s.id), ["near-river", "dry-1"]);
+  // Too few safe ones: the nearest risky ones fill up, after the safe ones and flagged.
+  const filled = nearestShelters(shelters.slice(0, 3), [CILIWUNG_POINT], 3);
+  assert.deepEqual(filled.map((s) => s.id), ["dry-2", "near-river", "school-floods"]);
+  assert.equal(filled[1].inFloodArea, true);
 });
 
 test("each post maps to the active areas it activates; rain-only areas map to no post", () => {

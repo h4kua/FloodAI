@@ -4,7 +4,7 @@ import EvacuationMap, { DESTINATIONS, EVAC_COLORS, haversineKm } from "../compon
 import { API_BASE } from "../lib/api";
 import floodProneZones from "../data/floodProneZones.json";
 import postRivers from "../data/postRivers.json";
-import { activeFloodPoints, rankSheltersByFlood } from "../lib/floodRoads";
+import { activeFloodPoints, nearestShelters } from "../lib/floodRoads";
 import { useFloodRisk } from "../hooks/useFloodRisk";
 import ChatBot from "../components/ChatBot";
 import { useT, useApp } from "../lib/appContext";
@@ -115,9 +115,6 @@ const formatDistance = (km) => (km < 1 ? `${Math.round(km * 1000 / 10) * 10} m` 
 // Special entries in the destination dropdown (shelters use their ids).
 const HOME_OPTION = "__home";
 const OTHER_OPTION = "__other";
-const MORE_OPTION = "__more";
-// The list opens with the best few; twenty names at once were too many to read.
-const SHELTERS_SHOWN = 5;
 
 // "Kembangan Selatan, Kembangan, Jakarta Barat" → "Kembangan Selatan"
 const shortPlace = (name) => (name || "").split(",")[0].trim();
@@ -217,11 +214,10 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     [riskData],
   );
 
-  // Shelters near where the user starts: outside active flood-prone areas
-  // first, then nearest first. The first one is picked when a new list arrives.
+  // The nearest few shelters to where the user starts, outside active
+  // flood-prone areas. The first one is picked when a new list arrives.
   const [nearbyShelters, setNearbyShelters]   = useState([]);
   const [sheltersOffline, setSheltersOffline] = useState(false);
-  const [showAllShelters, setShowAllShelters] = useState(false);
   const pickFirstShelter = useRef(false);
   useEffect(() => {
     if (!userLocation) {
@@ -231,18 +227,14 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     const controller = new AbortController();
     fetchNearbyShelters(userLocation.lat, userLocation.lng, controller.signal).then((list) => {
       if (controller.signal.aborted) return;
-      // The three nearest large venues stay as farther options, in case every
-      // nearby candidate lies in an active flood-prone area.
-      const venues = fallbackShelters(userLocation.lat, userLocation.lng);
       setSheltersOffline(!list?.length);
-      setShowAllShelters(false);
       pickFirstShelter.current = true;
-      setNearbyShelters(list?.length ? [...list, ...venues.slice(0, 3)] : venues);
+      setNearbyShelters(list?.length ? list : fallbackShelters(userLocation.lat, userLocation.lng));
     });
     return () => controller.abort();
   }, [userLocation]);
   const shelterOptions = useMemo(
-    () => rankSheltersByFlood(nearbyShelters, floodPoints),
+    () => nearestShelters(nearbyShelters, floodPoints),
     [nearbyShelters, floodPoints],
   );
   useEffect(() => {
@@ -252,11 +244,6 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
     }
   }, [shelterOptions]);
   const selectedDest = destId ? shelterOptions.find((d) => d.id === destId) ?? null : null;
-  // The first few, plus the chosen one if it sits further down the list.
-  const visibleShelters = showAllShelters
-    ? shelterOptions
-    : shelterOptions.filter((d, i) => i < SHELTERS_SHOWN || d.id === destId);
-  const hiddenShelters = shelterOptions.length - visibleShelters.length;
 
   // Destination: home first (the default once saved), any place, or a shelter.
   const [destMode, setDestMode]         = useState(() => (loadHome() ? "home" : "shelter"));
@@ -274,9 +261,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
 
   const handleDestChange = (e) => {
     const value = e.target.value;
-    if (value === MORE_OPTION) {
-      setShowAllShelters(true);  // the selection stays where it was
-    } else if (value === HOME_OPTION) {
+    if (value === HOME_OPTION) {
       setDestMode("home");
     } else if (value === OTHER_OPTION) {
       setDestMode("other");
@@ -499,8 +484,8 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
                   <option value={OTHER_OPTION}>
                     {other ? `${shortPlace(other.name)}` : (lang === "en" ? "Another place…" : "Tujuan lain…")}
                   </option>
-                  <optgroup label={lang === "en" ? "Shelters (best first)" : "Tempat pengungsian (terbaik dulu)"}>
-                    {visibleShelters.map((d) => (
+                  <optgroup label={lang === "en" ? "Nearest shelters" : "Tempat pengungsian terdekat"}>
+                    {shelterOptions.map((d) => (
                       <option key={d.id} value={d.id}>
                         {`${d.name} · ${formatDistance(d.distanceKm)}`}
                         {d.inFloodArea ? ` · ${lang === "en" ? "flood-prone area" : "area rawan banjir"}`
@@ -509,11 +494,6 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
                         {d.id === nearestId && !d.inFloodArea && !d.floodProneSchool ? ` (${lang === "en" ? "recommended" : "disarankan"})` : ""}
                       </option>
                     ))}
-                    {hiddenShelters > 0 && (
-                      <option value={MORE_OPTION}>
-                        {lang === "en" ? `+ ${hiddenShelters} more places…` : `+ ${hiddenShelters} tempat lain…`}
-                      </option>
-                    )}
                   </optgroup>
                 </select>
               </div>
