@@ -56,6 +56,12 @@ def test_greeting_gets_only_the_core_rules():
     assert "NAMA JALAN" not in system and "TITIK PENGUNGSIAN" not in system
 
 
+def test_scope_rule_is_always_sent():
+    # Without it the bot wrote Python code on request ("tolong bikin coding python").
+    for message in ("halo", "tolong bikin coding python", "banjir di jaktim parah ga?"):
+        assert "SCOPE RULE" in _system(message)
+
+
 def test_abbreviations_are_sent_when_used():
     assert "SINGKATAN LOKASI" in _system("banjir di jaktim parah ga?")
     assert "SINGKATAN LOKASI" not in _system("banjir di Jakarta Timur parah ga?")

@@ -31,7 +31,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (622, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (29: flood roads, shelter ranking,
+- Tests: `tests/` (623, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (29: flood roads, shelter ranking,
   post levels, weather per wilayah)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -112,6 +112,9 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   heavier use needs a paid tier.
 
 ## Resolved
+- 2026-11-06: the chat answered anything (it wrote Python code on request): `api/chat_knowledge.txt` now opens with a
+  SCOPE RULE (floods, weather, evacuation, the site only; otherwise a one-sentence refusal in the user's language).
+  Checked live on gpt-oss-20b: code, homework, recipes, translation and "ignore your rules" are refused; flood questions answered.
 - 2026-11-06: home map weather per wilayah ("Cuaca per wilayah" switch, on by default): the backend's OpenWeather
   reading per kota (`openweather_wilayah`, the same data as the "Weather now by area" cards; the map first read
   Open-Meteo and the two disagreed) in nine states (`frontend/src/lib/wilayahWeather.js`). Each kota
