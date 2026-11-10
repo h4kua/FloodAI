@@ -1,0 +1,114 @@
+{
+ "source": "deFlood.ai /predict/realtime-native (DSDA pintu-air feed), Siaga limits per post in cm",
+ "fetched": "2026-11-10",
+ "posts": [
+  {
+   "name": "P.A. Cengkareng Drain",
+   "siaga3": 190.0,
+   "siaga2": 270.0,
+   "siaga1": 310.0
+  },
+  {
+   "name": "P.A. Hek Kramat Jati 1",
+   "siaga3": 200.0,
+   "siaga2": 250.0,
+   "siaga1": 300.0
+  },
+  {
+   "name": "P.A. Manggarai 2",
+   "siaga3": 750.0,
+   "siaga2": 850.0,
+   "siaga1": 950.0
+  },
+  {
+   "name": "P.A. Marina Ancol 1 (Laut)",
+   "siaga3": 170.0,
+   "siaga2": 200.0,
+   "siaga1": 250.0
+  },
+  {
+   "name": "P.A. Ancol Flushing 1",
+   "siaga3": 180.0,
+   "siaga2": 190.0,
+   "siaga1": 220.0
+  },
+  {
+   "name": "P.A. Marina Ancol 1 (Kali)",
+   "siaga3": 170.0,
+   "siaga2": 200.0,
+   "siaga1": 250.0
+  },
+  {
+   "name": "P.A. Pulo Gadung 2",
+   "siaga3": 550.0,
+   "siaga2": 700.0,
+   "siaga1": 770.0
+  },
+  {
+   "name": "P.S. Depok 2",
+   "siaga3": 200.0,
+   "siaga2": 270.0,
+   "siaga1": 350.0
+  },
+  {
+   "name": "P.S. Sunter Hulu",
+   "siaga3": 140.0,
+   "siaga2": 200.0,
+   "siaga1": 250.0
+  },
+  {
+   "name": "P.S. Angke Hulu 1",
+   "siaga3": 150.0,
+   "siaga2": 250.0,
+   "siaga1": 300.0
+  },
+  {
+   "name": "P.S. Pesanggrahan 1",
+   "siaga3": 150.0,
+   "siaga2": 250.0,
+   "siaga1": 350.0
+  },
+  {
+   "name": "P.A. Jembatan Merah 1",
+   "siaga3": 150.0,
+   "siaga2": 200.0,
+   "siaga1": 250.0
+  },
+  {
+   "name": "P.A. Istiqlal 1",
+   "siaga3": 250.0,
+   "siaga2": 300.0,
+   "siaga1": 350.0
+  },
+  {
+   "name": "Waduk Kampung Rambutan 1",
+   "siaga3": 200.0,
+   "siaga2": 250.0,
+   "siaga1": 300.0
+  },
+  {
+   "name": "P.S. Krukut Hulu 2",
+   "siaga3": 150.0,
+   "siaga2": 250.0,
+   "siaga1": 300.0
+  },
+  {
+   "name": "Bendung. Katulampa 2",
+   "siaga3": 80.0,
+   "siaga2": 150.0,
+   "siaga1": 200.0
+  },
+  {
+   "name": "P.A. Karet 1",
+   "siaga3": 450.0,
+   "siaga2": 550.0,
+   "siaga1": 600.0
+  },
+  {
+   "name": "P.A. Kaliduri 1",
+   "siaga3": 220.0,
+   "siaga2": 270.0,
+   "siaga1": 320.0
+  }
+ ]
+}

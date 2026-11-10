@@ -1,0 +1,176 @@
+{
+  "generated_at": "2026-11-10T14:04:46+00:00",
+  "base": {
+    "features": "F4",
+    "validation_pr_auc": 0.116,
+    "test_roc_auc": 0.834,
+    "test_pr_auc": 0.147
+  },
+  "groups": {
+    "hourly rain intensity": {
+      "features": [
+        "max1h",
+        "max3h",
+        "max6h",
+        "hours10",
+        "up_bogor_max3h",
+        "up_depok_max3h"
+      ],
+      "validation_pr_auc": 0.112,
+      "test_roc_auc": 0.838,
+      "test_pr_auc": 0.177,
+      "minus_F4": {
+        "roc_auc": [
+          -0.006,
+          0.012
+        ],
+        "pr_auc": [
+          0.01,
+          0.048
+        ]
+      }
+    },
+    "soil moisture (ERA5-Land, day before)": {
+      "features": [
+        "soil07_prev",
+        "soil728_prev"
+      ],
+      "validation_pr_auc": 0.113,
+      "test_roc_auc": 0.832,
+      "test_pr_auc": 0.136,
+      "minus_F4": {
+        "roc_auc": [
+          -0.006,
+          0.003
+        ],
+        "pr_auc": [
+          -0.027,
+          0.003
+        ]
+      }
+    },
+    "MJO (OMI index)": {
+      "features": [
+        "mjo_x",
+        "mjo_y",
+        "mjo_amp"
+      ],
+      "validation_pr_auc": 0.1,
+      "test_roc_auc": 0.832,
+      "test_pr_auc": 0.16,
+      "minus_F4": {
+        "roc_auc": [
+          -0.013,
+          0.009
+        ],
+        "pr_auc": [
+          -0.013,
+          0.038
+        ]
+      }
+    },
+    "ENSO (ONI)": {
+      "features": [
+        "oni"
+      ],
+      "validation_pr_auc": 0.115,
+      "test_roc_auc": 0.84,
+      "test_pr_auc": 0.159,
+      "minus_F4": {
+        "roc_auc": [
+          0.002,
+          0.011
+        ],
+        "pr_auc": [
+          -0.005,
+          0.029
+        ]
+      }
+    },
+    "northerly surge (wind from the north, Java Sea)": {
+      "features": [
+        "north_wind",
+        "north_wind_d1"
+      ],
+      "validation_pr_auc": 0.112,
+      "test_roc_auc": 0.837,
+      "test_pr_auc": 0.143,
+      "minus_F4": {
+        "roc_auc": [
+          -0.004,
+          0.011
+        ],
+        "pr_auc": [
+          -0.029,
+          0.018
+        ]
+      }
+    },
+    "spring tide (moon phase) on the coast": {
+      "features": [
+        "spring_tide",
+        "coastal",
+        "coastal_spring_tide"
+      ],
+      "validation_pr_auc": 0.124,
+      "test_roc_auc": 0.837,
+      "test_pr_auc": 0.15,
+      "minus_F4": {
+        "roc_auc": [
+          -0.005,
+          0.011
+        ],
+        "pr_auc": [
+          -0.016,
+          0.026
+        ]
+      }
+    }
+  },
+  "day_ahead": {
+    "features": [
+      "d1",
+      "d3prev",
+      "d7prev",
+      "api14",
+      "up_bogor_d1",
+      "hist_rate",
+      "month_sin",
+      "month_cos",
+      "elevation",
+      "slope"
+    ],
+    "drivers": [
+      "soil07_prev",
+      "soil728_prev",
+      "mjo_x",
+      "mjo_y",
+      "mjo_amp",
+      "oni",
+      "north_wind_d1",
+      "spring_tide",
+      "coastal",
+      "coastal_spring_tide"
+    ],
+    "without_drivers": {
+      "validation_pr_auc": 0.084,
+      "test_roc_auc": 0.78,
+      "test_pr_auc": 0.069
+    },
+    "with_drivers": {
+      "validation_pr_auc": 0.077,
+      "test_roc_auc": 0.8,
+      "test_pr_auc": 0.088
+    },
+    "with_minus_without": {
+      "roc_auc": [
+        0.001,
+        0.041
+      ],
+      "pr_auc": [
+        0.001,
+        0.039
+      ]
+    }
+  }
+}

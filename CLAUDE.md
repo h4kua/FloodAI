@@ -31,7 +31,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (623, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (29: flood roads, shelter ranking,
+- Tests: `tests/` (626, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (29: flood roads, shelter ranking,
   post levels, weather per wilayah)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -110,6 +110,22 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   `INTERNAL_SECRET` (and `INTERNAL_SECRET` on Fly).
 - Groq free tier: 8k tokens/min per model, so roughly 4–8 chat questions a minute across all users;
   heavier use needs a paid tier.
+
+- Thesis experiments (2026-11-10, `scripts/thesis_experiments.py`, GPU, `artifacts/reports/thesis_experiments.md`):
+  a daily kecamatan model of our own on BPBD flood dates + IMERG rain (train 2020-2021, validate 2022, test 2023 to
+  Sep 2025, test prevalence 0.024). Tuned XGBoost test ROC-AUC 0.839 [0.819-0.857], PR-AUC 0.162 vs rain-that-day
+  0.743 / 0.082 (paired CIs exclude 0); logistic regression and random forest are as good (CIs include 0); place and
+  season lift AUC 0.72 -> 0.83, the model family does not. At equal alarm volume it catches 32 % of floods vs 22 % for a
+  rain threshold. Rules vs model vs hybrid on real 2025 DSDA daily water levels (`data/raw/tinggi-muka-air-...xls`, 19
+  posts, every day of 2025): hybrid catches more flood days than rules alone (>= Alert recall 0.32 -> 0.45, CI of the
+  difference [0.075, 0.186]) at lower precision (0.84 -> 0.64). Drivers from the literature (`scripts/fetch_flood_drivers.py`,
+  `scripts/driver_ablation.py`: ERA5-Land soil moisture, MJO OMI, ENSO ONI, northerly wind, spring tide) add nothing
+  same-day beyond rain; day ahead (no same-day rain) they lift ROC-AUC 0.78 -> 0.80 (CI [0.001, 0.041]) but not on 2022.
+  Nothing is served yet.
+- `data/bundled/awlr_stations.json` (AWLR FeatureServer) holds Siaga limits on another scale for several posts
+  (Manggarai Siaga 1 250 cm vs 950 cm in the live DSDA feed; Depok has Katulampa's 80/150/200). The live app reads the
+  feed's own limits and is not affected; experiments use `data/bundled/dsda_siaga_limits_2026-11-10.json`. In the 2025 file,
+  Marina (Laut/Kali), Ancol Flushing and PA. Hek sit at Siaga 3+ on more than half of the days.
 
 ## Resolved
 - 2026-11-06: the chat answered anything (it wrote Python code on request): `api/chat_knowledge.txt` now opens with a

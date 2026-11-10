@@ -1,0 +1,743 @@
+{
+  "generated_at": "2026-11-10T13:47:44+00:00",
+  "device": "cuda",
+  "rows": {
+    "train": 30702,
+    "validate": 15330,
+    "test": 42168
+  },
+  "floods": {
+    "train": 1027,
+    "validate": 544,
+    "test": 990
+  },
+  "prevalence_test": 0.0235,
+  "missing_static": 0,
+  "exp1_feature_sets": {
+    "F1 rain (today, yesterday, 3 days)": {
+      "validation_pr_auc": 0.057,
+      "roc_auc": [
+        0.724,
+        0.694,
+        0.753
+      ],
+      "pr_auc": [
+        0.067,
+        0.049,
+        0.099
+      ]
+    },
+    "F2 + antecedent rain (7 days, API)": {
+      "validation_pr_auc": 0.064,
+      "roc_auc": [
+        0.726,
+        0.695,
+        0.754
+      ],
+      "pr_auc": [
+        0.073,
+        0.049,
+        0.107
+      ]
+    },
+    "F3 + upstream rain (Bogor, Depok)": {
+      "validation_pr_auc": 0.069,
+      "roc_auc": [
+        0.725,
+        0.693,
+        0.755
+      ],
+      "pr_auc": [
+        0.084,
+        0.056,
+        0.122
+      ]
+    },
+    "F4 + place and season": {
+      "validation_pr_auc": 0.116,
+      "roc_auc": [
+        0.834,
+        0.814,
+        0.852
+      ],
+      "pr_auc": [
+        0.147,
+        0.109,
+        0.196
+      ]
+    },
+    "F5 + hourly intensity": {
+      "validation_pr_auc": 0.112,
+      "roc_auc": [
+        0.838,
+        0.817,
+        0.857
+      ],
+      "pr_auc": [
+        0.177,
+        0.131,
+        0.231
+      ]
+    },
+    "F6 + drivers (soil moisture, MJO, ENSO, northerly surge, spring tide)": {
+      "validation_pr_auc": 0.104,
+      "roc_auc": [
+        0.844,
+        0.826,
+        0.862
+      ],
+      "pr_auc": [
+        0.172,
+        0.123,
+        0.228
+      ]
+    }
+  },
+  "best_feature_set": "F4 + place and season",
+  "exp1_tuning": {
+    "trials": 300,
+    "seconds": 455.2,
+    "best_params": {
+      "max_depth": 5,
+      "learning_rate": 0.01453452298705924,
+      "n_estimators": 462,
+      "min_child_weight": 10.586088813666745,
+      "subsample": 0.8725940641644223,
+      "colsample_bytree": 0.7780071067458392,
+      "gamma": 4.255655498809675,
+      "reg_lambda": 0.20437415993960126,
+      "scale_pos_weight": 28.89483933787731
+    },
+    "best_val_pr_auc": 0.1298
+  },
+  "exp1_models": {
+    "baseline: rain that day (d0)": {
+      "validation_pr_auc": 0.063,
+      "roc_auc": [
+        0.743,
+        0.711,
+        0.77
+      ],
+      "pr_auc": [
+        0.082,
+        0.057,
+        0.114
+      ]
+    },
+    "baseline: climatology": {
+      "validation_pr_auc": 0.047,
+      "roc_auc": [
+        0.729,
+        0.695,
+        0.761
+      ],
+      "pr_auc": [
+        0.068,
+        0.054,
+        0.084
+      ]
+    },
+    "logistic": {
+      "validation_pr_auc": 0.111,
+      "roc_auc": [
+        0.832,
+        0.812,
+        0.85
+      ],
+      "pr_auc": [
+        0.161,
+        0.116,
+        0.209
+      ]
+    },
+    "random_forest": {
+      "validation_pr_auc": 0.102,
+      "roc_auc": [
+        0.843,
+        0.823,
+        0.861
+      ],
+      "pr_auc": [
+        0.154,
+        0.109,
+        0.208
+      ]
+    },
+    "mlp": {
+      "validation_pr_auc": 0.092,
+      "roc_auc": [
+        0.825,
+        0.806,
+        0.843
+      ],
+      "pr_auc": [
+        0.119,
+        0.093,
+        0.152
+      ]
+    },
+    "xgboost": {
+      "validation_pr_auc": 0.116,
+      "roc_auc": [
+        0.834,
+        0.814,
+        0.852
+      ],
+      "pr_auc": [
+        0.147,
+        0.109,
+        0.196
+      ]
+    },
+    "xgboost_tuned": {
+      "validation_pr_auc": 0.13,
+      "roc_auc": [
+        0.839,
+        0.819,
+        0.857
+      ],
+      "pr_auc": [
+        0.162,
+        0.116,
+        0.217
+      ]
+    }
+  },
+  "chosen_model": "xgboost_tuned",
+  "exp1_paired": {
+    "xgboost_tuned minus baseline: rain that day (d0)": {
+      "roc_auc": [
+        0.077,
+        0.12
+      ],
+      "pr_auc": [
+        0.048,
+        0.118
+      ]
+    },
+    "xgboost_tuned minus baseline: climatology": {
+      "roc_auc": [
+        0.078,
+        0.148
+      ],
+      "pr_auc": [
+        0.053,
+        0.145
+      ]
+    },
+    "xgboost_tuned minus logistic": {
+      "roc_auc": [
+        -0.005,
+        0.02
+      ],
+      "pr_auc": [
+        -0.027,
+        0.032
+      ]
+    },
+    "xgboost_tuned minus random_forest": {
+      "roc_auc": [
+        -0.012,
+        0.006
+      ],
+      "pr_auc": [
+        -0.013,
+        0.026
+      ]
+    },
+    "xgboost_tuned minus mlp": {
+      "roc_auc": [
+        -0.001,
+        0.03
+      ],
+      "pr_auc": [
+        0.008,
+        0.086
+      ]
+    },
+    "xgboost_tuned minus xgboost": {
+      "roc_auc": [
+        0.001,
+        0.01
+      ],
+      "pr_auc": [
+        0.0,
+        0.032
+      ]
+    }
+  },
+  "exp2_model_thresholds": {
+    "budget 0.5 alarm(s) per kecamatan per month": {
+      "threshold": 0.7503,
+      "recall": 0.211,
+      "precision": 0.189,
+      "alarms": 1107,
+      "missed": 781,
+      "alarms_per_kecamatan_month": 0.8
+    },
+    "budget 1 alarm(s) per kecamatan per month": {
+      "threshold": 0.6759,
+      "recall": 0.32,
+      "precision": 0.171,
+      "alarms": 1859,
+      "missed": 673,
+      "alarms_per_kecamatan_month": 1.34
+    },
+    "budget 2 alarm(s) per kecamatan per month": {
+      "threshold": 0.5595,
+      "recall": 0.449,
+      "precision": 0.135,
+      "alarms": 3304,
+      "missed": 545,
+      "alarms_per_kecamatan_month": 2.38
+    },
+    "budget 4 alarm(s) per kecamatan per month": {
+      "threshold": 0.4154,
+      "recall": 0.567,
+      "precision": 0.096,
+      "alarms": 5822,
+      "missed": 429,
+      "alarms_per_kecamatan_month": 4.2
+    },
+    "best F1 on 2022": {
+      "threshold": 0.5557,
+      "recall": 0.456,
+      "precision": 0.134,
+      "alarms": 3359,
+      "missed": 539,
+      "alarms_per_kecamatan_month": 2.42
+    },
+    "highest recall with precision >= 0.30 on 2022": {
+      "threshold": 0.8194,
+      "recall": 0.135,
+      "precision": 0.265,
+      "alarms": 505,
+      "missed": 856,
+      "alarms_per_kecamatan_month": 0.36
+    }
+  },
+  "exp2_rain_rules": {
+    "rain that day >= 50 mm (BMKG heavy)": {
+      "threshold": 50.0,
+      "recall": 0.085,
+      "precision": 0.124,
+      "alarms": 680,
+      "missed": 906,
+      "alarms_per_kecamatan_month": 0.49
+    },
+    "rain that day >= 100 mm (BMKG very heavy)": {
+      "threshold": 100.0,
+      "recall": 0.011,
+      "precision": 0.733,
+      "alarms": 15,
+      "missed": 979,
+      "alarms_per_kecamatan_month": 0.01
+    }
+  },
+  "exp2_rain_equal_volume": {
+    "threshold": 35.155,
+    "recall": 0.217,
+    "precision": 0.115,
+    "alarms": 1864,
+    "missed": 775,
+    "alarms_per_kecamatan_month": 1.34
+  },
+  "exp3": {
+    "period": "2025-01-01 to 2025-09-30",
+    "water_level_file": {
+      "posts_in_file": 19,
+      "posts_with_siaga_bands": [
+        "BENDUNG KATULAMPA",
+        "ISTIQLAL",
+        "JEMBATAN MERAH",
+        "PA. FLUSHING ANCOL",
+        "PA. KARET",
+        "PA. MANGGARAI",
+        "PA. MARINA (KALI)",
+        "PA. MARINA (LAUT)",
+        "PA. PULOGADUNG",
+        "PA.HEK",
+        "PS. ANGKE HULU",
+        "PS. DEPOK",
+        "PS. KRUKUT HULU",
+        "PS. PESANGGRAHAN",
+        "PS. SUNTER HULU"
+      ],
+      "posts_without_bands": [
+        "PA. PASAR IKAN (LAUT)",
+        "PS. CIPINANG HULU",
+        "TANGKI",
+        "WADUK PLUIT"
+      ],
+      "missing_readings": 197,
+      "always_on_posts": {
+        "PA. FLUSHING ANCOL": 0.59,
+        "PA. MARINA (KALI)": 0.68,
+        "PA. MARINA (LAUT)": 0.96,
+        "PA.HEK": 0.95
+      }
+    },
+    "city_model_thresholds": {
+      "1": 0.6126,
+      "2": 0.7322,
+      "3": 0.8134
+    },
+    "results": {
+      "any BPBD flood record | >= Watch": {
+        "rules, all 15 posts": {
+          "warning_days": 264,
+          "flood_days": 128,
+          "caught_same_day": 123,
+          "recall": 0.961,
+          "recall_same_or_day_before": 0.992,
+          "precision": 0.466,
+          "false_alarm_days": 141
+        },
+        "rules": {
+          "warning_days": 131,
+          "flood_days": 128,
+          "caught_same_day": 73,
+          "recall": 0.57,
+          "recall_same_or_day_before": 0.656,
+          "precision": 0.557,
+          "false_alarm_days": 58
+        },
+        "model": {
+          "warning_days": 81,
+          "flood_days": 128,
+          "caught_same_day": 47,
+          "recall": 0.367,
+          "recall_same_or_day_before": 0.516,
+          "precision": 0.58,
+          "false_alarm_days": 34
+        },
+        "hybrid": {
+          "warning_days": 162,
+          "flood_days": 128,
+          "caught_same_day": 85,
+          "recall": 0.664,
+          "recall_same_or_day_before": 0.766,
+          "precision": 0.525,
+          "false_alarm_days": 77
+        },
+        "hybrid minus rules": {
+          "recall_difference": [
+            0.045,
+            0.145
+          ],
+          "precision_difference": [
+            -0.073,
+            0.005
+          ]
+        }
+      },
+      "any BPBD flood record | >= Alert": {
+        "rules, all 15 posts": {
+          "warning_days": 255,
+          "flood_days": 128,
+          "caught_same_day": 121,
+          "recall": 0.945,
+          "recall_same_or_day_before": 0.992,
+          "precision": 0.475,
+          "false_alarm_days": 134
+        },
+        "rules": {
+          "warning_days": 49,
+          "flood_days": 128,
+          "caught_same_day": 41,
+          "recall": 0.32,
+          "recall_same_or_day_before": 0.406,
+          "precision": 0.837,
+          "false_alarm_days": 8
+        },
+        "model": {
+          "warning_days": 57,
+          "flood_days": 128,
+          "caught_same_day": 33,
+          "recall": 0.258,
+          "recall_same_or_day_before": 0.406,
+          "precision": 0.579,
+          "false_alarm_days": 24
+        },
+        "hybrid": {
+          "warning_days": 89,
+          "flood_days": 128,
+          "caught_same_day": 57,
+          "recall": 0.445,
+          "recall_same_or_day_before": 0.562,
+          "precision": 0.64,
+          "false_alarm_days": 32
+        },
+        "hybrid minus rules": {
+          "recall_difference": [
+            0.075,
+            0.186
+          ],
+          "precision_difference": [
+            -0.304,
+            -0.104
+          ]
+        }
+      },
+      "any BPBD flood record | Danger": {
+        "rules, all 15 posts": {
+          "warning_days": 45,
+          "flood_days": 128,
+          "caught_same_day": 38,
+          "recall": 0.297,
+          "recall_same_or_day_before": 0.445,
+          "precision": 0.844,
+          "false_alarm_days": 7
+        },
+        "rules": {
+          "warning_days": 23,
+          "flood_days": 128,
+          "caught_same_day": 20,
+          "recall": 0.156,
+          "recall_same_or_day_before": 0.242,
+          "precision": 0.87,
+          "false_alarm_days": 3
+        },
+        "model": {
+          "warning_days": 29,
+          "flood_days": 128,
+          "caught_same_day": 15,
+          "recall": 0.117,
+          "recall_same_or_day_before": 0.227,
+          "precision": 0.517,
+          "false_alarm_days": 14
+        },
+        "hybrid": {
+          "warning_days": 45,
+          "flood_days": 128,
+          "caught_same_day": 28,
+          "recall": 0.219,
+          "recall_same_or_day_before": 0.367,
+          "precision": 0.622,
+          "false_alarm_days": 17
+        },
+        "hybrid minus rules": {
+          "recall_difference": [
+            0.023,
+            0.102
+          ],
+          "precision_difference": [
+            -0.4,
+            -0.114
+          ]
+        }
+      },
+      "large flood (>= 10 RW records) | >= Watch": {
+        "rules, all 15 posts": {
+          "warning_days": 264,
+          "flood_days": 13,
+          "caught_same_day": 13,
+          "recall": 1.0,
+          "recall_same_or_day_before": 1.0,
+          "precision": 0.049,
+          "false_alarm_days": 251
+        },
+        "rules": {
+          "warning_days": 131,
+          "flood_days": 13,
+          "caught_same_day": 12,
+          "recall": 0.923,
+          "recall_same_or_day_before": 0.923,
+          "precision": 0.092,
+          "false_alarm_days": 119
+        },
+        "model": {
+          "warning_days": 81,
+          "flood_days": 13,
+          "caught_same_day": 10,
+          "recall": 0.769,
+          "recall_same_or_day_before": 1.0,
+          "precision": 0.123,
+          "false_alarm_days": 71
+        },
+        "hybrid": {
+          "warning_days": 162,
+          "flood_days": 13,
+          "caught_same_day": 12,
+          "recall": 0.923,
+          "recall_same_or_day_before": 1.0,
+          "precision": 0.074,
+          "false_alarm_days": 150
+        },
+        "hybrid minus rules": {
+          "recall_difference": [
+            0.0,
+            0.0
+          ],
+          "precision_difference": [
+            -0.03,
+            -0.008
+          ]
+        }
+      },
+      "large flood (>= 10 RW records) | >= Alert": {
+        "rules, all 15 posts": {
+          "warning_days": 255,
+          "flood_days": 13,
+          "caught_same_day": 13,
+          "recall": 1.0,
+          "recall_same_or_day_before": 1.0,
+          "precision": 0.051,
+          "false_alarm_days": 242
+        },
+        "rules": {
+          "warning_days": 49,
+          "flood_days": 13,
+          "caught_same_day": 11,
+          "recall": 0.846,
+          "recall_same_or_day_before": 0.923,
+          "precision": 0.224,
+          "false_alarm_days": 38
+        },
+        "model": {
+          "warning_days": 57,
+          "flood_days": 13,
+          "caught_same_day": 9,
+          "recall": 0.692,
+          "recall_same_or_day_before": 0.923,
+          "precision": 0.158,
+          "false_alarm_days": 48
+        },
+        "hybrid": {
+          "warning_days": 89,
+          "flood_days": 13,
+          "caught_same_day": 11,
+          "recall": 0.846,
+          "recall_same_or_day_before": 1.0,
+          "precision": 0.124,
+          "false_alarm_days": 78
+        },
+        "hybrid minus rules": {
+          "recall_difference": [
+            0.0,
+            0.0
+          ],
+          "precision_difference": [
+            -0.16,
+            -0.046
+          ]
+        }
+      },
+      "large flood (>= 10 RW records) | Danger": {
+        "rules, all 15 posts": {
+          "warning_days": 45,
+          "flood_days": 13,
+          "caught_same_day": 11,
+          "recall": 0.846,
+          "recall_same_or_day_before": 0.923,
+          "precision": 0.244,
+          "false_alarm_days": 34
+        },
+        "rules": {
+          "warning_days": 23,
+          "flood_days": 13,
+          "caught_same_day": 8,
+          "recall": 0.615,
+          "recall_same_or_day_before": 0.692,
+          "precision": 0.348,
+          "false_alarm_days": 15
+        },
+        "model": {
+          "warning_days": 29,
+          "flood_days": 13,
+          "caught_same_day": 7,
+          "recall": 0.538,
+          "recall_same_or_day_before": 0.692,
+          "precision": 0.241,
+          "false_alarm_days": 22
+        },
+        "hybrid": {
+          "warning_days": 45,
+          "flood_days": 13,
+          "caught_same_day": 9,
+          "recall": 0.692,
+          "recall_same_or_day_before": 0.846,
+          "precision": 0.2,
+          "false_alarm_days": 36
+        },
+        "hybrid minus rules": {
+          "recall_difference": [
+            0.0,
+            0.286
+          ],
+          "precision_difference": [
+            -0.286,
+            -0.03
+          ]
+        }
+      },
+      "any BPBD flood record | model with as many warning days as the rules": {
+        "model": {
+          "warning_days": 131,
+          "flood_days": 128,
+          "caught_same_day": 71,
+          "recall": 0.555,
+          "recall_same_or_day_before": 0.688,
+          "precision": 0.542,
+          "false_alarm_days": 60
+        },
+        "rules": {
+          "warning_days": 131,
+          "flood_days": 128,
+          "caught_same_day": 73,
+          "recall": 0.57,
+          "recall_same_or_day_before": 0.656,
+          "precision": 0.557,
+          "false_alarm_days": 58
+        }
+      },
+      "large flood (>= 10 RW records) | model with as many warning days as the rules": {
+        "model": {
+          "warning_days": 131,
+          "flood_days": 13,
+          "caught_same_day": 10,
+          "recall": 0.769,
+          "recall_same_or_day_before": 1.0,
+          "precision": 0.076,
+          "false_alarm_days": 121
+        },
+        "rules": {
+          "warning_days": 131,
+          "flood_days": 13,
+          "caught_same_day": 12,
+          "recall": 0.923,
+          "recall_same_or_day_before": 0.923,
+          "precision": 0.092,
+          "false_alarm_days": 119
+        }
+      }
+    },
+    "level_days": {
+      "rules, all 15 posts": {
+        "0": 9,
+        "1": 9,
+        "2": 210,
+        "3": 45
+      },
+      "rules": {
+        "0": 142,
+        "1": 82,
+        "2": 26,
+        "3": 23
+      },
+      "model": {
+        "0": 192,
+        "1": 24,
+        "2": 28,
+        "3": 29
+      },
+      "hybrid": {
+        "0": 111,
+        "1": 73,
+        "2": 44,
+        "3": 45
+      }
+    }
+  },
+  "seconds": 797.3
+}
