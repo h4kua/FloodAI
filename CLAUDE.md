@@ -31,7 +31,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (626, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (29: flood roads, shelter ranking,
+- Tests: `tests/` (629, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (29: flood roads, shelter ranking,
   post levels, weather per wilayah)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -126,6 +126,21 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   (Manggarai Siaga 1 250 cm vs 950 cm in the live DSDA feed; Depok has Katulampa's 80/150/200). The live app reads the
   feed's own limits and is not affected; experiments use `data/bundled/dsda_siaga_limits_2026-11-10.json`. In the 2025 file,
   Marina (Laut/Kali), Ancol Flushing and PA. Hek sit at Siaga 3+ on more than half of the days.
+
+- More data and longer tests (2026-11-11). IMERG now 2013 onward (`fetch_imerg_history.py --history`), so BPBD dated
+  events 2013-2019 (`events_clean.csv`) train the daily model; `scripts/long_experiments.py` tests every year 2016-2025 on
+  models trained on earlier years only: XGBoost F4 ROC-AUC 0.841 [0.822-0.858] pooled 2016-2022 and 0.869 on 2023-Sep 2025
+  (rain alone 0.75 / 0.74); XGBoost beats logistic (+0.008-0.053); hourly intensity and the literature drivers add nothing.
+  DSDA water levels 2016-2021 from Satu Data Jakarta (`scripts/fetch_satudata_tma.py`, 2.2 M readings with the official
+  status_siaga; the 2020 dataset also holds Aug-Dec 2021; 2016-2017 are patchy) -> `scripts/dsda_history.py` ->
+  `data/processed/dsda_tma_daily_2016_2020.csv`. `scripts/water_level_experiments.py`: city water features lift the
+  kecamatan model on 2019-2021 (ROC-AUC 0.778 -> 0.810, PR-AUC 0.078 -> 0.131, CIs exclude 0). Rules on every river post
+  warn on 94 % of days: P.A. Hek, Jembatan Merah and Istiqlal sit at Siaga 3+ on 58-94 % of days (gate-operated); without
+  them the rules warn on 47 %. A depth-3 learned decision layer + Siaga-1 safety rule matches the informative-post hybrid at
+  Watch/Alert and catches more large floods at Danger (recall 0.71 vs 0.58, CI [0.026, 0.242]); at equal warning days no
+  approach ranks days significantly better than the official statuses. PetaBencana: flooded-area archive is open but ends
+  Oct 2022 with no public area map; the reports archive needs a key (`scripts/fetch_petabencana_reports.py`, PETABENCANA_API_KEY
+  in .env, request at info@petabencana.id).
 
 ## Resolved
 - 2026-11-06: the chat answered anything (it wrote Python code on request): `api/chat_knowledge.txt` now opens with a

@@ -1,0 +1,655 @@
+{
+  "generated_at": "2026-11-10T17:59:46+00:00",
+  "device": "cuda",
+  "rows": 195552,
+  "floods_by_year": {
+    "2013": 374,
+    "2014": 671,
+    "2015": 224,
+    "2016": 407,
+    "2017": 239,
+    "2018": 151,
+    "2019": 145,
+    "2020": 704,
+    "2021": 323,
+    "2022": 544,
+    "2023": 213,
+    "2024": 424,
+    "2025": 353
+  },
+  "missing": {
+    "d7prev": 0.0002,
+    "hist_rate": 0.0784
+  },
+  "per_year": {
+    "2016": {
+      "floods": 407,
+      "prevalence": 0.0265,
+      "models": {
+        "baseline: rain that day": {
+          "roc_auc": 0.706,
+          "pr_auc": 0.073
+        },
+        "logistic F4": {
+          "roc_auc": 0.79,
+          "pr_auc": 0.173
+        },
+        "XGBoost F4": {
+          "roc_auc": 0.801,
+          "pr_auc": 0.193
+        },
+        "XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": 0.811,
+          "pr_auc": 0.19
+        },
+        "XGBoost F6 (+ drivers)": {
+          "roc_auc": 0.825,
+          "pr_auc": 0.17
+        },
+        "day ahead, no drivers": {
+          "roc_auc": 0.794,
+          "pr_auc": 0.168
+        },
+        "day ahead, + drivers": {
+          "roc_auc": 0.804,
+          "pr_auc": 0.167
+        }
+      }
+    },
+    "2017": {
+      "floods": 239,
+      "prevalence": 0.0156,
+      "models": {
+        "baseline: rain that day": {
+          "roc_auc": 0.728,
+          "pr_auc": 0.08
+        },
+        "logistic F4": {
+          "roc_auc": 0.869,
+          "pr_auc": 0.156
+        },
+        "XGBoost F4": {
+          "roc_auc": 0.865,
+          "pr_auc": 0.156
+        },
+        "XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": 0.87,
+          "pr_auc": 0.17
+        },
+        "XGBoost F6 (+ drivers)": {
+          "roc_auc": 0.878,
+          "pr_auc": 0.221
+        },
+        "day ahead, no drivers": {
+          "roc_auc": 0.858,
+          "pr_auc": 0.2
+        },
+        "day ahead, + drivers": {
+          "roc_auc": 0.872,
+          "pr_auc": 0.265
+        }
+      }
+    },
+    "2018": {
+      "floods": 151,
+      "prevalence": 0.0098,
+      "models": {
+        "baseline: rain that day": {
+          "roc_auc": 0.83,
+          "pr_auc": 0.041
+        },
+        "logistic F4": {
+          "roc_auc": 0.87,
+          "pr_auc": 0.054
+        },
+        "XGBoost F4": {
+          "roc_auc": 0.885,
+          "pr_auc": 0.085
+        },
+        "XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": 0.887,
+          "pr_auc": 0.085
+        },
+        "XGBoost F6 (+ drivers)": {
+          "roc_auc": 0.816,
+          "pr_auc": 0.071
+        },
+        "day ahead, no drivers": {
+          "roc_auc": 0.852,
+          "pr_auc": 0.061
+        },
+        "day ahead, + drivers": {
+          "roc_auc": 0.783,
+          "pr_auc": 0.044
+        }
+      }
+    },
+    "2019": {
+      "floods": 145,
+      "prevalence": 0.0095,
+      "models": {
+        "baseline: rain that day": {
+          "roc_auc": 0.873,
+          "pr_auc": 0.11
+        },
+        "logistic F4": {
+          "roc_auc": 0.915,
+          "pr_auc": 0.095
+        },
+        "XGBoost F4": {
+          "roc_auc": 0.919,
+          "pr_auc": 0.089
+        },
+        "XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": 0.914,
+          "pr_auc": 0.075
+        },
+        "XGBoost F6 (+ drivers)": {
+          "roc_auc": 0.915,
+          "pr_auc": 0.077
+        },
+        "day ahead, no drivers": {
+          "roc_auc": 0.888,
+          "pr_auc": 0.073
+        },
+        "day ahead, + drivers": {
+          "roc_auc": 0.889,
+          "pr_auc": 0.066
+        }
+      }
+    },
+    "2020": {
+      "floods": 704,
+      "prevalence": 0.0458,
+      "models": {
+        "baseline: rain that day": {
+          "roc_auc": 0.785,
+          "pr_auc": 0.23
+        },
+        "logistic F4": {
+          "roc_auc": 0.785,
+          "pr_auc": 0.19
+        },
+        "XGBoost F4": {
+          "roc_auc": 0.815,
+          "pr_auc": 0.171
+        },
+        "XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": 0.82,
+          "pr_auc": 0.189
+        },
+        "XGBoost F6 (+ drivers)": {
+          "roc_auc": 0.824,
+          "pr_auc": 0.221
+        },
+        "day ahead, no drivers": {
+          "roc_auc": 0.784,
+          "pr_auc": 0.129
+        },
+        "day ahead, + drivers": {
+          "roc_auc": 0.793,
+          "pr_auc": 0.151
+        }
+      }
+    },
+    "2021": {
+      "floods": 323,
+      "prevalence": 0.0211,
+      "models": {
+        "baseline: rain that day": {
+          "roc_auc": 0.777,
+          "pr_auc": 0.092
+        },
+        "logistic F4": {
+          "roc_auc": 0.858,
+          "pr_auc": 0.236
+        },
+        "XGBoost F4": {
+          "roc_auc": 0.866,
+          "pr_auc": 0.226
+        },
+        "XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": 0.868,
+          "pr_auc": 0.213
+        },
+        "XGBoost F6 (+ drivers)": {
+          "roc_auc": 0.861,
+          "pr_auc": 0.202
+        },
+        "day ahead, no drivers": {
+          "roc_auc": 0.842,
+          "pr_auc": 0.129
+        },
+        "day ahead, + drivers": {
+          "roc_auc": 0.832,
+          "pr_auc": 0.135
+        }
+      }
+    },
+    "2022": {
+      "floods": 544,
+      "prevalence": 0.0355,
+      "models": {
+        "baseline: rain that day": {
+          "roc_auc": 0.597,
+          "pr_auc": 0.063
+        },
+        "logistic F4": {
+          "roc_auc": 0.734,
+          "pr_auc": 0.097
+        },
+        "XGBoost F4": {
+          "roc_auc": 0.786,
+          "pr_auc": 0.106
+        },
+        "XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": 0.781,
+          "pr_auc": 0.099
+        },
+        "XGBoost F6 (+ drivers)": {
+          "roc_auc": 0.782,
+          "pr_auc": 0.101
+        },
+        "day ahead, no drivers": {
+          "roc_auc": 0.751,
+          "pr_auc": 0.085
+        },
+        "day ahead, + drivers": {
+          "roc_auc": 0.76,
+          "pr_auc": 0.085
+        }
+      }
+    },
+    "2023": {
+      "floods": 213,
+      "prevalence": 0.0139,
+      "models": {
+        "baseline: rain that day": {
+          "roc_auc": 0.848,
+          "pr_auc": 0.067
+        },
+        "logistic F4": {
+          "roc_auc": 0.892,
+          "pr_auc": 0.141
+        },
+        "XGBoost F4": {
+          "roc_auc": 0.918,
+          "pr_auc": 0.197
+        },
+        "XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": 0.915,
+          "pr_auc": 0.183
+        },
+        "XGBoost F6 (+ drivers)": {
+          "roc_auc": 0.915,
+          "pr_auc": 0.223
+        },
+        "day ahead, no drivers": {
+          "roc_auc": 0.893,
+          "pr_auc": 0.148
+        },
+        "day ahead, + drivers": {
+          "roc_auc": 0.89,
+          "pr_auc": 0.187
+        }
+      }
+    },
+    "2024": {
+      "floods": 424,
+      "prevalence": 0.0276,
+      "models": {
+        "baseline: rain that day": {
+          "roc_auc": 0.709,
+          "pr_auc": 0.068
+        },
+        "logistic F4": {
+          "roc_auc": 0.778,
+          "pr_auc": 0.123
+        },
+        "XGBoost F4": {
+          "roc_auc": 0.822,
+          "pr_auc": 0.152
+        },
+        "XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": 0.826,
+          "pr_auc": 0.156
+        },
+        "XGBoost F6 (+ drivers)": {
+          "roc_auc": 0.827,
+          "pr_auc": 0.131
+        },
+        "day ahead, no drivers": {
+          "roc_auc": 0.794,
+          "pr_auc": 0.11
+        },
+        "day ahead, + drivers": {
+          "roc_auc": 0.792,
+          "pr_auc": 0.09
+        }
+      }
+    },
+    "2025": {
+      "floods": 353,
+      "prevalence": 0.0308,
+      "models": {
+        "baseline: rain that day": {
+          "roc_auc": 0.677,
+          "pr_auc": 0.117
+        },
+        "logistic F4": {
+          "roc_auc": 0.821,
+          "pr_auc": 0.267
+        },
+        "XGBoost F4": {
+          "roc_auc": 0.871,
+          "pr_auc": 0.201
+        },
+        "XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": 0.869,
+          "pr_auc": 0.246
+        },
+        "XGBoost F6 (+ drivers)": {
+          "roc_auc": 0.886,
+          "pr_auc": 0.235
+        },
+        "day ahead, no drivers": {
+          "roc_auc": 0.823,
+          "pr_auc": 0.125
+        },
+        "day ahead, + drivers": {
+          "roc_auc": 0.851,
+          "pr_auc": 0.15
+        }
+      }
+    }
+  },
+  "pooled": {
+    "2016\u20132022 (complete labels)": {
+      "models": {
+        "baseline: rain that day": {
+          "roc_auc": [
+            0.75,
+            0.721,
+            0.778
+          ],
+          "pr_auc": [
+            0.093,
+            0.066,
+            0.14
+          ]
+        },
+        "logistic F4": {
+          "roc_auc": [
+            0.821,
+            0.801,
+            0.842
+          ],
+          "pr_auc": [
+            0.142,
+            0.107,
+            0.193
+          ]
+        },
+        "XGBoost F4": {
+          "roc_auc": [
+            0.841,
+            0.822,
+            0.859
+          ],
+          "pr_auc": [
+            0.146,
+            0.113,
+            0.192
+          ]
+        },
+        "XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": [
+            0.844,
+            0.826,
+            0.861
+          ],
+          "pr_auc": [
+            0.148,
+            0.113,
+            0.2
+          ]
+        },
+        "XGBoost F6 (+ drivers)": {
+          "roc_auc": [
+            0.839,
+            0.82,
+            0.856
+          ],
+          "pr_auc": [
+            0.153,
+            0.119,
+            0.198
+          ]
+        },
+        "day ahead, no drivers": {
+          "roc_auc": [
+            0.82,
+            0.802,
+            0.837
+          ],
+          "pr_auc": [
+            0.111,
+            0.09,
+            0.138
+          ]
+        },
+        "day ahead, + drivers": {
+          "roc_auc": [
+            0.816,
+            0.797,
+            0.834
+          ],
+          "pr_auc": [
+            0.119,
+            0.094,
+            0.151
+          ]
+        }
+      },
+      "paired": {
+        "XGBoost F4 minus baseline: rain that day": {
+          "roc_auc": [
+            0.067,
+            0.114
+          ],
+          "pr_auc": [
+            0.023,
+            0.081
+          ]
+        },
+        "XGBoost F4 minus logistic F4": {
+          "roc_auc": [
+            0.011,
+            0.03
+          ],
+          "pr_auc": [
+            -0.015,
+            0.022
+          ]
+        },
+        "XGBoost F5 (+ hourly intensity) minus XGBoost F4": {
+          "roc_auc": [
+            -0.001,
+            0.006
+          ],
+          "pr_auc": [
+            -0.006,
+            0.011
+          ]
+        },
+        "XGBoost F6 (+ drivers) minus XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": [
+            -0.015,
+            0.004
+          ],
+          "pr_auc": [
+            -0.016,
+            0.022
+          ]
+        },
+        "day ahead, + drivers minus day ahead, no drivers": {
+          "roc_auc": [
+            -0.016,
+            0.008
+          ],
+          "pr_auc": [
+            -0.005,
+            0.023
+          ]
+        }
+      },
+      "rows": 107394,
+      "floods": 2513,
+      "prevalence": 0.0234
+    },
+    "2023\u2013Sep 2025 (partial labels)": {
+      "models": {
+        "baseline: rain that day": {
+          "roc_auc": [
+            0.743,
+            0.711,
+            0.77
+          ],
+          "pr_auc": [
+            0.082,
+            0.057,
+            0.114
+          ]
+        },
+        "logistic F4": {
+          "roc_auc": [
+            0.828,
+            0.807,
+            0.847
+          ],
+          "pr_auc": [
+            0.181,
+            0.13,
+            0.234
+          ]
+        },
+        "XGBoost F4": {
+          "roc_auc": [
+            0.869,
+            0.852,
+            0.884
+          ],
+          "pr_auc": [
+            0.178,
+            0.132,
+            0.227
+          ]
+        },
+        "XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": [
+            0.868,
+            0.851,
+            0.884
+          ],
+          "pr_auc": [
+            0.192,
+            0.142,
+            0.248
+          ]
+        },
+        "XGBoost F6 (+ drivers)": {
+          "roc_auc": [
+            0.872,
+            0.855,
+            0.887
+          ],
+          "pr_auc": [
+            0.188,
+            0.139,
+            0.242
+          ]
+        },
+        "day ahead, no drivers": {
+          "roc_auc": [
+            0.836,
+            0.817,
+            0.853
+          ],
+          "pr_auc": [
+            0.121,
+            0.09,
+            0.162
+          ]
+        },
+        "day ahead, + drivers": {
+          "roc_auc": [
+            0.841,
+            0.822,
+            0.859
+          ],
+          "pr_auc": [
+            0.13,
+            0.093,
+            0.173
+          ]
+        }
+      },
+      "paired": {
+        "XGBoost F4 minus baseline: rain that day": {
+          "roc_auc": [
+            0.104,
+            0.15
+          ],
+          "pr_auc": [
+            0.063,
+            0.134
+          ]
+        },
+        "XGBoost F4 minus logistic F4": {
+          "roc_auc": [
+            0.029,
+            0.053
+          ],
+          "pr_auc": [
+            -0.033,
+            0.026
+          ]
+        },
+        "XGBoost F5 (+ hourly intensity) minus XGBoost F4": {
+          "roc_auc": [
+            -0.006,
+            0.004
+          ],
+          "pr_auc": [
+            -0.002,
+            0.034
+          ]
+        },
+        "XGBoost F6 (+ drivers) minus XGBoost F5 (+ hourly intensity)": {
+          "roc_auc": [
+            -0.006,
+            0.014
+          ],
+          "pr_auc": [
+            -0.034,
+            0.022
+          ]
+        },
+        "day ahead, + drivers minus day ahead, no drivers": {
+          "roc_auc": [
+            -0.006,
+            0.015
+          ],
+          "pr_auc": [
+            -0.012,
+            0.027
+          ]
+        }
+      },
+      "rows": 42168,
+      "floods": 990,
+      "prevalence": 0.0235
+    }
+  },
+  "seconds": 911.3
+}

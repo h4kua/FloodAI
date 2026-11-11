@@ -124,7 +124,7 @@ def add_drivers(data: pd.DataFrame) -> pd.DataFrame:
     # Soil moisture of the previous WIB day (the day's own value already contains its rain).
     soil = {}
     for cell in sorted(set(points.values())):
-        path = DRIVERS_DIR / f"soil_{cell}.json"
+        path = DRIVERS_DIR / f"soil_{cell}_2012.json"
         daily = pd.DataFrame({k: _hourly_json(path, f"soil_moisture_{k}").resample("1D").mean()
                               for k in ("0_to_7cm", "7_to_28cm")}).shift(1)
         soil[cell] = daily
@@ -149,7 +149,7 @@ def add_drivers(data: pd.DataFrame) -> pd.DataFrame:
     # Northerly surge proxy: mean wind component from the north at two sea points, per WIB day.
     north = []
     for name in ("karimata", "javasea"):
-        path = DRIVERS_DIR / f"wind_{name}.json"
+        path = DRIVERS_DIR / f"wind_{name}_2012.json"
         speed, direction = _hourly_json(path, "wind_speed_10m"), _hourly_json(path, "wind_direction_10m")
         north.append((speed * np.cos(np.deg2rad(direction))).resample("1D").mean())  # + = wind from the north
     north = pd.concat(north, axis=1).mean(axis=1)

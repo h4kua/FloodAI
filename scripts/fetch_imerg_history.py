@@ -95,6 +95,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[1])
     parser.add_argument("--data", default=DEFAULT_DATA_ID, help="Giovanni variable id")
     parser.add_argument("--probe", action="store_true", help="fetch one day at one cell and stop")
+    parser.add_argument("--history", action="store_true",
+                        help="also fetch Dec 2012 to Nov 2019 (BPBD dated events 2013-2019), cached as <cell>_<year>h.csv")
     args = parser.parse_args()
 
     try:
@@ -118,6 +120,20 @@ def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "points.json").write_text(json.dumps(points, indent=2), encoding="utf-8")
     print(f"{len(points)} points -> {len(cells)} IMERG cells")
+    if args.history:
+        # The "h" files end where the regular cache starts (the 2019 file holds December only).
+        spans = {2012: ("2012-12-01T00:00:00", "2012-12-31T23:59:59"),
+                 **{y: (f"{y}-01-01T00:00:00", f"{y}-12-31T23:59:59") for y in range(2013, 2019)},
+                 2019: ("2019-01-01T00:00:00", "2019-11-30T23:59:59")}
+        for cell in cells:
+            for year, (start, end) in spans.items():
+                out = OUT_DIR / f"{cell}_{year}h.csv"
+                if out.exists():
+                    continue
+                text = fetch(token, cell, start, end, args.data)
+                rows = len(parse_timeseries(text))
+                out.write_text(text, encoding="utf-8")
+                print(f"  {cell} {year} (history): {rows} half-hours", flush=True)
     for cell in cells:
         for year in YEARS:
             out = OUT_DIR / f"{cell}_{year}.csv"

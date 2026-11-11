@@ -7,9 +7,9 @@ scripts/thesis_experiments.py (exploratory; nothing here is served). Cached in d
                           https://www.psl.noaa.gov/mjo/mjoindex/omi.1x.txt
   oni.ascii.txt           ENSO, NOAA CPC Oceanic Nino Index, monthly (3-month running mean)
                           https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt
-  soil_<cell>.json        ERA5-Land soil moisture 0-7 cm and 7-28 cm, hourly, per IMERG cell
+  soil_<cell>_2012.json   ERA5-Land soil moisture 0-7 cm and 7-28 cm, hourly, per IMERG cell
                           (Open-Meteo archive, no key)
-  wind_<point>.json       ERA5 10 m wind at two sea points north of Jakarta (Karimata Strait,
+  wind_<point>_2012.json  ERA5 10 m wind at two sea points north of Jakarta (Karimata Strait,
                           Java Sea): the northerly component is a proxy for cross-equatorial
                           northerly (cold) surges
 
@@ -31,7 +31,7 @@ if str(_PROJECT_ROOT) not in sys.path:
 from scripts.fetch_imerg_history import build_points  # noqa: E402
 
 OUT = _PROJECT_ROOT / "data" / "raw" / "drivers"
-START, END = "2019-12-01", "2025-09-30"
+START, END = "2012-12-01", "2025-09-30"
 SEA_POINTS = {"karimata": (-2.5, 107.5), "javasea": (-5.0, 107.0)}
 _UA = {"User-Agent": "deFlood.ai thesis research script"}
 
@@ -56,7 +56,7 @@ def main() -> int:
             (OUT / name).write_bytes(_get(url))
             print("fetched", name)
     for cell in sorted(set(build_points().values())):
-        path = OUT / f"soil_{cell}.json"
+        path = OUT / f"soil_{cell}_{START[:4]}.json"
         if not path.exists():
             lat, lon = (float(v) for v in cell.split("_"))
             path.write_text(json.dumps(_archive(lat, lon, "soil_moisture_0_to_7cm,soil_moisture_7_to_28cm")),
@@ -64,7 +64,7 @@ def main() -> int:
             print("fetched", path.name)
             time.sleep(1)
     for name, (lat, lon) in SEA_POINTS.items():
-        path = OUT / f"wind_{name}.json"
+        path = OUT / f"wind_{name}_{START[:4]}.json"
         if not path.exists():
             path.write_text(json.dumps(_archive(lat, lon, "wind_speed_10m,wind_direction_10m")), encoding="utf-8")
             print("fetched", path.name)

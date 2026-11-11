@@ -1,0 +1,925 @@
+{
+  "generated_at": "2026-11-10T18:28:52+00:00",
+  "device": "cuda",
+  "city_days_with_water_levels": {
+    "2016": 58,
+    "2017": 74,
+    "2018": 242,
+    "2019": 331,
+    "2020": 318,
+    "2021": 140,
+    "2025": 351
+  },
+  "part_a": {
+    "2019": {
+      "train_rows": 15708,
+      "test_rows": 13902,
+      "floods": 126,
+      "F4": {
+        "roc_auc": 0.883,
+        "pr_auc": 0.073
+      },
+      "F4 + water levels": {
+        "roc_auc": 0.899,
+        "pr_auc": 0.135
+      }
+    },
+    "2020": {
+      "train_rows": 29610,
+      "test_rows": 13356,
+      "floods": 560,
+      "F4": {
+        "roc_auc": 0.752,
+        "pr_auc": 0.105
+      },
+      "F4 + water levels": {
+        "roc_auc": 0.789,
+        "pr_auc": 0.16
+      }
+    },
+    "2021": {
+      "train_rows": 42966,
+      "test_rows": 5880,
+      "floods": 85,
+      "F4": {
+        "roc_auc": 0.866,
+        "pr_auc": 0.116
+      },
+      "F4 + water levels": {
+        "roc_auc": 0.896,
+        "pr_auc": 0.191
+      }
+    },
+    "pooled 2019-2021": {
+      "F4": {
+        "roc_auc": [
+          0.778,
+          0.749,
+          0.806
+        ],
+        "pr_auc": [
+          0.078,
+          0.059,
+          0.105
+        ]
+      },
+      "F4 + water levels": {
+        "roc_auc": [
+          0.81,
+          0.784,
+          0.837
+        ],
+        "pr_auc": [
+          0.131,
+          0.097,
+          0.182
+        ]
+      },
+      "difference": {
+        "roc_auc": [
+          0.02,
+          0.046
+        ],
+        "pr_auc": [
+          0.032,
+          0.084
+        ]
+      }
+    }
+  },
+  "part_b": {
+    "years": {
+      "2019": {
+        "days": 331,
+        "flood_days": 45,
+        "large_days": 9,
+        "train_days": 374,
+        "auc_any_flood": {
+          "rules": 0.683,
+          "rules (informative posts)": 0.772,
+          "model": 0.901,
+          "learned": 0.882
+        }
+      },
+      "2020": {
+        "days": 318,
+        "flood_days": 94,
+        "large_days": 44,
+        "train_days": 705,
+        "auc_any_flood": {
+          "rules": 0.751,
+          "rules (informative posts)": 0.773,
+          "model": 0.724,
+          "learned": 0.741
+        }
+      },
+      "2021": {
+        "days": 140,
+        "flood_days": 26,
+        "large_days": 4,
+        "train_days": 1023,
+        "auc_any_flood": {
+          "rules": 0.864,
+          "rules (informative posts)": 0.859,
+          "model": 0.756,
+          "learned": 0.761
+        }
+      },
+      "2025": {
+        "days": 264,
+        "flood_days": 123,
+        "large_days": 19,
+        "train_days": 1163,
+        "auc_any_flood": {
+          "rules": 0.627,
+          "rules (informative posts)": 0.638,
+          "model": 0.644,
+          "learned": 0.67
+        }
+      }
+    },
+    "trees": {
+      "2019": "|--- model_p <= 0.42\n|   |--- model_p <= 0.13\n|   |   |--- class: 0\n|   |--- model_p >  0.13\n|   |   |--- model_p <= 0.23\n|   |   |   |--- class: 0\n|   |   |--- model_p >  0.23\n|   |   |   |--- class: 0\n|--- model_p >  0.42\n|   |--- river_n2 <= 1.50\n|   |   |--- model_p <= 0.78\n|   |   |   |--- class: 0\n|   |   |--- model_p >  0.78\n|   |   |   |--- class: 1\n|   |--- river_n2 >  1.50\n|   |   |--- model_p <= 0.69\n|   |   |   |--- class: 1\n|   |   |--- model_p >  0.69\n|   |   |   |--- class: 1\n",
+      "2020": "|--- model_p <= 0.41\n|   |--- model_p <= 0.13\n|   |   |--- class: 0\n|   |--- model_p >  0.13\n|   |   |--- river_n1_prev <= 2.50\n|   |   |   |--- class: 0\n|   |   |--- river_n1_prev >  2.50\n|   |   |   |--- class: 0\n|--- model_p >  0.41\n|   |--- model_p <= 0.78\n|   |   |--- river_n1 <= 2.50\n|   |   |   |--- class: 0\n|   |   |--- river_n1 >  2.50\n|   |   |   |--- class: 1\n|   |--- model_p >  0.78\n|   |   |--- river_max <= 2.50\n|   |   |   |--- class: 1\n|   |   |--- river_max >  2.50\n|   |   |   |--- class: 1\n",
+      "2021": "|--- model_p <= 0.36\n|   |--- model_p <= 0.13\n|   |   |--- model_p <= 0.02\n|   |   |   |--- class: 0\n|   |   |--- model_p >  0.02\n|   |   |   |--- class: 0\n|   |--- model_p >  0.13\n|   |   |--- river_n2 <= 1.50\n|   |   |   |--- class: 0\n|   |   |--- river_n2 >  1.50\n|   |   |   |--- class: 1\n|--- model_p >  0.36\n|   |--- model_p <= 0.78\n|   |   |--- river_n2 <= 1.50\n|   |   |   |--- class: 0\n|   |   |--- river_n2 >  1.50\n|   |   |   |--- class: 1\n|   |--- model_p >  0.78\n|   |   |--- river_max <= 2.50\n|   |   |   |--- class: 1\n|   |   |--- river_max >  2.50\n|   |   |   |--- class: 1\n",
+      "2025": "|--- model_p <= 0.36\n|   |--- model_p <= 0.13\n|   |   |--- model_p <= 0.02\n|   |   |   |--- class: 0\n|   |   |--- model_p >  0.02\n|   |   |   |--- class: 0\n|   |--- model_p >  0.13\n|   |   |--- river_n2 <= 1.50\n|   |   |   |--- class: 0\n|   |   |--- river_n2 >  1.50\n|   |   |   |--- class: 1\n|--- model_p >  0.36\n|   |--- river_n1 <= 3.50\n|   |   |--- model_p <= 0.79\n|   |   |   |--- class: 0\n|   |   |--- model_p >  0.79\n|   |   |   |--- class: 1\n|   |--- river_n1 >  3.50\n|   |   |--- model_p <= 0.73\n|   |   |   |--- class: 1\n|   |   |--- model_p >  0.73\n|   |   |   |--- class: 1\n"
+    },
+    "always_on_posts": {
+      "2019": {
+        "HEK": 0.84,
+        "ISTIQLAL": 0.74,
+        "JEMBATANMERAH": 0.88
+      },
+      "2020": {
+        "HEK": 0.92,
+        "ISTIQLAL": 0.77,
+        "JEMBATANMERAH": 0.94
+      },
+      "2021": {
+        "HEK": 0.68,
+        "ISTIQLAL": 0.66,
+        "JEMBATANMERAH": 0.94
+      },
+      "2025": {
+        "HEK": 0.66,
+        "ISTIQLAL": 0.58,
+        "JEMBATANMERAH": 0.84
+      }
+    },
+    "pooled": {
+      "any flood | >= Watch": {
+        "rules": {
+          "warning_days": 995,
+          "flood_days": 288,
+          "caught_same_day": 286,
+          "recall": 0.993,
+          "recall_same_or_day_before": 1.0,
+          "precision": 0.287,
+          "false_alarm_days": 709
+        },
+        "rules (informative posts)": {
+          "warning_days": 493,
+          "flood_days": 288,
+          "caught_same_day": 206,
+          "recall": 0.715,
+          "recall_same_or_day_before": 0.795,
+          "precision": 0.418,
+          "false_alarm_days": 287
+        },
+        "model": {
+          "warning_days": 357,
+          "flood_days": 288,
+          "caught_same_day": 169,
+          "recall": 0.587,
+          "recall_same_or_day_before": 0.67,
+          "precision": 0.473,
+          "false_alarm_days": 188
+        },
+        "hybrid": {
+          "warning_days": 997,
+          "flood_days": 288,
+          "caught_same_day": 286,
+          "recall": 0.993,
+          "recall_same_or_day_before": 1.0,
+          "precision": 0.287,
+          "false_alarm_days": 711
+        },
+        "hybrid (informative posts)": {
+          "warning_days": 616,
+          "flood_days": 288,
+          "caught_same_day": 234,
+          "recall": 0.812,
+          "recall_same_or_day_before": 0.872,
+          "precision": 0.38,
+          "false_alarm_days": 382
+        },
+        "learned": {
+          "warning_days": 389,
+          "flood_days": 288,
+          "caught_same_day": 186,
+          "recall": 0.646,
+          "recall_same_or_day_before": 0.736,
+          "precision": 0.478,
+          "false_alarm_days": 203
+        },
+        "learned minus rules (informative posts)": {
+          "recall_difference": [
+            -0.123,
+            -0.022
+          ],
+          "precision_difference": [
+            0.022,
+            0.1
+          ]
+        },
+        "learned minus hybrid (informative posts)": {
+          "recall_difference": [
+            -0.211,
+            -0.125
+          ],
+          "precision_difference": [
+            0.066,
+            0.131
+          ]
+        },
+        "hybrid (informative posts) minus rules (informative posts)": {
+          "recall_difference": [
+            0.064,
+            0.132
+          ],
+          "precision_difference": [
+            -0.057,
+            -0.019
+          ]
+        }
+      },
+      "any flood | >= Alert": {
+        "rules": {
+          "warning_days": 640,
+          "flood_days": 288,
+          "caught_same_day": 185,
+          "recall": 0.642,
+          "recall_same_or_day_before": 0.729,
+          "precision": 0.289,
+          "false_alarm_days": 455
+        },
+        "rules (informative posts)": {
+          "warning_days": 128,
+          "flood_days": 288,
+          "caught_same_day": 89,
+          "recall": 0.309,
+          "recall_same_or_day_before": 0.406,
+          "precision": 0.695,
+          "false_alarm_days": 39
+        },
+        "model": {
+          "warning_days": 193,
+          "flood_days": 288,
+          "caught_same_day": 112,
+          "recall": 0.389,
+          "recall_same_or_day_before": 0.451,
+          "precision": 0.58,
+          "false_alarm_days": 81
+        },
+        "hybrid": {
+          "warning_days": 681,
+          "flood_days": 288,
+          "caught_same_day": 201,
+          "recall": 0.698,
+          "recall_same_or_day_before": 0.781,
+          "precision": 0.295,
+          "false_alarm_days": 480
+        },
+        "hybrid (informative posts)": {
+          "warning_days": 269,
+          "flood_days": 288,
+          "caught_same_day": 155,
+          "recall": 0.538,
+          "recall_same_or_day_before": 0.625,
+          "precision": 0.576,
+          "false_alarm_days": 114
+        },
+        "learned": {
+          "warning_days": 326,
+          "flood_days": 288,
+          "caught_same_day": 166,
+          "recall": 0.576,
+          "recall_same_or_day_before": 0.66,
+          "precision": 0.509,
+          "false_alarm_days": 160
+        },
+        "learned minus rules (informative posts)": {
+          "recall_difference": [
+            0.207,
+            0.327
+          ],
+          "precision_difference": [
+            -0.261,
+            -0.113
+          ]
+        },
+        "learned minus hybrid (informative posts)": {
+          "recall_difference": [
+            -0.003,
+            0.08
+          ],
+          "precision_difference": [
+            -0.106,
+            -0.029
+          ]
+        },
+        "hybrid (informative posts) minus rules (informative posts)": {
+          "recall_difference": [
+            0.179,
+            0.279
+          ],
+          "precision_difference": [
+            -0.182,
+            -0.06
+          ]
+        }
+      },
+      "any flood | Danger": {
+        "rules": {
+          "warning_days": 138,
+          "flood_days": 288,
+          "caught_same_day": 82,
+          "recall": 0.285,
+          "recall_same_or_day_before": 0.375,
+          "precision": 0.594,
+          "false_alarm_days": 56
+        },
+        "rules (informative posts)": {
+          "warning_days": 54,
+          "flood_days": 288,
+          "caught_same_day": 38,
+          "recall": 0.132,
+          "recall_same_or_day_before": 0.198,
+          "precision": 0.704,
+          "false_alarm_days": 16
+        },
+        "model": {
+          "warning_days": 122,
+          "flood_days": 288,
+          "caught_same_day": 73,
+          "recall": 0.253,
+          "recall_same_or_day_before": 0.333,
+          "precision": 0.598,
+          "false_alarm_days": 49
+        },
+        "hybrid": {
+          "warning_days": 219,
+          "flood_days": 288,
+          "caught_same_day": 120,
+          "recall": 0.417,
+          "recall_same_or_day_before": 0.521,
+          "precision": 0.548,
+          "false_alarm_days": 99
+        },
+        "hybrid (informative posts)": {
+          "warning_days": 160,
+          "flood_days": 288,
+          "caught_same_day": 97,
+          "recall": 0.337,
+          "recall_same_or_day_before": 0.448,
+          "precision": 0.606,
+          "false_alarm_days": 63
+        },
+        "learned": {
+          "warning_days": 179,
+          "flood_days": 288,
+          "caught_same_day": 106,
+          "recall": 0.368,
+          "recall_same_or_day_before": 0.451,
+          "precision": 0.592,
+          "false_alarm_days": 73
+        },
+        "learned minus rules (informative posts)": {
+          "recall_difference": [
+            0.179,
+            0.292
+          ],
+          "precision_difference": [
+            -0.231,
+            0.016
+          ]
+        },
+        "learned minus hybrid (informative posts)": {
+          "recall_difference": [
+            -0.023,
+            0.084
+          ],
+          "precision_difference": [
+            -0.079,
+            0.052
+          ]
+        },
+        "hybrid (informative posts) minus rules (informative posts)": {
+          "recall_difference": [
+            0.16,
+            0.249
+          ],
+          "precision_difference": [
+            -0.191,
+            0.012
+          ]
+        }
+      },
+      "large flood (>= 5 kecamatan) | >= Watch": {
+        "rules": {
+          "warning_days": 995,
+          "flood_days": 76,
+          "caught_same_day": 75,
+          "recall": 0.987,
+          "recall_same_or_day_before": 1.0,
+          "precision": 0.075,
+          "false_alarm_days": 920
+        },
+        "rules (informative posts)": {
+          "warning_days": 493,
+          "flood_days": 76,
+          "caught_same_day": 71,
+          "recall": 0.934,
+          "recall_same_or_day_before": 0.947,
+          "precision": 0.144,
+          "false_alarm_days": 422
+        },
+        "model": {
+          "warning_days": 357,
+          "flood_days": 76,
+          "caught_same_day": 62,
+          "recall": 0.816,
+          "recall_same_or_day_before": 0.855,
+          "precision": 0.174,
+          "false_alarm_days": 295
+        },
+        "hybrid": {
+          "warning_days": 997,
+          "flood_days": 76,
+          "caught_same_day": 75,
+          "recall": 0.987,
+          "recall_same_or_day_before": 1.0,
+          "precision": 0.075,
+          "false_alarm_days": 922
+        },
+        "hybrid (informative posts)": {
+          "warning_days": 616,
+          "flood_days": 76,
+          "caught_same_day": 72,
+          "recall": 0.947,
+          "recall_same_or_day_before": 0.961,
+          "precision": 0.117,
+          "false_alarm_days": 544
+        },
+        "learned": {
+          "warning_days": 389,
+          "flood_days": 76,
+          "caught_same_day": 67,
+          "recall": 0.882,
+          "recall_same_or_day_before": 0.882,
+          "precision": 0.172,
+          "false_alarm_days": 322
+        },
+        "learned minus rules (informative posts)": {
+          "recall_difference": [
+            -0.116,
+            0.012
+          ],
+          "precision_difference": [
+            0.012,
+            0.046
+          ]
+        },
+        "learned minus hybrid (informative posts)": {
+          "recall_difference": [
+            -0.133,
+            0.0
+          ],
+          "precision_difference": [
+            0.039,
+            0.074
+          ]
+        },
+        "hybrid (informative posts) minus rules (informative posts)": {
+          "recall_difference": [
+            0.0,
+            0.042
+          ],
+          "precision_difference": [
+            -0.036,
+            -0.02
+          ]
+        }
+      },
+      "large flood (>= 5 kecamatan) | >= Alert": {
+        "rules": {
+          "warning_days": 640,
+          "flood_days": 76,
+          "caught_same_day": 65,
+          "recall": 0.855,
+          "recall_same_or_day_before": 0.895,
+          "precision": 0.102,
+          "false_alarm_days": 575
+        },
+        "rules (informative posts)": {
+          "warning_days": 128,
+          "flood_days": 76,
+          "caught_same_day": 42,
+          "recall": 0.553,
+          "recall_same_or_day_before": 0.618,
+          "precision": 0.328,
+          "false_alarm_days": 86
+        },
+        "model": {
+          "warning_days": 193,
+          "flood_days": 76,
+          "caught_same_day": 52,
+          "recall": 0.684,
+          "recall_same_or_day_before": 0.724,
+          "precision": 0.269,
+          "false_alarm_days": 141
+        },
+        "hybrid": {
+          "warning_days": 681,
+          "flood_days": 76,
+          "caught_same_day": 68,
+          "recall": 0.895,
+          "recall_same_or_day_before": 0.895,
+          "precision": 0.1,
+          "false_alarm_days": 613
+        },
+        "hybrid (informative posts)": {
+          "warning_days": 269,
+          "flood_days": 76,
+          "caught_same_day": 63,
+          "recall": 0.829,
+          "recall_same_or_day_before": 0.855,
+          "precision": 0.234,
+          "false_alarm_days": 206
+        },
+        "learned": {
+          "warning_days": 326,
+          "flood_days": 76,
+          "caught_same_day": 63,
+          "recall": 0.829,
+          "recall_same_or_day_before": 0.842,
+          "precision": 0.193,
+          "false_alarm_days": 263
+        },
+        "learned minus rules (informative posts)": {
+          "recall_difference": [
+            0.169,
+            0.4
+          ],
+          "precision_difference": [
+            -0.196,
+            -0.073
+          ]
+        },
+        "learned minus hybrid (informative posts)": {
+          "recall_difference": [
+            -0.036,
+            0.041
+          ],
+          "precision_difference": [
+            -0.061,
+            -0.023
+          ]
+        },
+        "hybrid (informative posts) minus rules (informative posts)": {
+          "recall_difference": [
+            0.177,
+            0.388
+          ],
+          "precision_difference": [
+            -0.147,
+            -0.038
+          ]
+        }
+      },
+      "large flood (>= 5 kecamatan) | Danger": {
+        "rules": {
+          "warning_days": 138,
+          "flood_days": 76,
+          "caught_same_day": 41,
+          "recall": 0.539,
+          "recall_same_or_day_before": 0.592,
+          "precision": 0.297,
+          "false_alarm_days": 97
+        },
+        "rules (informative posts)": {
+          "warning_days": 54,
+          "flood_days": 76,
+          "caught_same_day": 20,
+          "recall": 0.263,
+          "recall_same_or_day_before": 0.316,
+          "precision": 0.37,
+          "false_alarm_days": 34
+        },
+        "model": {
+          "warning_days": 122,
+          "flood_days": 76,
+          "caught_same_day": 36,
+          "recall": 0.474,
+          "recall_same_or_day_before": 0.592,
+          "precision": 0.295,
+          "false_alarm_days": 86
+        },
+        "hybrid": {
+          "warning_days": 219,
+          "flood_days": 76,
+          "caught_same_day": 53,
+          "recall": 0.697,
+          "recall_same_or_day_before": 0.789,
+          "precision": 0.242,
+          "false_alarm_days": 166
+        },
+        "hybrid (informative posts)": {
+          "warning_days": 160,
+          "flood_days": 76,
+          "caught_same_day": 44,
+          "recall": 0.579,
+          "recall_same_or_day_before": 0.724,
+          "precision": 0.275,
+          "false_alarm_days": 116
+        },
+        "learned": {
+          "warning_days": 179,
+          "flood_days": 76,
+          "caught_same_day": 54,
+          "recall": 0.711,
+          "recall_same_or_day_before": 0.737,
+          "precision": 0.302,
+          "false_alarm_days": 125
+        },
+        "learned minus rules (informative posts)": {
+          "recall_difference": [
+            0.319,
+            0.566
+          ],
+          "precision_difference": [
+            -0.187,
+            0.049
+          ]
+        },
+        "learned minus hybrid (informative posts)": {
+          "recall_difference": [
+            0.026,
+            0.242
+          ],
+          "precision_difference": [
+            -0.024,
+            0.078
+          ]
+        },
+        "hybrid (informative posts) minus rules (informative posts)": {
+          "recall_difference": [
+            0.212,
+            0.425
+          ],
+          "precision_difference": [
+            -0.2,
+            0.007
+          ]
+        }
+      }
+    },
+    "equal_warning_days": {
+      "any flood | 493 days, as many as rules >= Watch": {
+        "rules (informative posts)": {
+          "warning_days": 493,
+          "flood_days": 288,
+          "caught_same_day": 206,
+          "recall": 0.715,
+          "recall_same_or_day_before": 0.795,
+          "precision": 0.418,
+          "false_alarm_days": 287
+        },
+        "model": {
+          "warning_days": 493,
+          "flood_days": 288,
+          "caught_same_day": 215,
+          "recall": 0.747,
+          "recall_same_or_day_before": 0.826,
+          "precision": 0.436,
+          "false_alarm_days": 278
+        },
+        "learned": {
+          "warning_days": 493,
+          "flood_days": 288,
+          "caught_same_day": 192,
+          "recall": 0.667,
+          "recall_same_or_day_before": 0.757,
+          "precision": 0.389,
+          "false_alarm_days": 301
+        },
+        "learned minus rules (informative posts)": {
+          "recall_difference": [
+            -0.106,
+            0.007
+          ],
+          "precision_difference": [
+            -0.065,
+            0.008
+          ]
+        }
+      },
+      "large flood (>= 5 kecamatan) | 493 days, as many as rules >= Watch": {
+        "rules (informative posts)": {
+          "warning_days": 493,
+          "flood_days": 76,
+          "caught_same_day": 71,
+          "recall": 0.934,
+          "recall_same_or_day_before": 0.947,
+          "precision": 0.144,
+          "false_alarm_days": 422
+        },
+        "model": {
+          "warning_days": 493,
+          "flood_days": 76,
+          "caught_same_day": 64,
+          "recall": 0.842,
+          "recall_same_or_day_before": 0.895,
+          "precision": 0.13,
+          "false_alarm_days": 429
+        },
+        "learned": {
+          "warning_days": 493,
+          "flood_days": 76,
+          "caught_same_day": 65,
+          "recall": 0.855,
+          "recall_same_or_day_before": 0.882,
+          "precision": 0.132,
+          "false_alarm_days": 428
+        },
+        "learned minus rules (informative posts)": {
+          "recall_difference": [
+            -0.15,
+            -0.013
+          ],
+          "precision_difference": [
+            -0.027,
+            0.002
+          ]
+        }
+      },
+      "any flood | 128 days, as many as rules >= Alert": {
+        "rules (informative posts)": {
+          "warning_days": 128,
+          "flood_days": 288,
+          "caught_same_day": 89,
+          "recall": 0.309,
+          "recall_same_or_day_before": 0.406,
+          "precision": 0.695,
+          "false_alarm_days": 39
+        },
+        "model": {
+          "warning_days": 128,
+          "flood_days": 288,
+          "caught_same_day": 79,
+          "recall": 0.274,
+          "recall_same_or_day_before": 0.365,
+          "precision": 0.617,
+          "false_alarm_days": 49
+        },
+        "learned": {
+          "warning_days": 128,
+          "flood_days": 288,
+          "caught_same_day": 81,
+          "recall": 0.281,
+          "recall_same_or_day_before": 0.354,
+          "precision": 0.633,
+          "false_alarm_days": 47
+        },
+        "learned minus rules (informative posts)": {
+          "recall_difference": [
+            -0.082,
+            0.028
+          ],
+          "precision_difference": [
+            -0.154,
+            0.029
+          ]
+        }
+      },
+      "large flood (>= 5 kecamatan) | 128 days, as many as rules >= Alert": {
+        "rules (informative posts)": {
+          "warning_days": 128,
+          "flood_days": 76,
+          "caught_same_day": 42,
+          "recall": 0.553,
+          "recall_same_or_day_before": 0.618,
+          "precision": 0.328,
+          "false_alarm_days": 86
+        },
+        "model": {
+          "warning_days": 128,
+          "flood_days": 76,
+          "caught_same_day": 38,
+          "recall": 0.5,
+          "recall_same_or_day_before": 0.618,
+          "precision": 0.297,
+          "false_alarm_days": 90
+        },
+        "learned": {
+          "warning_days": 128,
+          "flood_days": 76,
+          "caught_same_day": 47,
+          "recall": 0.618,
+          "recall_same_or_day_before": 0.632,
+          "precision": 0.367,
+          "false_alarm_days": 81
+        },
+        "learned minus rules (informative posts)": {
+          "recall_difference": [
+            -0.056,
+            0.189
+          ],
+          "precision_difference": [
+            -0.034,
+            0.114
+          ]
+        }
+      },
+      "any flood | 54 days, as many as rules >= Danger": {
+        "rules (informative posts)": {
+          "warning_days": 54,
+          "flood_days": 288,
+          "caught_same_day": 38,
+          "recall": 0.132,
+          "recall_same_or_day_before": 0.198,
+          "precision": 0.704,
+          "false_alarm_days": 16
+        },
+        "model": {
+          "warning_days": 54,
+          "flood_days": 288,
+          "caught_same_day": 34,
+          "recall": 0.118,
+          "recall_same_or_day_before": 0.156,
+          "precision": 0.63,
+          "false_alarm_days": 20
+        },
+        "learned": {
+          "warning_days": 54,
+          "flood_days": 288,
+          "caught_same_day": 37,
+          "recall": 0.128,
+          "recall_same_or_day_before": 0.153,
+          "precision": 0.685,
+          "false_alarm_days": 17
+        },
+        "learned minus rules (informative posts)": {
+          "recall_difference": [
+            -0.053,
+            0.047
+          ],
+          "precision_difference": [
+            -0.172,
+            0.134
+          ]
+        }
+      },
+      "large flood (>= 5 kecamatan) | 54 days, as many as rules >= Danger": {
+        "rules (informative posts)": {
+          "warning_days": 54,
+          "flood_days": 76,
+          "caught_same_day": 20,
+          "recall": 0.263,
+          "recall_same_or_day_before": 0.316,
+          "precision": 0.37,
+          "false_alarm_days": 34
+        },
+        "model": {
+          "warning_days": 54,
+          "flood_days": 76,
+          "caught_same_day": 17,
+          "recall": 0.224,
+          "recall_same_or_day_before": 0.276,
+          "precision": 0.315,
+          "false_alarm_days": 37
+        },
+        "learned": {
+          "warning_days": 54,
+          "flood_days": 76,
+          "caught_same_day": 22,
+          "recall": 0.289,
+          "recall_same_or_day_before": 0.329,
+          "precision": 0.407,
+          "false_alarm_days": 32
+        },
+        "learned minus rules (informative posts)": {
+          "recall_difference": [
+            -0.125,
+            0.15
+          ],
+          "precision_difference": [
+            -0.13,
+            0.185
+          ]
+        }
+      }
+    }
+  },
+  "seconds": 63.4
+}
