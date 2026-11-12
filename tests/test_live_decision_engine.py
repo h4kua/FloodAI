@@ -17,7 +17,7 @@ NOW = FETCHED + timedelta(minutes=5)
 MODEL_SAYS_SAFE = 0.01
 
 
-def _post(level, prev=None, *, s1=3100, s2=2700, s3=1900, name="P.A. Cengkareng Drain"):
+def _post(level, prev=None, *, s1=3100, s2=2700, s3=1900, name="P.A. Karet 1"):  # not a chronic post
     # DSDA reports millimetres: Siaga 1 = 3100 is 310 cm.
     return {
         "nama_pintu_air": name,

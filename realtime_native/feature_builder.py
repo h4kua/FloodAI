@@ -15,6 +15,7 @@ from psycopg2.extras import Json
 from api.observability import FEATURE_HISTORY_DB_FAILURE_TOTAL
 from services.bmkg_filter import filter_jakarta_bmkg_alerts
 from services.bmkg_rainfall_context import get_recent_daily_rainfall
+from services.hydrology_analyzer import is_chronic_post
 from services.constants import (
     BMKG_CERTAINTY_WEIGHTS,
     BMKG_SEVERITY_WEIGHTS,
@@ -842,6 +843,9 @@ def build_realtime_native_features_from_snapshot(snapshot, persist_history=True,
                         3,
                     ),
                     "status_siaga": str(r.get("status_siaga") or "Normal"),
+                    # Usually at Siaga 3, so it counts one band lower for the city status
+                    # (services/hydrology_analyzer.status_siaga_level); its own status is unchanged.
+                    "chronic": is_chronic_post(r.get("nama_pintu_air")),
                     # Validated coordinates — None when outside Jakarta bounds or zero
                     "lat": _valid_jakarta_lat(r.get("latitude")),
                     "lon": _valid_jakarta_lon(r.get("longitude")),

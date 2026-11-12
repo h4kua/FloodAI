@@ -31,7 +31,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (631, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (29: flood roads, shelter ranking,
+- Tests: `tests/` (635, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (30: flood roads, shelter ranking,
   post levels, weather per wilayah)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -151,6 +151,14 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   https://claude.ai/artifact/Nwsqz6vKWR8t975ETZHQPx
 
 ## Resolved
+- 2026-11-12: the city status sat at Waspada or higher 92 % of the time (live history 5-12 Nov, 723 snapshots):
+  P.A. Cengkareng Drain was at Siaga 3+ in 89 % of snapshots, Pompa Pasar Ikan in 55 %, Marina Ancol (Laut) in 48 %
+  (the last two follow the tide). These posts now count one band lower for the CITY status only
+  (`services/hydrology_analyzer.status_siaga_level`; Siaga 3 -> normal, 2 -> Siaga 3, 1 -> Siaga 2; override or switch off
+  with `FLOOD_CHRONIC_POSTS`); each post keeps its official DSDA status on the map, list and area cards. Replayed on the
+  history: Aman 8 % -> 67 %, Waspada 67 % -> 33 %, Siaga 25 % -> 0 %. `stations[].chronic` marks them, and the Aman
+  sentence says such a post "memang sering di Siaga 3". In 2016-2021 data, dropping always-on posts cut Watch recall
+  0.99 -> 0.72 (large floods 0.99 -> 0.93), so some small floods no longer get Waspada.
 - 2026-11-06: the chat answered anything (it wrote Python code on request): `api/chat_knowledge.txt` now opens with a
   SCOPE RULE (floods, weather, evacuation, the site only; otherwise a one-sentence refusal in the user's language).
   Checked live on gpt-oss-20b: code, homework, recipes, translation and "ignore your rules" are refused; flood questions answered.

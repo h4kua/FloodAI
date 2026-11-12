@@ -268,13 +268,25 @@ export function buildStatusDesc(riskData, isId) {
   // so the sentence agrees with the per-wilayah badges right below it.
   const totalSt   = stations.length;
   const alertSt   = s1.length + s2.length;
-  const waspadaSt = stations.filter(s => postRiskLevel(s) === "WASPADA").length;
+  // Posts the backend marks `chronic` sit at Siaga 3 most of the time (Cengkareng Drain, two sea posts),
+  // so their Siaga 3 does not raise the city status; say so instead of listing them as a warning.
+  const waspadaPosts = stations.filter(s => postRiskLevel(s) === "WASPADA");
+  const usualPosts = waspadaPosts.filter(s => s.chronic);
+  const waspadaSt = waspadaPosts.length - usualPosts.length;
+  const usualNames = usualPosts.map(s => cleanStationName(s.nama)).join(", ");
+  const usualNote = usualPosts.length === 0
+    ? ""
+    : (isId
+        ? ` ${usualNames} memang sering di Siaga 3, jadi tidak menaikkan status Jakarta.`
+        : ` ${usualNames} ${usualPosts.length > 1 ? "are" : "is"} often at Siaga 3, so ${usualPosts.length > 1 ? "they do" : "it does"} not raise Jakarta's status.`);
   const sNote = totalSt === 0
     ? ""
     : alertSt > 0
     ? (isId ? ` Tapi ${alertSt} pos pantau sudah mendekati batas siaga — pantau terus.` : ` But ${postsEn(alertSt)} close to the alert limit — keep watching.`)
     : waspadaSt > 0
-    ? (isId ? ` Air di ${waspadaSt} dari ${totalSt} pos pantau mulai tinggi (Waspada), tapi belum mendekati batas siaga.` : ` Water is getting high at ${waspadaSt} of ${totalSt} posts (Watch), but not near the alert limit.`)
+    ? (isId ? ` Air di ${waspadaSt} dari ${totalSt} pos pantau mulai tinggi (Waspada), tapi belum mendekati batas siaga.` : ` Water is getting high at ${waspadaSt} of ${totalSt} posts (Watch), but not near the alert limit.`) + usualNote
+    : usualPosts.length > 0
+    ? usualNote
     : (isId ? ` Semua ${totalSt} pos pantau dalam batas normal.` : ` All ${totalSt} monitoring posts are normal.`);
   // When the model input is statistically unusual (isOutlier && WLR < 0.75),
   // don't claim "nothing concerning" — frame it as honest uncertainty.

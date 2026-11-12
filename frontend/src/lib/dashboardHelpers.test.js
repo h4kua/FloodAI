@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { byPostSeverity, groupStationsByWilayah, postClass, postRiskLevel } from "./dashboardHelpers.js";
+import { buildStatusDesc, byPostSeverity, groupStationsByWilayah, postClass, postRiskLevel } from "./dashboardHelpers.js";
 
 test("a post's level follows the band DSDA reports, not its ratio", () => {
   // 76% of Siaga 1 used to read "Siaga 2"; DSDA puts this post in Siaga 3.
@@ -27,4 +27,16 @@ test("worst post first: band before ratio", () => {
     .filter((g) => g.key === "Jakarta Barat");
   assert.equal(group.worst.nama, "lower ratio, Siaga 2");
   assert.equal(group.maxRatio, 0.9);
+});
+
+test("an Aman status explains a chronic post at Siaga 3 instead of calling it a warning", () => {
+  const stations = [
+    { nama: "P.A. Cengkareng Drain", ratio: 0.62, status_siaga: "Status : Siaga 3", chronic: true },
+    { nama: "P.A. Manggarai 2", ratio: 0.6, status_siaga: "Status : Normal" },
+  ];
+  const id = buildStatusDesc({ level: "aman", stations }, true);
+  assert.match(id, /Cengkareng Drain memang sering di Siaga 3, jadi tidak menaikkan status Jakarta/);
+  assert.doesNotMatch(id, /Semua 2 pos pantau dalam batas normal|mulai tinggi/);
+  const other = buildStatusDesc({ level: "aman", stations: [{ ...stations[0], chronic: false }, stations[1]] }, true);
+  assert.match(other, /Air di 1 dari 2 pos pantau mulai tinggi/);
 });

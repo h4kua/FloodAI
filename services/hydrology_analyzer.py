@@ -16,6 +16,7 @@ Design:
 
 from __future__ import annotations
 
+import os
 import logging
 from dataclasses import dataclass, field
 from functools import lru_cache
@@ -42,6 +43,35 @@ _GENERIC_DEFAULT_THRESHOLDS: dict[str, float] = {
 _SIAGA_SEVERITY: dict[str, float] = {
     "siaga1": 1.00, "siaga2": 0.75, "siaga3": 0.50, "siaga4": 0.25, "normal": 0.00,
 }
+
+# Posts whose DSDA status is "Siaga 3" most of the time, so that status says nothing about a flood:
+# in the live history of 5-12 Nov 2026 (723 snapshots) Cengkareng Drain was at Siaga 3+ in 89 %,
+# Pompa Pasar Ikan in 55 % and Marina Ancol (Laut) in 48 % (the last two follow the tide), which kept
+# the city at Waspada or higher 92 % of the time. For the CITY STATUS these posts count one band lower
+# (Siaga 3 -> normal, Siaga 2 -> Siaga 3, Siaga 1 -> Siaga 2); each post still shows its official DSDA
+# status. FLOOD_CHRONIC_POSTS (comma-separated name fragments; empty = none) overrides the list.
+_DEFAULT_CHRONIC_POSTS = ("cengkareng drain", "pasar ikan", "marina ancol 1 (laut)")
+_ONE_BAND_LOWER = {"siaga1": "siaga2", "siaga2": "siaga3", "siaga3": "normal", "siaga4": "normal", "normal": "normal"}
+
+
+def _chronic_posts() -> tuple[str, ...]:
+    raw = os.getenv("FLOOD_CHRONIC_POSTS")
+    if raw is None:
+        return _DEFAULT_CHRONIC_POSTS
+    return tuple(part.strip().lower() for part in raw.split(",") if part.strip())
+
+
+def is_chronic_post(station_name: str | None) -> bool:
+    name = (station_name or "").lower()
+    return any(fragment in name for fragment in _chronic_posts())
+
+
+def status_siaga_level(siaga_level: str, station_name: str) -> str:
+    """The band a post contributes to the city status: one lower for a chronically high post."""
+    if is_chronic_post(station_name):
+        return _ONE_BAND_LOWER.get(siaga_level, siaga_level)
+    return siaga_level
+
 
 _NEAR_THRESHOLD_MARGIN = 0.10   # within 10% of next siaga level value
 _MIN_REAL_THRESHOLD_CM = 1.0    # smaller thresholds are DSDA placeholders
@@ -155,6 +185,12 @@ class StationAssessment:
     next_siaga_level: str
     thresholds: dict[str, float]
     explanation: str
+    # What the post contributes to the city status (see _DEFAULT_CHRONIC_POSTS); "" = same as siaga_level.
+    status_siaga_level: str = ""
+
+    @property
+    def status_severity(self) -> float:
+        return _SIAGA_SEVERITY.get(self.status_siaga_level or self.siaga_level, 0.0)
 
 
 @dataclass
@@ -187,6 +223,7 @@ class HydrologyAssessment:
                     "station_name": s.station_name,
                     "tinggi_air_cm": s.tinggi_air_cm,
                     "siaga_level": s.siaga_level,
+                    "status_siaga_level": s.status_siaga_level or s.siaga_level,
                     "severity_score": round(s.severity_score, 4),
                     "water_level_ratio": round(s.water_level_ratio, 4),
                     "near_threshold": s.near_threshold,
@@ -270,6 +307,7 @@ def analyze_hydrology(
             near_threshold=near, near_threshold_margin_cm=margin if near else 0.0,
             next_siaga_level=next_lv if near else "",
             thresholds=thresholds, explanation=expl,
+            status_siaga_level=status_siaga_level(siaga_level, sname),
         ))
 
     if not assessments:
@@ -277,25 +315,27 @@ def analyze_hydrology(
             overall_explanation="Records present but no valid station data extracted.",
         )
 
-    dominant   = max(assessments, key=lambda s: (s.severity_score, s.water_level_ratio))
-    crit_count = sum(1 for s in assessments if s.siaga_level in ("siaga1", "siaga2"))
+    # The city status follows each post's status band, which is one lower for chronically high posts.
+    dominant   = max(assessments, key=lambda s: (s.status_severity, s.water_level_ratio))
+    dominant_level = dominant.status_siaga_level or dominant.siaga_level
+    crit_count = sum(1 for s in assessments if (s.status_siaga_level or s.siaga_level) in ("siaga1", "siaga2"))
     near_count = sum(1 for s in assessments if s.near_threshold)
     rapid      = delta_value is not None and delta_value > _RAPID_DELTA_THRESHOLD
 
     parts: list[str] = []
-    if dominant.siaga_level == "siaga1":
+    if dominant_level == "siaga1":
         parts.append(
             f"CRITICAL: {dominant.station_name} at Siaga 1 ({dominant.tinggi_air_cm:.0f} cm). "
             "Immediate flood risk — highest alert."
         )
-    elif dominant.siaga_level == "siaga2":
+    elif dominant_level == "siaga2":
         parts.append(
             f"SEVERE: {dominant.station_name} at Siaga 2 ({dominant.tinggi_air_cm:.0f} cm). "
             "High flood probability — activate emergency protocols."
         )
-    elif dominant.siaga_level == "siaga3":
+    elif dominant_level == "siaga3":
         parts.append(f"ELEVATED: {dominant.station_name} at Siaga 3 — flood watch active.")
-    elif dominant.siaga_level == "siaga4":
+    elif dominant_level == "siaga4":
         parts.append(f"WATCH: {dominant.station_name} at Siaga 4 — early warning.")
     else:
         parts.append("All monitored stations within normal range.")
@@ -311,9 +351,9 @@ def analyze_hydrology(
         parts.append("Rapid escalation check unavailable — water level delta is missing.")
     return HydrologyAssessment(
         stations=assessments,
-        severity_score=round(dominant.severity_score, 4),
+        severity_score=round(dominant.status_severity, 4),
         dominant_station=dominant.station_name,
-        dominant_siaga_level=dominant.siaga_level,
+        dominant_siaga_level=dominant_level,
         critical_station_count=crit_count,
         near_threshold_count=near_count,
         rapid_escalation=rapid,
