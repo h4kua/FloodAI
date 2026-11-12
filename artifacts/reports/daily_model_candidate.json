@@ -1,0 +1,283 @@
+{
+  "generated_at": "2026-11-12T01:07:52+00:00",
+  "device": "cuda",
+  "features": [
+    "d0",
+    "d1",
+    "d3prev",
+    "d7prev",
+    "api14",
+    "up_bogor_d0",
+    "up_bogor_d1",
+    "up_depok_d0",
+    "hist_rate",
+    "month_sin",
+    "month_cos",
+    "elevation",
+    "slope"
+  ],
+  "per_year": {
+    "2017": {
+      "floods": 239,
+      "prevalence": 0.0156,
+      "roc_auc": 0.859,
+      "raw": {
+        "ece": 0.1175,
+        "ece_equal_count": 0.1175,
+        "brier": 0.0617,
+        "mean_p": 0.1331
+      },
+      "calibrated": {
+        "ece": 0.016,
+        "ece_equal_count": 0.016,
+        "brier": 0.0149,
+        "mean_p": 0.0316
+      }
+    },
+    "2018": {
+      "floods": 151,
+      "prevalence": 0.0098,
+      "roc_auc": 0.884,
+      "raw": {
+        "ece": 0.1056,
+        "ece_equal_count": 0.1056,
+        "brier": 0.0507,
+        "mean_p": 0.1154
+      },
+      "calibrated": {
+        "ece": 0.0089,
+        "ece_equal_count": 0.0088,
+        "brier": 0.0097,
+        "mean_p": 0.0187
+      }
+    },
+    "2019": {
+      "floods": 145,
+      "prevalence": 0.0095,
+      "roc_auc": 0.918,
+      "raw": {
+        "ece": 0.1151,
+        "ece_equal_count": 0.1151,
+        "brier": 0.0588,
+        "mean_p": 0.1246
+      },
+      "calibrated": {
+        "ece": 0.0082,
+        "ece_equal_count": 0.0082,
+        "brier": 0.0091,
+        "mean_p": 0.0176
+      }
+    },
+    "2020": {
+      "floods": 704,
+      "prevalence": 0.0458,
+      "roc_auc": 0.813,
+      "raw": {
+        "ece": 0.1744,
+        "ece_equal_count": 0.1744,
+        "brier": 0.1216,
+        "mean_p": 0.2202
+      },
+      "calibrated": {
+        "ece": 0.0186,
+        "ece_equal_count": 0.0129,
+        "brier": 0.0432,
+        "mean_p": 0.0367
+      }
+    },
+    "2021": {
+      "floods": 323,
+      "prevalence": 0.0211,
+      "roc_auc": 0.865,
+      "raw": {
+        "ece": 0.2071,
+        "ece_equal_count": 0.2071,
+        "brier": 0.1061,
+        "mean_p": 0.2282
+      },
+      "calibrated": {
+        "ece": 0.0143,
+        "ece_equal_count": 0.0121,
+        "brier": 0.0185,
+        "mean_p": 0.0332
+      }
+    },
+    "2022": {
+      "floods": 544,
+      "prevalence": 0.0355,
+      "roc_auc": 0.784,
+      "raw": {
+        "ece": 0.1778,
+        "ece_equal_count": 0.1778,
+        "brier": 0.1001,
+        "mean_p": 0.2133
+      },
+      "calibrated": {
+        "ece": 0.0106,
+        "ece_equal_count": 0.0118,
+        "brier": 0.0332,
+        "mean_p": 0.0255
+      }
+    },
+    "2023": {
+      "floods": 213,
+      "prevalence": 0.0139,
+      "roc_auc": 0.919,
+      "raw": {
+        "ece": 0.1672,
+        "ece_equal_count": 0.1672,
+        "brier": 0.0859,
+        "mean_p": 0.1811
+      },
+      "calibrated": {
+        "ece": 0.0117,
+        "ece_equal_count": 0.0115,
+        "brier": 0.0126,
+        "mean_p": 0.0254
+      }
+    },
+    "2024": {
+      "floods": 424,
+      "prevalence": 0.0276,
+      "roc_auc": 0.822,
+      "raw": {
+        "ece": 0.223,
+        "ece_equal_count": 0.223,
+        "brier": 0.128,
+        "mean_p": 0.2506
+      },
+      "calibrated": {
+        "ece": 0.0051,
+        "ece_equal_count": 0.0055,
+        "brier": 0.0251,
+        "mean_p": 0.0326
+      }
+    },
+    "2025": {
+      "floods": 353,
+      "prevalence": 0.0308,
+      "roc_auc": 0.871,
+      "raw": {
+        "ece": 0.2551,
+        "ece_equal_count": 0.2551,
+        "brier": 0.1427,
+        "mean_p": 0.2859
+      },
+      "calibrated": {
+        "ece": 0.0078,
+        "ece_equal_count": 0.0068,
+        "brier": 0.027,
+        "mean_p": 0.0364
+      }
+    }
+  },
+  "pooled_2017_2025": {
+    "raw": {
+      "ece": 0.169,
+      "ece_equal_count": 0.169,
+      "brier": 0.0937
+    },
+    "calibrated": {
+      "ece": 0.0055,
+      "ece_equal_count": 0.0058,
+      "brier": 0.0213
+    },
+    "prevalence": 0.0231
+  },
+  "reliability_calibrated": [
+    {
+      "p_low": 0.0,
+      "p_high": 0.0021,
+      "rows": 13379,
+      "mean_predicted": 0.0004,
+      "observed_rate": 0.0001
+    },
+    {
+      "p_low": 0.0021,
+      "p_high": 0.0034,
+      "rows": 11052,
+      "mean_predicted": 0.0029,
+      "observed_rate": 0.0013
+    },
+    {
+      "p_low": 0.0034,
+      "p_high": 0.0053,
+      "rows": 15621,
+      "mean_predicted": 0.0038,
+      "observed_rate": 0.0024
+    },
+    {
+      "p_low": 0.0053,
+      "p_high": 0.0081,
+      "rows": 13211,
+      "mean_predicted": 0.0066,
+      "observed_rate": 0.0045
+    },
+    {
+      "p_low": 0.0081,
+      "p_high": 0.0098,
+      "rows": 13008,
+      "mean_predicted": 0.009,
+      "observed_rate": 0.0039
+    },
+    {
+      "p_low": 0.0098,
+      "p_high": 0.0181,
+      "rows": 13648,
+      "mean_predicted": 0.0134,
+      "observed_rate": 0.011
+    },
+    {
+      "p_low": 0.0181,
+      "p_high": 0.0278,
+      "rows": 13971,
+      "mean_predicted": 0.0236,
+      "observed_rate": 0.0257
+    },
+    {
+      "p_low": 0.0278,
+      "p_high": 0.039,
+      "rows": 13288,
+      "mean_predicted": 0.0326,
+      "observed_rate": 0.0228
+    },
+    {
+      "p_low": 0.039,
+      "p_high": 0.0757,
+      "rows": 13436,
+      "mean_predicted": 0.0489,
+      "observed_rate": 0.0395
+    },
+    {
+      "p_low": 0.0757,
+      "p_high": 1.0,
+      "rows": 13576,
+      "mean_predicted": 0.1406,
+      "observed_rate": 0.117
+    }
+  ],
+  "levels": {
+    "thresholds": {
+      "Waspada": 0.0513,
+      "Siaga": 0.0922,
+      "Bahaya": 0.1408
+    },
+    "scored_on_2025": {
+      "Waspada": {
+        "alarm_days_per_kecamatan_month": 5.71,
+        "recall": 0.686,
+        "precision": 0.112
+      },
+      "Siaga": {
+        "alarm_days_per_kecamatan_month": 2.94,
+        "recall": 0.513,
+        "precision": 0.163
+      },
+      "Bahaya": {
+        "alarm_days_per_kecamatan_month": 1.71,
+        "recall": 0.365,
+        "precision": 0.2
+      }
+    }
+  }
+}

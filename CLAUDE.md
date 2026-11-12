@@ -31,7 +31,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (629, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (29: flood roads, shelter ranking,
+- Tests: `tests/` (631, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (29: flood roads, shelter ranking,
   post levels, weather per wilayah)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -141,6 +141,14 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   approach ranks days significantly better than the official statuses. PetaBencana: flooded-area archive is open but ends
   Oct 2022 with no public area map; the reports archive needs a key (`scripts/fetch_petabencana_reports.py`, PETABENCANA_API_KEY
   in .env, request at info@petabencana.id).
+
+- Daily model candidate (2026-11-12, `scripts/daily_model_candidate.py`, `artifacts/reports/daily_model_candidate.md`):
+  XGBoost F4 out of sample per year, isotonic map fitted on earlier years only: ECE 0.169 -> 0.0055 (2017-2025, every
+  year 0.005-0.019), Brier 0.094 -> 0.021; alarm-budget thresholds Waspada 0.051 / Siaga 0.092 / Bahaya 0.141.
+  Bundle (not served, gitignored folder) `models/candidates/daily_f4/` with model_card.json. City-wide water features are
+  enough: per-post status + location adds nothing (`scripts/local_water_experiment.py`). IMERG Early (and Late) answer
+  from Giovanni about a day behind (`GPM_3IMERGHHE_07_precipitation`), so live serving is possible. Chapter 5 draft:
+  https://claude.ai/artifact/Nwsqz6vKWR8t975ETZHQPx
 
 ## Resolved
 - 2026-11-06: the chat answered anything (it wrote Python code on request): `api/chat_knowledge.txt` now opens with a
