@@ -152,6 +152,12 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   from Giovanni about a day behind (`GPM_3IMERGHHE_07_precipitation`), so live serving is possible. Chapter 5 draft:
   https://claude.ai/artifact/Nwsqz6vKWR8t975ETZHQPx
 
+- News-derived flood days (2026-11-12, `scripts/fetch_news_flood_days.py` -> `data/processed/news_flood_reports_*.csv`,
+  `scripts/news_label_experiment.py`, `artifacts/reports/news_label_experiment.md`): detik.com reports quoting BPBD,
+  mapped to the 42 kecamatan (noisy: some articles are about other cities, so only days inside a BPBD-flooded
+  kecamatan-month are kept). They add 320 flood kecamatan-days to 2023-Sep 2025 (990 -> 1310); training on them changes
+  nothing (ROC-AUC 0.869 vs 0.865, CIs overlap). Nothing served; the raw cache (data/raw/news/) is not committed.
+
 ## Resolved
 - 2026-11-13: the daily kecamatan model is on the site (`scripts/train_daily_live_model.py`,
   `artifacts/reports/daily_live_model.md`, bundle `models/daily_bundle/`). Rain is IMERG Early, which Giovanni serves

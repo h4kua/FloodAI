@@ -1,0 +1,110 @@
+{
+  "generated_at": "2026-11-12T07:31:20+00:00",
+  "device": "cuda",
+  "checks": {
+    "2020-2022 (complete BPBD dates)": {
+      "news_kecamatan_days": 1022,
+      "inside_a_bpbd_flood_month": 825,
+      "filtered_confirmed_within_1_day": 602,
+      "filtered": 825,
+      "all_confirmed_within_1_day": 602
+    },
+    "2023-2025": {
+      "news_kecamatan_days": 1208,
+      "inside_a_bpbd_flood_month": 860,
+      "near_a_dated_bpbd_day": 577
+    }
+  },
+  "labels": {
+    "2023": {
+      "bpbd": 213,
+      "bpbd+news": 297
+    },
+    "2024": {
+      "bpbd": 424,
+      "bpbd+news": 587
+    },
+    "2025": {
+      "bpbd": 353,
+      "bpbd+news": 426
+    }
+  },
+  "scores": {
+    "trained on bpbd | scored on bpbd": {
+      "floods": 990,
+      "prevalence": 0.0235,
+      "roc_auc": [
+        0.869,
+        0.852,
+        0.884
+      ],
+      "pr_auc": [
+        0.178,
+        0.132,
+        0.227
+      ],
+      "at_1_alarm_per_kecamatan_month": {
+        "recall": 0.273,
+        "precision": 0.195,
+        "alarms_per_kecamatan_month": 1.0
+      }
+    },
+    "trained on bpbd | scored on bpbd+news": {
+      "floods": 1310,
+      "prevalence": 0.0311,
+      "roc_auc": [
+        0.873,
+        0.857,
+        0.887
+      ],
+      "pr_auc": [
+        0.216,
+        0.171,
+        0.268
+      ],
+      "at_1_alarm_per_kecamatan_month": {
+        "recall": 0.276,
+        "precision": 0.261,
+        "alarms_per_kecamatan_month": 1.0
+      }
+    },
+    "trained on bpbd+news | scored on bpbd": {
+      "floods": 990,
+      "prevalence": 0.0235,
+      "roc_auc": [
+        0.865,
+        0.848,
+        0.881
+      ],
+      "pr_auc": [
+        0.178,
+        0.132,
+        0.23
+      ],
+      "at_1_alarm_per_kecamatan_month": {
+        "recall": 0.286,
+        "precision": 0.204,
+        "alarms_per_kecamatan_month": 1.0
+      }
+    },
+    "trained on bpbd+news | scored on bpbd+news": {
+      "floods": 1310,
+      "prevalence": 0.0311,
+      "roc_auc": [
+        0.869,
+        0.853,
+        0.884
+      ],
+      "pr_auc": [
+        0.214,
+        0.168,
+        0.267
+      ],
+      "at_1_alarm_per_kecamatan_month": {
+        "recall": 0.283,
+        "precision": 0.268,
+        "alarms_per_kecamatan_month": 1.0
+      }
+    }
+  }
+}
