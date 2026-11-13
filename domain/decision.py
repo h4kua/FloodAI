@@ -116,6 +116,9 @@ class PhysicalSignals:
     hydrology_bands: bool = False
 
 
+DAILY_MODEL_VARIANT = "daily_kecamatan"
+
+
 @dataclass(frozen=True)
 class AdaptiveThresholds:
     """Operating thresholds for L3 ML classification."""
@@ -281,9 +284,15 @@ def _should_suppress_marginal_alert(
     Only fires when a baseline probability was actually computed (> 0);
     the default 0.0 means "not available" and disables the gate.
 
+    Not for the daily kecamatan model: its Waspada threshold already fixes the
+    alarm volume (8 days a month, tested out of sample), and its whole range
+    lies inside the gate's absolute soft margin, so the gate would erase it.
+
     Returns True when the alert should be downgraded to SAFE.
     """
     if risk != RiskLevel.PRE_ALERT:
+        return False
+    if reasoning.model_variant == DAILY_MODEL_VARIANT:
         return False
     if reasoning.baseline_probability <= 0.0:
         return False

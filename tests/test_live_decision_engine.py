@@ -169,3 +169,36 @@ def test_placeholder_siaga4_does_not_put_every_post_at_siaga_4():
     (station,) = analyze_hydrology([record]).stations
     assert station.siaga_level == "normal"
     assert "siaga4" not in station.thresholds
+
+
+# Daily kecamatan model: its own thresholds; Siaga/Bahaya at 1.0 (the model alone never sets them).
+DAILY_THRESHOLDS = {"pre_alert": 0.0822, "warning": 1.0, "danger": 1.0, "model_variant": "daily_kecamatan"}
+
+
+def _decide_daily(snapshot, probability):
+    bundle = load_runtime_bundle()
+    engineered = build_realtime_native_features_from_snapshot(snapshot, persist_history=False, as_of=NOW)
+    ood = {"method": "IsolationForest", "score": 0.05, "is_outlier": False}
+    decision, _ = _live_decision(snapshot, engineered, probability, ood, DAILY_THRESHOLDS, bundle.model_card, now=NOW)
+    return decision
+
+
+def test_daily_model_below_waspada_leaves_a_calm_city_safe():
+    assert _decide_daily(_snapshot([_post(1200)]), 0.05).risk_level == "SAFE"
+
+
+def test_daily_model_alone_raises_at_most_waspada():
+    for p in (0.12, 0.6):
+        assert _decide_daily(_snapshot([_post(1200)]), p).risk_level == "PRE_ALERT"
+
+
+def test_post_at_siaga_2_still_raises_alert_with_the_daily_model():
+    decision = _decide_daily(_snapshot([{**_post(2750), "status_siaga": "Status : Siaga 2"}]), 0.05)
+    assert decision.risk_level == "WARNING"
+
+
+def test_model_above_a_calm_baseline_is_not_escalated():
+    # A daily-model chance of 0.35 on a calm day differs from the baseline by > 0.30; the
+    # conflict is logged but does not raise Waspada to Siaga (only a baseline above the model does).
+    for p in (0.35, 0.39):
+        assert _decide_daily(_snapshot([_post(1200)]), p).risk_level == "PRE_ALERT"

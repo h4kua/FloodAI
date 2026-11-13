@@ -259,9 +259,17 @@ export function buildStatusDesc(riskData, isId) {
     const rfNote = rainfall > 5
       ? (isId ? ` Sedang hujan ${Math.round(rainfall)} mm/jam.` : ` It's raining ${Math.round(rainfall)} mm/h.`)
       : "";
+    // The daily kecamatan model raises Waspada after wet days even when every post is normal: say so.
+    const daily = riskData?.dailyModel;
+    const top = daily && daily.city_level !== "SAFE" ? dailyTopKecamatan(daily, 1)[0] : null;
+    const dNote = top
+      ? (isId
+          ? ` Hujan beberapa hari terakhir menaikkan peluang banjir hari ini, tertinggi ${formatChance(top.probability)} di Kec. ${top.name}.`
+          : ` Rain over the last few days raises today's flood chance, highest ${formatChance(top.probability)} in ${top.name}.`)
+      : "";
     return isId
-      ? `Ada tanda awal yang perlu diperhatikan.${sNote}${tNote}${rfNote} Pantau terus kondisinya.`
-      : `There are early warning signs.${sNote}${tNote}${rfNote} Keep an eye on conditions.`;
+      ? `Ada tanda awal yang perlu diperhatikan.${dNote}${sNote}${tNote}${rfNote} Pantau terus kondisinya.`
+      : `There are early warning signs.${dNote}${sNote}${tNote}${rfNote} Keep an eye on conditions.`;
   }
 
   // aman — only claim "all normal" when every post really is below Waspada,
@@ -404,4 +412,22 @@ export function windDirection(deg, isId) {
   const en = ["N","NE","E","SE","S","SW","W","NW"];
   const idx = Math.round(deg / 45) % 8;
   return isId ? id[idx] : en[idx];
+}
+
+/* ── Daily kecamatan model (backend `daily_model`) ─────── */
+const DAILY_LEVEL = { DANGER: "bahaya", WARNING: "siaga", PRE_ALERT: "waspada", SAFE: "aman" };
+
+// The n kecamatan with the highest chance today, highest first: { slug, name, probability, level }.
+export function dailyTopKecamatan(dailyModel, n = 5) {
+  const rows = Object.entries(dailyModel?.kecamatan ?? {}).map(([slug, k]) => ({
+    slug, name: k.name, probability: k.probability ?? 0, level: DAILY_LEVEL[k.risk_level] ?? "aman",
+  }));
+  return rows.sort((a, b) => b.probability - a.probability || a.name.localeCompare(b.name)).slice(0, n);
+}
+
+// 0.004 -> "<1%", 0.137 -> "14%".
+export function formatChance(p) {
+  if (p == null || Number.isNaN(p)) return "—";
+  const pct = p * 100;
+  return pct > 0 && pct < 1 ? "<1%" : `${Math.round(pct)}%`;
 }

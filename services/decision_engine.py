@@ -235,6 +235,7 @@ def run_decision_engine(
     perception_completeness: float = 1.0,
     data_freshness_minutes: float = 0.0,
     elevation_data: dict | None = None,
+    model_variant: str = "realtime_native",
 ) -> DecisionResult:
     """
     Adapter around app.domain.decide() — the canonical decision authority.
@@ -275,6 +276,7 @@ def run_decision_engine(
             perception_completeness=perception_completeness,
             data_freshness_minutes=data_freshness_minutes,
             elevation_data=elevation_data or {},
+            model_variant=model_variant,
         )
 
         canonical_inputs = _build_canonical_inputs(kwargs_snapshot)
@@ -458,7 +460,7 @@ def _build_canonical_inputs(kw: dict) -> dict:
     reasoning = ReasoningInputs(
         probability=float(kw.get("probability") or 0.0),
         confidence=float(kw.get("adjusted_confidence") or 0.0),
-        model_variant="realtime_native",
+        model_variant=str(kw.get("model_variant") or "realtime_native"),
         ood_score=ood_score_value,
         baseline_probability=baseline_prob,
     )

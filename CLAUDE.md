@@ -6,8 +6,10 @@ FastAPI backend + React frontend. Agentic flood prediction system for Jakarta.
 - Backend: FastAPI + uvicorn, port 8080
 - Frontend: React + Vite
 - DB: Supabase/PostgreSQL (RPC over HTTPS via `supabase` client; psycopg2 for direct/pooled access)
-- ML: XGBoost + scikit-learn 1.8.0 — the `realtime_native` bundle (`models/realtime_native_bundle/`)
-  serves the UI; the legacy Jakarta model serves only `/predict/realtime`. No Torch.
+- ML: XGBoost + scikit-learn 1.8.0. The daily kecamatan model (`models/daily_bundle/`,
+  `realtime_native/daily_model.py`) gives the decision engine its probability when it has today's
+  predictions; otherwise the monthly `realtime_native` bundle (`models/realtime_native_bundle/`) does.
+  No Torch.
 - LLM (non-critical path): Groq `qwen/qwen3.8-27b` primary (`DEFAULT_GROQ_MODEL` in `config/llm_config.py`,
   `GROQ_MODEL` overrides), Anthropic Claude optional — explanation and chat only. Chat prompt lives in
   `api/chat_knowledge.txt` (core rules + only the sections the question touches, ~1.5k tokens); the
@@ -31,8 +33,8 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (635, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (30: flood roads, shelter ranking,
-  post levels, weather per wilayah)
+- Tests: `tests/` (652, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (32: flood roads, shelter ranking,
+  post levels, weather per wilayah, daily model card)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
 
@@ -151,6 +153,21 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   https://claude.ai/artifact/Nwsqz6vKWR8t975ETZHQPx
 
 ## Resolved
+- 2026-11-13: the daily kecamatan model is on the site (`scripts/train_daily_live_model.py`,
+  `artifacts/reports/daily_live_model.md`, bundle `models/daily_bundle/`). Rain is IMERG Early, which Giovanni serves
+  ~28 h late, so it uses rain through D-2 (D-3 before ~04:00 WIB; D-1 when complete) plus the city's river-post Siaga
+  status on D-1/D-2 from our own history rows (14 fixed river posts in both the 2016-2021 archive and the live feed;
+  coastal and gate posts left out). Rolling by year: kecamatan ROC-AUC lag 2 0.786 (2016-2022) / 0.799 (2023-2025) vs
+  place+season 0.735 / 0.769 (CI of the difference excludes 0); water adds nothing significant; lag 1 is 0.808 / 0.836.
+  City probability = highest kecamatan (isotonic-calibrated on out-of-sample predictions). City precision is ~0.31-0.36
+  at every threshold (base rate 0.22), so the model raises at most Waspada (8 model days a month; Siaga/Bahaya
+  thresholds 1.0) and is exempt from the L3.1 precision gate (its absolute 0.15 margin covered the model's whole range).
+  `daily_model.refresh()` runs every 30 min in the API scheduler (16 s; never in a request) and needs `EARTHDATA_TOKEN`
+  on Fly; without it, or when no rain day is complete, the monthly model serves as before (`DAILY_MODEL_ENABLED=false`
+  switches it off). The response carries `daily_model` (per kecamatan) and `realtime_native_probability`; the AI tab
+  shows the top-5 card and a model-raised Waspada says "hujan beberapa hari terakhir ...". Also fixed: signal conflict 4
+  escalated when the MODEL was above the baseline (comment said the reverse); now only a baseline above the model
+  escalates. The isotonic ECE ~0 is in-sample on the out-of-sample predictions, so optimistic.
 - 2026-11-12: the city status sat at Waspada or higher 92 % of the time (live history 5-12 Nov, 723 snapshots):
   P.A. Cengkareng Drain was at Siaga 3+ in 89 % of snapshots, Pompa Pasar Ikan in 55 %, Marina Ancol (Laut) in 48 %
   (the last two follow the tide). These posts now count one band lower for the CITY status only

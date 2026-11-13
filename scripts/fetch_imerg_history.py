@@ -14,8 +14,12 @@ centre of its IMERG cell, so neighbouring kecamatan share one download. Raw CSVs
 per cell and year in data/raw/imerg/ (gitignored); data/raw/imerg/points.json maps kecamatan
 to cells.
 
+--early fetches IMERG Early (GPM_3IMERGHHE, the near-real-time run the website reads) from Dec 2012
+to yesterday into data/raw/imerg_early/, the training rain of scripts/train_daily_live_model.py.
+
 Usage (repo root):
     python scripts/fetch_imerg_history.py                  # all cells, 2020-2025
+    python scripts/fetch_imerg_history.py --early          # IMERG Early, Dec 2012 to yesterday
     python scripts/fetch_imerg_history.py --probe          # one day at one cell, to check access
     python scripts/fetch_imerg_history.py --data <id>      # another Giovanni variable id
 """
@@ -23,7 +27,6 @@ Usage (repo root):
 from __future__ import annotations
 
 import argparse
-import io
 import json
 import math
 import os
@@ -35,10 +38,15 @@ import pandas as pd
 import requests
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+from realtime_native.imerg_client import EARLY_DATA_ID, parse_timeseries  # noqa: E402,F401  (re-exported)
+
 CENTROIDS_CSV = _PROJECT_ROOT / "data" / "processed" / "cleaned_flood_data_jakarta.csv"
 OUT_DIR = _PROJECT_ROOT / "data" / "raw" / "imerg"
 API_URL = "https://api.giovanni.earthdata.nasa.gov/timeseries"
 DEFAULT_DATA_ID = "GPM_3IMERGHH_07_precipitation"
+EARLY_DIR = _PROJECT_ROOT / "data" / "raw" / "imerg_early"
 YEARS = range(2019, 2026)  # 2019 = December only, the lead-in days for 1 Jan 2020
 FIRST_DAY = {2019: "2019-12-01T00:00:00"}
 LAST_V07B = "2025-09-30T23:59:59"
@@ -63,20 +71,6 @@ def build_points() -> dict[str, str]:
     return points
 
 
-def parse_timeseries(text: str) -> pd.Series:
-    """Giovanni CSV -> half-hourly precipitation series (UTC index). The body starts with
-    key,value metadata lines, then a header row whose first field is the timestamp."""
-    lines = text.splitlines()
-    start = next((i for i, line in enumerate(lines) if line.lower().startswith("timestamp")), None)
-    if start is None:
-        raise ValueError("no data rows in the response (check the variable id, the bounds or the token)")
-    frame = pd.read_csv(io.StringIO("\n".join(lines[start:])))
-    frame.columns = ["time", "value"] + list(frame.columns[2:])
-    series = pd.Series(pd.to_numeric(frame["value"], errors="coerce").to_numpy(),
-                       index=pd.to_datetime(frame["time"], utc=True))
-    return series.where(series >= 0)  # fill values are negative
-
-
 def fetch(token: str, cell: str, start: str, end: str, data_id: str) -> str:
     lat, lon = (float(x) for x in cell.split("_"))
     params = {"data": data_id, "location": f"[{lat},{lon}]", "time": f"{start}/{end}"}
@@ -97,6 +91,8 @@ def main() -> int:
     parser.add_argument("--probe", action="store_true", help="fetch one day at one cell and stop")
     parser.add_argument("--history", action="store_true",
                         help="also fetch Dec 2012 to Nov 2019 (BPBD dated events 2013-2019), cached as <cell>_<year>h.csv")
+    parser.add_argument("--early", action="store_true",
+                        help="fetch IMERG Early (near real time) Dec 2012 to yesterday into data/raw/imerg_early/ instead")
     args = parser.parse_args()
 
     try:
@@ -115,6 +111,25 @@ def main() -> int:
         text = fetch(token, points["kramatjati"], "2020-01-01T00:00:00", "2020-01-01T23:59:59", args.data)
         series = parse_timeseries(text)
         print(f"probe ok: {len(series)} half-hours, total {series.sum() * 0.5:.1f} mm on 2020-01-01 UTC")
+        return 0
+
+    if args.early:
+        # IMERG Early (about half a day behind real time) is what a live service can read, and it differs
+        # from Final (upstream Bogor 2024: 11.1 vs 8.9 mm a day), so the live daily model is trained on Early.
+        EARLY_DIR.mkdir(parents=True, exist_ok=True)
+        today = pd.Timestamp.now(tz="UTC").tz_localize(None).normalize()
+        spans = {2012: ("2012-12-01T00:00:00", "2012-12-31T23:59:59"),
+                 **{y: (f"{y}-01-01T00:00:00", f"{y}-12-31T23:59:59") for y in range(2013, today.year)},
+                 today.year: (f"{today.year}-01-01T00:00:00", f"{(today - pd.Timedelta(days=1)):%Y-%m-%d}T23:59:59")}
+        for cell in cells:
+            for year, (start, end) in spans.items():
+                out = EARLY_DIR / f"{cell}_{year}.csv"
+                if out.exists() and year != today.year:
+                    continue
+                text = fetch(token, cell, start, end, EARLY_DATA_ID)
+                rows = len(parse_timeseries(text))
+                out.write_text(text, encoding="utf-8")
+                print(f"  {cell} {year} (early): {rows} half-hours", flush=True)
         return 0
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)

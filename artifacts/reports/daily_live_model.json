@@ -1,0 +1,695 @@
+{
+  "generated_utc": "2026-11-13T06:29:49+00:00",
+  "device": "cuda",
+  "rows": {
+    "total": 199416,
+    "floods": 4830,
+    "water_rows": 63126
+  },
+  "variants": {
+    "2016-2022 (complete labels)": {
+      "place and season": {
+        "roc_auc": [
+          0.735,
+          0.715,
+          0.756
+        ],
+        "pr_auc": [
+          0.065,
+          0.054,
+          0.079
+        ]
+      },
+      "lag 1": {
+        "roc_auc": [
+          0.808,
+          0.79,
+          0.825
+        ],
+        "pr_auc": [
+          0.101,
+          0.081,
+          0.128
+        ]
+      },
+      "lag 1 + water": {
+        "roc_auc": [
+          0.807,
+          0.789,
+          0.824
+        ],
+        "pr_auc": [
+          0.096,
+          0.079,
+          0.119
+        ]
+      },
+      "lag 2": {
+        "roc_auc": [
+          0.786,
+          0.769,
+          0.804
+        ],
+        "pr_auc": [
+          0.079,
+          0.064,
+          0.098
+        ]
+      },
+      "lag 2 + water": {
+        "roc_auc": [
+          0.789,
+          0.77,
+          0.808
+        ],
+        "pr_auc": [
+          0.081,
+          0.066,
+          0.1
+        ]
+      },
+      "lag 3": {
+        "roc_auc": [
+          0.774,
+          0.754,
+          0.794
+        ],
+        "pr_auc": [
+          0.077,
+          0.063,
+          0.099
+        ]
+      },
+      "lag 3 + water": {
+        "roc_auc": [
+          0.774,
+          0.756,
+          0.794
+        ],
+        "pr_auc": [
+          0.071,
+          0.059,
+          0.088
+        ]
+      },
+      "_floods": 2513,
+      "_prevalence": 0.0234
+    },
+    "2023-2025 (partial labels)": {
+      "place and season": {
+        "roc_auc": [
+          0.769,
+          0.747,
+          0.791
+        ],
+        "pr_auc": [
+          0.063,
+          0.05,
+          0.078
+        ]
+      },
+      "lag 1": {
+        "roc_auc": [
+          0.836,
+          0.817,
+          0.853
+        ],
+        "pr_auc": [
+          0.124,
+          0.09,
+          0.167
+        ]
+      },
+      "lag 1 + water": {
+        "roc_auc": [
+          0.833,
+          0.813,
+          0.85
+        ],
+        "pr_auc": [
+          0.122,
+          0.089,
+          0.163
+        ]
+      },
+      "lag 2": {
+        "roc_auc": [
+          0.799,
+          0.779,
+          0.816
+        ],
+        "pr_auc": [
+          0.072,
+          0.056,
+          0.092
+        ]
+      },
+      "lag 2 + water": {
+        "roc_auc": [
+          0.806,
+          0.784,
+          0.823
+        ],
+        "pr_auc": [
+          0.082,
+          0.063,
+          0.108
+        ]
+      },
+      "lag 3": {
+        "roc_auc": [
+          0.79,
+          0.769,
+          0.811
+        ],
+        "pr_auc": [
+          0.068,
+          0.055,
+          0.086
+        ]
+      },
+      "lag 3 + water": {
+        "roc_auc": [
+          0.798,
+          0.777,
+          0.817
+        ],
+        "pr_auc": [
+          0.075,
+          0.059,
+          0.095
+        ]
+      },
+      "_floods": 1048,
+      "_prevalence": 0.0228
+    },
+    "water years 2017-2021, 2025": {
+      "place and season": {
+        "roc_auc": [
+          0.769,
+          0.75,
+          0.787
+        ],
+        "pr_auc": [
+          0.07,
+          0.057,
+          0.087
+        ]
+      },
+      "lag 1": {
+        "roc_auc": [
+          0.826,
+          0.807,
+          0.845
+        ],
+        "pr_auc": [
+          0.115,
+          0.093,
+          0.147
+        ]
+      },
+      "lag 1 + water": {
+        "roc_auc": [
+          0.821,
+          0.799,
+          0.839
+        ],
+        "pr_auc": [
+          0.105,
+          0.086,
+          0.134
+        ]
+      },
+      "lag 2": {
+        "roc_auc": [
+          0.8,
+          0.78,
+          0.819
+        ],
+        "pr_auc": [
+          0.081,
+          0.065,
+          0.102
+        ]
+      },
+      "lag 2 + water": {
+        "roc_auc": [
+          0.803,
+          0.781,
+          0.823
+        ],
+        "pr_auc": [
+          0.086,
+          0.071,
+          0.108
+        ]
+      },
+      "lag 3": {
+        "roc_auc": [
+          0.8,
+          0.779,
+          0.82
+        ],
+        "pr_auc": [
+          0.085,
+          0.068,
+          0.108
+        ]
+      },
+      "lag 3 + water": {
+        "roc_auc": [
+          0.798,
+          0.778,
+          0.818
+        ],
+        "pr_auc": [
+          0.079,
+          0.065,
+          0.099
+        ]
+      },
+      "_floods": 1973,
+      "_prevalence": 0.0214
+    }
+  },
+  "pairs": [
+    {
+      "block": "2016-2022 (complete labels)",
+      "a": "place and season",
+      "b": "lag 2",
+      "roc_auc": [
+        0.036,
+        0.065
+      ],
+      "pr_auc": [
+        0.005,
+        0.025
+      ]
+    },
+    {
+      "block": "2016-2022 (complete labels)",
+      "a": "lag 2",
+      "b": "lag 2 + water",
+      "roc_auc": [
+        -0.006,
+        0.012
+      ],
+      "pr_auc": [
+        -0.004,
+        0.008
+      ]
+    },
+    {
+      "block": "2016-2022 (complete labels)",
+      "a": "lag 3",
+      "b": "lag 3 + water",
+      "roc_auc": [
+        -0.008,
+        0.008
+      ],
+      "pr_auc": [
+        -0.016,
+        0.001
+      ]
+    },
+    {
+      "block": "2016-2022 (complete labels)",
+      "a": "lag 1 + water",
+      "b": "lag 2 + water",
+      "roc_auc": [
+        -0.03,
+        -0.005
+      ],
+      "pr_auc": [
+        -0.027,
+        -0.004
+      ]
+    },
+    {
+      "block": "2016-2022 (complete labels)",
+      "a": "lag 2 + water",
+      "b": "lag 3 + water",
+      "roc_auc": [
+        -0.027,
+        -0.002
+      ],
+      "pr_auc": [
+        -0.018,
+        -0.002
+      ]
+    },
+    {
+      "block": "2023-2025 (partial labels)",
+      "a": "place and season",
+      "b": "lag 2",
+      "roc_auc": [
+        0.014,
+        0.047
+      ],
+      "pr_auc": [
+        -0.001,
+        0.023
+      ]
+    },
+    {
+      "block": "2023-2025 (partial labels)",
+      "a": "lag 2",
+      "b": "lag 2 + water",
+      "roc_auc": [
+        -0.003,
+        0.016
+      ],
+      "pr_auc": [
+        0.003,
+        0.019
+      ]
+    },
+    {
+      "block": "2023-2025 (partial labels)",
+      "a": "lag 3",
+      "b": "lag 3 + water",
+      "roc_auc": [
+        -0.002,
+        0.017
+      ],
+      "pr_auc": [
+        -0.0,
+        0.014
+      ]
+    },
+    {
+      "block": "2023-2025 (partial labels)",
+      "a": "lag 1 + water",
+      "b": "lag 2 + water",
+      "roc_auc": [
+        -0.041,
+        -0.014
+      ],
+      "pr_auc": [
+        -0.066,
+        -0.022
+      ]
+    },
+    {
+      "block": "2023-2025 (partial labels)",
+      "a": "lag 2 + water",
+      "b": "lag 3 + water",
+      "roc_auc": [
+        -0.021,
+        0.006
+      ],
+      "pr_auc": [
+        -0.019,
+        0.001
+      ]
+    },
+    {
+      "block": "water years 2017-2021, 2025",
+      "a": "place and season",
+      "b": "lag 2",
+      "roc_auc": [
+        0.016,
+        0.046
+      ],
+      "pr_auc": [
+        -0.001,
+        0.023
+      ]
+    },
+    {
+      "block": "water years 2017-2021, 2025",
+      "a": "lag 2",
+      "b": "lag 2 + water",
+      "roc_auc": [
+        -0.009,
+        0.014
+      ],
+      "pr_auc": [
+        -0.002,
+        0.016
+      ]
+    },
+    {
+      "block": "water years 2017-2021, 2025",
+      "a": "lag 3",
+      "b": "lag 3 + water",
+      "roc_auc": [
+        -0.013,
+        0.009
+      ],
+      "pr_auc": [
+        -0.018,
+        0.005
+      ]
+    },
+    {
+      "block": "water years 2017-2021, 2025",
+      "a": "lag 1 + water",
+      "b": "lag 2 + water",
+      "roc_auc": [
+        -0.032,
+        -0.007
+      ],
+      "pr_auc": [
+        -0.036,
+        -0.007
+      ]
+    },
+    {
+      "block": "water years 2017-2021, 2025",
+      "a": "lag 2 + water",
+      "b": "lag 3 + water",
+      "roc_auc": [
+        -0.019,
+        0.009
+      ],
+      "pr_auc": [
+        -0.017,
+        0.003
+      ]
+    }
+  ],
+  "city": {},
+  "lags": {
+    "lag 1 + water": {
+      "kecamatan_ece_before": 0.01,
+      "kecamatan_ece_after": 0.0,
+      "kecamatan_brier_after": 0.0217,
+      "city_roc_auc_2016_2022": 0.7,
+      "city_flood_day_share_2016_2022": 0.217,
+      "tiers_2016_2022": {
+        "pre_alert": {
+          "threshold": 0.0889,
+          "warning_days_per_month": 7.96,
+          "recall": 0.417,
+          "precision": 0.345
+        },
+        "warning": {
+          "threshold": 1.0,
+          "warning_days_per_month": 0.0,
+          "recall": 0.0,
+          "precision": 0.0
+        },
+        "danger": {
+          "threshold": 1.0,
+          "warning_days_per_month": 0.0,
+          "recall": 0.0,
+          "precision": 0.0
+        }
+      },
+      "tiers_2016_2025": {
+        "pre_alert": {
+          "threshold": 0.0889,
+          "warning_days_per_month": 8.28,
+          "recall": 0.403,
+          "precision": 0.371
+        },
+        "warning": {
+          "threshold": 1.0,
+          "warning_days_per_month": 0.0,
+          "recall": 0.0,
+          "precision": 0.0
+        },
+        "danger": {
+          "threshold": 1.0,
+          "warning_days_per_month": 0.0,
+          "recall": 0.0,
+          "precision": 0.0
+        }
+      },
+      "reference_budgets_2016_2022": {
+        "8 days a month": {
+          "threshold": 0.0836,
+          "warning_days_per_month": 9.61,
+          "recall": 0.507,
+          "precision": 0.348
+        },
+        "4 days a month": {
+          "threshold": 0.1351,
+          "warning_days_per_month": 4.58,
+          "recall": 0.244,
+          "precision": 0.351
+        },
+        "2 days a month": {
+          "threshold": 0.2056,
+          "warning_days_per_month": 2.89,
+          "recall": 0.181,
+          "precision": 0.412
+        },
+        "1 days a month": {
+          "threshold": 0.2397,
+          "warning_days_per_month": 1.32,
+          "recall": 0.116,
+          "precision": 0.577
+        }
+      }
+    },
+    "lag 2 + water": {
+      "kecamatan_ece_before": 0.0104,
+      "kecamatan_ece_after": 0.0,
+      "kecamatan_brier_after": 0.0219,
+      "city_roc_auc_2016_2022": 0.67,
+      "city_flood_day_share_2016_2022": 0.217,
+      "tiers_2016_2022": {
+        "pre_alert": {
+          "threshold": 0.0822,
+          "warning_days_per_month": 8.38,
+          "recall": 0.399,
+          "precision": 0.314
+        },
+        "warning": {
+          "threshold": 1.0,
+          "warning_days_per_month": 0.0,
+          "recall": 0.0,
+          "precision": 0.0
+        },
+        "danger": {
+          "threshold": 1.0,
+          "warning_days_per_month": 0.0,
+          "recall": 0.0,
+          "precision": 0.0
+        }
+      },
+      "tiers_2016_2025": {
+        "pre_alert": {
+          "threshold": 0.0822,
+          "warning_days_per_month": 8.57,
+          "recall": 0.38,
+          "precision": 0.339
+        },
+        "warning": {
+          "threshold": 1.0,
+          "warning_days_per_month": 0.0,
+          "recall": 0.0,
+          "precision": 0.0
+        },
+        "danger": {
+          "threshold": 1.0,
+          "warning_days_per_month": 0.0,
+          "recall": 0.0,
+          "precision": 0.0
+        }
+      },
+      "reference_budgets_2016_2022": {
+        "8 days a month": {
+          "threshold": 0.0822,
+          "warning_days_per_month": 8.38,
+          "recall": 0.399,
+          "precision": 0.314
+        },
+        "4 days a month": {
+          "threshold": 0.127,
+          "warning_days_per_month": 4.05,
+          "recall": 0.211,
+          "precision": 0.344
+        },
+        "2 days a month": {
+          "threshold": 0.1705,
+          "warning_days_per_month": 2.2,
+          "recall": 0.144,
+          "precision": 0.432
+        },
+        "1 days a month": {
+          "threshold": 0.1705,
+          "warning_days_per_month": 2.2,
+          "recall": 0.144,
+          "precision": 0.432
+        }
+      }
+    },
+    "lag 3 + water": {
+      "kecamatan_ece_before": 0.0106,
+      "kecamatan_ece_after": 0.0,
+      "kecamatan_brier_after": 0.022,
+      "city_roc_auc_2016_2022": 0.661,
+      "city_flood_day_share_2016_2022": 0.217,
+      "tiers_2016_2022": {
+        "pre_alert": {
+          "threshold": 0.0735,
+          "warning_days_per_month": 11.55,
+          "recall": 0.516,
+          "precision": 0.295
+        },
+        "warning": {
+          "threshold": 1.0,
+          "warning_days_per_month": 0.0,
+          "recall": 0.0,
+          "precision": 0.0
+        },
+        "danger": {
+          "threshold": 1.0,
+          "warning_days_per_month": 0.0,
+          "recall": 0.0,
+          "precision": 0.0
+        }
+      },
+      "tiers_2016_2025": {
+        "pre_alert": {
+          "threshold": 0.0735,
+          "warning_days_per_month": 12.57,
+          "recall": 0.541,
+          "precision": 0.329
+        },
+        "warning": {
+          "threshold": 1.0,
+          "warning_days_per_month": 0.0,
+          "recall": 0.0,
+          "precision": 0.0
+        },
+        "danger": {
+          "threshold": 1.0,
+          "warning_days_per_month": 0.0,
+          "recall": 0.0,
+          "precision": 0.0
+        }
+      },
+      "reference_budgets_2016_2022": {
+        "8 days a month": {
+          "threshold": 0.0735,
+          "warning_days_per_month": 11.55,
+          "recall": 0.516,
+          "precision": 0.295
+        },
+        "4 days a month": {
+          "threshold": 0.1122,
+          "warning_days_per_month": 4.67,
+          "recall": 0.229,
+          "precision": 0.324
+        },
+        "2 days a month": {
+          "threshold": 0.1412,
+          "warning_days_per_month": 2.33,
+          "recall": 0.117,
+          "precision": 0.332
+        },
+        "1 days a month": {
+          "threshold": 0.1412,
+          "warning_days_per_month": 2.33,
+          "recall": 0.117,
+          "precision": 0.332
+        }
+      }
+    }
+  },
+  "bundle_generated_utc": "2026-11-13T07:05:02+00:00"
+}

@@ -1492,3 +1492,12 @@ button, input, select, textarea { font-family: inherit; }
   .wx-card, .wx-card * { animation: none !important; transition: none !important; }
   .leaflet-container path.wx-t-flash { animation: none; }
 }
+
+/* Daily kecamatan model card (AI tab) */
+.daily-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.daily-row { display: grid; grid-template-columns: minmax(7rem, 11rem) 1fr 3rem; align-items: center; gap: 0.75rem; }
+.daily-name { font-size: 0.9rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.daily-bar { height: 0.5rem; border-radius: var(--r-pill); background: var(--line); overflow: hidden; }
+.daily-bar > span { display: block; height: 100%; border-radius: inherit; }
+.daily-pct { font-size: 0.85rem; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+.daily-note { font-size: 0.8rem; color: var(--muted); line-height: 1.6; margin: 0; max-width: 70ch; }

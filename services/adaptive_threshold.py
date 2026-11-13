@@ -36,31 +36,6 @@ def _base_triplet() -> tuple[float, float, float]:
     return _canonical_default_thresholds()
 
 
-def _base_pre_alert() -> float:
-    return _base_triplet()[0]
-
-
-def _base_warning() -> float:
-    return _base_triplet()[1]
-
-
-def _base_danger() -> float:
-    return _base_triplet()[2]
-
-
-def _min_danger() -> float:
-    """Conservative floor: at most the canonical warning threshold."""
-    return _base_triplet()[1]
-
-
-def _max_danger() -> float:
-    """
-    Conservative ceiling derived from the canonical danger threshold so the
-    operating envelope tracks the source automatically instead of drifting.
-    """
-    return min(0.95, _base_triplet()[2] + 0.30)
-
-
 _ADJ_OOD_RAISE = +0.10
 _ADJ_MISSING_RAISE = +0.05
 _ADJ_TREND_ANOMALY = -0.06
@@ -149,15 +124,19 @@ class AdaptiveThresholder:
         failure_modes: list[dict],
         trend_state: dict,
         plausibility_score: float,
+        base: tuple[float, float, float] | None = None,
     ) -> AdaptiveThresholdProfile:
-        """Build context-adjusted operating thresholds."""
+        """Build context-adjusted operating thresholds.
+
+        ``base`` = (pre_alert, warning, danger) of the model whose probability is
+        classified (the daily kecamatan model has its own); None = the canonical
+        realtime-native thresholds.
+        """
         failure_types = {f.get("type", "") for f in failure_modes}
         adjustments: list[ThresholdAdjustment] = []
-        base_pre_alert = _base_pre_alert()
-        base_warning = _base_warning()
-        base_danger = _base_danger()
-        min_danger = _min_danger()
-        max_danger = _max_danger()
+        base_pre_alert, base_warning, base_danger = base if base is not None else _base_triplet()
+        min_danger = base_warning
+        max_danger = min(0.95, base_danger + 0.30)
         danger_threshold = base_danger
 
         if "ood_input" in failure_types:

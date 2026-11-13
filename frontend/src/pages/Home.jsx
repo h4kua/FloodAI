@@ -13,6 +13,7 @@ import { StaleDataBanner, ModelOutputCard } from "../components/dashboard/Status
 import { WilayahForecastGrid, ForecastPanel } from "../components/dashboard/ForecastSection";
 import { WeatherCurrentCard } from "../components/dashboard/WeatherSection";
 import { CrewAnalysisPanel } from "../components/dashboard/CrewAnalysisPanel";
+import DailyModelCard from "../components/dashboard/DailyModelCard";
 
 // The chatbot (and its ~60 KB offline knowledge base) loads after the page,
 // so the status card is not held up by it.
@@ -150,9 +151,12 @@ export default function Home({ setRiskContext, riskLevel }) {
         <div id="detail-tabpanel" role="tabpanel" aria-labelledby={`detail-tab-${detailTab}`} tabIndex={0}
              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           {detailTab === "ai" && (
-            <ModelOutputCard riskData={riskData}>
-              <CrewAnalysisPanel />
-            </ModelOutputCard>
+            <>
+              <ModelOutputCard riskData={riskData}>
+                <CrewAnalysisPanel />
+              </ModelOutputCard>
+              <DailyModelCard dailyModel={riskData?.dailyModel} />
+            </>
           )}
 
           {detailTab === "sensors" && <StationPanel stations={stations} />}

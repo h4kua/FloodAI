@@ -7,6 +7,8 @@ import numpy as np
 
 from agents.perception_agent import PerceptionAgent
 from agents.reasoning_agent import _base_confidence, _outlier_capped_confidence
+from domain.decision import DAILY_MODEL_VARIANT
+from realtime_native import daily_model
 from realtime_native.bundle import load_runtime_bundle
 from realtime_native.feature_builder import (
     REALTIME_NATIVE_FEATURES,
@@ -95,6 +97,7 @@ def _live_decision(snapshot, engineered, probability, ood_detection, thresholds,
         failure_modes=failures,
         trend_state=diagnostics.get("trend_state") or {},
         plausibility_score=plausibility_score,
+        base=(float(thresholds["pre_alert"]), float(thresholds["warning"]), float(thresholds["danger"])),
     )
     confidence, _, _ = _outlier_capped_confidence(
         confidence=_base_confidence(probability, ood_detection["score"], thresholds),
@@ -125,6 +128,7 @@ def _live_decision(snapshot, engineered, probability, ood_detection, thresholds,
         adaptive_classification=adaptive.to_dict(),
         perception_completeness=present / len(_EXPECTED_SNAPSHOT_SECTIONS),
         data_freshness_minutes=_snapshot_freshness_minutes(snapshot, now),
+        model_variant=str(thresholds.get("model_variant") or "realtime_native"),
     )
     return decision, failures
 
@@ -153,7 +157,20 @@ def _station_location_label(station: dict) -> str:
     return nama
 
 
-def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None, lang="id"):
+def _daily_model_note(daily, en):
+    """Why the daily kecamatan model raised Waspada: recent rain and today's highest chance."""
+    if not daily or daily.get("city_level") == "SAFE":
+        return ""
+    pct = f"{daily['city_probability'] * 100:.0f}%"
+    name = daily.get("top_kecamatan", "")
+    if en:
+        return (f" Rain over the last few days raises today's flood chance, highest {pct} in {name} "
+                f"(daily model, satellite rain up to {daily.get('rain_through')}).")
+    return (f" Hujan beberapa hari terakhir menaikkan peluang banjir hari ini, tertinggi {pct} di Kec. {name} "
+            f"(model harian, hujan satelit sampai {daily.get('rain_through')}).")
+
+
+def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None, lang="id", daily=None):
     """Plain-language reading of the level, in Indonesian (default) or English."""
     en = lang == "en"
 
@@ -238,6 +255,13 @@ def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None, lang="id
         loc_context = ""
         if top_station:
             loc_context = tr(f" {label} mencatat {siaga}.", f" {label} reads {siaga}.")
+        daily_note = _daily_model_note(daily, en)
+        if daily_note:
+            posts = loc_context or tr(" Pos air saat ini normal.", " The water-level posts read normal.")
+            return tr(
+                f"Waspada.{daily_note}{posts} Belum tentu banjir, tetapi siapkan diri dan pantau lebih sering.",
+                f"Watch.{daily_note}{posts} Not necessarily a flood, but be ready and check more often.",
+            )
         return tr(
             f"Ada sinyal awal di atas kondisi normal dari muka air, cuaca, atau data yang tidak biasa.{loc_context} "
             "Belum mengarah ke banjir, tetapi perlu diwaspadai dan dipantau lebih sering.",
@@ -542,16 +566,28 @@ def predict_realtime_native(
         "score": ood_score,
         "is_outlier": bool(ood_detector.predict(scaled)[0] == -1),
     }
+    # The daily kecamatan model, when the scheduler has computed it for today, gives the
+    # decision engine its probability and thresholds; otherwise the monthly model above does.
+    daily = daily_model.current(now=as_of)
+    engine_probability, engine_thresholds = probability, thresholds
     model_risk_level = _classify(probability, thresholds)
+    if daily is not None:
+        engine_probability = daily["city_probability"]
+        engine_thresholds = {**daily["thresholds"], "source": "daily_model", "model_variant": DAILY_MODEL_VARIANT,
+                             "lag_days": daily["lag_days"], "model_version": daily["model_version"]}
+        model_risk_level = daily["city_level"]
     decision, failure_modes = _live_decision(
-        snapshot_raw, engineered, probability, ood_detection, thresholds, model_card, now=as_of,
+        snapshot_raw, engineered, engine_probability, ood_detection, engine_thresholds, model_card, now=as_of,
     )
     risk_level = decision.risk_level
 
     result = {
-        "model_variant": "realtime_native",
-        # Raw model probability; the final level comes from the decision engine.
-        "probability": probability,
+        "model_variant": DAILY_MODEL_VARIANT if daily is not None else "realtime_native",
+        # Probability the decision engine classified; the final level comes from the engine.
+        "probability": engine_probability,
+        # The monthly realtime-native model's own probability (the engine's input when the
+        # daily model is unavailable).
+        "realtime_native_probability": probability,
         "risk_level": risk_level,
         "confidence_score": decision.confidence_score,
         # Which layer set the level and why — the model's own view is kept so
@@ -565,10 +601,11 @@ def predict_realtime_native(
             "failure_modes": [f.get("type") for f in failure_modes],
             "trace": decision.decision_trace,
         },
-        "risk_interpretation": _risk_interpretation(risk_level, engineered.diagnostics, wilayah_summary),
-        "risk_interpretation_en": _risk_interpretation(risk_level, engineered.diagnostics, wilayah_summary, lang="en"),
+        "risk_interpretation": _risk_interpretation(risk_level, engineered.diagnostics, wilayah_summary, daily=daily),
+        "risk_interpretation_en": _risk_interpretation(risk_level, engineered.diagnostics, wilayah_summary, lang="en",
+                                                       daily=daily),
         "recommended_action": _recommended_action(risk_level, wilayah_summary),
-        "risk_thresholds": thresholds,
+        "risk_thresholds": engine_thresholds,
         # ISO-8601 UTC timestamp when the sensor snapshot was built.
         # Lets the frontend show "Data sensor dari XX:XX WIB" so users know
         # how fresh the underlying TMA/BMKG/OpenWeather data actually is.
@@ -587,6 +624,9 @@ def predict_realtime_native(
         # Per-kecamatan ML probability — additive, does not affect risk_level/
         # probability above. {} when no station maps to any active kecamatan.
         "district_risk_breakdown": district_risk_breakdown,
+        # Daily kecamatan model state (per-kecamatan probabilities, rain lag, thresholds);
+        # None when it is off or not computed for today.
+        "daily_model": daily,
     }
 
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)

@@ -308,7 +308,8 @@ def conflicting_signals(
     if baseline_prob is not None and baseline_gap > MODEL_BASELINE_GAP_CONFLICT:
         direction = "higher" if model_prob > baseline_prob else "lower"
         # Only escalate when baseline signals danger but model says safe.
-        escalate = baseline_result.get("baseline_alert", False) and model_prob < 0.40
+        escalate = (baseline_result.get("baseline_alert", False) and model_prob < baseline_prob
+                    and model_prob < 0.40)
         failures.append(
             {
                 "type": "signal_conflict",

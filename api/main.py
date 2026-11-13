@@ -510,6 +510,17 @@ async def _scheduled_refresh() -> None:
         )
 
 
+_DAILY_MODEL_INTERVAL_MIN = 30
+
+
+async def _scheduled_daily_model() -> None:
+    """Recompute today's daily kecamatan predictions (IMERG Early + water history) off the
+    event loop. daily_model.refresh never raises; on failure the site keeps the monthly model."""
+    from realtime_native import daily_model
+
+    await asyncio.to_thread(daily_model.refresh)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     configure_logging()
@@ -557,11 +568,20 @@ async def lifespan(app: FastAPI):
             replace_existing=True,
             max_instances=1,
         )
+        scheduler.add_job(
+            _scheduled_daily_model,
+            "interval",
+            minutes=_DAILY_MODEL_INTERVAL_MIN,
+            id="daily_model_refresh",
+            replace_existing=True,
+            max_instances=1,
+        )
         scheduler.start()
         _log.info(f"snapshot_scheduler_started (interval_minutes={interval_minutes})")
         # Immediate refresh so a fresh deploy updates the snapshot right away
         # instead of waiting a full interval.
         asyncio.create_task(_scheduled_refresh())
+        asyncio.create_task(_scheduled_daily_model())
     else:
         _log.info("snapshot_scheduler_disabled (SNAPSHOT_SCHEDULER_ENABLED=false)")
 
