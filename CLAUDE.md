@@ -170,6 +170,22 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   informative-post water rules at Alert: any-flood precision 0.70. Siaga/Bahaya stay with the water-level rules; the
   model stays capped at Waspada.
 
+- Decision-layer experiments (2026-11-17, `scripts/decision_layer_experiments.py`, `artifacts/reports/decision_layer_experiments.md`;
+  lag 1, test 2019-2021 + 2025, nothing served). (1) Today's rain so far (IMERG half-hours that started by H-5 h) + the hour:
+  ROC-AUC 0.786 vs 0.775 (CI of the difference [-0.01, 0.033]) but Siaga recall 0.174 -> 0.22 ([0.006, 0.085]) and Bahaya
+  0.082 -> 0.117 ([0.01, 0.064]) at higher precision (0.74 -> 0.76, 0.77 -> 0.84), and fewer Waspada (44 % -> 36 % of
+  snapshots, precision 0.38 -> 0.43). (2) One status per wilayah: a layer with the wilayah's highest kecamatan chance and its
+  own river posts beats the city level copied to every wilayah: ROC-AUC 0.803 vs 0.762 ([0.026, 0.057]); Siaga recall +0.04-0.12
+  and precision +0.05-0.14, Bahaya both better; more Waspada. (3) Ablation: the daily model matters most (ROC-AUC -0.02 to
+  -0.05 without it), upstream posts a little, yesterday's posts not significantly; the served chance runs low in the 10-40 %
+  range (mean 0.14 -> 0.27 observed; ECE 0.075, 0.17-0.18 in 2020 and 2025). (5) Lead time, 46 flood days 2020-2021 with BPBD
+  + news (first report ~12:00 WIB median): Waspada before the first report on 85 % (learned, median 16.7 h) vs 83 % (rules,
+  13.1 h); Siaga 30 % vs 22 % (CI [-0.022, 0.217]). Snapshot spacing is 5-7 h, so leads are coarse.
+- Live validation (`scripts/live_validation.py`, `artifacts/reports/live_validation.md`): replays the 15-minute history rows
+  through the served code and compares each day's highest level with news-reported floods
+  (`fetch_news_flood_days.py --start 2026-11 --end <month> --out data/processed/news_flood_reports_2026.csv`). 5-17 Nov 2026:
+  no flood reported; Waspada on 7 days (learned) and 7 (rules), not the same days. Re-run monthly through the season.
+
 ## Resolved
 - 2026-11-17: learned decision layer (supervisor: the 10 hand-written layers were too simple). `scripts/train_decision_layer.py`
   builds city snapshots at 06/12/18/23 WIB from the raw DSDA readings 2016-2021 (latest reading of the 3 h before) and the

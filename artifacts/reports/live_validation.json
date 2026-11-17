@@ -1,0 +1,203 @@
+{
+  "generated_utc": "2026-11-17T13:15:43+00:00",
+  "period": [
+    "2026-11-05",
+    "2026-11-17"
+  ],
+  "days": 13,
+  "flood_days": [],
+  "snapshot_share": {
+    "learned": {
+      "Aman": 0.603,
+      "Waspada": 0.396,
+      "Siaga": 0.0,
+      "Bahaya": 0.001
+    },
+    "rules": {
+      "Aman": 0.577,
+      "Waspada": 0.422,
+      "Siaga": 0.0,
+      "Bahaya": 0.001
+    }
+  },
+  "per_day": {
+    "2026-11-05": {
+      "learned": "SAFE",
+      "rules": "SAFE",
+      "snapshots": 63,
+      "by_layer": 0,
+      "chance_max": null,
+      "daily_p": 0.0889,
+      "lag": 1,
+      "flood_reported": false
+    },
+    "2026-11-06": {
+      "learned": "SAFE",
+      "rules": "PRE_ALERT",
+      "snapshots": 97,
+      "by_layer": 97,
+      "chance_max": 0.155,
+      "daily_p": 0.2056,
+      "lag": 1,
+      "flood_reported": false
+    },
+    "2026-11-07": {
+      "learned": "SAFE",
+      "rules": "PRE_ALERT",
+      "snapshots": 96,
+      "by_layer": 96,
+      "chance_max": 0.155,
+      "daily_p": 0.1351,
+      "lag": 1,
+      "flood_reported": false
+    },
+    "2026-11-08": {
+      "learned": "SAFE",
+      "rules": "SAFE",
+      "snapshots": 96,
+      "by_layer": 96,
+      "chance_max": 0.155,
+      "daily_p": 0.0889,
+      "lag": 1,
+      "flood_reported": false
+    },
+    "2026-11-09": {
+      "learned": "PRE_ALERT",
+      "rules": "PRE_ALERT",
+      "snapshots": 96,
+      "by_layer": 96,
+      "chance_max": 0.299,
+      "daily_p": 0.1212,
+      "lag": 1,
+      "flood_reported": false
+    },
+    "2026-11-10": {
+      "learned": "PRE_ALERT",
+      "rules": "PRE_ALERT",
+      "snapshots": 96,
+      "by_layer": 96,
+      "chance_max": 0.506,
+      "daily_p": 0.1351,
+      "lag": 1,
+      "flood_reported": false
+    },
+    "2026-11-11": {
+      "learned": "PRE_ALERT",
+      "rules": "SAFE",
+      "snapshots": 94,
+      "by_layer": 94,
+      "chance_max": 0.215,
+      "daily_p": 0.0613,
+      "lag": 1,
+      "flood_reported": false
+    },
+    "2026-11-12": {
+      "learned": "DANGER",
+      "rules": "DANGER",
+      "snapshots": 96,
+      "by_layer": 96,
+      "chance_max": 0.441,
+      "daily_p": 0.0613,
+      "lag": 1,
+      "flood_reported": false
+    },
+    "2026-11-13": {
+      "learned": "PRE_ALERT",
+      "rules": "PRE_ALERT",
+      "snapshots": 97,
+      "by_layer": 97,
+      "chance_max": 0.541,
+      "daily_p": 0.1351,
+      "lag": 1,
+      "flood_reported": false
+    },
+    "2026-11-14": {
+      "learned": "PRE_ALERT",
+      "rules": "SAFE",
+      "snapshots": 96,
+      "by_layer": 96,
+      "chance_max": 0.229,
+      "daily_p": 0.0836,
+      "lag": 1,
+      "flood_reported": false
+    },
+    "2026-11-15": {
+      "learned": "SAFE",
+      "rules": "SAFE",
+      "snapshots": 96,
+      "by_layer": 96,
+      "chance_max": 0.144,
+      "daily_p": 0.0676,
+      "lag": 1,
+      "flood_reported": false
+    },
+    "2026-11-16": {
+      "learned": "SAFE",
+      "rules": "PRE_ALERT",
+      "snapshots": 96,
+      "by_layer": 96,
+      "chance_max": 0.205,
+      "daily_p": 0.0613,
+      "lag": 1,
+      "flood_reported": false
+    },
+    "2026-11-17": {
+      "learned": "PRE_ALERT",
+      "rules": "SAFE",
+      "snapshots": 82,
+      "by_layer": 82,
+      "chance_max": 0.394,
+      "daily_p": 0.0706,
+      "lag": 1,
+      "flood_reported": false
+    }
+  },
+  "by_level": {
+    "learned": {
+      "Waspada": {
+        "warning_days": 7,
+        "flood_days": 0,
+        "warned_flood_days": 0,
+        "warned_days_without_report": 7,
+        "missed_flood_days": 0
+      },
+      "Siaga": {
+        "warning_days": 1,
+        "flood_days": 0,
+        "warned_flood_days": 0,
+        "warned_days_without_report": 1,
+        "missed_flood_days": 0
+      },
+      "Bahaya": {
+        "warning_days": 1,
+        "flood_days": 0,
+        "warned_flood_days": 0,
+        "warned_days_without_report": 1,
+        "missed_flood_days": 0
+      }
+    },
+    "rules": {
+      "Waspada": {
+        "warning_days": 7,
+        "flood_days": 0,
+        "warned_flood_days": 0,
+        "warned_days_without_report": 7,
+        "missed_flood_days": 0
+      },
+      "Siaga": {
+        "warning_days": 1,
+        "flood_days": 0,
+        "warned_flood_days": 0,
+        "warned_days_without_report": 1,
+        "missed_flood_days": 0
+      },
+      "Bahaya": {
+        "warning_days": 1,
+        "flood_days": 0,
+        "warned_flood_days": 0,
+        "warned_days_without_report": 1,
+        "missed_flood_days": 0
+      }
+    }
+  }
+}
