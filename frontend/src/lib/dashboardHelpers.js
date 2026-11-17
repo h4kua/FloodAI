@@ -117,10 +117,16 @@ export function stationKecamatan(nama) {
 
 /* ── Risk helpers ──────────────────────────────────────── */
 export function riskClass(rl) {
-  if (rl === "SIAGA_1") return "s1";
-  if (rl === "SIAGA_2") return "s2";
+  if (rl === "SIAGA_1" || rl === "BAHAYA") return "s1";
+  if (rl === "SIAGA_2" || rl === "SIAGA") return "s2";
   if (rl === "WASPADA") return "wsp";
   return "ok";
+}
+
+/* The decision layers' levels (backend SAFE / PRE_ALERT / WARNING / DANGER) as badge levels. */
+const MODEL_LEVEL = { SAFE: "AMAN", PRE_ALERT: "WASPADA", WARNING: "SIAGA", DANGER: "BAHAYA" };
+export function wilayahModelLevel(level) {
+  return MODEL_LEVEL[level] ?? "AMAN";
 }
 
 /* ── Station helpers ───────────────────────────────────── */

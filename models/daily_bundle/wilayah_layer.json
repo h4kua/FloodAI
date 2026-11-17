@@ -1,0 +1,216 @@
+{
+  "version": "20261117",
+  "kind": "xgb_monotone",
+  "features": [
+    "p",
+    "w_max_now",
+    "w_frac1_now",
+    "w_frac2_now",
+    "w_upstream_now",
+    "w_manggarai_now",
+    "w_max_d1",
+    "w_frac1_d1",
+    "w_frac2_d1",
+    "w_upstream_d1",
+    "w_manggarai_d1",
+    "today_mean",
+    "today_max",
+    "today_bogor",
+    "hour",
+    "p_w",
+    "local_now",
+    "local_d1",
+    "is_barat",
+    "is_pusat",
+    "is_selatan",
+    "is_timur",
+    "is_utara"
+  ],
+  "wilayah": [
+    "jakarta barat",
+    "jakarta pusat",
+    "jakarta selatan",
+    "jakarta timur",
+    "jakarta utara"
+  ],
+  "kecamatan_wilayah": {
+    "cakung": "jakarta timur",
+    "cempakaputih": "jakarta pusat",
+    "cengkareng": "jakarta barat",
+    "cilandak": "jakarta selatan",
+    "cilincing": "jakarta utara",
+    "cipayung": "jakarta timur",
+    "ciracas": "jakarta timur",
+    "durensawit": "jakarta timur",
+    "gambir": "jakarta pusat",
+    "grogolpetamburan": "jakarta barat",
+    "jagakarsa": "jakarta selatan",
+    "jatinegara": "jakarta timur",
+    "joharbaru": "jakarta pusat",
+    "kalideres": "jakarta barat",
+    "kebayoranbaru": "jakarta selatan",
+    "kebayoranlama": "jakarta selatan",
+    "kebonjeruk": "jakarta barat",
+    "kelapagading": "jakarta utara",
+    "kemayoran": "jakarta pusat",
+    "kembangan": "jakarta barat",
+    "koja": "jakarta utara",
+    "kramatjati": "jakarta timur",
+    "makasar": "jakarta timur",
+    "mampangprapatan": "jakarta selatan",
+    "matraman": "jakarta timur",
+    "menteng": "jakarta pusat",
+    "pademangan": "jakarta utara",
+    "palmerah": "jakarta barat",
+    "pancoran": "jakarta selatan",
+    "pasarminggu": "jakarta selatan",
+    "pasarrebo": "jakarta timur",
+    "penjaringan": "jakarta utara",
+    "pesanggrahan": "jakarta selatan",
+    "pulogadung": "jakarta timur",
+    "sawahbesar": "jakarta pusat",
+    "senen": "jakarta pusat",
+    "setiabudi": "jakarta selatan",
+    "tamansari": "jakarta barat",
+    "tambora": "jakarta barat",
+    "tanahabang": "jakarta pusat",
+    "tanjungpriok": "jakarta utara",
+    "tebet": "jakarta selatan"
+  },
+  "post_wilayah": {
+    "CIDENG": "jakarta pusat",
+    "KARET": "jakarta pusat",
+    "KALIDURI": "jakarta barat",
+    "ANGKEHULU": "jakarta barat",
+    "KRUKUTHULU": "jakarta selatan",
+    "MANGGARAI": "jakarta selatan",
+    "PESANGGRAHAN": "jakarta selatan",
+    "PULOGADUNG": "jakarta timur",
+    "SUNTERHULU": "jakarta timur",
+    "PLUIT": "jakarta utara",
+    "YOSSUDARSO": "jakarta utara"
+  },
+  "upstream_posts": [
+    "CIBALOKGADOG",
+    "DEPOK",
+    "KATULAMPA"
+  ],
+  "frequent": {
+    "jakarta barat": [
+      {
+        "kecamatan": "cengkareng",
+        "name": "Cengkareng",
+        "flood_days": 222
+      },
+      {
+        "kecamatan": "kebonjeruk",
+        "name": "Kebon Jeruk",
+        "flood_days": 210
+      },
+      {
+        "kecamatan": "kalideres",
+        "name": "Kalideres",
+        "flood_days": 186
+      }
+    ],
+    "jakarta pusat": [
+      {
+        "kecamatan": "tanahabang",
+        "name": "Tanah Abang",
+        "flood_days": 65
+      },
+      {
+        "kecamatan": "kemayoran",
+        "name": "Kemayoran",
+        "flood_days": 25
+      },
+      {
+        "kecamatan": "gambir",
+        "name": "Gambir",
+        "flood_days": 15
+      }
+    ],
+    "jakarta selatan": [
+      {
+        "kecamatan": "pasarminggu",
+        "name": "Pasar Minggu",
+        "flood_days": 308
+      },
+      {
+        "kecamatan": "pancoran",
+        "name": "Pancoran",
+        "flood_days": 211
+      },
+      {
+        "kecamatan": "tebet",
+        "name": "Tebet",
+        "flood_days": 187
+      }
+    ],
+    "jakarta timur": [
+      {
+        "kecamatan": "jatinegara",
+        "name": "Jatinegara",
+        "flood_days": 412
+      },
+      {
+        "kecamatan": "kramatjati",
+        "name": "Kramat Jati",
+        "flood_days": 365
+      },
+      {
+        "kecamatan": "makasar",
+        "name": "Makasar",
+        "flood_days": 171
+      }
+    ],
+    "jakarta utara": [
+      {
+        "kecamatan": "penjaringan",
+        "name": "Penjaringan",
+        "flood_days": 307
+      },
+      {
+        "kecamatan": "cilincing",
+        "name": "Cilincing",
+        "flood_days": 150
+      },
+      {
+        "kecamatan": "tanjungpriok",
+        "name": "Tanjung Priok",
+        "flood_days": 61
+      }
+    ]
+  },
+  "frequent_period": "BPBD flood days 2013-2025 (2023-2025 partly readable)",
+  "label": "BPBD flood in one of the wilayah's kecamatan that day",
+  "lags": {
+    "1": {
+      "model_file": "wilayah_layer_lag1.json",
+      "train_rows": 21510,
+      "thresholds": {
+        "PRE_ALERT": 0.20148,
+        "WARNING": 0.64573,
+        "DANGER": 0.79996
+      }
+    },
+    "2": {
+      "model_file": "wilayah_layer_lag2.json",
+      "train_rows": 21510,
+      "thresholds": {
+        "PRE_ALERT": 0.21218,
+        "WARNING": 0.64613,
+        "DANGER": 0.80498
+      }
+    },
+    "3": {
+      "model_file": "wilayah_layer_lag3.json",
+      "train_rows": 21510,
+      "thresholds": {
+        "PRE_ALERT": 0.20842,
+        "WARNING": 0.65572,
+        "DANGER": 0.80653
+      }
+    }
+  }
+}

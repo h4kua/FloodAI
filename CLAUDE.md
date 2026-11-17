@@ -37,8 +37,8 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (669, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (33: flood roads, shelter ranking,
-  post levels, weather per wilayah, daily model card, learned-layer status sentence)
+- Tests: `tests/` (670, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (34: flood roads, shelter ranking,
+  post levels, weather per wilayah, daily model card, learned-layer status sentence, wilayah levels)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
 
@@ -187,6 +187,17 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   no flood reported; Waspada on 7 days (learned) and 7 (rules), not the same days. Re-run monthly through the season.
 
 ## Resolved
+- 2026-11-17: status per wilayah (`scripts/train_wilayah_layer.py`, `artifacts/reports/wilayah_layer.md`, `models/daily_bundle/wilayah_layer*.json`,
+  `decision_layer.decide_wilayah`, API field `wilayah_status`). Inputs: the city layer's + the kota's highest kecamatan chance
+  + its own river posts now / yesterday (`posts_d1` in the daily state) + which kota; a kota or upstream post at Siaga 1 -> Bahaya
+  there. It does not change the city status. Served thresholds = the city layer's chance thresholds (same meaning everywhere);
+  volume-matched thresholds (6 % Waspada, 38 % Bahaya) put South Jakarta at Bahaya on calm November days and were dropped.
+  Test lag 1 (2019-2021 + 2025) vs the city level copied to every kota: ROC-AUC 0.817 vs 0.779 (CI [0.026, 0.051]); precision
+  Waspada 0.36 vs 0.18, Siaga 0.67 vs 0.38, Bahaya 0.67 vs 0.48, but recall lower (Siaga 0.14 vs 0.29) and Waspada on 12 % vs
+  36 % of kota-snapshots. Live replay 6-17 Nov: Selatan Waspada 22 %, Timur 11 %, others <= 3 %. Beranda `WilayahStatus`: each
+  kota's level and chance; tap for its posts, the riskiest kecamatan, what raised it and the kecamatan BPBD recorded flooded
+  most often (2013-2025); falls back to the worst post without the layer. About page rewritten for the daily model, the
+  learned layers, the safety rules and the year-by-year test figures.
 - 2026-11-17: the learned decision layer also reads today's rain so far: IMERG Early half-hours that started by now - 5 h
   (mean and max over the model's kecamatan cells, Bogor), plus the WIB hour (the only input not monotone). `daily_model.refresh()`
   keeps today's half-hours per cell in the state (`today_halfhours`); without them the rules decide. Lag 1, test 2019-2021 +

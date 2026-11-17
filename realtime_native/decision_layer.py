@@ -5,9 +5,15 @@ scripts/train_decision_layer.py; report artifacts/reports/decision_layer.md).
 It reads what the site sees right now: the daily kecamatan model's city probability, the 14 fixed river
 posts now (highest Siaga status, share at Siaga 3+ / 2+, upstream, Manggarai), the same posts
 yesterday, and today's rain so far (IMERG Early half-hours that started by now - 5 h, as in training:
-mean and max over the model's kecamatan cells, Bogor upstream) with the WIB hour. A small XGBoost model per rain lag (depth 2, every input monotone increasing: a higher
-post status or chance can never lower the risk) gives the chance that BPBD records a flood in
-Jakarta today; three thresholds learned from 2016-2025 turn it into Waspada / Siaga / Bahaya.
+mean and max over the model's kecamatan cells, Bogor upstream) with the WIB hour. A small XGBoost
+model per rain lag (depth 2, inputs monotone increasing except the hour: a higher post status, chance
+or rain can never lower the risk) gives the chance that BPBD records a flood in Jakarta today; three
+thresholds learned from 2016-2025 turn it into Waspada / Siaga / Bahaya.
+
+decide_wilayah() gives the same for each of the five kota (models/daily_bundle/wilayah_layer*.json,
+scripts/train_wilayah_layer.py): the city inputs plus the kota's highest kecamatan chance and its own
+river posts now and yesterday; a post of the kota or upstream at Siaga 1 makes that kota Bahaya. It
+does not change the city status. WILAYAH_DECISION_ENABLED=false switches it off.
 
 In the decision engine it replaces the hand-written middle layers; the safety rules in front of it stay
 (L0 invalid data, L1 Siaga 1 / rapid rise, L1.7 BMKG severe), and the engine falls back to the full rule
@@ -30,6 +36,7 @@ from realtime_native import daily_features as dfe
 
 BUNDLE_DIR = Path(__file__).resolve().parents[1] / "models" / "daily_bundle"
 LAYER_PATH = BUNDLE_DIR / "decision_layer.json"
+WILAYAH_PATH = BUNDLE_DIR / "wilayah_layer.json"
 LEVEL_ORDER = ("DANGER", "WARNING", "PRE_ALERT")
 STATUS_NAMES = {0: "Normal", 1: "Siaga 3", 2: "Siaga 2", 3: "Siaga 1"}
 
@@ -38,16 +45,30 @@ def enabled() -> bool:
     return os.getenv("LEARNED_DECISION_ENABLED", "true").strip().lower() == "true" and LAYER_PATH.exists()
 
 
-@lru_cache(maxsize=1)
-def load() -> dict:
+def wilayah_enabled() -> bool:
+    return (os.getenv("WILAYAH_DECISION_ENABLED", "true").strip().lower() == "true" and WILAYAH_PATH.exists()
+            and LAYER_PATH.exists())
+
+
+def _load(path: Path) -> dict:
     from xgboost import Booster
 
-    layer = json.loads(LAYER_PATH.read_text(encoding="utf-8"))
+    layer = json.loads(path.read_text(encoding="utf-8"))
     for spec in layer["lags"].values():
         booster = Booster()
         booster.load_model(str(BUNDLE_DIR / spec["model_file"]))
         spec["booster"] = booster
     return layer
+
+
+@lru_cache(maxsize=1)
+def load() -> dict:
+    return _load(LAYER_PATH)
+
+
+@lru_cache(maxsize=1)
+def load_wilayah() -> dict:
+    return _load(WILAYAH_PATH)
 
 
 def water_now(posts: list[dict] | None) -> dict | None:
@@ -105,31 +126,89 @@ def today_features(daily: dict, now=None) -> dict | None:
             "hour": float(hour)}
 
 
+def city_features(daily: dict, posts: list[dict] | None, now=None) -> dict | None:
+    """The city layer's inputs for this snapshot, or None when one is missing (the rules then decide)."""
+    posts_now = water_now(posts)
+    d1 = daily.get("water_d1") or {}
+    if posts_now is None or _clean(d1.get("w_max")) is None:
+        return None  # fewer than 8 river posts now, or no river-post day for yesterday
+    today = today_features(daily, now)
+    if today is None:
+        return None  # no rain half-hours for today
+    # A single missing post reading counts as normal (as in training): a data gap never raises the risk.
+    return {"p": float(daily["city_probability"]),
+            **{f"{c}_now": posts_now.get(c) or 0.0 for c in dfe.WATER_DAY},
+            **{f"{c}_d1": _clean(d1.get(c)) or 0.0 for c in dfe.WATER_DAY},
+            **today}
+
+
+def _level(chance: float, thr: dict) -> str:
+    return next((lvl for lvl in LEVEL_ORDER if thr.get(lvl) is not None and chance >= thr[lvl]), "SAFE")
+
+
 def decide(daily: dict | None, posts: list[dict] | None, now=None) -> dict | None:
     """The layer's level for this snapshot, or None when it cannot decide (the rules then do)."""
     if not enabled() or not daily:
         return None
     layer = load()
     spec = layer["lags"].get(str(daily.get("lag_days")))
-    posts_now = water_now(posts)
-    if spec is None or posts_now is None:
+    features = city_features(daily, posts, now) if spec is not None else None
+    if features is None:
         return None
-    d1 = daily.get("water_d1") or {}
-    if _clean(d1.get("w_max")) is None:
-        return None  # no river-post day for yesterday: the rules decide
-    today = today_features(daily, now)
-    if today is None and any(f in layer["features"] for f in ("today_mean", "hour")):
-        return None  # no rain half-hours for today: the rules decide
-    # A single missing post reading counts as normal (as in training): a data gap never raises the risk.
-    features = {"p": float(daily["city_probability"]),
-                **{f"{c}_now": posts_now.get(c) or 0.0 for c in dfe.WATER_DAY},
-                **{f"{c}_d1": _clean(d1.get(c)) or 0.0 for c in dfe.WATER_DAY},
-                **(today or {})}
     chance, push = score(spec, features, layer["features"])
     thr = spec["thresholds"]
-    level = next((lvl for lvl in LEVEL_ORDER if thr.get(lvl) is not None and chance >= thr[lvl]), "SAFE")
     return {"version": layer["version"], "kind": layer["kind"], "lag_days": daily.get("lag_days"),
-            "risk_level": level, "score": round(chance, 4), "thresholds": thr, "features": features, "push": push}
+            "risk_level": _level(chance, thr), "score": round(chance, 4), "thresholds": thr, "features": features,
+            "push": push}
+
+
+def _post_statuses(posts: list[dict] | None) -> dict[str, float]:
+    out = {}
+    for p in posts or []:
+        if not isinstance(p, dict):
+            continue
+        key, status = dfe.post_key(p.get("nama_pintu_air")), dfe.status_level(p.get("status_siaga"))
+        if key in dfe.RIVER_POSTS and not math.isnan(status):
+            out[key] = max(out.get(key, 0.0), status)
+    return out
+
+
+def decide_wilayah(daily: dict | None, posts: list[dict] | None, now=None) -> dict | None:
+    """Level per kota ("Jakarta Barat", ...), or None when the layer cannot decide."""
+    if not wilayah_enabled() or not daily:
+        return None
+    layer = load_wilayah()
+    spec = layer["lags"].get(str(daily.get("lag_days")))
+    base = city_features(daily, posts, now) if spec is not None else None
+    kec = daily.get("kecamatan") or {}
+    if base is None or not kec:
+        return None
+    statuses, d1 = _post_statuses(posts), daily.get("posts_d1") or {}
+    upstream = max((statuses.get(p, 0.0) for p in layer["upstream_posts"]), default=0.0)
+    out = {}
+    for name in layer["wilayah"]:
+        kecs = [k for k, w in layer["kecamatan_wilayah"].items() if w == name and k in kec]
+        local = [p for p, w in layer["post_wilayah"].items() if w == name]
+        if not kecs:
+            continue
+        top = max(kecs, key=lambda k: kec[k]["probability"])
+        local_now = max((statuses[p] for p in local if p in statuses), default=0.0)
+        features = {**base, "p_w": float(kec[top]["probability"]), "local_now": local_now,
+                    "local_d1": max((float(d1[p]) for p in local if p in d1), default=0.0),
+                    **{f"is_{w.split()[1]}": int(w == name) for w in layer["wilayah"]}}
+        chance, push = score(spec, features, layer["features"])
+        level = _level(chance, spec["thresholds"])
+        siaga1 = local_now >= 3 or upstream >= 3
+        out[name.title()] = {
+            "risk_level": "DANGER" if siaga1 else level, "score": round(chance, 4), "siaga1_rule": bool(siaga1),
+            "top_kecamatan": {"name": kec[top]["name"], "probability": kec[top]["probability"]},
+            "reasons": [_feature_text(n, features.get(n), False) for n, c in sorted(push.items(), key=lambda kv: -kv[1])
+                        if c > 0.05 and n != "hour" and not n.startswith("is_")][:3],
+            "reasons_en": [_feature_text(n, features.get(n), True) for n, c in sorted(push.items(), key=lambda kv: -kv[1])
+                           if c > 0.05 and n != "hour" and not n.startswith("is_")][:3],
+            "frequent": layer["frequent"].get(name, [])}
+    return {"version": layer["version"], "lag_days": daily.get("lag_days"), "thresholds": spec["thresholds"],
+            "frequent_period": layer.get("frequent_period"), "wilayah": out}
 
 
 # ---------------------------------------------------------------- plain language
@@ -157,6 +236,12 @@ def _feature_text(name: str, value, en: bool) -> str:
         return f"rain so far today up to {value:.0f} mm" if en else f"hujan hari ini sejauh ini hingga {value:.0f} mm"
     if name == "today_bogor":
         return f"rain in Bogor so far today {value:.0f} mm" if en else f"hujan di Bogor hari ini {value:.0f} mm"
+    if name == "p_w":
+        return f"highest kecamatan chance {value * 100:.0f}%" if en else f"peluang kecamatan tertinggi {value * 100:.0f}%"
+    if name == "local_now":
+        return f"its river posts now {status}" if en else f"pos sungai di wilayah ini sekarang {status}"
+    if name == "local_d1":
+        return f"its river posts yesterday {status}" if en else f"pos sungai di wilayah ini kemarin {status}"
     return name
 
 

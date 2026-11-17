@@ -153,3 +153,31 @@ def test_interpretation_says_what_the_layer_saw():
     assert text.startswith("Siaga.") and "peluang banjir hari ini 64%" in text and "21% pos sungai di Siaga 2" in text
     assert _risk_interpretation("WARNING", {}, lang="en", learned=learned).startswith("Alert.")
     assert "model keputusan" not in _risk_interpretation("WARNING", {})
+
+
+def test_wilayah_status_per_kota():
+    from realtime_native import daily_model
+
+    if not decision_layer.WILAYAH_PATH.exists():
+        pytest.skip("wilayah_layer.json not built")
+    bundle = daily_model.load_bundle()
+    kec = {k: {"name": v["name"], "probability": 0.01} for k, v in bundle["kecamatan"].items()}
+    river = sorted(dfe.RIVER_POSTS)
+    calm = {p: "Normal" for p in river}
+    daily = {**_daily(), "kecamatan": kec, "posts_d1": {}}
+    out = decision_layer.decide_wilayah(daily, _posts(calm), now=NOON)
+    assert set(out["wilayah"]) == {"Jakarta Barat", "Jakarta Pusat", "Jakarta Selatan", "Jakarta Timur", "Jakarta Utara"}
+    assert all(w["frequent"] for w in out["wilayah"].values())
+    east = out["wilayah"]["Jakarta Timur"]
+    # A higher chance in an East Jakarta kecamatan raises East Jakarta's score, never lowers it.
+    jatinegara = next(k for k, v in bundle["kecamatan"].items() if v["name"] == "Jatinegara")
+    wet = decision_layer.decide_wilayah({**daily, "kecamatan": {**kec, jatinegara: {"name": "Jatinegara", "probability": 0.3}}},
+                                        _posts(calm), now=NOON)["wilayah"]["Jakarta Timur"]
+    assert wet["score"] >= east["score"] and wet["top_kecamatan"]["name"] == "Jatinegara"
+    # A Manggarai (South Jakarta) post at Siaga 1 makes South Jakarta Bahaya, not the other kota.
+    hit = decision_layer.decide_wilayah(daily, _posts({**calm, "MANGGARAI": "Siaga 1"}), now=NOON)["wilayah"]
+    assert hit["Jakarta Selatan"]["risk_level"] == "DANGER" and hit["Jakarta Selatan"]["siaga1_rule"]
+    assert not hit["Jakarta Utara"]["siaga1_rule"]
+    assert decision_layer.decide_wilayah({**daily, "kecamatan": {}}, _posts(calm), now=NOON) is None
+    # A level means the same flood chance for a kota as for Jakarta.
+    assert out["thresholds"] == decision_layer.load()["lags"]["1"]["thresholds"]

@@ -1,0 +1,554 @@
+{
+  "generated_utc": "2026-11-17T14:01:11+00:00",
+  "device": "cuda",
+  "bootstrap": 1000,
+  "features": [
+    "p",
+    "w_max_now",
+    "w_frac1_now",
+    "w_frac2_now",
+    "w_upstream_now",
+    "w_manggarai_now",
+    "w_max_d1",
+    "w_frac1_d1",
+    "w_frac2_d1",
+    "w_upstream_d1",
+    "w_manggarai_d1",
+    "today_mean",
+    "today_max",
+    "today_bogor",
+    "hour",
+    "p_w",
+    "local_now",
+    "local_d1",
+    "is_barat",
+    "is_pusat",
+    "is_selatan",
+    "is_timur",
+    "is_utara"
+  ],
+  "frequent": {
+    "jakarta barat": [
+      {
+        "kecamatan": "cengkareng",
+        "name": "Cengkareng",
+        "flood_days": 222
+      },
+      {
+        "kecamatan": "kebonjeruk",
+        "name": "Kebon Jeruk",
+        "flood_days": 210
+      },
+      {
+        "kecamatan": "kalideres",
+        "name": "Kalideres",
+        "flood_days": 186
+      }
+    ],
+    "jakarta pusat": [
+      {
+        "kecamatan": "tanahabang",
+        "name": "Tanah Abang",
+        "flood_days": 65
+      },
+      {
+        "kecamatan": "kemayoran",
+        "name": "Kemayoran",
+        "flood_days": 25
+      },
+      {
+        "kecamatan": "gambir",
+        "name": "Gambir",
+        "flood_days": 15
+      }
+    ],
+    "jakarta selatan": [
+      {
+        "kecamatan": "pasarminggu",
+        "name": "Pasar Minggu",
+        "flood_days": 308
+      },
+      {
+        "kecamatan": "pancoran",
+        "name": "Pancoran",
+        "flood_days": 211
+      },
+      {
+        "kecamatan": "tebet",
+        "name": "Tebet",
+        "flood_days": 187
+      }
+    ],
+    "jakarta timur": [
+      {
+        "kecamatan": "jatinegara",
+        "name": "Jatinegara",
+        "flood_days": 412
+      },
+      {
+        "kecamatan": "kramatjati",
+        "name": "Kramat Jati",
+        "flood_days": 365
+      },
+      {
+        "kecamatan": "makasar",
+        "name": "Makasar",
+        "flood_days": 171
+      }
+    ],
+    "jakarta utara": [
+      {
+        "kecamatan": "penjaringan",
+        "name": "Penjaringan",
+        "flood_days": 307
+      },
+      {
+        "kecamatan": "cilincing",
+        "name": "Cilincing",
+        "flood_days": 150
+      },
+      {
+        "kecamatan": "tanjungpriok",
+        "name": "Tanjung Priok",
+        "flood_days": 61
+      }
+    ]
+  },
+  "test_lag1": {
+    "rows": 15450,
+    "flood_share": 0.084,
+    "city": {
+      "roc_auc": [
+        0.779,
+        0.742,
+        0.81
+      ],
+      "levels": {
+        "Waspada": {
+          "alarm_share": 0.359,
+          "recall": 0.755,
+          "precision": 0.178
+        },
+        "Siaga": {
+          "alarm_share": 0.064,
+          "recall": 0.285,
+          "precision": 0.376
+        },
+        "Bahaya": {
+          "alarm_share": 0.031,
+          "recall": 0.174,
+          "precision": 0.478
+        }
+      }
+    },
+    "wilayah": {
+      "roc_auc": [
+        0.817,
+        0.786,
+        0.845
+      ],
+      "roc_auc_minus_base": [
+        0.026,
+        0.051
+      ],
+      "levels": {
+        "Waspada": {
+          "alarm_share": 0.124,
+          "recall": 0.525,
+          "precision": 0.357
+        },
+        "Siaga": {
+          "alarm_share": 0.018,
+          "recall": 0.144,
+          "precision": 0.667
+        },
+        "Bahaya": {
+          "alarm_share": 0.011,
+          "recall": 0.085,
+          "precision": 0.673
+        }
+      },
+      "levels_minus_base": {
+        "Waspada": {
+          "recall": [
+            -0.269,
+            -0.193
+          ],
+          "precision": [
+            0.149,
+            0.208
+          ]
+        },
+        "Siaga": {
+          "recall": [
+            -0.183,
+            -0.1
+          ],
+          "precision": [
+            0.204,
+            0.375
+          ]
+        },
+        "Bahaya": {
+          "recall": [
+            -0.124,
+            -0.057
+          ],
+          "precision": [
+            0.1,
+            0.282
+          ]
+        }
+      }
+    },
+    "wilayah_volume_matched": {
+      "roc_auc": [
+        0.817,
+        0.786,
+        0.845
+      ],
+      "roc_auc_minus_base": [
+        0.026,
+        0.051
+      ],
+      "levels": {
+        "Waspada": {
+          "alarm_share": 0.467,
+          "recall": 0.853,
+          "precision": 0.154
+        },
+        "Siaga": {
+          "alarm_share": 0.073,
+          "recall": 0.383,
+          "precision": 0.441
+        },
+        "Bahaya": {
+          "alarm_share": 0.036,
+          "recall": 0.241,
+          "precision": 0.57
+        }
+      },
+      "levels_minus_base": {
+        "Waspada": {
+          "recall": [
+            0.065,
+            0.136
+          ],
+          "precision": [
+            -0.033,
+            -0.014
+          ]
+        },
+        "Siaga": {
+          "recall": [
+            0.066,
+            0.131
+          ],
+          "precision": [
+            0.02,
+            0.105
+          ]
+        },
+        "Bahaya": {
+          "recall": [
+            0.033,
+            0.103
+          ],
+          "precision": [
+            0.015,
+            0.164
+          ]
+        }
+      }
+    },
+    "per_wilayah": {
+      "jakarta barat": {
+        "flood_share": 0.091,
+        "city": {
+          "Waspada": {
+            "alarm_share": 0.359,
+            "recall": 0.748,
+            "precision": 0.19
+          },
+          "Siaga": {
+            "alarm_share": 0.064,
+            "recall": 0.294,
+            "precision": 0.419
+          },
+          "Bahaya": {
+            "alarm_share": 0.031,
+            "recall": 0.184,
+            "precision": 0.547
+          }
+        },
+        "wilayah": {
+          "Waspada": {
+            "alarm_share": 0.135,
+            "recall": 0.479,
+            "precision": 0.324
+          },
+          "Siaga": {
+            "alarm_share": 0.018,
+            "recall": 0.142,
+            "precision": 0.714
+          },
+          "Bahaya": {
+            "alarm_share": 0.011,
+            "recall": 0.078,
+            "precision": 0.647
+          }
+        },
+        "wilayah_volume_matched": {
+          "Waspada": {
+            "alarm_share": 0.556,
+            "recall": 0.855,
+            "precision": 0.14
+          },
+          "Siaga": {
+            "alarm_share": 0.081,
+            "recall": 0.344,
+            "precision": 0.39
+          },
+          "Bahaya": {
+            "alarm_share": 0.038,
+            "recall": 0.238,
+            "precision": 0.573
+          }
+        }
+      },
+      "jakarta pusat": {
+        "flood_share": 0.016,
+        "city": {
+          "Waspada": {
+            "alarm_share": 0.359,
+            "recall": 0.84,
+            "precision": 0.038
+          },
+          "Siaga": {
+            "alarm_share": 0.064,
+            "recall": 0.52,
+            "precision": 0.131
+          },
+          "Bahaya": {
+            "alarm_share": 0.031,
+            "recall": 0.42,
+            "precision": 0.221
+          }
+        },
+        "wilayah": {
+          "Waspada": {
+            "alarm_share": 0.021,
+            "recall": 0.42,
+            "precision": 0.323
+          },
+          "Siaga": {
+            "alarm_share": 0.006,
+            "recall": 0.12,
+            "precision": 0.333
+          },
+          "Bahaya": {
+            "alarm_share": 0.005,
+            "recall": 0.12,
+            "precision": 0.375
+          }
+        },
+        "wilayah_volume_matched": {
+          "Waspada": {
+            "alarm_share": 0.099,
+            "recall": 0.7,
+            "precision": 0.115
+          },
+          "Siaga": {
+            "alarm_share": 0.01,
+            "recall": 0.28,
+            "precision": 0.438
+          },
+          "Bahaya": {
+            "alarm_share": 0.007,
+            "recall": 0.18,
+            "precision": 0.391
+          }
+        }
+      },
+      "jakarta selatan": {
+        "flood_share": 0.117,
+        "city": {
+          "Waspada": {
+            "alarm_share": 0.359,
+            "recall": 0.793,
+            "precision": 0.26
+          },
+          "Siaga": {
+            "alarm_share": 0.064,
+            "recall": 0.284,
+            "precision": 0.52
+          },
+          "Bahaya": {
+            "alarm_share": 0.031,
+            "recall": 0.16,
+            "precision": 0.611
+          }
+        },
+        "wilayah": {
+          "Waspada": {
+            "alarm_share": 0.179,
+            "recall": 0.606,
+            "precision": 0.399
+          },
+          "Siaga": {
+            "alarm_share": 0.026,
+            "recall": 0.163,
+            "precision": 0.728
+          },
+          "Bahaya": {
+            "alarm_share": 0.013,
+            "recall": 0.094,
+            "precision": 0.85
+          }
+        },
+        "wilayah_volume_matched": {
+          "Waspada": {
+            "alarm_share": 0.601,
+            "recall": 0.923,
+            "precision": 0.18
+          },
+          "Siaga": {
+            "alarm_share": 0.102,
+            "recall": 0.438,
+            "precision": 0.503
+          },
+          "Bahaya": {
+            "alarm_share": 0.053,
+            "recall": 0.273,
+            "precision": 0.607
+          }
+        }
+      },
+      "jakarta timur": {
+        "flood_share": 0.118,
+        "city": {
+          "Waspada": {
+            "alarm_share": 0.359,
+            "recall": 0.844,
+            "precision": 0.279
+          },
+          "Siaga": {
+            "alarm_share": 0.064,
+            "recall": 0.328,
+            "precision": 0.606
+          },
+          "Bahaya": {
+            "alarm_share": 0.031,
+            "recall": 0.186,
+            "precision": 0.716
+          }
+        },
+        "wilayah": {
+          "Waspada": {
+            "alarm_share": 0.226,
+            "recall": 0.721,
+            "precision": 0.379
+          },
+          "Siaga": {
+            "alarm_share": 0.034,
+            "recall": 0.199,
+            "precision": 0.702
+          },
+          "Bahaya": {
+            "alarm_share": 0.018,
+            "recall": 0.115,
+            "precision": 0.75
+          }
+        },
+        "wilayah_volume_matched": {
+          "Waspada": {
+            "alarm_share": 0.733,
+            "recall": 0.981,
+            "precision": 0.159
+          },
+          "Siaga": {
+            "alarm_share": 0.136,
+            "recall": 0.546,
+            "precision": 0.475
+          },
+          "Bahaya": {
+            "alarm_share": 0.065,
+            "recall": 0.339,
+            "precision": 0.617
+          }
+        }
+      },
+      "jakarta utara": {
+        "flood_share": 0.079,
+        "city": {
+          "Waspada": {
+            "alarm_share": 0.359,
+            "recall": 0.553,
+            "precision": 0.122
+          },
+          "Siaga": {
+            "alarm_share": 0.064,
+            "recall": 0.164,
+            "precision": 0.202
+          },
+          "Bahaya": {
+            "alarm_share": 0.031,
+            "recall": 0.115,
+            "precision": 0.295
+          }
+        },
+        "wilayah": {
+          "Waspada": {
+            "alarm_share": 0.061,
+            "recall": 0.184,
+            "precision": 0.238
+          },
+          "Siaga": {
+            "alarm_share": 0.007,
+            "recall": 0.041,
+            "precision": 0.435
+          },
+          "Bahaya": {
+            "alarm_share": 0.006,
+            "recall": 0.029,
+            "precision": 0.368
+          }
+        },
+        "wilayah_volume_matched": {
+          "Waspada": {
+            "alarm_share": 0.346,
+            "recall": 0.586,
+            "precision": 0.134
+          },
+          "Siaga": {
+            "alarm_share": 0.038,
+            "recall": 0.123,
+            "precision": 0.256
+          },
+          "Bahaya": {
+            "alarm_share": 0.015,
+            "recall": 0.061,
+            "precision": 0.319
+          }
+        }
+      }
+    }
+  },
+  "thresholds": {
+    "1": {
+      "PRE_ALERT": 0.20148,
+      "WARNING": 0.64573,
+      "DANGER": 0.79996
+    },
+    "2": {
+      "PRE_ALERT": 0.21218,
+      "WARNING": 0.64613,
+      "DANGER": 0.80498
+    },
+    "3": {
+      "PRE_ALERT": 0.20842,
+      "WARNING": 0.65572,
+      "DANGER": 0.80653
+    }
+  }
+}

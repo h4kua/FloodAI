@@ -604,6 +604,8 @@ def predict_realtime_native(
     if learned is not None:
         learned = {**learned, "decided": decision.override_trace.get("authority") == "L3_LEARNED"}
     learned_text = learned if learned and learned["decided"] else None
+    # One status per kota from the per-wilayah layer; the city status above is not changed by it.
+    wilayah_status = decision_layer.decide_wilayah(daily, snapshot_raw.get("poskobanjir"), now=as_of) if daily else None
 
     result = {
         "model_variant": DAILY_MODEL_VARIANT if daily is not None else "realtime_native",
@@ -655,6 +657,9 @@ def predict_realtime_native(
         # Learned decision layer: its level, score, the questions the tree asked and whether it set
         # the final level (False when a safety rule decided first); None when it could not decide.
         "decision_layer": learned,
+        # Status per kota (Jakarta Barat ...): level, flood chance, the kecamatan with today's highest chance,
+        # what raised it, and the kecamatan BPBD recorded flooded most often. None when it cannot decide.
+        "wilayah_status": wilayah_status,
     }
 
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)

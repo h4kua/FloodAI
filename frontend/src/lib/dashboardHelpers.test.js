@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { buildStatusDesc, byPostSeverity, dailyTopKecamatan, formatChance, groupStationsByWilayah, postClass, postRiskLevel } from "./dashboardHelpers.js";
+import { buildStatusDesc, byPostSeverity, dailyTopKecamatan, formatChance, groupStationsByWilayah, postClass, postRiskLevel, riskClass, wilayahModelLevel } from "./dashboardHelpers.js";
 
 test("a post's level follows the band DSDA reports, not its ratio", () => {
   // 76% of Siaga 1 used to read "Siaga 2"; DSDA puts this post in Siaga 3.
@@ -79,4 +79,13 @@ test("a level set by the learned decision layer leads with today's flood chance"
   assert.doesNotMatch(waspada, /Hujan beberapa hari/);  // the daily chance did not raise it
   const ruled = buildStatusDesc({ level: "siaga", waterLevelRatio: 0.8, decisionLayer: { ...decisionLayer, decided: false } }, true);
   assert.match(ruled, /^Air sudah 80% dari batas siaga/);
+});
+
+test("a kota's model level maps to the badge levels and colours", () => {
+  assert.equal(wilayahModelLevel("DANGER"), "BAHAYA");
+  assert.equal(wilayahModelLevel("WARNING"), "SIAGA");
+  assert.equal(wilayahModelLevel("PRE_ALERT"), "WASPADA");
+  assert.equal(wilayahModelLevel("SAFE"), "AMAN");
+  assert.equal(wilayahModelLevel(undefined), "AMAN");
+  assert.deepEqual(["BAHAYA", "SIAGA", "WASPADA", "AMAN"].map(riskClass), ["s1", "s2", "wsp", "ok"]);
 });

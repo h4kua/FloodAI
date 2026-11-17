@@ -112,11 +112,11 @@ export default function About({ riskContext = {} }) {
               label={id ? "Mengumpulkan data" : "Collecting data"}
               desc={id ? "Setiap 15 menit kami mengambil ketinggian air dari pos pantau sungai, kondisi cuaca, dan peringatan BMKG." : "Every 15 minutes we collect water levels from river monitoring posts, weather conditions, and BMKG warnings."} />
             <Step num="2"
-              label={id ? "Menghitung risiko" : "Estimating the risk"}
-              desc={id ? "Model komputer yang dilatih dengan data banjir Jakarta 2020–2024 memperkirakan seberapa besar kemungkinan banjir." : "A computer model trained on Jakarta flood records from 2020–2024 estimates how likely a flood is."} />
+              label={id ? "Menghitung peluang banjir" : "Estimating the flood chance"}
+              desc={id ? "Model harian, dilatih dengan catatan banjir BPBD 2013–2025 dan hujan satelit NASA, memperkirakan peluang banjir di tiap kecamatan hari ini dari hujan beberapa hari terakhir. Model keputusan lalu menggabungkannya dengan status pos sungai sekarang dan kemarin serta hujan hari ini, untuk Jakarta dan untuk tiap kota." : "A daily model, trained on BPBD flood records from 2013–2025 and NASA satellite rain, estimates today's flood chance in every kecamatan from the rain of the last few days. A decision model then combines it with the river posts now and yesterday and today's rain, for Jakarta and for each city."} />
             <Step num="3"
               label={id ? "Memberi tahu Anda" : "Telling you"}
-              desc={id ? "Hasilnya ditampilkan sebagai status sederhana — Aman, Waspada, Siaga, atau Bahaya — per kota dan di peta. Status tidak pernah lebih rendah dari batas siaga yang sudah dilewati pos pantau." : "The result is shown as a simple status — Safe, Watch, Alert, or Danger — per city and on the map. The status is never lower than the alert band a monitoring post has already reached."} />
+              desc={id ? "Hasilnya ditampilkan sebagai status sederhana — Aman, Waspada, Siaga, atau Bahaya — untuk Jakarta, per kota, dan di peta, lengkap dengan alasannya. Pos pantau di Siaga 1 selalu membuat status Bahaya, dan peringatan BMKG yang parah membuat status minimal Siaga." : "The result is shown as a simple status — Safe, Watch, Alert, or Danger — for Jakarta, per city and on the map, with the reason. A monitoring post at Alert 1 always makes the status Danger, and a severe BMKG warning makes it at least Alert."} />
             <Step num="4"
               label={id ? "Membantu Anda bertindak" : "Helping you act"}
               desc={id ? "Halaman Evakuasi mencari rute ke rumah Anda atau ke pengungsian terdekat: jalan hijau aman, jalan merah melewati area rawan banjir, lalu bisa dibuka di Google Maps. Di halaman Laporan, warga saling berbagi kondisi air, boleh dengan foto." : "The Evacuation page finds a route home or to the nearest shelter: green roads are clear, red roads pass flood-prone areas, and the route opens in Google Maps. On the Reports page, residents share what they see, photos included."} />
@@ -128,12 +128,12 @@ export default function About({ riskContext = {} }) {
             {(id ? [
               "Aplikasi ini alat bantu, bukan pengganti informasi resmi dari BPBD, BMKG, atau BNPB.",
               "Saat darurat, selalu ikuti arahan petugas BPBD dan Basarnas.",
-              "Data bisa terlambat jika pos pantau belum mengirim pembaruan.",
+              "Data bisa terlambat jika pos pantau belum mengirim pembaruan. Hujan satelit tiba sekitar 5 jam setelah turun.",
               "Laporan warga belum diverifikasi, tampil 6 jam, dan tidak mengubah status resmi.",
             ] : [
               "This app is an aid, not a replacement for official information from BPBD, BMKG, or BNPB.",
               "In an emergency, always follow instructions from BPBD and Basarnas officers.",
-              "Data can be late if monitoring posts haven't sent an update.",
+              "Data can be late if monitoring posts haven't sent an update. Satellite rain arrives about 5 hours after it falls.",
               "Community reports are unverified, shown for 6 hours and never change the official status.",
             ]).map((text) => <li key={text}>{text}</li>)}
           </ul>
@@ -168,49 +168,51 @@ export default function About({ riskContext = {} }) {
           <Section title={id ? "Performa model" : "Model performance"}>
             <p style={{ fontSize: "0.85rem", color: "var(--muted)", marginBottom: "1rem", lineHeight: 1.6 }}>
               {id
-                ? "Diukur sekali saat pelatihan, pada 586 baris bulanan yang dipilih acak dari 2020–2024. Data latihnya masih proksi, dan karena dipilih acak, baris uji bertetangga waktu dengan data latih. Jadi angka di bawah terlalu optimistis: saat model serupa dilatih dengan 2020–2022 lalu diuji pada 2024, AUC-nya sekitar 0,83 (rentang 0,75–0,89). Model ini belum pernah diuji dengan data lapangan."
-                : "Measured once at training time on 586 monthly rows picked at random from 2020–2024. The training data is still a proxy, and because rows were picked at random, test rows sit next to training rows in time. So the figures below are optimistic: when a similar model is trained on 2020–2022 and tested on 2024, its AUC is about 0.83 (range 0.75–0.89). The model has not yet been tested on field data."}
+                ? "Diuji per tahun: untuk tahun 2019, 2020, 2021 dan 2025, model hanya dilatih dengan tahun-tahun sebelumnya, lalu dicek pada tahun itu. Patokannya hari banjir yang dicatat BPBD. Angka di bawah untuk model keputusan Jakarta, dibandingkan dengan aturan lama (status pos sungai + model harian)."
+                : "Tested year by year: for 2019, 2020, 2021 and 2025 the model was trained only on earlier years and then checked on that year, against the flood days BPBD recorded. The figures below are for the Jakarta decision model, compared with the old rules (river-post status + daily model)."}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-              <MetricBar label="AUC-ROC" hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}
-                value={0.899} color="var(--safe)" format={v => v.toFixed(3)} />
-              <MetricBar label={id ? "Recall @ Siaga" : "Recall @ Alert"} hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}
-                value={0.875} color="var(--s2)" format={v => (v * 100).toFixed(1) + "%"} />
-              <MetricBar label={id ? "Presisi" : "Precision"} hint={id ? "(makin tinggi makin baik)" : "(higher is better)"}
-                value={0.282} color="var(--wsp)" format={v => (v * 100).toFixed(1) + "%"} />
-              <MetricBar label="Brier Score" hint={id ? "(makin rendah makin baik)" : "(lower is better)"}
-                value={0.074} max={0.25} color="var(--cyan)" lowerIsBetter format={() => "0.074"} />
-              <MetricBar label={id ? "ECE (data uji)" : "ECE (test set)"} hint={id ? "(makin rendah makin baik)" : "(lower is better)"}
-                value={0.062} max={0.25} color="var(--cyan)" lowerIsBetter format={() => "0.062"} />
+              <MetricBar label="AUC-ROC" hint={id ? "(aturan lama 0,694)" : "(old rules 0.694)"}
+                value={0.786} color="var(--safe)" format={v => v.toFixed(3)} />
+              <MetricBar label={id ? "Presisi Siaga" : "Alert precision"} hint={id ? "(aturan lama 73%)" : "(old rules 73%)"}
+                value={0.758} color="var(--s2)" format={v => (v * 100).toFixed(0) + "%"} />
+              <MetricBar label={id ? "Banjir tertangkap di Siaga" : "Floods caught at Alert"} hint={id ? "(aturan lama 13%)" : "(old rules 13%)"}
+                value={0.22} color="var(--s2)" format={v => (v * 100).toFixed(0) + "%"} />
+              <MetricBar label={id ? "Presisi Bahaya" : "Danger precision"} hint={id ? "(aturan lama 76%)" : "(old rules 76%)"}
+                value={0.842} color="var(--s1)" format={v => (v * 100).toFixed(0) + "%"} />
+              <MetricBar label={id ? "Model harian per kecamatan, AUC-ROC" : "Daily kecamatan model, AUC-ROC"} hint="(2023–2025)"
+                value={0.836} color="var(--cyan)" format={v => v.toFixed(3)} />
             </div>
             <ul style={{ margin: "1rem 0 0", paddingLeft: "1.1rem", display: "flex", flexDirection: "column", gap: "0.4rem", fontSize: "0.85rem", color: "var(--muted)", lineHeight: 1.55 }}>
               <li>
                 {id
-                  ? "Presisi 28% berarti sekitar 7 dari 10 peringatan model adalah alarm palsu. Model sengaja dibuat sensitif supaya banjir jarang terlewat (recall 88%)."
-                  : "28% precision means about 7 in 10 model warnings are false alarms. The model is deliberately sensitive so floods are rarely missed (88% recall)."}
+                  ? "Presisi Siaga 76% berarti sekitar 3 dari 4 saat berstatus Siaga memang ada banjir yang dicatat BPBD di Jakarta hari itu. Banjir kecil sering tidak terdeteksi: status Siaga hanya muncul pada 22% saat banjir."
+                  : "76% Alert precision means about 3 in 4 Alert moments had a BPBD-recorded flood in Jakarta that day. Small floods are often missed: Alert shows on only 22% of flood moments."}
               </li>
               <li>
                 {id
-                  ? "Belum ada pengukuran kalibrasi yang sahih untuk model ini di lapangan. Angka kalibrasi lain di proyek ini (ECE 0,196 dan 0,378) berasal dari versi model sebelumnya, dan penyesuaian kalibrasi saat aplikasi berjalan sedang dinonaktifkan."
-                  : "There is no valid field calibration measurement for this model yet. Other calibration figures in this project (ECE 0.196 and 0.378) come from earlier model versions, and the live calibration adjustment is switched off."}
+                  ? "Status per kota memakai model tersendiri dengan ambang peluang yang sama seperti Jakarta. Dibanding menyalin status Jakarta ke setiap kota, ia lebih tepat: saat sebuah kota berstatus Siaga, 2 dari 3 kali memang ada banjir di kota itu hari itu (presisi 67% vs 38%). Gantinya, lebih sedikit banjir kecil yang tertangkap per kota."
+                  : "The per-city status uses its own model with the same chance thresholds as Jakarta. Compared with copying Jakarta's status to every city it is more precise: when a city is at Alert, 2 in 3 times there was a flood in that city that day (67% vs 38% precision). In exchange, fewer small floods are caught per city."}
               </li>
               <li>
                 {id
-                  ? "Kami mencoba ratusan variasi model dan menilainya pada tahun yang belum pernah dilihat model (2024). Membuang fitur proksi dan mengkalibrasi ulang pada tahun terbaru justru menurunkan AUC menjadi 0,73, jadi model yang dipakai tidak diganti. Peningkatan berarti butuh data yang lebih baik: label banjir harian, muka air hulu, dan pasang laut."
-                  : "We tried hundreds of model variants and judged them on a year the model had not seen (2024). Dropping the proxy features and recalibrating on the latest year lowered the AUC to 0.73, so the served model was kept. A real gain needs better data: daily flood labels, upstream water levels and tides."}
+                  ? "Model belum diuji langsung di lapangan. Sejak November 2026 setiap keputusan situs dibandingkan dengan laporan banjir setiap bulan. Peluang 10–40% cenderung lebih rendah dari kenyataan, dan catatan BPBD setelah 2022 belum lengkap."
+                  : "The model has not been tested in the field yet. Since November 2026 every decision of the site is compared with flood reports each month. Chances of 10–40% tend to run lower than reality, and BPBD records after 2022 are incomplete."}
               </li>
             </ul>
           </Section>
 
           <Section title={id ? "Sumber data" : "Data sources"}>
             <Row tag="DSDADKI" title={id ? "Pos pantau ketinggian air" : "Water-level monitoring posts"}
-              desc={id ? "38 titik dari Dinas Sumber Daya Air DKI (28 pos sungai, pintu air, bendung, dan waduk, serta 10 rumah pompa), diperbarui tiap 15 menit. Status memakai pos yang punya batas siaga resmi; rumah pompa tidak dihitung." : "38 points from the DKI Water Resources Agency (28 river posts, water gates, weirs and reservoirs, plus 10 pump houses), updated every 15 minutes. The status uses posts with official alert levels; pump houses are left out."} />
+              desc={id ? "38 titik dari Dinas Sumber Daya Air DKI (28 pos sungai, pintu air, bendung, dan waduk, serta 10 rumah pompa), diperbarui tiap 15 menit. Arsip 2,2 juta bacaan 2016–2021 dipakai untuk melatih model keputusan." : "38 points from the DKI Water Resources Agency (28 river posts, water gates, weirs and reservoirs, plus 10 pump houses), updated every 15 minutes. An archive of 2.2 million readings from 2016–2021 trained the decision model."} />
+            <Row tag="NASA" title={id ? "Hujan satelit GPM IMERG" : "GPM IMERG satellite rain"}
+              desc={id ? "Curah hujan setengah-jaman sejak 2013 untuk Jakarta, Bogor dan Depok, tiba sekitar 5 jam setelah hujan." : "Half-hourly rain since 2013 for Jakarta, Bogor and Depok, arriving about 5 hours after it falls."} />
             <Row tag="BMKG" title={id ? "Peringatan & prakiraan cuaca" : "Weather warnings & forecasts"}
               desc={id ? "Peringatan cuaca ekstrem dan prakiraan per wilayah." : "Extreme-weather warnings and per-area forecasts."} />
             <Row tag="OWM" title="OpenWeatherMap"
               desc={id ? "Suhu, kelembapan, dan curah hujan realtime." : "Realtime temperature, humidity, and rainfall."} />
             <Row tag="BPBD" title={id ? "Data historis banjir" : "Historical flood data"}
-              desc={id ? "Kejadian banjir Jakarta 2020–2024 untuk melatih model, dan titik rawan banjir untuk mewarnai jalan di peta evakuasi." : "Jakarta flood events from 2020–2024 to train the model, and flood-prone points to colour roads on the evacuation map."} />
+              desc={id ? "Tanggal banjir per kelurahan 2013–2025 untuk melatih dan menguji model, area yang paling sering banjir di tiap kota, dan titik rawan banjir untuk peta evakuasi." : "Flood dates per kelurahan from 2013–2025 to train and test the models, the areas that flood most often in each city, and flood-prone points for the evacuation map."} />
             <Row tag="OSM" title={id ? "Peta dan rute jalan" : "Maps and road routes"}
               desc={id ? "OpenStreetMap dan OSRM untuk rute evakuasi; navigasi diteruskan ke Google Maps." : "OpenStreetMap and OSRM for evacuation routes; navigation is handed to Google Maps."} />
             <Row tag={id ? "Warga" : "Public"} title={id ? "Laporan warga" : "Community reports"}
@@ -218,10 +220,12 @@ export default function About({ riskContext = {} }) {
           </Section>
 
           <Section title={id ? "Model & AI" : "Model & AI"}>
-            <Row tag="XGB" title="XGBoost Classifier"
-              desc={id ? "17 fitur cuaca, hidrologi, dan geografis → peluang banjir. Mesin keputusan berlapis (L0–L4) lalu menetapkan status: data rusak jadi Tidak diketahui, dan status tidak pernah di bawah pita siaga DSDA pos pantau terparah." : "17 weather, hydrology and geographic features → a flood probability. A layered decision engine (L0–L4) then sets the status: broken data becomes Unknown, and the status never sits below the DSDA alert band of the worst post."} />
-            <Row tag="OOD" title="IsolationForest"
-              desc={id ? "Menandai kondisi data yang tidak biasa dibanding data latih." : "Flags data conditions that look unusual compared with the training data."} />
+            <Row tag={id ? "Harian" : "Daily"} title={id ? "Model harian per kecamatan (XGBoost)" : "Daily kecamatan model (XGBoost)"}
+              desc={id ? "Hujan satelit beberapa hari terakhir, hujan di hulu, musim, riwayat banjir dan ketinggian tanah → peluang banjir tiap kecamatan hari ini. Diperbarui tiap 30 menit." : "Satellite rain of the last few days, upstream rain, season, flood history and elevation → today's flood chance in each kecamatan. Updated every 30 minutes."} />
+            <Row tag={id ? "Keputusan" : "Decision"} title={id ? "Model keputusan (XGBoost monoton)" : "Decision model (monotone XGBoost)"}
+              desc={id ? "Menggabungkan peluang model harian, status pos sungai sekarang dan kemarin, dan hujan hari ini menjadi peluang banjir Jakarta dan tiap kota. Ambang Waspada, Siaga dan Bahaya juga dipelajari dari data. Status pos yang lebih tinggi atau hujan yang lebih deras tidak pernah menurunkan risiko." : "Combines the daily model's chance, the river posts now and yesterday and today's rain into a flood chance for Jakarta and for each city. The Watch, Alert and Danger thresholds are learned from data too. A higher post status or heavier rain can never lower the risk."} />
+            <Row tag={id ? "Aturan" : "Rules"} title={id ? "Aturan pengaman" : "Safety rules"}
+              desc={id ? "Data rusak → Tidak diketahui; pos di Siaga 1 atau air naik cepat → Bahaya; peringatan BMKG parah → minimal Siaga. Jika data model belum lengkap, 10 lapisan aturan lama yang memutuskan." : "Broken data → Unknown; a post at Alert 1 or fast-rising water → Danger; a severe BMKG warning → at least Alert. When the model's data is incomplete, the old 10-layer rules decide."} />
             <Row tag="LLM" title="Groq — Qwen3 (qwen3.8-27b)"
               desc={id ? "Menulis penjelasan dan menjawab chat. Tidak ikut menentukan status; jika gagal, dipakai template tetap." : "Writes explanations and answers chat. It does not decide the status; a fixed template is used if it fails."} />
           </Section>

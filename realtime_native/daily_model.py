@@ -48,6 +48,7 @@ _state: dict | None = None
 _rain_cache: dict = {}    # {"fetched": datetime, "start": Timestamp, "daily": {...}, "strict": {...}}
 _water_cache: dict = {}   # {date: city water features of that WIB day (dict) or None}
 _file_cache: dict = {}    # {half-hour (UTC): {cell: rate}} read from GES DISC files
+_post_cache: dict = {}    # {date: {river post key: highest status that WIB day}} (the wilayah layer reads D-1)
 
 
 class DailyModelUnavailable(RuntimeError):
@@ -137,8 +138,8 @@ def _strict_days(rate: pd.Series) -> pd.Series:
     return present >= 48
 
 
-def city_water_from_rows(rows: list[dict]) -> pd.DataFrame:
-    """History rows ({fetched_at, poskobanjir}) -> city water features per WIB day."""
+def posts_from_rows(rows: list[dict]) -> pd.DataFrame:
+    """History rows ({fetched_at, poskobanjir}) -> (post key, WIB date, status) per reading."""
     records = []
     for row in rows:
         ts = pd.Timestamp(row.get("fetched_at"))
@@ -148,7 +149,12 @@ def city_water_from_rows(rows: list[dict]) -> pd.DataFrame:
         for post in row.get("poskobanjir") or []:
             if isinstance(post, dict):
                 records.append((dfe.post_key(post.get("nama_pintu_air")), day, dfe.status_level(post.get("status_siaga"))))
-    posts = pd.DataFrame(records, columns=["post", "date", "status"])
+    return pd.DataFrame(records, columns=["post", "date", "status"])
+
+
+def city_water_from_rows(rows: list[dict]) -> pd.DataFrame:
+    """History rows ({fetched_at, poskobanjir}) -> city water features per WIB day."""
+    posts = posts_from_rows(rows)
     if posts.empty:
         return pd.DataFrame(columns=dfe.WATER_DAY)
     return dfe.city_water_by_day(posts)
@@ -180,15 +186,19 @@ def _water(today: pd.Timestamp) -> pd.DataFrame:
         start = (min(missing) - pd.Timedelta(hours=7)).to_pydatetime().replace(tzinfo=timezone.utc)
         end = (max(missing) + pd.Timedelta(hours=17)).to_pydatetime().replace(tzinfo=timezone.utc)
         try:
-            city = city_water_from_rows(_history_rows(start, end))
+            posts = posts_from_rows(_history_rows(start, end))
+            city = dfe.city_water_by_day(posts) if not posts.empty else pd.DataFrame(columns=dfe.WATER_DAY)
         except Exception as exc:  # noqa: BLE001 - water is optional; the model takes NaN
             logger.warning("daily_model water history unavailable: %s", type(exc).__name__)
-            city = None
+            posts = city = None
         for d in missing:
             if city is not None:
                 _water_cache[d] = city.loc[d].to_dict() if d in city.index else None
-        for old in [d for d in _water_cache if d < today - pd.Timedelta(days=7)]:
-            del _water_cache[old]
+                river = posts[(posts["date"] == d) & posts["post"].isin(dfe.RIVER_POSTS)].dropna(subset=["status"])
+                _post_cache[d] = {k: float(v) for k, v in river.groupby("post")["status"].max().items()}
+        for cache in (_water_cache, _post_cache):
+            for old in [d for d in cache if d < today - pd.Timedelta(days=7)]:
+                del cache[old]
     known = {d: _water_cache[d] for d in days if _water_cache.get(d)}
     return pd.DataFrame.from_dict(known, orient="index", columns=dfe.WATER_DAY) if known else pd.DataFrame(columns=dfe.WATER_DAY)
 
@@ -275,6 +285,7 @@ def refresh(now: datetime | None = None) -> dict | None:
             daily, strict, today_mm = _rain(cells, today, now)
             state = predict(daily, strict, _water(today), today, bundle)
             state["today_halfhours"] = today_mm
+            state["posts_d1"] = _post_cache.get(today - pd.Timedelta(days=1))
             state["computed_at_utc"] = now.astimezone(timezone.utc).isoformat(timespec="seconds")
             _state = state
             logger.info("daily_model_refreshed date=%s lag=%s city_p=%.4f level=%s",
@@ -301,3 +312,4 @@ def _reset_for_tests() -> None:
     _rain_cache.clear()
     _water_cache.clear()
     _file_cache.clear()
+    _post_cache.clear()
