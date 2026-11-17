@@ -1,0 +1,1823 @@
+{
+  "generated_utc": "2026-11-17T11:45:17+00:00",
+  "device": "cuda",
+  "bootstrap": 1000,
+  "lags": {
+    "lag 1": {
+      "2016-2022 (complete labels)": {
+        "days": 2557,
+        "any flood": {
+          "flood_days": 554,
+          "share": 0.217,
+          "max": {
+            "roc_auc": [
+              0.7,
+              0.677,
+              0.723
+            ],
+            "pr_auc": [
+              0.367,
+              0.333,
+              0.409
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.419,
+                "precision": 0.345,
+                "precision_any_flood": 0.345
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.224,
+                "precision": 0.369,
+                "precision_any_flood": 0.369
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.15,
+                "precision": 0.494,
+                "precision_any_flood": 0.494
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.085,
+                "precision": 0.56,
+                "precision_any_flood": 0.56
+              }
+            }
+          },
+          "sum": {
+            "roc_auc": [
+              0.701,
+              0.676,
+              0.725
+            ],
+            "pr_auc": [
+              0.369,
+              0.332,
+              0.411
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.431,
+                "precision": 0.356,
+                "precision_any_flood": 0.356
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.235,
+                "precision": 0.387,
+                "precision_any_flood": 0.387
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.139,
+                "precision": 0.458,
+                "precision_any_flood": 0.458
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.087,
+                "precision": 0.571,
+                "precision_any_flood": 0.571
+              }
+            }
+          },
+          "city": {
+            "roc_auc": [
+              0.56,
+              0.533,
+              0.588
+            ],
+            "pr_auc": [
+              0.301,
+              0.267,
+              0.336
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.339,
+                "precision": 0.28,
+                "precision_any_flood": 0.28
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.202,
+                "precision": 0.333,
+                "precision_any_flood": 0.333
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.126,
+                "precision": 0.417,
+                "precision_any_flood": 0.417
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.072,
+                "precision": 0.476,
+                "precision_any_flood": 0.476
+              }
+            }
+          },
+          "diffs": {
+            "sum - max": {
+              "roc_auc": [
+                -0.007,
+                0.007
+              ],
+              "pr_auc": [
+                -0.011,
+                0.014
+              ]
+            },
+            "city - max": {
+              "roc_auc": [
+                -0.174,
+                -0.109
+              ],
+              "pr_auc": [
+                -0.103,
+                -0.034
+              ]
+            },
+            "city - sum": {
+              "roc_auc": [
+                -0.171,
+                -0.114
+              ],
+              "pr_auc": [
+                -0.098,
+                -0.041
+              ]
+            }
+          }
+        },
+        "large (>= 5 kecamatan)": {
+          "flood_days": 174,
+          "share": 0.068,
+          "max": {
+            "roc_auc": [
+              0.744,
+              0.708,
+              0.776
+            ],
+            "pr_auc": [
+              0.171,
+              0.135,
+              0.218
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.557,
+                "precision": 0.144,
+                "precision_any_flood": 0.345
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.316,
+                "precision": 0.164,
+                "precision_any_flood": 0.369
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.253,
+                "precision": 0.262,
+                "precision_any_flood": 0.494
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.138,
+                "precision": 0.286,
+                "precision_any_flood": 0.56
+              }
+            }
+          },
+          "sum": {
+            "roc_auc": [
+              0.739,
+              0.703,
+              0.772
+            ],
+            "pr_auc": [
+              0.174,
+              0.137,
+              0.229
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.552,
+                "precision": 0.143,
+                "precision_any_flood": 0.356
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.351,
+                "precision": 0.182,
+                "precision_any_flood": 0.387
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.23,
+                "precision": 0.238,
+                "precision_any_flood": 0.458
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.138,
+                "precision": 0.286,
+                "precision_any_flood": 0.571
+              }
+            }
+          },
+          "city": {
+            "roc_auc": [
+              0.594,
+              0.546,
+              0.641
+            ],
+            "pr_auc": [
+              0.134,
+              0.097,
+              0.181
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.385,
+                "precision": 0.1,
+                "precision_any_flood": 0.28
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.259,
+                "precision": 0.134,
+                "precision_any_flood": 0.333
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.19,
+                "precision": 0.196,
+                "precision_any_flood": 0.417
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.098,
+                "precision": 0.202,
+                "precision_any_flood": 0.476
+              }
+            }
+          },
+          "diffs": {
+            "sum - max": {
+              "roc_auc": [
+                -0.015,
+                0.006
+              ],
+              "pr_auc": [
+                -0.01,
+                0.021
+              ]
+            },
+            "city - max": {
+              "roc_auc": [
+                -0.202,
+                -0.097
+              ],
+              "pr_auc": [
+                -0.074,
+                0.001
+              ]
+            },
+            "city - sum": {
+              "roc_auc": [
+                -0.192,
+                -0.099
+              ],
+              "pr_auc": [
+                -0.075,
+                -0.005
+              ]
+            }
+          }
+        },
+        "very large (>= 10 kecamatan)": {
+          "flood_days": 65,
+          "share": 0.025,
+          "max": {
+            "roc_auc": [
+              0.751,
+              0.7,
+              0.801
+            ],
+            "pr_auc": [
+              0.084,
+              0.056,
+              0.135
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.569,
+                "precision": 0.055,
+                "precision_any_flood": 0.345
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.385,
+                "precision": 0.074,
+                "precision_any_flood": 0.369
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.323,
+                "precision": 0.125,
+                "precision_any_flood": 0.494
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.215,
+                "precision": 0.167,
+                "precision_any_flood": 0.56
+              }
+            }
+          },
+          "sum": {
+            "roc_auc": [
+              0.754,
+              0.7,
+              0.806
+            ],
+            "pr_auc": [
+              0.1,
+              0.065,
+              0.168
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.538,
+                "precision": 0.052,
+                "precision_any_flood": 0.356
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.446,
+                "precision": 0.086,
+                "precision_any_flood": 0.387
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.354,
+                "precision": 0.137,
+                "precision_any_flood": 0.458
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.215,
+                "precision": 0.167,
+                "precision_any_flood": 0.571
+              }
+            }
+          },
+          "city": {
+            "roc_auc": [
+              0.618,
+              0.537,
+              0.693
+            ],
+            "pr_auc": [
+              0.06,
+              0.038,
+              0.108
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.4,
+                "precision": 0.039,
+                "precision_any_flood": 0.28
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.323,
+                "precision": 0.062,
+                "precision_any_flood": 0.333
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.246,
+                "precision": 0.095,
+                "precision_any_flood": 0.417
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.123,
+                "precision": 0.095,
+                "precision_any_flood": 0.476
+              }
+            }
+          },
+          "diffs": {
+            "sum - max": {
+              "roc_auc": [
+                -0.012,
+                0.015
+              ],
+              "pr_auc": [
+                0.003,
+                0.044
+              ]
+            },
+            "city - max": {
+              "roc_auc": [
+                -0.214,
+                -0.055
+              ],
+              "pr_auc": [
+                -0.059,
+                0.008
+              ]
+            },
+            "city - sum": {
+              "roc_auc": [
+                -0.214,
+                -0.062
+              ],
+              "pr_auc": [
+                -0.086,
+                -0.01
+              ]
+            }
+          }
+        }
+      },
+      "2023-2025 (partial labels)": {
+        "days": 1096,
+        "any flood": {
+          "flood_days": 362,
+          "share": 0.33,
+          "max": {
+            "roc_auc": [
+              0.638,
+              0.604,
+              0.669
+            ],
+            "pr_auc": [
+              0.46,
+              0.411,
+              0.514
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.354,
+                "precision": 0.444,
+                "precision_any_flood": 0.444
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.204,
+                "precision": 0.514,
+                "precision_any_flood": 0.514
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.127,
+                "precision": 0.639,
+                "precision_any_flood": 0.639
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.066,
+                "precision": 0.667,
+                "precision_any_flood": 0.667
+              }
+            }
+          },
+          "sum": {
+            "roc_auc": [
+              0.636,
+              0.602,
+              0.668
+            ],
+            "pr_auc": [
+              0.456,
+              0.407,
+              0.511
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.356,
+                "precision": 0.448,
+                "precision_any_flood": 0.448
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.207,
+                "precision": 0.521,
+                "precision_any_flood": 0.521
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.113,
+                "precision": 0.569,
+                "precision_any_flood": 0.569
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.072,
+                "precision": 0.722,
+                "precision_any_flood": 0.722
+              }
+            }
+          },
+          "city": {
+            "roc_auc": [
+              0.632,
+              0.597,
+              0.663
+            ],
+            "pr_auc": [
+              0.469,
+              0.418,
+              0.519
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.326,
+                "precision": 0.41,
+                "precision_any_flood": 0.41
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.213,
+                "precision": 0.535,
+                "precision_any_flood": 0.535
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.122,
+                "precision": 0.611,
+                "precision_any_flood": 0.611
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.08,
+                "precision": 0.806,
+                "precision_any_flood": 0.806
+              }
+            }
+          },
+          "diffs": {
+            "sum - max": {
+              "roc_auc": [
+                -0.01,
+                0.007
+              ],
+              "pr_auc": [
+                -0.017,
+                0.011
+              ]
+            },
+            "city - max": {
+              "roc_auc": [
+                -0.025,
+                0.014
+              ],
+              "pr_auc": [
+                -0.025,
+                0.041
+              ]
+            },
+            "city - sum": {
+              "roc_auc": [
+                -0.022,
+                0.014
+              ],
+              "pr_auc": [
+                -0.02,
+                0.042
+              ]
+            }
+          }
+        },
+        "large (>= 5 kecamatan)": {
+          "flood_days": 64,
+          "share": 0.058,
+          "max": {
+            "roc_auc": [
+              0.797,
+              0.738,
+              0.848
+            ],
+            "pr_auc": [
+              0.268,
+              0.178,
+              0.395
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.641,
+                "precision": 0.142,
+                "precision_any_flood": 0.444
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.469,
+                "precision": 0.208,
+                "precision_any_flood": 0.514
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.359,
+                "precision": 0.319,
+                "precision_any_flood": 0.639
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.234,
+                "precision": 0.417,
+                "precision_any_flood": 0.667
+              }
+            }
+          },
+          "sum": {
+            "roc_auc": [
+              0.804,
+              0.747,
+              0.853
+            ],
+            "pr_auc": [
+              0.253,
+              0.168,
+              0.381
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.688,
+                "precision": 0.153,
+                "precision_any_flood": 0.448
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.469,
+                "precision": 0.208,
+                "precision_any_flood": 0.521
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.297,
+                "precision": 0.264,
+                "precision_any_flood": 0.569
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.203,
+                "precision": 0.361,
+                "precision_any_flood": 0.722
+              }
+            }
+          },
+          "city": {
+            "roc_auc": [
+              0.79,
+              0.736,
+              0.837
+            ],
+            "pr_auc": [
+              0.248,
+              0.158,
+              0.368
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.656,
+                "precision": 0.146,
+                "precision_any_flood": 0.41
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.422,
+                "precision": 0.188,
+                "precision_any_flood": 0.535
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.25,
+                "precision": 0.222,
+                "precision_any_flood": 0.611
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.219,
+                "precision": 0.389,
+                "precision_any_flood": 0.806
+              }
+            }
+          },
+          "diffs": {
+            "sum - max": {
+              "roc_auc": [
+                -0.006,
+                0.022
+              ],
+              "pr_auc": [
+                -0.046,
+                0.013
+              ]
+            },
+            "city - max": {
+              "roc_auc": [
+                -0.043,
+                0.031
+              ],
+              "pr_auc": [
+                -0.128,
+                0.076
+              ]
+            },
+            "city - sum": {
+              "roc_auc": [
+                -0.048,
+                0.022
+              ],
+              "pr_auc": [
+                -0.109,
+                0.085
+              ]
+            }
+          }
+        },
+        "very large (>= 10 kecamatan)": {
+          "flood_days": 18,
+          "share": 0.016,
+          "max": {
+            "roc_auc": [
+              0.827,
+              0.731,
+              0.911
+            ],
+            "pr_auc": [
+              0.141,
+              0.053,
+              0.333
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.722,
+                "precision": 0.045,
+                "precision_any_flood": 0.444
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.611,
+                "precision": 0.076,
+                "precision_any_flood": 0.514
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.389,
+                "precision": 0.097,
+                "precision_any_flood": 0.639
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.333,
+                "precision": 0.167,
+                "precision_any_flood": 0.667
+              }
+            }
+          },
+          "sum": {
+            "roc_auc": [
+              0.839,
+              0.754,
+              0.919
+            ],
+            "pr_auc": [
+              0.134,
+              0.053,
+              0.315
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.778,
+                "precision": 0.049,
+                "precision_any_flood": 0.448
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.556,
+                "precision": 0.069,
+                "precision_any_flood": 0.521
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.389,
+                "precision": 0.097,
+                "precision_any_flood": 0.569
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.333,
+                "precision": 0.167,
+                "precision_any_flood": 0.722
+              }
+            }
+          },
+          "city": {
+            "roc_auc": [
+              0.816,
+              0.719,
+              0.901
+            ],
+            "pr_auc": [
+              0.153,
+              0.046,
+              0.377
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.722,
+                "precision": 0.045,
+                "precision_any_flood": 0.41
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.5,
+                "precision": 0.062,
+                "precision_any_flood": 0.535
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.278,
+                "precision": 0.069,
+                "precision_any_flood": 0.611
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.278,
+                "precision": 0.139,
+                "precision_any_flood": 0.806
+              }
+            }
+          },
+          "diffs": {
+            "sum - max": {
+              "roc_auc": [
+                -0.018,
+                0.041
+              ],
+              "pr_auc": [
+                -0.06,
+                0.025
+              ]
+            },
+            "city - max": {
+              "roc_auc": [
+                -0.096,
+                0.063
+              ],
+              "pr_auc": [
+                -0.172,
+                0.215
+              ]
+            },
+            "city - sum": {
+              "roc_auc": [
+                -0.11,
+                0.055
+              ],
+              "pr_auc": [
+                -0.146,
+                0.213
+              ]
+            }
+          }
+        }
+      }
+    },
+    "lag 2": {
+      "2016-2022 (complete labels)": {
+        "days": 2557,
+        "any flood": {
+          "flood_days": 554,
+          "share": 0.217,
+          "max": {
+            "roc_auc": [
+              0.671,
+              0.646,
+              0.696
+            ],
+            "pr_auc": [
+              0.323,
+              0.292,
+              0.36
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.379,
+                "precision": 0.312,
+                "precision_any_flood": 0.312
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.208,
+                "precision": 0.342,
+                "precision_any_flood": 0.342
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.128,
+                "precision": 0.423,
+                "precision_any_flood": 0.423
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.061,
+                "precision": 0.405,
+                "precision_any_flood": 0.405
+              }
+            }
+          },
+          "sum": {
+            "roc_auc": [
+              0.672,
+              0.648,
+              0.697
+            ],
+            "pr_auc": [
+              0.329,
+              0.297,
+              0.368
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.392,
+                "precision": 0.323,
+                "precision_any_flood": 0.323
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.209,
+                "precision": 0.345,
+                "precision_any_flood": 0.345
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.119,
+                "precision": 0.393,
+                "precision_any_flood": 0.393
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.079,
+                "precision": 0.524,
+                "precision_any_flood": 0.524
+              }
+            }
+          },
+          "city": {
+            "roc_auc": [
+              0.543,
+              0.517,
+              0.572
+            ],
+            "pr_auc": [
+              0.268,
+              0.241,
+              0.302
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.307,
+                "precision": 0.253,
+                "precision_any_flood": 0.253
+              },
+              "4 a month": {
+                "alarm_days": 347,
+                "recall": 0.173,
+                "precision": 0.277,
+                "precision_any_flood": 0.277
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.112,
+                "precision": 0.369,
+                "precision_any_flood": 0.369
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.072,
+                "precision": 0.476,
+                "precision_any_flood": 0.476
+              }
+            }
+          },
+          "diffs": {
+            "sum - max": {
+              "roc_auc": [
+                -0.005,
+                0.008
+              ],
+              "pr_auc": [
+                -0.004,
+                0.016
+              ]
+            },
+            "city - max": {
+              "roc_auc": [
+                -0.162,
+                -0.095
+              ],
+              "pr_auc": [
+                -0.085,
+                -0.024
+              ]
+            },
+            "city - sum": {
+              "roc_auc": [
+                -0.158,
+                -0.099
+              ],
+              "pr_auc": [
+                -0.088,
+                -0.034
+              ]
+            }
+          }
+        },
+        "large (>= 5 kecamatan)": {
+          "flood_days": 174,
+          "share": 0.068,
+          "max": {
+            "roc_auc": [
+              0.703,
+              0.665,
+              0.737
+            ],
+            "pr_auc": [
+              0.145,
+              0.112,
+              0.189
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.448,
+                "precision": 0.116,
+                "precision_any_flood": 0.312
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.31,
+                "precision": 0.161,
+                "precision_any_flood": 0.342
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.218,
+                "precision": 0.226,
+                "precision_any_flood": 0.423
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.098,
+                "precision": 0.202,
+                "precision_any_flood": 0.405
+              }
+            }
+          },
+          "sum": {
+            "roc_auc": [
+              0.699,
+              0.658,
+              0.734
+            ],
+            "pr_auc": [
+              0.148,
+              0.114,
+              0.192
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.489,
+                "precision": 0.126,
+                "precision_any_flood": 0.323
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.299,
+                "precision": 0.155,
+                "precision_any_flood": 0.345
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.19,
+                "precision": 0.196,
+                "precision_any_flood": 0.393
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.144,
+                "precision": 0.298,
+                "precision_any_flood": 0.524
+              }
+            }
+          },
+          "city": {
+            "roc_auc": [
+              0.571,
+              0.525,
+              0.623
+            ],
+            "pr_auc": [
+              0.116,
+              0.088,
+              0.163
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.362,
+                "precision": 0.094,
+                "precision_any_flood": 0.253
+              },
+              "4 a month": {
+                "alarm_days": 347,
+                "recall": 0.241,
+                "precision": 0.121,
+                "precision_any_flood": 0.277
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.172,
+                "precision": 0.179,
+                "precision_any_flood": 0.369
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.109,
+                "precision": 0.226,
+                "precision_any_flood": 0.476
+              }
+            }
+          },
+          "diffs": {
+            "sum - max": {
+              "roc_auc": [
+                -0.015,
+                0.007
+              ],
+              "pr_auc": [
+                -0.009,
+                0.015
+              ]
+            },
+            "city - max": {
+              "roc_auc": [
+                -0.183,
+                -0.079
+              ],
+              "pr_auc": [
+                -0.062,
+                0.01
+              ]
+            },
+            "city - sum": {
+              "roc_auc": [
+                -0.173,
+                -0.078
+              ],
+              "pr_auc": [
+                -0.061,
+                0.004
+              ]
+            }
+          }
+        },
+        "very large (>= 10 kecamatan)": {
+          "flood_days": 65,
+          "share": 0.025,
+          "max": {
+            "roc_auc": [
+              0.728,
+              0.672,
+              0.783
+            ],
+            "pr_auc": [
+              0.074,
+              0.05,
+              0.117
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.523,
+                "precision": 0.051,
+                "precision_any_flood": 0.312
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.4,
+                "precision": 0.077,
+                "precision_any_flood": 0.342
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.308,
+                "precision": 0.119,
+                "precision_any_flood": 0.423
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.138,
+                "precision": 0.107,
+                "precision_any_flood": 0.405
+              }
+            }
+          },
+          "sum": {
+            "roc_auc": [
+              0.733,
+              0.675,
+              0.79
+            ],
+            "pr_auc": [
+              0.085,
+              0.055,
+              0.135
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.585,
+                "precision": 0.057,
+                "precision_any_flood": 0.323
+              },
+              "4 a month": {
+                "alarm_days": 336,
+                "recall": 0.415,
+                "precision": 0.08,
+                "precision_any_flood": 0.345
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.292,
+                "precision": 0.113,
+                "precision_any_flood": 0.393
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.2,
+                "precision": 0.155,
+                "precision_any_flood": 0.524
+              }
+            }
+          },
+          "city": {
+            "roc_auc": [
+              0.618,
+              0.543,
+              0.704
+            ],
+            "pr_auc": [
+              0.08,
+              0.046,
+              0.159
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 672,
+                "recall": 0.431,
+                "precision": 0.042,
+                "precision_any_flood": 0.253
+              },
+              "4 a month": {
+                "alarm_days": 347,
+                "recall": 0.338,
+                "precision": 0.063,
+                "precision_any_flood": 0.277
+              },
+              "2 a month": {
+                "alarm_days": 168,
+                "recall": 0.262,
+                "precision": 0.101,
+                "precision_any_flood": 0.369
+              },
+              "1 a month": {
+                "alarm_days": 84,
+                "recall": 0.169,
+                "precision": 0.131,
+                "precision_any_flood": 0.476
+              }
+            }
+          },
+          "diffs": {
+            "sum - max": {
+              "roc_auc": [
+                -0.01,
+                0.019
+              ],
+              "pr_auc": [
+                -0.0,
+                0.027
+              ]
+            },
+            "city - max": {
+              "roc_auc": [
+                -0.19,
+                -0.029
+              ],
+              "pr_auc": [
+                -0.032,
+                0.073
+              ]
+            },
+            "city - sum": {
+              "roc_auc": [
+                -0.189,
+                -0.036
+              ],
+              "pr_auc": [
+                -0.041,
+                0.058
+              ]
+            }
+          }
+        }
+      },
+      "2023-2025 (partial labels)": {
+        "days": 1096,
+        "any flood": {
+          "flood_days": 362,
+          "share": 0.33,
+          "max": {
+            "roc_auc": [
+              0.6,
+              0.564,
+              0.63
+            ],
+            "pr_auc": [
+              0.403,
+              0.361,
+              0.451
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.304,
+                "precision": 0.382,
+                "precision_any_flood": 0.382
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.157,
+                "precision": 0.396,
+                "precision_any_flood": 0.396
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.091,
+                "precision": 0.458,
+                "precision_any_flood": 0.458
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.05,
+                "precision": 0.5,
+                "precision_any_flood": 0.5
+              }
+            }
+          },
+          "sum": {
+            "roc_auc": [
+              0.603,
+              0.569,
+              0.632
+            ],
+            "pr_auc": [
+              0.409,
+              0.364,
+              0.456
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.318,
+                "precision": 0.399,
+                "precision_any_flood": 0.399
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.174,
+                "precision": 0.438,
+                "precision_any_flood": 0.438
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.083,
+                "precision": 0.417,
+                "precision_any_flood": 0.417
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.047,
+                "precision": 0.472,
+                "precision_any_flood": 0.472
+              }
+            }
+          },
+          "city": {
+            "roc_auc": [
+              0.592,
+              0.557,
+              0.624
+            ],
+            "pr_auc": [
+              0.39,
+              0.348,
+              0.438
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.298,
+                "precision": 0.375,
+                "precision_any_flood": 0.375
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.155,
+                "precision": 0.389,
+                "precision_any_flood": 0.389
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.086,
+                "precision": 0.431,
+                "precision_any_flood": 0.431
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.036,
+                "precision": 0.361,
+                "precision_any_flood": 0.361
+              }
+            }
+          },
+          "diffs": {
+            "sum - max": {
+              "roc_auc": [
+                -0.004,
+                0.01
+              ],
+              "pr_auc": [
+                -0.004,
+                0.015
+              ]
+            },
+            "city - max": {
+              "roc_auc": [
+                -0.031,
+                0.015
+              ],
+              "pr_auc": [
+                -0.044,
+                0.018
+              ]
+            },
+            "city - sum": {
+              "roc_auc": [
+                -0.035,
+                0.012
+              ],
+              "pr_auc": [
+                -0.047,
+                0.01
+              ]
+            }
+          }
+        },
+        "large (>= 5 kecamatan)": {
+          "flood_days": 64,
+          "share": 0.058,
+          "max": {
+            "roc_auc": [
+              0.733,
+              0.673,
+              0.791
+            ],
+            "pr_auc": [
+              0.155,
+              0.104,
+              0.241
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.594,
+                "precision": 0.132,
+                "precision_any_flood": 0.382
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.328,
+                "precision": 0.146,
+                "precision_any_flood": 0.396
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.219,
+                "precision": 0.194,
+                "precision_any_flood": 0.458
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.125,
+                "precision": 0.222,
+                "precision_any_flood": 0.5
+              }
+            }
+          },
+          "sum": {
+            "roc_auc": [
+              0.727,
+              0.661,
+              0.787
+            ],
+            "pr_auc": [
+              0.156,
+              0.103,
+              0.241
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.516,
+                "precision": 0.115,
+                "precision_any_flood": 0.399
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.359,
+                "precision": 0.16,
+                "precision_any_flood": 0.438
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.203,
+                "precision": 0.181,
+                "precision_any_flood": 0.417
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.094,
+                "precision": 0.167,
+                "precision_any_flood": 0.472
+              }
+            }
+          },
+          "city": {
+            "roc_auc": [
+              0.675,
+              0.606,
+              0.739
+            ],
+            "pr_auc": [
+              0.135,
+              0.087,
+              0.212
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.469,
+                "precision": 0.104,
+                "precision_any_flood": 0.375
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.359,
+                "precision": 0.16,
+                "precision_any_flood": 0.389
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.234,
+                "precision": 0.208,
+                "precision_any_flood": 0.431
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.078,
+                "precision": 0.139,
+                "precision_any_flood": 0.361
+              }
+            }
+          },
+          "diffs": {
+            "sum - max": {
+              "roc_auc": [
+                -0.019,
+                0.006
+              ],
+              "pr_auc": [
+                -0.026,
+                0.019
+              ]
+            },
+            "city - max": {
+              "roc_auc": [
+                -0.116,
+                -0.003
+              ],
+              "pr_auc": [
+                -0.105,
+                0.044
+              ]
+            },
+            "city - sum": {
+              "roc_auc": [
+                -0.111,
+                0.008
+              ],
+              "pr_auc": [
+                -0.098,
+                0.048
+              ]
+            }
+          }
+        },
+        "very large (>= 10 kecamatan)": {
+          "flood_days": 18,
+          "share": 0.016,
+          "max": {
+            "roc_auc": [
+              0.733,
+              0.624,
+              0.841
+            ],
+            "pr_auc": [
+              0.061,
+              0.024,
+              0.165
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.611,
+                "precision": 0.038,
+                "precision_any_flood": 0.382
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.333,
+                "precision": 0.042,
+                "precision_any_flood": 0.396
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.278,
+                "precision": 0.069,
+                "precision_any_flood": 0.458
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.167,
+                "precision": 0.083,
+                "precision_any_flood": 0.5
+              }
+            }
+          },
+          "sum": {
+            "roc_auc": [
+              0.717,
+              0.605,
+              0.824
+            ],
+            "pr_auc": [
+              0.054,
+              0.021,
+              0.145
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.444,
+                "precision": 0.028,
+                "precision_any_flood": 0.399
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.333,
+                "precision": 0.042,
+                "precision_any_flood": 0.438
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.222,
+                "precision": 0.056,
+                "precision_any_flood": 0.417
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.167,
+                "precision": 0.083,
+                "precision_any_flood": 0.472
+              }
+            }
+          },
+          "city": {
+            "roc_auc": [
+              0.739,
+              0.61,
+              0.856
+            ],
+            "pr_auc": [
+              0.056,
+              0.026,
+              0.144
+            ],
+            "budgets": {
+              "8 a month": {
+                "alarm_days": 288,
+                "recall": 0.667,
+                "precision": 0.042,
+                "precision_any_flood": 0.375
+              },
+              "4 a month": {
+                "alarm_days": 144,
+                "recall": 0.444,
+                "precision": 0.056,
+                "precision_any_flood": 0.389
+              },
+              "2 a month": {
+                "alarm_days": 72,
+                "recall": 0.278,
+                "precision": 0.069,
+                "precision_any_flood": 0.431
+              },
+              "1 a month": {
+                "alarm_days": 36,
+                "recall": 0.111,
+                "precision": 0.056,
+                "precision_any_flood": 0.361
+              }
+            }
+          },
+          "diffs": {
+            "sum - max": {
+              "roc_auc": [
+                -0.042,
+                0.011
+              ],
+              "pr_auc": [
+                -0.039,
+                0.014
+              ]
+            },
+            "city - max": {
+              "roc_auc": [
+                -0.119,
+                0.132
+              ],
+              "pr_auc": [
+                -0.107,
+                0.085
+              ]
+            },
+            "city - sum": {
+              "roc_auc": [
+                -0.116,
+                0.158
+              ],
+              "pr_auc": [
+                -0.087,
+                0.092
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

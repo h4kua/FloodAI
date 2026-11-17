@@ -158,6 +158,14 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   kecamatan-month are kept). They add 320 flood kecamatan-days to 2023-Sep 2025 (990 -> 1310); training on them changes
   nothing (ROC-AUC 0.869 vs 0.865, CIs overlap). Nothing served; the raw cache (data/raw/news/) is not committed.
 
+- Large flood days (2026-11-17, `scripts/large_flood_experiment.py`, `artifacts/reports/large_flood_experiment.md`): can the
+  live daily model (lag 1/2) justify Siaga on days with BPBD floods in >= 5 kecamatan (6.8 % of days 2016-2022)? It ranks
+  them better than "any flood" (lag 1 ROC-AUC 0.74 vs 0.70; 2023-2025 0.80) but is not precise enough: at 2 alarm days a
+  month, lag 1, 26 % of alarm days are large floods (2016-2022; 32 % in 2023-2025) and half have no flood at all. Sum of
+  kecamatan probabilities = max (CIs include 0); a city model trained on the large label is worse. For comparison the
+  informative-post water rules at Alert: any-flood precision 0.70. Siaga/Bahaya stay with the water-level rules; the
+  model stays capped at Waspada.
+
 ## Resolved
 - 2026-11-17: the daily model reads the newest rain straight from the GES DISC IMERG Early files (OPeNDAP subset of the
   9 model cells, ~2 s a file, ~4.5 h after the rain; `imerg_client.fetch_recent`) for the hours after Giovanni's last
