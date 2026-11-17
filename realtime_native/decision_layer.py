@@ -3,8 +3,9 @@ The learned decision layer (models/daily_bundle/decision_layer*.json, trained an
 scripts/train_decision_layer.py; report artifacts/reports/decision_layer.md).
 
 It reads what the site sees right now: the daily kecamatan model's city probability, the 14 fixed river
-posts now (highest Siaga status, share at Siaga 3+ / 2+, upstream, Manggarai) and the same posts
-yesterday. A small XGBoost model per rain lag (depth 2, every input monotone increasing: a higher
+posts now (highest Siaga status, share at Siaga 3+ / 2+, upstream, Manggarai), the same posts
+yesterday, and today's rain so far (IMERG Early half-hours that started by now - 5 h, as in training:
+mean and max over the model's kecamatan cells, Bogor upstream) with the WIB hour. A small XGBoost model per rain lag (depth 2, every input monotone increasing: a higher
 post status or chance can never lower the risk) gives the chance that BPBD records a flood in
 Jakarta today; three thresholds learned from 2016-2025 turn it into Waspada / Siaga / Bahaya.
 
@@ -80,22 +81,50 @@ def score(spec: dict, features: dict, names: list[str]) -> tuple[float, dict]:
     return chance, {n: round(float(c), 4) for n, c in zip(names, contribs[:-1])}
 
 
-def decide(daily: dict | None, posts: list[dict] | None) -> dict | None:
+def today_features(daily: dict, now=None) -> dict | None:
+    """Today's rain so far as the layer was trained on it, or None without today's half-hours."""
+    halfhours = daily.get("today_halfhours")
+    if halfhours is None:
+        return None
+    from realtime_native import daily_model
+
+    bundle = daily_model.load_bundle()
+    kec_cells = sorted({k["cell"] for k in bundle["kecamatan"].values()})
+    bogor = bundle["upstream_cells"]["bogor"]
+    ts = pd.Timestamp(now) if now is not None else pd.Timestamp.now(tz="UTC")
+    ts = (ts.tz_localize("UTC") if ts.tzinfo is None else ts).tz_convert("Asia/Jakarta")
+    hour = ts.hour + ts.minute / 60
+    cutoff = hour - 5  # half-hours that started by now - 5 h
+
+    def so_far(cell):
+        return sum(mm for start, mm in (halfhours.get(cell) or {}).items()
+                   if int(start[:2]) + int(start[3:]) / 60 <= cutoff)
+
+    jak = [so_far(c) for c in kec_cells]
+    return {"today_mean": float(np.mean(jak)), "today_max": float(max(jak)), "today_bogor": float(so_far(bogor)),
+            "hour": float(hour)}
+
+
+def decide(daily: dict | None, posts: list[dict] | None, now=None) -> dict | None:
     """The layer's level for this snapshot, or None when it cannot decide (the rules then do)."""
     if not enabled() or not daily:
         return None
     layer = load()
     spec = layer["lags"].get(str(daily.get("lag_days")))
-    now = water_now(posts)
-    if spec is None or now is None:
+    posts_now = water_now(posts)
+    if spec is None or posts_now is None:
         return None
     d1 = daily.get("water_d1") or {}
     if _clean(d1.get("w_max")) is None:
         return None  # no river-post day for yesterday: the rules decide
+    today = today_features(daily, now)
+    if today is None and any(f in layer["features"] for f in ("today_mean", "hour")):
+        return None  # no rain half-hours for today: the rules decide
     # A single missing post reading counts as normal (as in training): a data gap never raises the risk.
     features = {"p": float(daily["city_probability"]),
-                **{f"{c}_now": now.get(c) or 0.0 for c in dfe.WATER_DAY},
-                **{f"{c}_d1": _clean(d1.get(c)) or 0.0 for c in dfe.WATER_DAY}}
+                **{f"{c}_now": posts_now.get(c) or 0.0 for c in dfe.WATER_DAY},
+                **{f"{c}_d1": _clean(d1.get(c)) or 0.0 for c in dfe.WATER_DAY},
+                **(today or {})}
     chance, push = score(spec, features, layer["features"])
     thr = spec["thresholds"]
     level = next((lvl for lvl in LEVEL_ORDER if thr.get(lvl) is not None and chance >= thr[lvl]), "SAFE")
@@ -122,13 +151,19 @@ def _feature_text(name: str, value, en: bool) -> str:
         return f"upstream posts (Katulampa, Depok) {when} {status}" if en else f"pos hulu (Katulampa, Depok) {when} {status}"
     if base == "w_manggarai":
         return f"Manggarai {when} {status}"
+    if name == "today_mean":
+        return f"rain so far today {value:.0f} mm on average" if en else f"hujan hari ini sejauh ini rata-rata {value:.0f} mm"
+    if name == "today_max":
+        return f"rain so far today up to {value:.0f} mm" if en else f"hujan hari ini sejauh ini hingga {value:.0f} mm"
+    if name == "today_bogor":
+        return f"rain in Bogor so far today {value:.0f} mm" if en else f"hujan di Bogor hari ini {value:.0f} mm"
     return name
 
 
 def describe(learned: dict, en: bool = False) -> str:
     """The chance, the level thresholds, and the inputs that pushed the chance up the most."""
     thr, push, feats = learned.get("thresholds") or {}, learned.get("push") or {}, learned.get("features") or {}
-    up = [n for n, c in sorted(push.items(), key=lambda kv: -kv[1]) if c > 0.05][:3]
+    up = [n for n, c in sorted(push.items(), key=lambda kv: -kv[1]) if c > 0.05 and n != "hour"][:3]
     pct = lambda v: "-" if v is None else f"{v * 100:.0f}%"  # noqa: E731
     reasons = "; ".join(_feature_text(n, feats.get(n), en) for n in up)
     if en:

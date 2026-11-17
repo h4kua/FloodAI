@@ -1,344 +1,344 @@
 # Learned decision layer vs the current rules
 
-Generated 2026-11-17T12:35:32+00:00 by `scripts/train_decision_layer.py` on cuda (1000 day resamples).
+Generated 2026-11-17T13:19:35+00:00 by `scripts/train_decision_layer.py` on cuda (1000 day resamples).
 
-Features: p, w_max_now, w_frac1_now, w_frac2_now, w_upstream_now, w_manggarai_now, w_max_d1, w_frac1_d1, w_frac2_d1, w_upstream_d1, w_manggarai_d1. Current = river rules (Siaga 3/2/1 -> Waspada/Siaga/Bahaya) + the daily model's Waspada. Learned: a flood score from one of three learners (depth-3 tree; logistic regression; XGBoost depth 2 with every feature monotone increasing), thresholds per level set on the training years (leave-one-year-out scores) at the precision the current level has there, so at equal precision the one catching more floods is better. A river post at Siaga 1 stays Bahaya. Test years 2019, 2020, 2021, 2025, each trained on earlier snapshots only. 'Equal volume' re-cuts the learned score on the test rows to the current alarm shares (a ranking check, not deployable).
+Features: p, w_max_now, w_frac1_now, w_frac2_now, w_upstream_now, w_manggarai_now, w_max_d1, w_frac1_d1, w_frac2_d1, w_upstream_d1, w_manggarai_d1, today_mean, today_max, today_bogor, hour. Current = river rules (Siaga 3/2/1 -> Waspada/Siaga/Bahaya) + the daily model's Waspada. Learned: a flood score from one of three learners (depth-3 tree; logistic regression; XGBoost depth 2 with every feature monotone increasing), thresholds per level set on the training years (leave-one-year-out scores) at the precision the current level has there, so at equal precision the one catching more floods is better. A river post at Siaga 1 stays Bahaya. Test years 2019, 2020, 2021, 2025, each trained on earlier snapshots only. 'Equal volume' re-cuts the learned score on the test rows to the current alarm shares (a ranking check, not deployable).
 
-Served: **xgb_monotone** (volume-matched thresholds), thresholds {'lag 1': {'PRE_ALERT': 0.21118, 'WARNING': 0.6117, 'DANGER': 0.76178}, 'lag 2': {'PRE_ALERT': 0.22189, 'WARNING': 0.61886, 'DANGER': 0.76152}, 'lag 3': {'PRE_ALERT': 0.21843, 'WARNING': 0.63821, 'DANGER': 0.77641}}.
+Served: **xgb_monotone** (volume-matched thresholds), thresholds {'lag 1': {'PRE_ALERT': 0.20148, 'WARNING': 0.64573, 'DANGER': 0.79996}, 'lag 2': {'PRE_ALERT': 0.21218, 'WARNING': 0.64613, 'DANGER': 0.80498}, 'lag 3': {'PRE_ALERT': 0.20842, 'WARNING': 0.65572, 'DANGER': 0.80653}}.
 
 ## lag 1 · 3090 test snapshots on 1062 days (flood days 0.221, large 0.076)
 
 ### tree · precision-matched
 
-Thresholds by test year: {'2019': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2021': {'Waspada': 0.1882, 'Siaga': None, 'Bahaya': None}, '2025': {'Waspada': 0.3913, 'Siaga': 0.5, 'Bahaya': None}}
+Thresholds by test year: {'2019': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': 0.3333, 'Siaga': None, 'Bahaya': None}, '2021': {'Waspada': 0.4222, 'Siaga': None, 'Bahaya': None}, '2025': {'Waspada': 0.2995, 'Siaga': None, 'Bahaya': None}}
 
-**any flood**: ROC-AUC current 0.694 [0.663–0.723], learned 0.749 [0.71–0.784], difference [0.024, 0.091].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.269 / 0.558 / 0.458 | 0.118 / 0.189 / 0.353 | [-0.432, -0.296], [-0.181, -0.015] | 0.66 / 0.417 | [0.035, 0.172], [-0.082, 0.001] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.017 / 0.059 / 0.741 | [-0.096, -0.048], [-0.098, 0.125] | 0.138 / 0.528 | [-0.036, 0.056], [-0.334, -0.068] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.015 / 0.051 / 0.761 | [0.0, 0.0], [0.0, 0.0] | 0.051 / 0.686 | [-0.031, 0.037], [-0.335, 0.213] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.752 [0.7–0.802], learned 0.719 [0.668–0.761], difference [-0.077, 0.013].
+**any flood**: ROC-AUC current 0.694 [0.663–0.723], learned 0.745 [0.705–0.781], difference [0.018, 0.085].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.269 / 0.706 / 0.2 | 0.118 / 0.136 / 0.088 | [-0.675, -0.466], [-0.162, -0.062] | 0.766 / 0.166 | [-0.053, 0.176], [-0.061, -0.006] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.017 / 0.094 / 0.407 | [-0.17, -0.062], [-0.105, 0.127] | 0.106 / 0.14 | [-0.173, -0.025], [-0.36, -0.144] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.015 / 0.085 / 0.435 | [0.0, 0.0], [0.0, 0.0] | 0.043 / 0.196 | [-0.091, 0.004], [-0.43, -0.013] |
+| >= Waspada | 0.269 / 0.558 / 0.458 | 0.076 / 0.193 / 0.559 | [-0.419, -0.301], [0.017, 0.19] | 0.589 / 0.421 | [-0.033, 0.1], [-0.079, 0.005] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.015 / 0.051 / 0.761 | [-0.103, -0.056], [-0.084, 0.154] | 0.143 / 0.541 | [-0.032, 0.063], [-0.326, -0.058] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.015 / 0.051 / 0.761 | [0.0, 0.0], [0.0, 0.0] | 0.104 / 0.634 | [0.021, 0.087], [-0.294, 0.05] |
 
-Snapshots below the current level: 0.206 (with a river post at Siaga 2+: 0.024).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.752 [0.7–0.802], learned 0.737 [0.68–0.789], difference [-0.065, 0.035].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.269 / 0.706 / 0.2 | 0.076 / 0.162 / 0.161 | [-0.653, -0.44], [-0.101, 0.022] | 0.723 / 0.178 | [-0.083, 0.128], [-0.049, 0.006] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.015 / 0.085 / 0.435 | [-0.176, -0.071], [-0.086, 0.178] | 0.119 / 0.155 | [-0.169, 0.0], [-0.358, -0.129] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.015 / 0.085 / 0.435 | [0.0, 0.0], [0.0, 0.0] | 0.102 / 0.214 | [-0.036, 0.07], [-0.379, -0.071] |
+
+Snapshots below the current level: 0.21 (with a river post at Siaga 2+: 0.024).
 
 ### logistic · precision-matched
 
-Thresholds by test year: {'2019': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': 0.1258, 'Siaga': 0.827, 'Bahaya': None}, '2021': {'Waspada': 0.2132, 'Siaga': 0.8677, 'Bahaya': 0.8961}, '2025': {'Waspada': 0.1859, 'Siaga': 0.8404, 'Bahaya': 0.9079}}
+Thresholds by test year: {'2019': {'Waspada': 0.4699, 'Siaga': 0.6438, 'Bahaya': None}, '2020': {'Waspada': 0.0959, 'Siaga': 0.7069, 'Bahaya': 0.9417}, '2021': {'Waspada': 0.1738, 'Siaga': 0.5558, 'Bahaya': 0.7935}, '2025': {'Waspada': 0.1676, 'Siaga': 0.3471, 'Bahaya': 0.8045}}
 
-**any flood**: ROC-AUC current 0.694 [0.663–0.723], learned 0.749 [0.706–0.787], difference [0.021, 0.089].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.269 / 0.558 / 0.458 | 0.186 / 0.449 / 0.533 | [-0.164, -0.054], [0.026, 0.119] | 0.537 / 0.441 | [-0.08, 0.035], [-0.06, 0.026] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.02 / 0.073 / 0.806 | [-0.084, -0.033], [-0.015, 0.177] | 0.136 / 0.769 | [-0.03, 0.049], [-0.104, 0.17] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.017 / 0.061 / 0.792 | [0.003, 0.019], [0.007, 0.073] | 0.06 / 0.891 | [-0.016, 0.037], [-0.113, 0.333] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.752 [0.7–0.802], learned 0.777 [0.711–0.837], difference [-0.024, 0.069].
+**any flood**: ROC-AUC current 0.694 [0.663–0.723], learned 0.763 [0.722–0.8], difference [0.034, 0.103].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.269 / 0.706 / 0.2 | 0.186 / 0.63 / 0.257 | [-0.182, 0.026], [0.02, 0.093] | 0.655 / 0.185 | [-0.152, 0.039], [-0.043, 0.011] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.02 / 0.123 / 0.468 | [-0.141, -0.033], [-0.041, 0.177] | 0.226 / 0.438 | [-0.039, 0.076], [-0.077, 0.167] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.017 / 0.089 / 0.396 | [0.0, 0.016], [-0.103, 0.017] | 0.128 / 0.652 | [-0.01, 0.101], [-0.025, 0.457] |
+| >= Waspada | 0.269 / 0.558 / 0.458 | 0.253 / 0.542 / 0.474 | [-0.071, 0.037], [-0.025, 0.056] | 0.548 / 0.449 | [-0.069, 0.043], [-0.052, 0.03] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.05 / 0.165 / 0.724 | [0.006, 0.067], [-0.099, 0.101] | 0.142 / 0.802 | [-0.026, 0.051], [-0.058, 0.205] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.021 / 0.078 / 0.803 | [0.012, 0.046], [-0.033, 0.125] | 0.059 / 0.87 | [-0.019, 0.036], [-0.135, 0.319] |
 
-Snapshots below the current level: 0.13 (with a river post at Siaga 2+: 0.022).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.752 [0.7–0.802], learned 0.782 [0.715–0.836], difference [-0.017, 0.076].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.269 / 0.706 / 0.2 | 0.253 / 0.698 / 0.21 | [-0.103, 0.084], [-0.016, 0.036] | 0.643 / 0.181 | [-0.169, 0.035], [-0.046, 0.007] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.05 / 0.238 / 0.359 | [-0.028, 0.094], [-0.133, 0.052] | 0.289 / 0.562 | [0.005, 0.16], [0.031, 0.302] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.021 / 0.123 / 0.439 | [0.008, 0.081], [-0.091, 0.113] | 0.119 / 0.609 | [-0.025, 0.102], [-0.08, 0.41] |
+
+Snapshots below the current level: 0.109 (with a river post at Siaga 2+: 0.015).
 
 ### logistic · volume-matched
 
-Thresholds by test year: {'2019': {'Waspada': 0.0531, 'Siaga': 0.2259, 'Bahaya': 0.3512}, '2020': {'Waspada': 0.102, 'Siaga': 0.4938, 'Bahaya': 0.673}, '2021': {'Waspada': 0.1737, 'Siaga': 0.628, 'Bahaya': 0.8319}, '2025': {'Waspada': 0.1836, 'Siaga': 0.6701, 'Bahaya': 0.8404}}
+Thresholds by test year: {'2019': {'Waspada': 0.0531, 'Siaga': 0.2379, 'Bahaya': 0.395}, '2020': {'Waspada': 0.0936, 'Siaga': 0.4784, 'Bahaya': 0.7111}, '2021': {'Waspada': 0.1665, 'Siaga': 0.6765, 'Bahaya': 0.8358}, '2025': {'Waspada': 0.178, 'Siaga': 0.6967, 'Bahaya': 0.8734}}
 
-**any flood**: ROC-AUC current 0.694 [0.663–0.723], learned 0.749 [0.706–0.787], difference [0.021, 0.089].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.269 / 0.558 / 0.458 | 0.397 / 0.643 / 0.358 | [0.028, 0.14], [-0.135, -0.066] | 0.537 / 0.441 | [-0.08, 0.035], [-0.06, 0.026] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.045 / 0.132 / 0.647 | [-0.029, 0.036], [-0.205, 0.057] | 0.136 / 0.769 | [-0.03, 0.049], [-0.104, 0.17] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.029 / 0.1 / 0.764 | [0.029, 0.072], [-0.137, 0.126] | 0.06 / 0.891 | [-0.016, 0.037], [-0.113, 0.333] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.752 [0.7–0.802], learned 0.777 [0.711–0.837], difference [-0.024, 0.069].
+**any flood**: ROC-AUC current 0.694 [0.663–0.723], learned 0.763 [0.722–0.8], difference [0.034, 0.103].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.269 / 0.706 / 0.2 | 0.397 / 0.779 / 0.149 | [-0.014, 0.162], [-0.075, -0.028] | 0.655 / 0.185 | [-0.152, 0.039], [-0.043, 0.011] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.045 / 0.243 / 0.41 | [-0.024, 0.097], [-0.097, 0.131] | 0.226 / 0.438 | [-0.039, 0.076], [-0.077, 0.167] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.029 / 0.187 / 0.494 | [0.053, 0.158], [-0.075, 0.186] | 0.128 / 0.652 | [-0.01, 0.101], [-0.025, 0.457] |
+| >= Waspada | 0.269 / 0.558 / 0.458 | 0.428 / 0.643 / 0.332 | [0.028, 0.135], [-0.166, -0.091] | 0.548 / 0.449 | [-0.069, 0.043], [-0.052, 0.03] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.057 / 0.189 / 0.733 | [0.024, 0.099], [-0.105, 0.123] | 0.142 / 0.802 | [-0.026, 0.051], [-0.058, 0.205] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.036 / 0.126 / 0.782 | [0.049, 0.102], [-0.107, 0.145] | 0.059 / 0.87 | [-0.019, 0.036], [-0.135, 0.319] |
 
-Snapshots below the current level: 0.056 (with a river post at Siaga 2+: 0.019).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.752 [0.7–0.802], learned 0.782 [0.715–0.836], difference [-0.017, 0.076].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.269 / 0.706 / 0.2 | 0.428 / 0.762 / 0.135 | [-0.034, 0.139], [-0.09, -0.042] | 0.643 / 0.181 | [-0.169, 0.035], [-0.046, 0.007] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.057 / 0.353 / 0.472 | [0.068, 0.227], [-0.035, 0.183] | 0.289 / 0.562 | [0.005, 0.16], [0.031, 0.302] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.036 / 0.217 / 0.464 | [0.076, 0.194], [-0.115, 0.165] | 0.119 / 0.609 | [-0.025, 0.102], [-0.08, 0.41] |
+
+Snapshots below the current level: 0.079 (with a river post at Siaga 2+: 0.019).
 
 ### xgb_monotone · precision-matched
 
-Thresholds by test year: {'2019': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2021': {'Waspada': 0.168, 'Siaga': None, 'Bahaya': None}, '2025': {'Waspada': 0.1592, 'Siaga': None, 'Bahaya': None}}
+Thresholds by test year: {'2019': {'Waspada': 0.5234, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': 0.0908, 'Siaga': None, 'Bahaya': None}, '2021': {'Waspada': 0.1552, 'Siaga': None, 'Bahaya': None}, '2025': {'Waspada': 0.1525, 'Siaga': 0.4369, 'Bahaya': None}}
 
-**any flood**: ROC-AUC current 0.694 [0.663–0.723], learned 0.775 [0.735–0.811], difference [0.05, 0.115].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.269 / 0.558 / 0.458 | 0.158 / 0.278 / 0.389 | [-0.346, -0.205], [-0.133, -0.001] | 0.555 / 0.45 | [-0.072, 0.06], [-0.052, 0.037] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.015 / 0.051 / 0.761 | [-0.103, -0.056], [-0.084, 0.154] | 0.11 / 0.62 | [-0.056, 0.02], [-0.242, 0.02] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.015 / 0.051 / 0.761 | [0.0, 0.0], [0.0, 0.0] | 0.057 / 0.848 | [-0.015, 0.028], [-0.079, 0.26] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.752 [0.7–0.802], learned 0.781 [0.725–0.834], difference [-0.015, 0.073].
+**any flood**: ROC-AUC current 0.694 [0.663–0.723], learned 0.786 [0.748–0.821], difference [0.06, 0.126].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.269 / 0.706 / 0.2 | 0.158 / 0.174 / 0.084 | [-0.642, -0.421], [-0.162, -0.073] | 0.685 / 0.191 | [-0.126, 0.086], [-0.037, 0.019] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.015 / 0.085 / 0.435 | [-0.176, -0.071], [-0.086, 0.178] | 0.115 / 0.223 | [-0.167, -0.016], [-0.294, -0.054] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.015 / 0.085 / 0.435 | [0.0, 0.0], [0.0, 0.0] | 0.068 / 0.348 | [-0.056, 0.018], [-0.265, 0.077] |
+| >= Waspada | 0.269 / 0.558 / 0.458 | 0.293 / 0.597 / 0.45 | [-0.024, 0.103], [-0.053, 0.036] | 0.572 / 0.471 | [-0.045, 0.076], [-0.03, 0.058] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.043 / 0.113 / 0.575 | [-0.041, 0.009], [-0.244, -0.058] | 0.138 / 0.777 | [-0.027, 0.048], [-0.06, 0.175] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.015 / 0.051 / 0.761 | [0.0, 0.0], [0.0, 0.0] | 0.064 / 0.957 | [-0.01, 0.037], [0.038, 0.367] |
 
-Snapshots below the current level: 0.177 (with a river post at Siaga 2+: 0.024).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.752 [0.7–0.802], learned 0.791 [0.728–0.844], difference [-0.007, 0.084].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.269 / 0.706 / 0.2 | 0.293 / 0.719 / 0.187 | [-0.083, 0.114], [-0.038, 0.013] | 0.685 / 0.194 | [-0.112, 0.068], [-0.032, 0.019] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.043 / 0.119 / 0.209 | [-0.142, -0.035], [-0.278, -0.108] | 0.2 / 0.388 | [-0.069, 0.061], [-0.123, 0.106] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.015 / 0.085 / 0.435 | [0.0, 0.0], [0.0, 0.0] | 0.098 / 0.5 | [-0.031, 0.063], [-0.13, 0.26] |
+
+Snapshots below the current level: 0.1 (with a river post at Siaga 2+: 0.017).
 
 ### xgb_monotone · volume-matched
 
-Thresholds by test year: {'2019': {'Waspada': 0.074, 'Siaga': 0.3185, 'Bahaya': 0.4234}, '2020': {'Waspada': 0.1054, 'Siaga': 0.4337, 'Bahaya': 0.5655}, '2021': {'Waspada': 0.1917, 'Siaga': 0.5546, 'Bahaya': 0.7272}, '2025': {'Waspada': 0.2164, 'Siaga': 0.6133, 'Bahaya': 0.7562}}
+Thresholds by test year: {'2019': {'Waspada': 0.074, 'Siaga': 0.3496, 'Bahaya': 0.4707}, '2020': {'Waspada': 0.0851, 'Siaga': 0.4898, 'Bahaya': 0.6408}, '2021': {'Waspada': 0.1731, 'Siaga': 0.6227, 'Bahaya': 0.7609}, '2025': {'Waspada': 0.1932, 'Siaga': 0.6696, 'Bahaya': 0.8016}}
 
-**any flood**: ROC-AUC current 0.694 [0.663–0.723], learned 0.775 [0.735–0.811], difference [0.05, 0.115].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.269 / 0.558 / 0.458 | 0.443 / 0.758 / 0.378 | [0.14, 0.26], [-0.116, -0.042] | 0.555 / 0.45 | [-0.072, 0.06], [-0.052, 0.037] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.052 / 0.174 / 0.739 | [0.007, 0.08], [-0.093, 0.122] | 0.11 / 0.62 | [-0.056, 0.02], [-0.242, 0.02] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.024 / 0.082 / 0.767 | [0.017, 0.046], [-0.078, 0.089] | 0.057 / 0.848 | [-0.015, 0.028], [-0.079, 0.26] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.752 [0.7–0.802], learned 0.781 [0.725–0.834], difference [-0.015, 0.073].
+**any flood**: ROC-AUC current 0.694 [0.663–0.723], learned 0.786 [0.748–0.821], difference [0.06, 0.126].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.269 / 0.706 / 0.2 | 0.443 / 0.838 / 0.144 | [0.043, 0.219], [-0.082, -0.033] | 0.685 / 0.191 | [-0.126, 0.086], [-0.037, 0.019] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.052 / 0.247 / 0.36 | [-0.03, 0.107], [-0.133, 0.058] | 0.115 / 0.223 | [-0.167, -0.016], [-0.294, -0.054] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.024 / 0.111 / 0.356 | [0.005, 0.052], [-0.182, 0.016] | 0.068 / 0.348 | [-0.056, 0.018], [-0.265, 0.077] |
+| >= Waspada | 0.269 / 0.558 / 0.458 | 0.359 / 0.691 / 0.426 | [0.071, 0.193], [-0.071, 0.005] | 0.572 / 0.471 | [-0.045, 0.076], [-0.03, 0.058] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.064 / 0.22 / 0.758 | [0.051, 0.134], [-0.07, 0.13] | 0.138 / 0.777 | [-0.027, 0.048], [-0.06, 0.175] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.031 / 0.117 / 0.842 | [0.045, 0.092], [-0.014, 0.195] | 0.064 / 0.957 | [-0.01, 0.037], [0.038, 0.367] |
 
-Snapshots below the current level: 0.05 (with a river post at Siaga 2+: 0.014).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.752 [0.7–0.802], learned 0.791 [0.728–0.844], difference [-0.007, 0.084].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.269 / 0.706 / 0.2 | 0.359 / 0.791 / 0.168 | [0.004, 0.167], [-0.055, -0.01] | 0.685 / 0.194 | [-0.112, 0.068], [-0.032, 0.019] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.064 / 0.362 / 0.429 | [0.08, 0.232], [-0.08, 0.126] | 0.2 / 0.388 | [-0.069, 0.061], [-0.123, 0.106] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.031 / 0.221 / 0.547 | [0.081, 0.198], [-0.013, 0.245] | 0.098 / 0.5 | [-0.031, 0.063], [-0.13, 0.26] |
+
+Snapshots below the current level: 0.073 (with a river post at Siaga 2+: 0.014).
 
 ## lag 2 · 3090 test snapshots on 1062 days (flood days 0.221, large 0.076)
 
 ### tree · precision-matched
 
-Thresholds by test year: {'2019': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2021': {'Waspada': 0.2205, 'Siaga': None, 'Bahaya': None}, '2025': {'Waspada': 0.3208, 'Siaga': 0.5217, 'Bahaya': None}}
+Thresholds by test year: {'2019': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': 0.2772, 'Siaga': None, 'Bahaya': None}, '2021': {'Waspada': 0.215, 'Siaga': None, 'Bahaya': None}, '2025': {'Waspada': 0.2242, 'Siaga': None, 'Bahaya': None}}
 
-**any flood**: ROC-AUC current 0.683 [0.653–0.713], learned 0.733 [0.695–0.77], difference [0.014, 0.09].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.248 / 0.521 / 0.464 | 0.132 / 0.242 / 0.405 | [-0.345, -0.215], [-0.127, 0.025] | 0.635 / 0.436 | [0.05, 0.186], [-0.078, 0.019] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.018 / 0.059 / 0.702 | [-0.096, -0.048], [-0.139, 0.084] | 0.113 / 0.524 | [-0.052, 0.019], [-0.319, -0.079] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.015 / 0.051 / 0.761 | [0.0, 0.0], [0.0, 0.0] | 0.048 / 0.55 | [-0.029, 0.027], [-0.44, 0.028] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.732 [0.68–0.784], learned 0.712 [0.663–0.763], difference [-0.067, 0.032].
+**any flood**: ROC-AUC current 0.683 [0.653–0.713], learned 0.74 [0.699–0.778], difference [0.017, 0.097].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.248 / 0.651 / 0.199 | 0.132 / 0.166 / 0.096 | [-0.592, -0.38], [-0.155, -0.057] | 0.74 / 0.175 | [-0.02, 0.208], [-0.052, 0.006] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.018 / 0.089 / 0.368 | [-0.174, -0.065], [-0.139, 0.088] | 0.094 / 0.15 | [-0.179, -0.046], [-0.348, -0.146] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.015 / 0.085 / 0.435 | [0.0, 0.0], [0.0, 0.0] | 0.055 / 0.217 | [-0.082, 0.028], [-0.41, -0.001] |
+| >= Waspada | 0.248 / 0.521 / 0.464 | 0.22 / 0.466 / 0.468 | [-0.116, 0.007], [-0.051, 0.061] | 0.514 / 0.438 | [-0.071, 0.06], [-0.078, 0.027] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.015 / 0.051 / 0.761 | [-0.103, -0.056], [-0.084, 0.154] | 0.113 / 0.616 | [-0.057, 0.027], [-0.241, 0.017] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.015 / 0.051 / 0.761 | [0.0, 0.0], [0.0, 0.0] | 0.044 / 0.652 | [-0.039, 0.026], [-0.395, 0.145] |
 
-Snapshots below the current level: 0.181 (with a river post at Siaga 2+: 0.024).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.732 [0.68–0.784], learned 0.73 [0.67–0.784], difference [-0.053, 0.05].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.248 / 0.651 / 0.199 | 0.22 / 0.549 / 0.19 | [-0.201, 0.006], [-0.041, 0.025] | 0.613 / 0.18 | [-0.14, 0.063], [-0.049, 0.012] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.015 / 0.085 / 0.435 | [-0.176, -0.071], [-0.086, 0.178] | 0.106 / 0.2 | [-0.181, -0.015], [-0.322, -0.08] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.015 / 0.085 / 0.435 | [0.0, 0.0], [0.0, 0.0] | 0.043 / 0.217 | [-0.105, 0.018], [-0.439, 0.042] |
+
+Snapshots below the current level: 0.139 (with a river post at Siaga 2+: 0.024).
 
 ### logistic · precision-matched
 
-Thresholds by test year: {'2019': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': 0.5292, 'Siaga': 0.7626, 'Bahaya': None}, '2021': {'Waspada': 0.2056, 'Siaga': 0.7937, 'Bahaya': 0.8898}, '2025': {'Waspada': 0.1768, 'Siaga': 0.7953, 'Bahaya': 0.8418}}
+Thresholds by test year: {'2019': {'Waspada': 0.4654, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': 0.0926, 'Siaga': 0.6439, 'Bahaya': 0.943}, '2021': {'Waspada': 0.1607, 'Siaga': 0.5917, 'Bahaya': 0.8036}, '2025': {'Waspada': 0.1647, 'Siaga': 0.3689, 'Bahaya': 0.8152}}
 
-**any flood**: ROC-AUC current 0.683 [0.653–0.713], learned 0.746 [0.704–0.784], difference [0.027, 0.098].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.248 / 0.521 / 0.464 | 0.118 / 0.275 / 0.514 | [-0.3, -0.189], [-0.012, 0.117] | 0.512 / 0.455 | [-0.071, 0.05], [-0.059, 0.036] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.022 / 0.082 / 0.824 | [-0.076, -0.023], [0.004, 0.188] | 0.139 / 0.785 | [-0.027, 0.05], [-0.075, 0.171] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.017 / 0.061 / 0.792 | [0.003, 0.019], [0.007, 0.073] | 0.06 / 0.891 | [-0.015, 0.034], [-0.11, 0.333] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.732 [0.68–0.784], learned 0.764 [0.693–0.828], difference [-0.015, 0.076].
+**any flood**: ROC-AUC current 0.683 [0.653–0.713], learned 0.763 [0.722–0.801], difference [0.045, 0.113].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.248 / 0.651 / 0.199 | 0.118 / 0.272 / 0.175 | [-0.476, -0.278], [-0.071, 0.021] | 0.655 / 0.2 | [-0.1, 0.095], [-0.031, 0.03] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.022 / 0.14 / 0.485 | [-0.127, -0.01], [-0.032, 0.205] | 0.226 / 0.438 | [-0.046, 0.093], [-0.087, 0.165] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.017 / 0.089 / 0.396 | [0.0, 0.016], [-0.103, 0.017] | 0.128 / 0.652 | [-0.008, 0.101], [-0.021, 0.432] |
+| >= Waspada | 0.248 / 0.521 / 0.464 | 0.266 / 0.561 / 0.465 | [-0.016, 0.091], [-0.042, 0.041] | 0.529 / 0.471 | [-0.053, 0.064], [-0.043, 0.05] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.048 / 0.157 / 0.723 | [-0.005, 0.059], [-0.102, 0.093] | 0.142 / 0.802 | [-0.025, 0.051], [-0.06, 0.207] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.021 / 0.078 / 0.803 | [0.012, 0.046], [-0.033, 0.125] | 0.059 / 0.87 | [-0.02, 0.036], [-0.139, 0.321] |
 
-Snapshots below the current level: 0.167 (with a river post at Siaga 2+: 0.022).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.732 [0.68–0.784], learned 0.781 [0.714–0.835], difference [0.002, 0.095].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.248 / 0.651 / 0.199 | 0.266 / 0.715 / 0.204 | [-0.027, 0.161], [-0.021, 0.032] | 0.643 / 0.197 | [-0.114, 0.092], [-0.031, 0.027] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.048 / 0.23 / 0.365 | [-0.047, 0.088], [-0.13, 0.062] | 0.277 / 0.537 | [-0.008, 0.142], [0.008, 0.274] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.021 / 0.123 / 0.439 | [0.008, 0.081], [-0.091, 0.113] | 0.119 / 0.609 | [-0.023, 0.099], [-0.074, 0.408] |
+
+Snapshots below the current level: 0.097 (with a river post at Siaga 2+: 0.016).
 
 ### logistic · volume-matched
 
-Thresholds by test year: {'2019': {'Waspada': 0.0527, 'Siaga': 0.2081, 'Bahaya': 0.3709}, '2020': {'Waspada': 0.104, 'Siaga': 0.4867, 'Bahaya': 0.63}, '2021': {'Waspada': 0.1766, 'Siaga': 0.6395, 'Bahaya': 0.7938}, '2025': {'Waspada': 0.1924, 'Siaga': 0.6757, 'Bahaya': 0.8263}}
+Thresholds by test year: {'2019': {'Waspada': 0.0519, 'Siaga': 0.2327, 'Bahaya': 0.3926}, '2020': {'Waspada': 0.0941, 'Siaga': 0.4645, 'Bahaya': 0.7081}, '2021': {'Waspada': 0.1712, 'Siaga': 0.6518, 'Bahaya': 0.844}, '2025': {'Waspada': 0.1887, 'Siaga': 0.685, 'Bahaya': 0.8741}}
 
-**any flood**: ROC-AUC current 0.683 [0.653–0.713], learned 0.746 [0.704–0.784], difference [0.027, 0.098].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.248 / 0.521 / 0.464 | 0.415 / 0.668 / 0.356 | [0.089, 0.201], [-0.147, -0.072] | 0.512 / 0.455 | [-0.071, 0.05], [-0.059, 0.036] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.048 / 0.145 / 0.664 | [-0.018, 0.049], [-0.186, 0.068] | 0.139 / 0.785 | [-0.027, 0.05], [-0.075, 0.171] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.03 / 0.104 / 0.755 | [0.033, 0.076], [-0.149, 0.123] | 0.06 / 0.891 | [-0.015, 0.034], [-0.11, 0.333] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.732 [0.68–0.784], learned 0.764 [0.693–0.828], difference [-0.015, 0.076].
+**any flood**: ROC-AUC current 0.683 [0.653–0.713], learned 0.763 [0.722–0.801], difference [0.045, 0.113].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.248 / 0.651 / 0.199 | 0.415 / 0.753 / 0.138 | [0.023, 0.18], [-0.087, -0.037] | 0.655 / 0.2 | [-0.1, 0.095], [-0.031, 0.03] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.048 / 0.26 / 0.409 | [-0.009, 0.117], [-0.096, 0.122] | 0.226 / 0.438 | [-0.046, 0.093], [-0.087, 0.165] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.03 / 0.2 / 0.5 | [0.066, 0.171], [-0.077, 0.201] | 0.128 / 0.652 | [-0.008, 0.101], [-0.021, 0.432] |
+| >= Waspada | 0.248 / 0.521 / 0.464 | 0.428 / 0.643 / 0.332 | [0.069, 0.168], [-0.169, -0.096] | 0.529 / 0.471 | [-0.053, 0.064], [-0.043, 0.05] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.061 / 0.198 / 0.718 | [0.031, 0.11], [-0.116, 0.107] | 0.142 / 0.802 | [-0.025, 0.051], [-0.06, 0.207] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.036 / 0.13 / 0.802 | [0.054, 0.109], [-0.084, 0.16] | 0.059 / 0.87 | [-0.02, 0.036], [-0.139, 0.321] |
 
-Snapshots below the current level: 0.054 (with a river post at Siaga 2+: 0.017).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.732 [0.68–0.784], learned 0.781 [0.714–0.835], difference [0.002, 0.095].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.248 / 0.651 / 0.199 | 0.428 / 0.77 / 0.137 | [0.038, 0.202], [-0.086, -0.038] | 0.643 / 0.197 | [-0.114, 0.092], [-0.031, 0.027] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.061 / 0.353 / 0.441 | [0.069, 0.221], [-0.061, 0.15] | 0.277 / 0.537 | [-0.008, 0.142], [0.008, 0.274] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.036 / 0.226 / 0.477 | [0.082, 0.205], [-0.105, 0.177] | 0.119 / 0.609 | [-0.023, 0.099], [-0.074, 0.408] |
+
+Snapshots below the current level: 0.068 (with a river post at Siaga 2+: 0.018).
 
 ### xgb_monotone · precision-matched
 
-Thresholds by test year: {'2019': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2021': {'Waspada': 0.1526, 'Siaga': None, 'Bahaya': None}, '2025': {'Waspada': 0.151, 'Siaga': None, 'Bahaya': None}}
+Thresholds by test year: {'2019': {'Waspada': 0.5572, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': 0.0793, 'Siaga': None, 'Bahaya': None}, '2021': {'Waspada': 0.1455, 'Siaga': 0.6362, 'Bahaya': None}, '2025': {'Waspada': 0.1568, 'Siaga': 0.4069, 'Bahaya': None}}
 
-**any flood**: ROC-AUC current 0.683 [0.653–0.713], learned 0.769 [0.73–0.805], difference [0.053, 0.12].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.248 / 0.521 / 0.464 | 0.164 / 0.286 / 0.385 | [-0.299, -0.17], [-0.138, -0.012] | 0.529 / 0.463 | [-0.06, 0.071], [-0.051, 0.048] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.015 / 0.051 / 0.761 | [-0.103, -0.056], [-0.084, 0.154] | 0.116 / 0.642 | [-0.049, 0.026], [-0.217, 0.043] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.015 / 0.051 / 0.761 | [0.0, 0.0], [0.0, 0.0] | 0.057 / 0.848 | [-0.016, 0.029], [-0.077, 0.26] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.732 [0.68–0.784], learned 0.774 [0.713–0.827], difference [-0.002, 0.087].
+**any flood**: ROC-AUC current 0.683 [0.653–0.713], learned 0.788 [0.751–0.822], difference [0.073, 0.138].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.248 / 0.651 / 0.199 | 0.164 / 0.179 / 0.083 | [-0.576, -0.367], [-0.163, -0.074] | 0.655 / 0.198 | [-0.097, 0.11], [-0.03, 0.029] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.015 / 0.085 / 0.435 | [-0.176, -0.071], [-0.086, 0.178] | 0.106 / 0.203 | [-0.171, -0.027], [-0.312, -0.073] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.015 / 0.085 / 0.435 | [0.0, 0.0], [0.0, 0.0] | 0.068 / 0.348 | [-0.057, 0.019], [-0.273, 0.07] |
+| >= Waspada | 0.248 / 0.521 / 0.464 | 0.306 / 0.608 / 0.439 | [0.025, 0.152], [-0.072, 0.02] | 0.546 / 0.486 | [-0.034, 0.084], [-0.023, 0.07] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.051 / 0.132 / 0.573 | [-0.026, 0.032], [-0.25, -0.058] | 0.136 / 0.769 | [-0.03, 0.045], [-0.073, 0.167] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.015 / 0.051 / 0.761 | [0.0, 0.0], [0.0, 0.0] | 0.064 / 0.957 | [-0.01, 0.037], [0.038, 0.367] |
 
-Snapshots below the current level: 0.161 (with a river post at Siaga 2+: 0.024).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.732 [0.68–0.784], learned 0.794 [0.733–0.846], difference [0.017, 0.106].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.248 / 0.651 / 0.199 | 0.306 / 0.736 / 0.183 | [-0.013, 0.191], [-0.042, 0.012] | 0.66 / 0.202 | [-0.082, 0.109], [-0.024, 0.031] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.051 / 0.136 / 0.204 | [-0.129, -0.012], [-0.287, -0.112] | 0.191 / 0.372 | [-0.083, 0.054], [-0.139, 0.093] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.015 / 0.085 / 0.435 | [0.0, 0.0], [0.0, 0.0] | 0.098 / 0.5 | [-0.033, 0.064], [-0.128, 0.255] |
+
+Snapshots below the current level: 0.092 (with a river post at Siaga 2+: 0.016).
 
 ### xgb_monotone · volume-matched
 
-Thresholds by test year: {'2019': {'Waspada': 0.074, 'Siaga': 0.3635, 'Bahaya': 0.3924}, '2020': {'Waspada': 0.0948, 'Siaga': 0.4616, 'Bahaya': 0.5659}, '2021': {'Waspada': 0.2065, 'Siaga': 0.567, 'Bahaya': 0.73}, '2025': {'Waspada': 0.2285, 'Siaga': 0.6194, 'Bahaya': 0.7628}}
+Thresholds by test year: {'2019': {'Waspada': 0.074, 'Siaga': 0.3757, 'Bahaya': 0.5053}, '2020': {'Waspada': 0.0936, 'Siaga': 0.4959, 'Bahaya': 0.6484}, '2021': {'Waspada': 0.1947, 'Siaga': 0.6094, 'Bahaya': 0.7465}, '2025': {'Waspada': 0.2078, 'Siaga': 0.6643, 'Bahaya': 0.8065}}
 
-**any flood**: ROC-AUC current 0.683 [0.653–0.713], learned 0.769 [0.73–0.805], difference [0.053, 0.12].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.248 / 0.521 / 0.464 | 0.407 / 0.739 / 0.401 | [0.156, 0.278], [-0.103, -0.023] | 0.529 / 0.463 | [-0.06, 0.071], [-0.051, 0.048] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.043 / 0.148 / 0.765 | [-0.015, 0.049], [-0.058, 0.127] | 0.116 / 0.642 | [-0.049, 0.026], [-0.217, 0.043] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.022 / 0.075 / 0.75 | [0.012, 0.036], [-0.095, 0.07] | 0.057 / 0.848 | [-0.016, 0.029], [-0.077, 0.26] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.732 [0.68–0.784], learned 0.774 [0.713–0.827], difference [-0.002, 0.087].
+**any flood**: ROC-AUC current 0.683 [0.653–0.713], learned 0.788 [0.751–0.822], difference [0.073, 0.138].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.248 / 0.651 / 0.199 | 0.407 / 0.83 / 0.155 | [0.093, 0.269], [-0.069, -0.019] | 0.655 / 0.198 | [-0.097, 0.11], [-0.03, 0.029] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.043 / 0.217 / 0.386 | [-0.065, 0.086], [-0.116, 0.088] | 0.106 / 0.203 | [-0.171, -0.027], [-0.312, -0.073] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.022 / 0.102 / 0.353 | [0.004, 0.038], [-0.178, -0.003] | 0.068 / 0.348 | [-0.057, 0.019], [-0.273, 0.07] |
+| >= Waspada | 0.248 / 0.521 / 0.464 | 0.342 / 0.671 / 0.433 | [0.089, 0.21], [-0.071, 0.007] | 0.546 / 0.486 | [-0.034, 0.084], [-0.023, 0.07] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.063 / 0.214 / 0.749 | [0.046, 0.126], [-0.079, 0.124] | 0.136 / 0.769 | [-0.03, 0.045], [-0.073, 0.167] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.03 / 0.113 / 0.828 | [0.04, 0.086], [-0.03, 0.176] | 0.064 / 0.957 | [-0.01, 0.037], [0.038, 0.367] |
 
-Snapshots below the current level: 0.052 (with a river post at Siaga 2+: 0.016).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.732 [0.68–0.784], learned 0.794 [0.733–0.846], difference [0.017, 0.106].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.248 / 0.651 / 0.199 | 0.342 / 0.783 / 0.174 | [0.053, 0.215], [-0.048, -0.003] | 0.66 / 0.202 | [-0.082, 0.109], [-0.024, 0.031] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.063 / 0.357 / 0.431 | [0.076, 0.225], [-0.075, 0.132] | 0.191 / 0.372 | [-0.083, 0.054], [-0.139, 0.093] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.03 / 0.2 / 0.505 | [0.063, 0.175], [-0.049, 0.195] | 0.098 / 0.5 | [-0.033, 0.064], [-0.128, 0.255] |
+
+Snapshots below the current level: 0.071 (with a river post at Siaga 2+: 0.014).
 
 ## lag 3 · 3090 test snapshots on 1062 days (flood days 0.221, large 0.076)
 
 ### tree · precision-matched
 
-Thresholds by test year: {'2019': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2021': {'Waspada': 0.2363, 'Siaga': 0.8478, 'Bahaya': 0.8478}, '2025': {'Waspada': 0.3913, 'Siaga': 0.5217, 'Bahaya': None}}
+Thresholds by test year: {'2019': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': 0.2381, 'Siaga': None, 'Bahaya': None}, '2021': {'Waspada': 0.2697, 'Siaga': None, 'Bahaya': None}, '2025': {'Waspada': 0.2265, 'Siaga': 0.6744, 'Bahaya': None}}
 
-**any flood**: ROC-AUC current 0.685 [0.655–0.714], learned 0.743 [0.704–0.779], difference [0.023, 0.093].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.255 / 0.53 / 0.46 | 0.125 / 0.24 / 0.425 | [-0.354, -0.224], [-0.109, 0.047] | 0.605 / 0.458 | [0.009, 0.143], [-0.05, 0.043] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.02 / 0.064 / 0.721 | [-0.091, -0.041], [-0.117, 0.102] | 0.101 / 0.57 | [-0.064, 0.007], [-0.277, -0.041] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.016 / 0.057 / 0.78 | [0.0, 0.014], [0.0, 0.05] | 0.101 / 0.57 | [0.023, 0.083], [-0.351, -0.029] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.731 [0.68–0.784], learned 0.729 [0.674–0.78], difference [-0.051, 0.05].
+**any flood**: ROC-AUC current 0.685 [0.655–0.714], learned 0.73 [0.689–0.767], difference [0.008, 0.082].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.255 / 0.655 / 0.196 | 0.125 / 0.166 / 0.101 | [-0.597, -0.379], [-0.143, -0.046] | 0.74 / 0.193 | [-0.028, 0.203], [-0.033, 0.029] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.02 / 0.089 / 0.344 | [-0.174, -0.065], [-0.162, 0.06] | 0.085 / 0.165 | [-0.194, -0.045], [-0.352, -0.118] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.016 / 0.085 / 0.4 | [0.0, 0.0], [-0.09, 0.0] | 0.085 / 0.165 | [-0.044, 0.044], [-0.43, -0.125] |
+| >= Waspada | 0.255 / 0.53 / 0.46 | 0.174 / 0.406 / 0.514 | [-0.185, -0.062], [0.0, 0.107] | 0.605 / 0.435 | [0.013, 0.139], [-0.068, 0.02] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.015 / 0.051 / 0.761 | [-0.103, -0.056], [-0.084, 0.154] | 0.149 / 0.57 | [-0.02, 0.065], [-0.279, -0.034] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.015 / 0.051 / 0.761 | [0.0, 0.0], [0.0, 0.0] | 0.044 / 0.652 | [-0.039, 0.026], [-0.395, 0.145] |
 
-Snapshots below the current level: 0.185 (with a river post at Siaga 2+: 0.024).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.731 [0.68–0.784], learned 0.735 [0.67–0.795], difference [-0.05, 0.059].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.255 / 0.655 / 0.196 | 0.174 / 0.536 / 0.234 | [-0.222, -0.014], [-0.0, 0.076] | 0.74 / 0.183 | [-0.01, 0.19], [-0.04, 0.016] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.015 / 0.085 / 0.435 | [-0.176, -0.071], [-0.086, 0.178] | 0.136 / 0.179 | [-0.148, 0.01], [-0.326, -0.113] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.015 / 0.085 / 0.435 | [0.0, 0.0], [0.0, 0.0] | 0.043 / 0.217 | [-0.105, 0.018], [-0.439, 0.042] |
+
+Snapshots below the current level: 0.156 (with a river post at Siaga 2+: 0.024).
 
 ### logistic · precision-matched
 
-Thresholds by test year: {'2019': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': 0.6515, 'Siaga': 0.7964, 'Bahaya': None}, '2021': {'Waspada': 0.2024, 'Siaga': 0.8007, 'Bahaya': 0.8897}, '2025': {'Waspada': 0.1714, 'Siaga': 0.8074, 'Bahaya': 0.9008}}
+Thresholds by test year: {'2019': {'Waspada': 0.4804, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': 0.0886, 'Siaga': 0.7079, 'Bahaya': 0.9402}, '2021': {'Waspada': 0.1649, 'Siaga': 0.6405, 'Bahaya': 0.8286}, '2025': {'Waspada': 0.1635, 'Siaga': 0.5369, 'Bahaya': 0.8246}}
 
-**any flood**: ROC-AUC current 0.685 [0.655–0.714], learned 0.745 [0.703–0.784], difference [0.026, 0.095].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.255 / 0.53 / 0.46 | 0.117 / 0.264 / 0.497 | [-0.321, -0.206], [-0.024, 0.108] | 0.518 / 0.447 | [-0.073, 0.045], [-0.061, 0.032] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.019 / 0.072 / 0.817 | [-0.084, -0.035], [-0.005, 0.184] | 0.139 / 0.785 | [-0.028, 0.049], [-0.073, 0.171] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.017 / 0.061 / 0.792 | [0.003, 0.019], [0.007, 0.073] | 0.06 / 0.891 | [-0.017, 0.034], [-0.11, 0.336] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.731 [0.68–0.784], learned 0.757 [0.686–0.824], difference [-0.026, 0.075].
+**any flood**: ROC-AUC current 0.685 [0.655–0.714], learned 0.762 [0.721–0.8], difference [0.042, 0.111].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.255 / 0.655 / 0.196 | 0.117 / 0.234 / 0.152 | [-0.524, -0.317], [-0.091, 0.004] | 0.66 / 0.196 | [-0.091, 0.1], [-0.029, 0.028] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.019 / 0.111 / 0.433 | [-0.15, -0.049], [-0.078, 0.149] | 0.213 / 0.413 | [-0.056, 0.068], [-0.101, 0.141] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.017 / 0.089 / 0.396 | [0.0, 0.016], [-0.103, 0.017] | 0.119 / 0.609 | [-0.014, 0.082], [-0.057, 0.414] |
+| >= Waspada | 0.255 / 0.53 / 0.46 | 0.272 / 0.574 / 0.467 | [-0.009, 0.095], [-0.035, 0.044] | 0.533 / 0.463 | [-0.056, 0.059], [-0.043, 0.047] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.034 / 0.122 / 0.798 | [-0.039, 0.022], [-0.021, 0.166] | 0.142 / 0.802 | [-0.024, 0.049], [-0.054, 0.204] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.021 / 0.075 / 0.797 | [0.01, 0.042], [-0.039, 0.121] | 0.059 / 0.87 | [-0.019, 0.036], [-0.135, 0.321] |
 
-Snapshots below the current level: 0.174 (with a river post at Siaga 2+: 0.022).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.731 [0.68–0.784], learned 0.777 [0.709–0.832], difference [-0.004, 0.092].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.255 / 0.655 / 0.196 | 0.272 / 0.732 / 0.205 | [-0.014, 0.171], [-0.016, 0.036] | 0.643 / 0.192 | [-0.117, 0.087], [-0.032, 0.026] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.034 / 0.196 / 0.442 | [-0.074, 0.051], [-0.06, 0.152] | 0.281 / 0.545 | [0.0, 0.146], [0.022, 0.281] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.021 / 0.119 / 0.438 | [0.005, 0.076], [-0.091, 0.105] | 0.119 / 0.609 | [-0.022, 0.1], [-0.077, 0.407] |
+
+Snapshots below the current level: 0.103 (with a river post at Siaga 2+: 0.02).
 
 ### logistic · volume-matched
 
-Thresholds by test year: {'2019': {'Waspada': 0.0581, 'Siaga': 0.2236, 'Bahaya': 0.4037}, '2020': {'Waspada': 0.1043, 'Siaga': 0.4943, 'Bahaya': 0.6516}, '2021': {'Waspada': 0.1737, 'Siaga': 0.6455, 'Bahaya': 0.7962}, '2025': {'Waspada': 0.1877, 'Siaga': 0.6622, 'Bahaya': 0.8202}}
+Thresholds by test year: {'2019': {'Waspada': 0.0586, 'Siaga': 0.2376, 'Bahaya': 0.4187}, '2020': {'Waspada': 0.0964, 'Siaga': 0.46, 'Bahaya': 0.7367}, '2021': {'Waspada': 0.1697, 'Siaga': 0.6642, 'Bahaya': 0.8517}, '2025': {'Waspada': 0.1859, 'Siaga': 0.6916, 'Bahaya': 0.8692}}
 
-**any flood**: ROC-AUC current 0.685 [0.655–0.714], learned 0.745 [0.703–0.784], difference [0.026, 0.095].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.255 / 0.53 / 0.46 | 0.378 / 0.659 / 0.386 | [0.072, 0.177], [-0.112, -0.039] | 0.518 / 0.447 | [-0.073, 0.045], [-0.061, 0.032] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.046 / 0.136 / 0.66 | [-0.022, 0.039], [-0.196, 0.067] | 0.139 / 0.785 | [-0.028, 0.049], [-0.073, 0.171] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.027 / 0.098 / 0.807 | [0.028, 0.068], [-0.08, 0.149] | 0.06 / 0.891 | [-0.017, 0.034], [-0.11, 0.336] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.731 [0.68–0.784], learned 0.757 [0.686–0.824], difference [-0.026, 0.075].
+**any flood**: ROC-AUC current 0.685 [0.655–0.714], learned 0.762 [0.721–0.8], difference [0.042, 0.111].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.255 / 0.655 / 0.196 | 0.378 / 0.762 / 0.153 | [0.026, 0.185], [-0.066, -0.02] | 0.66 / 0.196 | [-0.091, 0.1], [-0.029, 0.028] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.046 / 0.238 / 0.397 | [-0.021, 0.086], [-0.107, 0.108] | 0.213 / 0.413 | [-0.056, 0.068], [-0.101, 0.141] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.027 / 0.179 / 0.506 | [0.05, 0.145], [-0.055, 0.189] | 0.119 / 0.609 | [-0.014, 0.082], [-0.057, 0.414] |
+| >= Waspada | 0.255 / 0.53 / 0.46 | 0.416 / 0.638 / 0.339 | [0.053, 0.158], [-0.157, -0.085] | 0.533 / 0.463 | [-0.056, 0.059], [-0.043, 0.047] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.06 / 0.192 / 0.712 | [0.027, 0.103], [-0.126, 0.101] | 0.142 / 0.802 | [-0.024, 0.049], [-0.054, 0.204] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.032 / 0.117 / 0.8 | [0.043, 0.091], [-0.095, 0.154] | 0.059 / 0.87 | [-0.019, 0.036], [-0.135, 0.321] |
 
-Snapshots below the current level: 0.059 (with a river post at Siaga 2+: 0.018).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.731 [0.68–0.784], learned 0.777 [0.709–0.832], difference [-0.004, 0.092].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.255 / 0.655 / 0.196 | 0.416 / 0.757 / 0.139 | [0.018, 0.182], [-0.081, -0.033] | 0.643 / 0.192 | [-0.117, 0.087], [-0.032, 0.026] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.06 / 0.336 / 0.429 | [0.051, 0.204], [-0.074, 0.141] | 0.281 / 0.545 | [0.0, 0.146], [0.022, 0.281] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.032 / 0.2 / 0.47 | [0.064, 0.172], [-0.1, 0.16] | 0.119 / 0.609 | [-0.022, 0.1], [-0.077, 0.407] |
+
+Snapshots below the current level: 0.076 (with a river post at Siaga 2+: 0.019).
 
 ### xgb_monotone · precision-matched
 
-Thresholds by test year: {'2019': {'Waspada': None, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': 0.1042, 'Siaga': None, 'Bahaya': None}, '2021': {'Waspada': 0.1628, 'Siaga': None, 'Bahaya': None}, '2025': {'Waspada': 0.1683, 'Siaga': None, 'Bahaya': None}}
+Thresholds by test year: {'2019': {'Waspada': 0.4686, 'Siaga': None, 'Bahaya': None}, '2020': {'Waspada': 0.0733, 'Siaga': None, 'Bahaya': None}, '2021': {'Waspada': 0.1459, 'Siaga': 0.5024, 'Bahaya': None}, '2025': {'Waspada': 0.1538, 'Siaga': 0.4342, 'Bahaya': None}}
 
-**any flood**: ROC-AUC current 0.685 [0.655–0.714], learned 0.773 [0.733–0.808], difference [0.056, 0.12].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.255 / 0.53 / 0.46 | 0.332 / 0.649 / 0.431 | [0.055, 0.189], [-0.075, 0.017] | 0.537 / 0.455 | [-0.057, 0.068], [-0.052, 0.041] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.015 / 0.051 / 0.761 | [-0.103, -0.056], [-0.084, 0.154] | 0.116 / 0.642 | [-0.05, 0.025], [-0.216, 0.045] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.015 / 0.051 / 0.761 | [0.0, 0.0], [0.0, 0.0] | 0.059 / 0.833 | [-0.014, 0.03], [-0.083, 0.249] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.731 [0.68–0.784], learned 0.777 [0.711–0.831], difference [-0.004, 0.091].
+**any flood**: ROC-AUC current 0.685 [0.655–0.714], learned 0.784 [0.745–0.819], difference [0.066, 0.131].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.255 / 0.655 / 0.196 | 0.332 / 0.762 / 0.174 | [-0.014, 0.223], [-0.05, 0.009] | 0.677 / 0.197 | [-0.083, 0.12], [-0.027, 0.028] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.015 / 0.085 / 0.435 | [-0.176, -0.071], [-0.086, 0.178] | 0.111 / 0.211 | [-0.169, -0.02], [-0.302, -0.069] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.015 / 0.085 / 0.435 | [0.0, 0.0], [0.0, 0.0] | 0.072 / 0.354 | [-0.054, 0.025], [-0.263, 0.083] |
+| >= Waspada | 0.255 / 0.53 / 0.46 | 0.316 / 0.631 / 0.441 | [0.038, 0.165], [-0.062, 0.024] | 0.549 / 0.476 | [-0.041, 0.078], [-0.029, 0.064] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.061 / 0.16 / 0.583 | [-0.006, 0.071], [-0.249, -0.042] | 0.138 / 0.777 | [-0.028, 0.049], [-0.064, 0.174] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.015 / 0.051 / 0.761 | [0.0, 0.0], [0.0, 0.0] | 0.063 / 0.935 | [-0.011, 0.036], [0.01, 0.341] |
 
-Snapshots below the current level: 0.094 (with a river post at Siaga 2+: 0.024).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.731 [0.68–0.784], learned 0.787 [0.721–0.841], difference [0.009, 0.103].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.255 / 0.655 / 0.196 | 0.316 / 0.762 / 0.183 | [0.015, 0.206], [-0.038, 0.013] | 0.668 / 0.199 | [-0.088, 0.108], [-0.024, 0.032] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.061 / 0.149 / 0.187 | [-0.12, 0.005], [-0.305, -0.121] | 0.196 / 0.38 | [-0.075, 0.056], [-0.133, 0.1] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.015 / 0.085 / 0.435 | [0.0, 0.0], [0.0, 0.0] | 0.102 / 0.522 | [-0.027, 0.069], [-0.1, 0.278] |
+
+Snapshots below the current level: 0.091 (with a river post at Siaga 2+: 0.016).
 
 ### xgb_monotone · volume-matched
 
-Thresholds by test year: {'2019': {'Waspada': 0.074, 'Siaga': 0.3587, 'Bahaya': 0.4147}, '2020': {'Waspada': 0.1053, 'Siaga': 0.4813, 'Bahaya': 0.5847}, '2021': {'Waspada': 0.2003, 'Siaga': 0.5792, 'Bahaya': 0.7267}, '2025': {'Waspada': 0.2336, 'Siaga': 0.6508, 'Bahaya': 0.7811}}
+Thresholds by test year: {'2019': {'Waspada': 0.074, 'Siaga': 0.3785, 'Bahaya': 0.5141}, '2020': {'Waspada': 0.0917, 'Siaga': 0.5201, 'Bahaya': 0.6709}, '2021': {'Waspada': 0.1813, 'Siaga': 0.6288, 'Bahaya': 0.7717}, '2025': {'Waspada': 0.2031, 'Siaga': 0.6685, 'Bahaya': 0.8045}}
 
-**any flood**: ROC-AUC current 0.685 [0.655–0.714], learned 0.773 [0.733–0.808], difference [0.056, 0.12].
-
-| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
-|---|---|---|---|---|---|
-| >= Waspada | 0.255 / 0.53 / 0.46 | 0.448 / 0.751 / 0.371 | [0.16, 0.279], [-0.127, -0.053] | 0.537 / 0.455 | [-0.057, 0.068], [-0.052, 0.041] |
-| >= Siaga | 0.039 / 0.129 / 0.727 | 0.044 / 0.146 / 0.741 | [-0.013, 0.047], [-0.089, 0.116] | 0.116 / 0.642 | [-0.05, 0.025], [-0.216, 0.045] |
-| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.022 / 0.076 / 0.776 | [0.013, 0.038], [-0.053, 0.089] | 0.059 / 0.833 | [-0.014, 0.03], [-0.083, 0.249] |
-
-**large flood (>= 5 kecamatan)**: ROC-AUC current 0.731 [0.68–0.784], learned 0.777 [0.711–0.831], difference [-0.004, 0.091].
+**any flood**: ROC-AUC current 0.685 [0.655–0.714], learned 0.784 [0.745–0.819], difference [0.066, 0.131].
 
 | Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
 |---|---|---|---|---|---|
-| >= Waspada | 0.255 / 0.655 / 0.196 | 0.448 / 0.843 / 0.143 | [0.1, 0.278], [-0.079, -0.028] | 0.677 / 0.197 | [-0.083, 0.12], [-0.027, 0.028] |
-| >= Siaga | 0.039 / 0.204 / 0.397 | 0.044 / 0.221 / 0.385 | [-0.051, 0.079], [-0.11, 0.087] | 0.111 / 0.211 | [-0.169, -0.02], [-0.302, -0.069] |
-| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.022 / 0.102 / 0.358 | [0.004, 0.038], [-0.167, -0.003] | 0.072 / 0.354 | [-0.054, 0.025], [-0.263, 0.083] |
+| >= Waspada | 0.255 / 0.53 / 0.46 | 0.344 / 0.671 / 0.431 | [0.081, 0.196], [-0.067, 0.012] | 0.549 / 0.476 | [-0.041, 0.078], [-0.029, 0.064] |
+| >= Siaga | 0.039 / 0.129 / 0.727 | 0.062 / 0.212 / 0.751 | [0.047, 0.122], [-0.076, 0.129] | 0.138 / 0.777 | [-0.028, 0.049], [-0.064, 0.174] |
+| >= Bahaya | 0.015 / 0.051 / 0.761 | 0.027 / 0.101 / 0.821 | [0.032, 0.071], [-0.035, 0.169] | 0.063 / 0.935 | [-0.011, 0.036], [0.01, 0.341] |
 
-Snapshots below the current level: 0.053 (with a river post at Siaga 2+: 0.015).
+**large flood (>= 5 kecamatan)**: ROC-AUC current 0.731 [0.68–0.784], learned 0.787 [0.721–0.841], difference [0.009, 0.103].
+
+| Level | Current share / recall / precision | Learned share / recall / precision | Learned − current recall, precision (95 %) | Equal volume: learned recall / precision | Equal volume − current recall, precision (95 %) |
+|---|---|---|---|---|---|
+| >= Waspada | 0.255 / 0.655 / 0.196 | 0.344 / 0.77 / 0.17 | [0.031, 0.205], [-0.048, -0.004] | 0.668 / 0.199 | [-0.088, 0.108], [-0.024, 0.032] |
+| >= Siaga | 0.039 / 0.204 / 0.397 | 0.062 / 0.349 / 0.425 | [0.066, 0.216], [-0.08, 0.12] | 0.196 / 0.38 | [-0.075, 0.056], [-0.133, 0.1] |
+| >= Bahaya | 0.015 / 0.085 / 0.435 | 0.027 / 0.179 / 0.5 | [0.049, 0.145], [-0.054, 0.19] | 0.102 / 0.522 | [-0.027, 0.069], [-0.1, 0.278] |
+
+Snapshots below the current level: 0.072 (with a river post at Siaga 2+: 0.014).
 

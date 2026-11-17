@@ -25,25 +25,54 @@ def test_water_now_reads_the_river_posts_only():
     assert decision_layer.water_now(_posts({p: "Normal" for p in river[:5]})) is None  # fewer than 8 posts
 
 
-def _daily(lag=1, p=0.05):
-    return {"lag_days": lag, "city_probability": p, "water_d1": {c: 0.0 for c in dfe.WATER_DAY}}
+NOON = "2026-11-17T05:00:00+00:00"  # 12:00 WIB
+
+
+def _daily(lag=1, p=0.05, today=None):
+    return {"lag_days": lag, "city_probability": p, "water_d1": {c: 0.0 for c in dfe.WATER_DAY},
+            "today_halfhours": today if today is not None else {}}
+
+
+def test_today_features_count_only_what_the_site_can_know():
+    from realtime_native import daily_model
+
+    bundle = daily_model.load_bundle()
+    cells = sorted({k["cell"] for k in bundle["kecamatan"].values()})
+    bogor = bundle["upstream_cells"]["bogor"]
+    today = {c: {"06:30": 4.0, "07:00": 2.0, "07:30": 9.0} for c in cells}
+    today[cells[0]]["06:30"] = 12.0
+    today[bogor] = {"01:00": 5.0, "11:00": 30.0}
+    f = decision_layer.today_features(_daily(today=today), now=NOON)
+    # At 12:00 WIB only half-hours that started by 07:00 count (they arrive ~4.5 h after they end).
+    assert f["hour"] == 12.0 and f["today_max"] == 14.0 and f["today_bogor"] == 5.0
+    assert f["today_mean"] == pytest.approx((14.0 + 6.0 * (len(cells) - 1)) / len(cells))
+    assert decision_layer.today_features({"lag_days": 1}, now=NOON) is None
+    early = decision_layer.today_features(_daily(today=today), now="2026-11-16T21:00:00+00:00")  # 04:00 WIB
+    assert early["today_mean"] == 0.0 and early["today_bogor"] == 0.0
 
 
 def test_served_layer_decides_and_is_monotone():
     river = sorted(dfe.RIVER_POSTS)
     calm = {p: "Normal" for p in river}
-    low = decision_layer.decide(_daily(), _posts(calm))
+    low = decision_layer.decide(_daily(), _posts(calm), now=NOON)
     assert low["risk_level"] == "SAFE" and 0.0 <= low["score"] < low["thresholds"]["PRE_ALERT"]
-    wet = decision_layer.decide(_daily(p=0.3), _posts(calm))
+    wet = decision_layer.decide(_daily(p=0.3), _posts(calm), now=NOON)
     assert wet["score"] >= low["score"]  # a higher daily chance never lowers the risk
     high = dict(calm)
     for post in river[:5]:
         high[post] = "Siaga 2"
-    raised = decision_layer.decide(_daily(p=0.3), _posts(high))
+    raised = decision_layer.decide(_daily(p=0.3), _posts(high), now=NOON)
     assert raised["score"] >= wet["score"]  # more posts at Siaga 2 never lower it
     thr = raised["thresholds"]
     assert thr["PRE_ALERT"] <= thr["WARNING"] <= thr["DANGER"]
     assert set(raised["push"]) == set(decision_layer.load()["features"])
+    from realtime_native import daily_model
+
+    cells = {k["cell"] for k in daily_model.load_bundle()["kecamatan"].values()}
+    rainy = decision_layer.decide(_daily(p=0.3, today={c: {"06:00": 25.0} for c in cells}), _posts(high), now=NOON)
+    assert rainy["score"] >= raised["score"]  # rain today never lowers it
+    no_today = {k: v for k, v in _daily().items() if k != "today_halfhours"}
+    assert decision_layer.decide(no_today, _posts(calm), now=NOON) is None
 
 
 def test_decide_needs_the_posts_and_a_layer_for_the_lag():

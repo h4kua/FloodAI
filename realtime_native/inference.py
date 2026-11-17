@@ -595,7 +595,7 @@ def predict_realtime_native(
         model_risk_level = daily["city_level"]
     # The learned decision layer (a small tree on the daily model and the river posts) replaces the
     # hand-written middle layers when it can decide; the safety rules still run in front of it.
-    learned = decision_layer.decide(daily, snapshot_raw.get("poskobanjir")) if daily is not None else None
+    learned = decision_layer.decide(daily, snapshot_raw.get("poskobanjir"), now=as_of) if daily is not None else None
     decision, failure_modes = _live_decision(
         snapshot_raw, engineered, engine_probability, ood_detection, engine_thresholds, model_card, now=as_of,
         learned=learned,

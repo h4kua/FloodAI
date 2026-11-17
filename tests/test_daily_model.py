@@ -246,3 +246,9 @@ def test_fetch_recent_skips_a_file_not_served_yet(monkeypatch):
     got = imerg_client.fetch_recent(CELLS, pd.Timestamp("2026-11-16 23:00", tz="UTC"),
                                     pd.Timestamp("2026-11-17 01:00", tz="UTC"), token="t", cache=cache)
     assert list(got["-6.65_106.85"]) == [1.5] and len(cache) == 1  # the other half-hour is retried later
+
+
+def test_today_halfhours_keep_only_today_in_wib():
+    idx = pd.date_range("2026-11-16 16:30", periods=4, freq="30min", tz="UTC")  # 23:30 WIB .. 01:00 WIB
+    out = daily_model.today_halfhours(pd.Series([2.0, 4.0, np.nan, 6.0], index=idx), pd.Timestamp("2026-11-17"))
+    assert out == {"00:00": 2.0, "01:00": 3.0}

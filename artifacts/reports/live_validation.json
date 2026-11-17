@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-11-17T13:15:43+00:00",
+  "generated_utc": "2026-11-17T13:28:27+00:00",
   "period": [
     "2026-11-05",
     "2026-11-17"
@@ -8,8 +8,8 @@
   "flood_days": [],
   "snapshot_share": {
     "learned": {
-      "Aman": 0.603,
-      "Waspada": 0.396,
+      "Aman": 0.693,
+      "Waspada": 0.306,
       "Siaga": 0.0,
       "Bahaya": 0.001
     },
@@ -36,7 +36,7 @@
       "rules": "PRE_ALERT",
       "snapshots": 97,
       "by_layer": 97,
-      "chance_max": 0.155,
+      "chance_max": 0.186,
       "daily_p": 0.2056,
       "lag": 1,
       "flood_reported": false
@@ -46,7 +46,7 @@
       "rules": "PRE_ALERT",
       "snapshots": 96,
       "by_layer": 96,
-      "chance_max": 0.155,
+      "chance_max": 0.154,
       "daily_p": 0.1351,
       "lag": 1,
       "flood_reported": false
@@ -56,7 +56,7 @@
       "rules": "SAFE",
       "snapshots": 96,
       "by_layer": 96,
-      "chance_max": 0.155,
+      "chance_max": 0.154,
       "daily_p": 0.0889,
       "lag": 1,
       "flood_reported": false
@@ -66,7 +66,7 @@
       "rules": "PRE_ALERT",
       "snapshots": 96,
       "by_layer": 96,
-      "chance_max": 0.299,
+      "chance_max": 0.336,
       "daily_p": 0.1212,
       "lag": 1,
       "flood_reported": false
@@ -76,7 +76,7 @@
       "rules": "PRE_ALERT",
       "snapshots": 96,
       "by_layer": 96,
-      "chance_max": 0.506,
+      "chance_max": 0.504,
       "daily_p": 0.1351,
       "lag": 1,
       "flood_reported": false
@@ -86,7 +86,7 @@
       "rules": "SAFE",
       "snapshots": 94,
       "by_layer": 94,
-      "chance_max": 0.215,
+      "chance_max": 0.309,
       "daily_p": 0.0613,
       "lag": 1,
       "flood_reported": false
@@ -96,7 +96,7 @@
       "rules": "DANGER",
       "snapshots": 96,
       "by_layer": 96,
-      "chance_max": 0.441,
+      "chance_max": 0.265,
       "daily_p": 0.0613,
       "lag": 1,
       "flood_reported": false
@@ -106,7 +106,7 @@
       "rules": "PRE_ALERT",
       "snapshots": 97,
       "by_layer": 97,
-      "chance_max": 0.541,
+      "chance_max": 0.496,
       "daily_p": 0.1351,
       "lag": 1,
       "flood_reported": false
@@ -116,27 +116,27 @@
       "rules": "SAFE",
       "snapshots": 96,
       "by_layer": 96,
-      "chance_max": 0.229,
+      "chance_max": 0.44,
       "daily_p": 0.0836,
       "lag": 1,
       "flood_reported": false
     },
     "2026-11-15": {
-      "learned": "SAFE",
+      "learned": "PRE_ALERT",
       "rules": "SAFE",
       "snapshots": 96,
       "by_layer": 96,
-      "chance_max": 0.144,
+      "chance_max": 0.205,
       "daily_p": 0.0676,
       "lag": 1,
       "flood_reported": false
     },
     "2026-11-16": {
-      "learned": "SAFE",
+      "learned": "PRE_ALERT",
       "rules": "PRE_ALERT",
       "snapshots": 96,
       "by_layer": 96,
-      "chance_max": 0.205,
+      "chance_max": 0.202,
       "daily_p": 0.0613,
       "lag": 1,
       "flood_reported": false
@@ -146,7 +146,7 @@
       "rules": "SAFE",
       "snapshots": 82,
       "by_layer": 82,
-      "chance_max": 0.394,
+      "chance_max": 0.359,
       "daily_p": 0.0706,
       "lag": 1,
       "flood_reported": false
@@ -155,10 +155,10 @@
   "by_level": {
     "learned": {
       "Waspada": {
-        "warning_days": 7,
+        "warning_days": 9,
         "flood_days": 0,
         "warned_flood_days": 0,
-        "warned_days_without_report": 7,
+        "warned_days_without_report": 9,
         "missed_flood_days": 0
       },
       "Siaga": {

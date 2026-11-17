@@ -13,7 +13,11 @@
     "w_frac1_d1",
     "w_frac2_d1",
     "w_upstream_d1",
-    "w_manggarai_d1"
+    "w_manggarai_d1",
+    "today_mean",
+    "today_max",
+    "today_bogor",
+    "hour"
   ],
   "label": "BPBD flood in any of the 42 model kecamatan that day",
   "levels": {
@@ -25,9 +29,9 @@
   "lags": {
     "1": {
       "thresholds": {
-        "PRE_ALERT": 0.21118,
-        "WARNING": 0.6117,
-        "DANGER": 0.76178
+        "PRE_ALERT": 0.20148,
+        "WARNING": 0.64573,
+        "DANGER": 0.79996
       },
       "train_snapshots": 4302,
       "train_years": [
@@ -43,9 +47,9 @@
     },
     "2": {
       "thresholds": {
-        "PRE_ALERT": 0.22189,
-        "WARNING": 0.61886,
-        "DANGER": 0.76152
+        "PRE_ALERT": 0.21218,
+        "WARNING": 0.64613,
+        "DANGER": 0.80498
       },
       "train_snapshots": 4302,
       "train_years": [
@@ -61,9 +65,9 @@
     },
     "3": {
       "thresholds": {
-        "PRE_ALERT": 0.21843,
-        "WARNING": 0.63821,
-        "DANGER": 0.77641
+        "PRE_ALERT": 0.20842,
+        "WARNING": 0.65572,
+        "DANGER": 0.80653
       },
       "train_snapshots": 4302,
       "train_years": [

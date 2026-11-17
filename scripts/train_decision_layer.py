@@ -10,6 +10,9 @@ What the site sees at any moment, and so what the layer learns from (one row per
                 at Siaga 3+ / Siaga 2+, upstream (Katulampa, Depok), Manggarai. The 14 fixed river
                 posts of realtime_native/daily_features.py (coastal, tidal and gate posts left out).
   *_d1          the same posts yesterday (each post's highest status of the day)
+  today_*       today's rain so far: IMERG Early half-hours that started by H-5 h (they arrive ~4.5 h late),
+                mean and max over the model's kecamatan cells, and Bogor upstream
+  hour          the snapshot's WIB hour (not monotone; the 2025 daily reading is taken as 06:00)
 Snapshots: 06:00, 12:00, 18:00 and 23:00 WIB of every day of the DSDA archive (2016-2021: per post the
 latest reading of the 3 hours before; date-only readings dropped) and the one daily reading of the 2025
 DSDA file. A snapshot counts with at least 8 river posts. Label: BPBD recorded a flood in any of the 42
@@ -66,7 +69,10 @@ WINDOW_MIN = 180
 TEST_YEARS = (2019, 2020, 2021, 2025)
 NOW = [f"{c}_now" for c in dfe.WATER_DAY]
 D1 = [f"{c}_d1" for c in dfe.WATER_DAY]
-FEATURES = ["p"] + NOW + D1
+TODAY = ["today_mean", "today_max", "today_bogor"]
+# hour: WIB hour of the snapshot (how much of today's rain can be known yet); the only input not monotone.
+FEATURES = ["p"] + NOW + D1 + TODAY + ["hour"]
+NOT_MONOTONE = {"hour"}
 LEVEL_NAMES = {1: "Waspada", 2: "Siaga", 3: "Bahaya"}
 LEVEL_KEYS = {1: "PRE_ALERT", 2: "WARNING", 3: "DANGER"}
 LARGE = 5
@@ -127,6 +133,30 @@ def assemble(snaps: pd.DataFrame, p: pd.Series, n_flooded: pd.Series, city_water
     return rows
 
 
+def today_rain(rows: pd.DataFrame, bundle: dict) -> pd.DataFrame:
+    """Rain (mm) of today's WIB half-hours that started by H-5 h, the part the site can know at hour H
+    (IMERG Early files arrive ~4.5 h after each half-hour ends): mean and max over the model's
+    kecamatan cells, and the Bogor upstream cell. Same as realtime_native.decision_layer.today_features."""
+    kec_cells = sorted({k["cell"] for k in bundle["kecamatan"].values()})
+    bogor = bundle["upstream_cells"]["bogor"]
+    hours = rows["hour"].to_numpy()
+    cutoff = rows["date"].to_numpy() + pd.to_timedelta(hours - 5, unit="h").to_numpy()
+    out = {}
+    for cell in sorted(set(kec_cells) | {bogor}):
+        files = sorted(tdl.EARLY_DIR.glob(f"{cell}_*.csv"))
+        rate = pd.concat(tdl.parse_timeseries(f.read_text(encoding="utf-8")) for f in files)
+        rate = rate[~rate.index.duplicated(keep="last")].sort_index().fillna(0.0)
+        local = pd.Series(rate.to_numpy() * 0.5, index=rate.index.tz_convert(None) + pd.Timedelta(hours=7))
+        cum = local.groupby(local.index.floor("D")).cumsum()  # mm since WIB midnight, at each half-hour start
+        pos = cum.index.searchsorted(cutoff, side="right") - 1
+        vals = np.where(pos >= 0, cum.to_numpy()[np.clip(pos, 0, None)], 0.0)
+        same_day = np.where(pos >= 0, cum.index.to_numpy()[np.clip(pos, 0, None)] >= rows["date"].to_numpy(), False)
+        out[cell] = np.where(same_day & (hours - 5 >= 0), vals, 0.0)
+    jak = np.column_stack([out[c] for c in kec_cells])
+    return pd.DataFrame({"today_mean": jak.mean(axis=1), "today_max": jak.max(axis=1), "today_bogor": out[bogor]},
+                        index=rows.index)
+
+
 # ---------------------------------------------------------------- levels
 
 def current_levels(rows: pd.DataFrame, waspada: float) -> np.ndarray:
@@ -152,7 +182,8 @@ def make_scorer(name: str):
     if name == "xgb_monotone":
         return (lambda f, y: XGBClassifier(n_estimators=300, max_depth=2, learning_rate=0.05, min_child_weight=20,
                                            subsample=0.8, colsample_bytree=0.8, eval_metric="logloss",
-                                           monotone_constraints="(" + ",".join("1" for _ in FEATURES) + ")",
+                                           monotone_constraints="(" + ",".join(
+                                               "0" if f in NOT_MONOTONE else "1" for f in FEATURES) + ")",
                                            tree_method="hist", random_state=SEED).fit(_logistic_matrix(f), y),
                 lambda m, f: m.predict_proba(_logistic_matrix(f))[:, 1])
     raise ValueError(name)
@@ -359,6 +390,10 @@ def main() -> int:
     # Snapshots need yesterday's posts (the site falls back to the rules without them); a single
     # missing post reading (upstream, Manggarai) counts as normal, so a data gap never raises the risk.
     rows_by_lag = {lag: r.dropna(subset=["w_max_d1"]).reset_index(drop=True) for lag, r in build_rows(args, device).items()}
+    bundle = json.loads((tdl.BUNDLE_DIR / "bundle.json").read_text(encoding="utf-8"))
+    for rows in rows_by_lag.values():
+        rows["hour"] = rows["hour"].where(rows["hour"] >= 0, 6)  # the 2025 daily reading: taken as 06:00
+        rows[TODAY] = today_rain(rows, bundle)
 
     report = {"generated_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"), "device": device,
               "bootstrap": args.bootstrap, "features": FEATURES, "lags": {}}

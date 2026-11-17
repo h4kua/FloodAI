@@ -80,13 +80,14 @@ def wib_date(now=None) -> pd.Timestamp:
 
 # ---------------------------------------------------------------- inputs
 
-def _rain(cells: list[str], today: pd.Timestamp, now: datetime) -> tuple[dict, dict]:
-    """Daily WIB rain per cell for the last RAIN_DAYS days: (counted when >= 44 half-hours,
-    counted only when all 48 are present). Cached for RAIN_TTL."""
+def _rain(cells: list[str], today: pd.Timestamp, now: datetime) -> tuple[dict, dict, dict]:
+    """Daily WIB rain per cell for the last RAIN_DAYS days (counted when >= 44 half-hours), the days
+    with all 48 half-hours, and today's half-hours so far ({cell: {WIB start "HH:MM": mm}}, for the
+    learned decision layer). Cached for RAIN_TTL."""
     start = today - pd.Timedelta(days=RAIN_DAYS)
     cached = _rain_cache
     if cached and cached["start"] == start and now - cached["fetched"] < RAIN_TTL:
-        return cached["daily"], cached["strict"]
+        return cached["daily"], cached["strict"], cached["today"]
     start_utc = start - pd.Timedelta(hours=7)  # WIB midnight
     end_utc = pd.Timestamp(now.astimezone(timezone.utc).replace(tzinfo=None))
 
@@ -98,9 +99,19 @@ def _rain(cells: list[str], today: pd.Timestamp, now: datetime) -> tuple[dict, d
     rates = _with_recent_files(rates, cells, pd.Timestamp(start_utc, tz="UTC"), pd.Timestamp(end_utc, tz="UTC"))
     daily = {c: dfe.wib_daily_rain(r) for c, r in rates.items()}
     strict = {c: _strict_days(r) for c, r in rates.items()}
+    today_mm = {c: today_halfhours(r, today) for c, r in rates.items()}
     _rain_cache.clear()
-    _rain_cache.update(fetched=now, start=start, daily=daily, strict=strict)
-    return daily, strict
+    _rain_cache.update(fetched=now, start=start, daily=daily, strict=strict, today=today_mm)
+    return daily, strict, today_mm
+
+
+def today_halfhours(rate: pd.Series, today: pd.Timestamp) -> dict[str, float]:
+    """{WIB start "HH:MM": mm} of the half-hours of WIB day ``today`` present in ``rate`` (mm/h, UTC)."""
+    rate = rate.dropna()
+    idx = rate.index.tz_convert(None) if rate.index.tz is not None else rate.index
+    local = idx + pd.Timedelta(hours=7)
+    keep = local.normalize() == today
+    return {f"{t:%H:%M}": round(float(v) * 0.5, 4) for t, v in zip(local[keep], rate.to_numpy()[keep])}
 
 
 def _with_recent_files(rates: dict, cells: list[str], start_utc: pd.Timestamp, end_utc: pd.Timestamp) -> dict:
@@ -261,8 +272,9 @@ def refresh(now: datetime | None = None) -> dict | None:
             bundle = load_bundle()
             today = wib_date(now)
             cells = sorted({k["cell"] for k in bundle["kecamatan"].values()} | set(bundle["upstream_cells"].values()))
-            daily, strict = _rain(cells, today, now)
+            daily, strict, today_mm = _rain(cells, today, now)
             state = predict(daily, strict, _water(today), today, bundle)
+            state["today_halfhours"] = today_mm
             state["computed_at_utc"] = now.astimezone(timezone.utc).isoformat(timespec="seconds")
             _state = state
             logger.info("daily_model_refreshed date=%s lag=%s city_p=%.4f level=%s",

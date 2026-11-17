@@ -60,7 +60,7 @@ from utils.paths import PROCESSED_DATA_DIR, REPORTS_DIR  # noqa: E402
 LAG = 1
 SEED = 42
 TEST_YEARS = dl.TEST_YEARS
-SERVED = dl.FEATURES
+SERVED = ["p"] + dl.NOW + dl.D1  # the layer as first served (2026-11-17), without today's rain
 NOW, D1 = dl.NOW, dl.D1
 TODAY = ["today_mean", "today_max", "today_bogor"]
 WILAYAH = ["jakarta barat", "jakarta pusat", "jakarta selatan", "jakarta timur", "jakarta utara"]
@@ -110,29 +110,6 @@ def rolling(rows: pd.DataFrame, feats: list[str], label: str, reference: np.ndar
 
 
 # ---------------------------------------------------------------- inputs
-
-def today_rain(rows: pd.DataFrame, bundle: dict) -> pd.DataFrame:
-    """Rain of today's half-hours that started by H-5 h (WIB), per snapshot."""
-    kec_cells = sorted({k["cell"] for k in bundle["kecamatan"].values()})
-    bogor = bundle["upstream_cells"]["bogor"]
-    hours = rows["hour"].where(rows["hour"] >= 0, 6).to_numpy()
-    cutoff = rows["date"].to_numpy() + pd.to_timedelta(hours - 5, unit="h").to_numpy()
-    out = {}
-    for cell in sorted(set(kec_cells) | {bogor}):
-        files = sorted(tdl.EARLY_DIR.glob(f"{cell}_*.csv"))
-        rate = pd.concat(tdl.parse_timeseries(f.read_text(encoding="utf-8")) for f in files)
-        rate = rate[~rate.index.duplicated(keep="last")].sort_index().fillna(0.0)
-        local = pd.Series(rate.to_numpy() * 0.5, index=rate.index.tz_convert(None) + pd.Timedelta(hours=7))
-        cum = local.groupby(local.index.floor("D")).cumsum()  # mm since WIB midnight, at each half-hour start
-        # value at the last half-hour starting <= cutoff of the same day (0 before the first)
-        pos = cum.index.searchsorted(cutoff, side="right") - 1
-        vals = np.where(pos >= 0, cum.to_numpy()[np.clip(pos, 0, None)], 0.0)
-        same_day = np.where(pos >= 0, cum.index.to_numpy()[np.clip(pos, 0, None)] >= rows["date"].to_numpy(), False)
-        out[cell] = np.where(same_day & (hours - 5 >= 0), vals, 0.0)
-    jak = np.column_stack([out[c] for c in kec_cells])
-    return pd.DataFrame({"today_mean": jak.mean(axis=1), "today_max": jak.max(axis=1), "today_bogor": out[bogor]},
-                        index=rows.index)
-
 
 def post_snapshots() -> pd.DataFrame:
     """Per river post: latest status in the 3 h before each check hour (archive), daily reading (2025)."""
@@ -232,7 +209,7 @@ def main() -> int:
     rows = dl.build_rows(types.SimpleNamespace(rows_cache=args.rows_cache), device)[LAG]
     rows = rows.dropna(subset=["w_max_d1"]).reset_index(drop=True)
     rows["hour"] = rows["hour"].where(rows["hour"] >= 0, 6)
-    rows[TODAY] = today_rain(rows, bundle)
+    rows[TODAY] = dl.today_rain(rows, bundle)
     current = dl.current_levels(rows, float(rows["waspada"].iloc[0]))
     siaga1 = rows["w_max_now"].fillna(0).to_numpy() >= 3
     test = rows["year"].isin(TEST_YEARS).to_numpy()

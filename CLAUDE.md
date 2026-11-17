@@ -37,7 +37,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (667, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (33: flood roads, shelter ranking,
+- Tests: `tests/` (669, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (33: flood roads, shelter ranking,
   post levels, weather per wilayah, daily model card, learned-layer status sentence)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -187,6 +187,12 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   no flood reported; Waspada on 7 days (learned) and 7 (rules), not the same days. Re-run monthly through the season.
 
 ## Resolved
+- 2026-11-17: the learned decision layer also reads today's rain so far: IMERG Early half-hours that started by now - 5 h
+  (mean and max over the model's kecamatan cells, Bogor), plus the WIB hour (the only input not monotone). `daily_model.refresh()`
+  keeps today's half-hours per cell in the state (`today_halfhours`); without them the rules decide. Lag 1, test 2019-2021 +
+  2025 vs the rules: ROC-AUC 0.786 vs 0.694; Siaga recall 0.13 -> 0.22 at precision 0.76, Bahaya 0.05 -> 0.12 at 0.84, Waspada
+  36 % of snapshots (was 44 % without today's rain) at precision 0.43. Thresholds lag 1: Waspada 20 %, Siaga 65 %, Bahaya 80 %.
+  Live replay 5-17 Nov: Waspada 31 % of snapshots (rules 42 %).
 - 2026-11-17: learned decision layer (supervisor: the 10 hand-written layers were too simple). `scripts/train_decision_layer.py`
   builds city snapshots at 06/12/18/23 WIB from the raw DSDA readings 2016-2021 (latest reading of the 3 h before) and the
   2025 daily file: the daily model's out-of-sample city chance + the 14 river posts now and yesterday; label = BPBD flood

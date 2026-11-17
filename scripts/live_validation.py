@@ -71,6 +71,7 @@ def daily_states(days: list[pd.Timestamp], water_city: pd.DataFrame) -> dict:
     for day in days:
         try:
             states[day] = daily_model.predict(daily, strict, water_city, day, bundle)
+            states[day]["today_halfhours"] = {c: daily_model.today_halfhours(r, day) for c, r in rates.items()}
         except daily_model.DailyModelUnavailable:
             pass
     return states
@@ -113,7 +114,7 @@ def main() -> int:
         if st is None or now is None or day < start or day > end:
             continue
         rules = LEVELS[max(int(now["w_max"] or 0), 1 if st["city_level"] != "SAFE" else 0)]
-        out = decision_layer.decide(st, posts)
+        out = decision_layer.decide(st, posts, now=r["fetched_at"])
         learned = out["risk_level"] if out else rules
         if (now["w_max"] or 0) >= 3:
             learned = "DANGER"
