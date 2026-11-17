@@ -3,11 +3,12 @@ The daily kecamatan flood model on the live site (bundle in models/daily_bundle/
 by scripts/train_daily_live_model.py; report artifacts/reports/daily_live_model.md).
 
 For today's WIB date D it gives each of the 42 kecamatan a calibrated probability that BPBD records
-a flood there today, from IMERG Early rain through D-L (L = 1, 2 or 3: the most recent WIB day that
-Giovanni has complete; it serves Early about a day late), the city's river-post Siaga status on D-1
+a flood there today, from IMERG Early rain through D-L (L = 1, 2 or 3: the most recent complete WIB
+day). Giovanni serves Early about 28 h late, so the newest hours come straight from the GES DISC files
+(~4.5 h late): D-1 is complete from about 05:00 WIB, and lag 2 serves only when the files fail. The city's river-post Siaga status on D-1
 and D-2 (our own 15-minute history rows in Supabase), the kecamatan's flood history and the season.
-The city probability is the highest kecamatan probability; the lag's thresholds (8 / 4 / 2 model
-alarm days a month) turn it into a level for the decision engine's L3, where the water-level, BMKG
+The city probability is the highest kecamatan probability; the lag's Waspada threshold (8 model days
+a month; the model never sets Siaga or Bahaya) turns it into a level for the decision engine's L3, where the water-level, BMKG
 and data-quality rules still apply.
 
 Heavy work (Giovanni, Supabase) runs only in refresh(), called by the API scheduler, never in a
@@ -31,13 +32,14 @@ import numpy as np
 import pandas as pd
 
 from realtime_native import daily_features as dfe
-from realtime_native.imerg_client import ImergUnavailable, fetch_rate
+from realtime_native.imerg_client import ImergUnavailable, fetch_rate, fetch_recent
 
 logger = logging.getLogger("flood.daily_model")
 
 BUNDLE_DIR = Path(__file__).resolve().parents[1] / "models" / "daily_bundle"
 RAIN_DAYS = 35            # the API's 0.85 daily decay leaves < 1 % after 30 days
-RAIN_TTL = timedelta(minutes=55)
+RAIN_TTL = timedelta(minutes=25)  # new Early files every 30 min; refresh() runs every 30 min
+FILE_DAYS = 3             # never read more than this many days of files (Giovanni covers the rest)
 WIB = timezone(timedelta(hours=7))
 LEVELS = (("danger", "DANGER"), ("warning", "WARNING"), ("pre_alert", "PRE_ALERT"))
 
@@ -45,6 +47,7 @@ _lock = threading.Lock()
 _state: dict | None = None
 _rain_cache: dict = {}    # {"fetched": datetime, "start": Timestamp, "daily": {...}, "strict": {...}}
 _water_cache: dict = {}   # {date: city water features of that WIB day (dict) or None}
+_file_cache: dict = {}    # {half-hour (UTC): {cell: rate}} read from GES DISC files
 
 
 class DailyModelUnavailable(RuntimeError):
@@ -92,11 +95,28 @@ def _rain(cells: list[str], today: pd.Timestamp, now: datetime) -> tuple[dict, d
 
     with ThreadPoolExecutor(max_workers=4) as pool:
         rates = dict(pool.map(one, cells))
+    rates = _with_recent_files(rates, cells, pd.Timestamp(start_utc, tz="UTC"), pd.Timestamp(end_utc, tz="UTC"))
     daily = {c: dfe.wib_daily_rain(r) for c, r in rates.items()}
     strict = {c: _strict_days(r) for c, r in rates.items()}
     _rain_cache.clear()
     _rain_cache.update(fetched=now, start=start, daily=daily, strict=strict)
     return daily, strict
+
+
+def _with_recent_files(rates: dict, cells: list[str], start_utc: pd.Timestamp, end_utc: pd.Timestamp) -> dict:
+    """Fill the hours after Giovanni's last value (common to every cell) from the GES DISC files.
+    Giovanni's values win where both exist; a file failure keeps Giovanni alone (lag 2)."""
+    lasts = [r.dropna().index.max() for r in rates.values() if r.notna().any()]
+    after = min(lasts) + pd.Timedelta(minutes=30) if len(lasts) == len(rates) else start_utc
+    after = max(after, end_utc - pd.Timedelta(days=FILE_DAYS))
+    for old in [ts for ts in _file_cache if ts < start_utc]:
+        del _file_cache[old]
+    try:
+        recent = fetch_recent(cells, after, end_utc, cache=_file_cache)
+    except ImergUnavailable as exc:
+        logger.warning("daily_model recent IMERG files unavailable: %s", exc)
+        return rates
+    return {c: rates[c].combine_first(recent[c]) if not recent[c].empty else rates[c] for c in cells}
 
 
 def _strict_days(rate: pd.Series) -> pd.Series:
@@ -266,3 +286,4 @@ def _reset_for_tests() -> None:
     _state = None
     _rain_cache.clear()
     _water_cache.clear()
+    _file_cache.clear()

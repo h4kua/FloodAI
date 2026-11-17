@@ -152,3 +152,81 @@ def test_waspada_from_the_daily_model_is_explained():
     assert "Rain over the last few days" in _risk_interpretation("PRE_ALERT", {}, lang="en", daily=daily)
     quiet = _risk_interpretation("PRE_ALERT", {}, daily={**daily, "city_level": "SAFE"})
     assert "Hujan beberapa hari" not in quiet
+
+
+# ---------------------------------------------------------------- GES DISC files
+
+from realtime_native import imerg_client  # noqa: E402
+
+CELLS = ["-6.15_106.85", "-6.65_106.85"]
+
+
+def _subset_text(values_by_lon):
+    rows = [f"precipitation[0][{i}], " + ", ".join(str(v) for v in col) for i, col in enumerate(values_by_lon)]
+    return "Dataset: x\n" + "\n".join(rows) + "\nlat, -6.65, -6.55, -6.45, -6.35, -6.25, -6.15\n"
+
+
+def test_parse_subset_picks_each_cell_from_the_box():
+    # Box: lon index 2868 only, lat indices 833 (-6.65) .. 838 (-6.15).
+    text = _subset_text([[4.0, 0, 0, 0, 0, -9999.9]])
+    got = imerg_client.parse_subset(text, CELLS, lon0=2868, lat0=833)
+    assert got["-6.65_106.85"] == 4.0 and np.isnan(got["-6.15_106.85"])
+
+
+def test_fetch_recent_reads_new_files_once(monkeypatch):
+    listing = ('<a href="3B-HHR-E.MS.MRG.3IMERG.20261116-S233000-E235959.1410.V07C.HDF5">'
+               '<a href="3B-HHR-E.MS.MRG.3IMERG.20261116-S230000-E232959.1380.V07C.HDF5">')
+    calls = []
+
+    def fake_get(url, token, timeout):
+        calls.append(url)
+        if "/data/" in url:
+            return listing if "/320/" in url else ""
+        return _subset_text([[1.5, 0, 0, 0, 0, 2.5]])
+
+    monkeypatch.setattr(imerg_client, "_get", fake_get)
+    cache = {}
+    start, end = pd.Timestamp("2026-11-16 23:00", tz="UTC"), pd.Timestamp("2026-11-17 01:00", tz="UTC")
+    got = imerg_client.fetch_recent(CELLS, start, end, token="t", cache=cache)
+    assert list(got["-6.15_106.85"]) == [2.5, 2.5] and list(got["-6.65_106.85"]) == [1.5, 1.5]
+    assert got["-6.15_106.85"].index[0] == pd.Timestamp("2026-11-16 23:00", tz="UTC")
+    opendap = [u for u in calls if "/opendap/" in u]
+    assert len(opendap) == 2 and "precipitation[0:0][2868:2868][833:838]" in opendap[0]
+    calls.clear()
+    imerg_client.fetch_recent(CELLS, start, end, token="t", cache=cache)
+    assert not [u for u in calls if "/opendap/" in u]  # cached
+
+
+def _giovanni(last):
+    idx = pd.date_range("2026-11-15 17:00", last, freq="30min", tz="UTC")
+    return pd.Series(1.0, index=idx)
+
+
+def test_recent_files_complete_yesterday(monkeypatch):
+    seen = {}
+
+    def fake_recent(cells, start, end, cache=None):
+        seen["start"] = start
+        idx = pd.date_range(start, end, freq="30min", inclusive="left")
+        return {c: pd.Series(2.0, index=idx) for c in cells}
+
+    monkeypatch.setattr(daily_model, "fetch_recent", fake_recent)
+    rates = {c: _giovanni("2026-11-16 08:00") for c in CELLS}
+    rates[CELLS[1]] = _giovanni("2026-11-16 10:00")
+    out = daily_model._with_recent_files(rates, CELLS, pd.Timestamp("2026-11-15 17:00", tz="UTC"),
+                                         pd.Timestamp("2026-11-17 05:00", tz="UTC"))
+    assert seen["start"] == pd.Timestamp("2026-11-16 08:30", tz="UTC")  # after the earliest last value
+    strict = daily_model._strict_days(out[CELLS[0]])
+    assert bool(strict.get(pd.Timestamp("2026-11-16"), False))  # WIB 16 Nov now has all 48 half-hours
+    assert out[CELLS[1]].loc["2026-11-16 09:00+00:00"] == 1.0  # Giovanni wins where both exist
+
+
+def test_recent_files_failure_keeps_giovanni(monkeypatch):
+    def broken(*a, **k):
+        raise imerg_client.ImergUnavailable("GES DISC answered HTTP 503")
+
+    monkeypatch.setattr(daily_model, "fetch_recent", broken)
+    rates = {c: _giovanni("2026-11-16 08:00") for c in CELLS}
+    out = daily_model._with_recent_files(rates, CELLS, pd.Timestamp("2026-11-15 17:00", tz="UTC"),
+                                         pd.Timestamp("2026-11-17 05:00", tz="UTC"))
+    assert out is rates

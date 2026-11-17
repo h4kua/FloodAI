@@ -33,7 +33,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (652, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (32: flood roads, shelter ranking,
+- Tests: `tests/` (656, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (32: flood roads, shelter ranking,
   post levels, weather per wilayah, daily model card)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
@@ -159,6 +159,12 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   nothing (ROC-AUC 0.869 vs 0.865, CIs overlap). Nothing served; the raw cache (data/raw/news/) is not committed.
 
 ## Resolved
+- 2026-11-17: the daily model reads the newest rain straight from the GES DISC IMERG Early files (OPeNDAP subset of the
+  9 model cells, ~2 s a file, ~4.5 h after the rain; `imerg_client.fetch_recent`) for the hours after Giovanni's last
+  value. Same values as Giovanni (all 9 cells, every half-hour of 15 Nov). Giovanni's delay varies (~28 h on 13 Nov,
+  ~9 h on 17 Nov), so yesterday's rain (lag 1, ROC-AUC 0.808 / 0.836 vs lag 2 0.786 / 0.799) is now complete from about
+  05:00 WIB every day instead of ~09:00 WIB on a good day and the next day on a bad one. A file failure keeps Giovanni
+  alone. Refresh ~28 s cold, ~13 s after; files stay cached in memory (Early files do not change).
 - 2026-11-13: the daily kecamatan model is on the site (`scripts/train_daily_live_model.py`,
   `artifacts/reports/daily_live_model.md`, bundle `models/daily_bundle/`). Rain is IMERG Early, which Giovanni serves
   ~28 h late, so it uses rain through D-2 (D-3 before ~04:00 WIB; D-1 when complete) plus the city's river-post Siaga
