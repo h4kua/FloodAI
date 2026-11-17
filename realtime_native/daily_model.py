@@ -236,6 +236,8 @@ def predict(daily: dict, strict: dict, water_city: pd.DataFrame, today: pd.Times
         "top_kecamatan": kecamatan[top]["name"],
         "thresholds": {"pre_alert": thr["pre_alert"], "warning": thr["warning"], "danger": thr["danger"]},
         "kecamatan": kecamatan,
+        # Yesterday's river posts (the learned decision layer reads them); None where unknown.
+        "water_d1": {c: (None if pd.isna(water[f"{c}_d1"]) else float(water[f"{c}_d1"])) for c in dfe.WATER_DAY},
     }
 
 

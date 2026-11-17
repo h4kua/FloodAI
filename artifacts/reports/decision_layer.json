@@ -1,0 +1,6758 @@
+{
+  "generated_utc": "2026-11-17T12:35:32+00:00",
+  "device": "cuda",
+  "bootstrap": 1000,
+  "features": [
+    "p",
+    "w_max_now",
+    "w_frac1_now",
+    "w_frac2_now",
+    "w_upstream_now",
+    "w_manggarai_now",
+    "w_max_d1",
+    "w_frac1_d1",
+    "w_frac2_d1",
+    "w_upstream_d1",
+    "w_manggarai_d1"
+  ],
+  "lags": {
+    "lag 1": {
+      "snapshots": 4302,
+      "test_snapshots": 3090,
+      "test_days": 1062,
+      "flood_share": 0.221,
+      "large_share": 0.076,
+      "scorers": {
+        "tree \u00b7 precision-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2020": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2021": {
+              "Waspada": 0.1882,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2025": {
+              "Waspada": 0.3913,
+              "Siaga": 0.5,
+              "Bahaya": null
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.694,
+                0.663,
+                0.723
+              ],
+              "learned score": [
+                0.749,
+                0.71,
+                0.784
+              ],
+              "learned minus current": [
+                0.024,
+                0.091
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.269,
+                "recall": 0.558,
+                "precision": 0.458
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.118,
+                "recall": 0.189,
+                "precision": 0.353
+              },
+              "Siaga": {
+                "alarm_share": 0.017,
+                "recall": 0.059,
+                "precision": 0.741
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.432,
+                  -0.296
+                ],
+                "precision": [
+                  -0.181,
+                  -0.015
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.096,
+                  -0.048
+                ],
+                "precision": [
+                  -0.098,
+                  0.125
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.0
+                ],
+                "precision": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.35,
+                  "recall": 0.66,
+                  "precision": 0.417
+                },
+                "Siaga": {
+                  "alarm_share": 0.058,
+                  "recall": 0.138,
+                  "precision": 0.528
+                },
+                "Bahaya": {
+                  "alarm_share": 0.017,
+                  "recall": 0.051,
+                  "precision": 0.686
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    0.035,
+                    0.172
+                  ],
+                  "precision": [
+                    -0.082,
+                    0.001
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.036,
+                    0.056
+                  ],
+                  "precision": [
+                    -0.334,
+                    -0.068
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.031,
+                    0.037
+                  ],
+                  "precision": [
+                    -0.335,
+                    0.213
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.752,
+                0.7,
+                0.802
+              ],
+              "learned score": [
+                0.719,
+                0.668,
+                0.761
+              ],
+              "learned minus current": [
+                -0.077,
+                0.013
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.269,
+                "recall": 0.706,
+                "precision": 0.2
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.118,
+                "recall": 0.136,
+                "precision": 0.088
+              },
+              "Siaga": {
+                "alarm_share": 0.017,
+                "recall": 0.094,
+                "precision": 0.407
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.675,
+                  -0.466
+                ],
+                "precision": [
+                  -0.162,
+                  -0.062
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.17,
+                  -0.062
+                ],
+                "precision": [
+                  -0.105,
+                  0.127
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.0
+                ],
+                "precision": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.35,
+                  "recall": 0.766,
+                  "precision": 0.166
+                },
+                "Siaga": {
+                  "alarm_share": 0.058,
+                  "recall": 0.106,
+                  "precision": 0.14
+                },
+                "Bahaya": {
+                  "alarm_share": 0.017,
+                  "recall": 0.043,
+                  "precision": 0.196
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.053,
+                    0.176
+                  ],
+                  "precision": [
+                    -0.061,
+                    -0.006
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.173,
+                    -0.025
+                  ],
+                  "precision": [
+                    -0.36,
+                    -0.144
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.091,
+                    0.004
+                  ],
+                  "precision": [
+                    -0.43,
+                    -0.013
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.139,
+                  "recall": 0.548,
+                  "precision": 0.347
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Siaga": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.298,
+                  "recall": 0.507,
+                  "precision": 0.514
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                },
+                "Siaga": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.29,
+                  "recall": 0.598,
+                  "precision": 0.399
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.591,
+                  "recall": 0.882,
+                  "precision": 0.288
+                },
+                "Siaga": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.537,
+                  "recall": 0.667,
+                  "precision": 0.492
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.1,
+                  "recall": 0.193,
+                  "precision": 0.765
+                },
+                "Siaga": {
+                  "alarm_share": 0.1,
+                  "recall": 0.193,
+                  "precision": 0.765
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              }
+            }
+          },
+          "below_current_share": 0.206,
+          "below_current_with_post_siaga2": 0.024
+        },
+        "logistic \u00b7 precision-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2020": {
+              "Waspada": 0.1258,
+              "Siaga": 0.827,
+              "Bahaya": null
+            },
+            "2021": {
+              "Waspada": 0.2132,
+              "Siaga": 0.8677,
+              "Bahaya": 0.8961
+            },
+            "2025": {
+              "Waspada": 0.1859,
+              "Siaga": 0.8404,
+              "Bahaya": 0.9079
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.694,
+                0.663,
+                0.723
+              ],
+              "learned score": [
+                0.749,
+                0.706,
+                0.787
+              ],
+              "learned minus current": [
+                0.021,
+                0.089
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.269,
+                "recall": 0.558,
+                "precision": 0.458
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.186,
+                "recall": 0.449,
+                "precision": 0.533
+              },
+              "Siaga": {
+                "alarm_share": 0.02,
+                "recall": 0.073,
+                "precision": 0.806
+              },
+              "Bahaya": {
+                "alarm_share": 0.017,
+                "recall": 0.061,
+                "precision": 0.792
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.164,
+                  -0.054
+                ],
+                "precision": [
+                  0.026,
+                  0.119
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.084,
+                  -0.033
+                ],
+                "precision": [
+                  -0.015,
+                  0.177
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.003,
+                  0.019
+                ],
+                "precision": [
+                  0.007,
+                  0.073
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.27,
+                  "recall": 0.537,
+                  "precision": 0.441
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.136,
+                  "precision": 0.769
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.06,
+                  "precision": 0.891
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.08,
+                    0.035
+                  ],
+                  "precision": [
+                    -0.06,
+                    0.026
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.03,
+                    0.049
+                  ],
+                  "precision": [
+                    -0.104,
+                    0.17
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.016,
+                    0.037
+                  ],
+                  "precision": [
+                    -0.113,
+                    0.333
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.752,
+                0.7,
+                0.802
+              ],
+              "learned score": [
+                0.777,
+                0.711,
+                0.837
+              ],
+              "learned minus current": [
+                -0.024,
+                0.069
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.269,
+                "recall": 0.706,
+                "precision": 0.2
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.186,
+                "recall": 0.63,
+                "precision": 0.257
+              },
+              "Siaga": {
+                "alarm_share": 0.02,
+                "recall": 0.123,
+                "precision": 0.468
+              },
+              "Bahaya": {
+                "alarm_share": 0.017,
+                "recall": 0.089,
+                "precision": 0.396
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.182,
+                  0.026
+                ],
+                "precision": [
+                  0.02,
+                  0.093
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.141,
+                  -0.033
+                ],
+                "precision": [
+                  -0.041,
+                  0.177
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.016
+                ],
+                "precision": [
+                  -0.103,
+                  0.017
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.27,
+                  "recall": 0.655,
+                  "precision": 0.185
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.226,
+                  "precision": 0.438
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.128,
+                  "precision": 0.652
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.152,
+                    0.039
+                  ],
+                  "precision": [
+                    -0.043,
+                    0.011
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.039,
+                    0.076
+                  ],
+                  "precision": [
+                    -0.077,
+                    0.167
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.01,
+                    0.101
+                  ],
+                  "precision": [
+                    -0.025,
+                    0.457
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.139,
+                  "recall": 0.548,
+                  "precision": 0.347
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Siaga": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.298,
+                  "recall": 0.507,
+                  "precision": 0.514
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.243,
+                  "recall": 0.473,
+                  "precision": 0.59
+                },
+                "Siaga": {
+                  "alarm_share": 0.019,
+                  "recall": 0.051,
+                  "precision": 0.818
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.29,
+                  "recall": 0.598,
+                  "precision": 0.399
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.25,
+                  "recall": 0.588,
+                  "precision": 0.455
+                },
+                "Siaga": {
+                  "alarm_share": 0.008,
+                  "recall": 0.039,
+                  "precision": 1.0
+                },
+                "Bahaya": {
+                  "alarm_share": 0.008,
+                  "recall": 0.039,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.537,
+                  "recall": 0.667,
+                  "precision": 0.492
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.457,
+                  "recall": 0.57,
+                  "precision": 0.494
+                },
+                "Siaga": {
+                  "alarm_share": 0.091,
+                  "recall": 0.185,
+                  "precision": 0.806
+                },
+                "Bahaya": {
+                  "alarm_share": 0.088,
+                  "recall": 0.185,
+                  "precision": 0.833
+                }
+              }
+            }
+          },
+          "below_current_share": 0.13,
+          "below_current_with_post_siaga2": 0.022
+        },
+        "logistic \u00b7 volume-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": 0.0531,
+              "Siaga": 0.2259,
+              "Bahaya": 0.3512
+            },
+            "2020": {
+              "Waspada": 0.102,
+              "Siaga": 0.4938,
+              "Bahaya": 0.673
+            },
+            "2021": {
+              "Waspada": 0.1737,
+              "Siaga": 0.628,
+              "Bahaya": 0.8319
+            },
+            "2025": {
+              "Waspada": 0.1836,
+              "Siaga": 0.6701,
+              "Bahaya": 0.8404
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.694,
+                0.663,
+                0.723
+              ],
+              "learned score": [
+                0.749,
+                0.706,
+                0.787
+              ],
+              "learned minus current": [
+                0.021,
+                0.089
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.269,
+                "recall": 0.558,
+                "precision": 0.458
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.397,
+                "recall": 0.643,
+                "precision": 0.358
+              },
+              "Siaga": {
+                "alarm_share": 0.045,
+                "recall": 0.132,
+                "precision": 0.647
+              },
+              "Bahaya": {
+                "alarm_share": 0.029,
+                "recall": 0.1,
+                "precision": 0.764
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  0.028,
+                  0.14
+                ],
+                "precision": [
+                  -0.135,
+                  -0.066
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.029,
+                  0.036
+                ],
+                "precision": [
+                  -0.205,
+                  0.057
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.029,
+                  0.072
+                ],
+                "precision": [
+                  -0.137,
+                  0.126
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.27,
+                  "recall": 0.537,
+                  "precision": 0.441
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.136,
+                  "precision": 0.769
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.06,
+                  "precision": 0.891
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.08,
+                    0.035
+                  ],
+                  "precision": [
+                    -0.06,
+                    0.026
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.03,
+                    0.049
+                  ],
+                  "precision": [
+                    -0.104,
+                    0.17
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.016,
+                    0.037
+                  ],
+                  "precision": [
+                    -0.113,
+                    0.333
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.752,
+                0.7,
+                0.802
+              ],
+              "learned score": [
+                0.777,
+                0.711,
+                0.837
+              ],
+              "learned minus current": [
+                -0.024,
+                0.069
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.269,
+                "recall": 0.706,
+                "precision": 0.2
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.397,
+                "recall": 0.779,
+                "precision": 0.149
+              },
+              "Siaga": {
+                "alarm_share": 0.045,
+                "recall": 0.243,
+                "precision": 0.41
+              },
+              "Bahaya": {
+                "alarm_share": 0.029,
+                "recall": 0.187,
+                "precision": 0.494
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.014,
+                  0.162
+                ],
+                "precision": [
+                  -0.075,
+                  -0.028
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.024,
+                  0.097
+                ],
+                "precision": [
+                  -0.097,
+                  0.131
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.053,
+                  0.158
+                ],
+                "precision": [
+                  -0.075,
+                  0.186
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.27,
+                  "recall": 0.655,
+                  "precision": 0.185
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.226,
+                  "precision": 0.438
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.128,
+                  "precision": 0.652
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.152,
+                    0.039
+                  ],
+                  "precision": [
+                    -0.043,
+                    0.011
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.039,
+                    0.076
+                  ],
+                  "precision": [
+                    -0.077,
+                    0.167
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.01,
+                    0.101
+                  ],
+                  "precision": [
+                    -0.025,
+                    0.457
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.139,
+                  "recall": 0.548,
+                  "precision": 0.347
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.439,
+                  "recall": 0.839,
+                  "precision": 0.168
+                },
+                "Siaga": {
+                  "alarm_share": 0.047,
+                  "recall": 0.172,
+                  "precision": 0.32
+                },
+                "Bahaya": {
+                  "alarm_share": 0.022,
+                  "recall": 0.129,
+                  "precision": 0.522
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.298,
+                  "recall": 0.507,
+                  "precision": 0.514
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.345,
+                  "recall": 0.598,
+                  "precision": 0.525
+                },
+                "Siaga": {
+                  "alarm_share": 0.04,
+                  "recall": 0.108,
+                  "precision": 0.809
+                },
+                "Bahaya": {
+                  "alarm_share": 0.027,
+                  "recall": 0.076,
+                  "precision": 0.871
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.29,
+                  "recall": 0.598,
+                  "precision": 0.399
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.388,
+                  "recall": 0.716,
+                  "precision": 0.356
+                },
+                "Siaga": {
+                  "alarm_share": 0.019,
+                  "recall": 0.098,
+                  "precision": 1.0
+                },
+                "Bahaya": {
+                  "alarm_share": 0.008,
+                  "recall": 0.039,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.537,
+                  "recall": 0.667,
+                  "precision": 0.492
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.46,
+                  "recall": 0.57,
+                  "precision": 0.49
+                },
+                "Siaga": {
+                  "alarm_share": 0.094,
+                  "recall": 0.193,
+                  "precision": 0.812
+                },
+                "Bahaya": {
+                  "alarm_share": 0.091,
+                  "recall": 0.185,
+                  "precision": 0.806
+                }
+              }
+            }
+          },
+          "below_current_share": 0.056,
+          "below_current_with_post_siaga2": 0.019
+        },
+        "xgb_monotone \u00b7 precision-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2020": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2021": {
+              "Waspada": 0.168,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2025": {
+              "Waspada": 0.1592,
+              "Siaga": null,
+              "Bahaya": null
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.694,
+                0.663,
+                0.723
+              ],
+              "learned score": [
+                0.775,
+                0.735,
+                0.811
+              ],
+              "learned minus current": [
+                0.05,
+                0.115
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.269,
+                "recall": 0.558,
+                "precision": 0.458
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.158,
+                "recall": 0.278,
+                "precision": 0.389
+              },
+              "Siaga": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.346,
+                  -0.205
+                ],
+                "precision": [
+                  -0.133,
+                  -0.001
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.103,
+                  -0.056
+                ],
+                "precision": [
+                  -0.084,
+                  0.154
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.0
+                ],
+                "precision": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.272,
+                  "recall": 0.555,
+                  "precision": 0.45
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.11,
+                  "precision": 0.62
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.057,
+                  "precision": 0.848
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.072,
+                    0.06
+                  ],
+                  "precision": [
+                    -0.052,
+                    0.037
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.056,
+                    0.02
+                  ],
+                  "precision": [
+                    -0.242,
+                    0.02
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.015,
+                    0.028
+                  ],
+                  "precision": [
+                    -0.079,
+                    0.26
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.752,
+                0.7,
+                0.802
+              ],
+              "learned score": [
+                0.781,
+                0.725,
+                0.834
+              ],
+              "learned minus current": [
+                -0.015,
+                0.073
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.269,
+                "recall": 0.706,
+                "precision": 0.2
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.158,
+                "recall": 0.174,
+                "precision": 0.084
+              },
+              "Siaga": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.642,
+                  -0.421
+                ],
+                "precision": [
+                  -0.162,
+                  -0.073
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.176,
+                  -0.071
+                ],
+                "precision": [
+                  -0.086,
+                  0.178
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.0
+                ],
+                "precision": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.272,
+                  "recall": 0.685,
+                  "precision": 0.191
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.115,
+                  "precision": 0.223
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.068,
+                  "precision": 0.348
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.126,
+                    0.086
+                  ],
+                  "precision": [
+                    -0.037,
+                    0.019
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.167,
+                    -0.016
+                  ],
+                  "precision": [
+                    -0.294,
+                    -0.054
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.056,
+                    0.018
+                  ],
+                  "precision": [
+                    -0.265,
+                    0.077
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.139,
+                  "recall": 0.548,
+                  "precision": 0.347
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Siaga": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.298,
+                  "recall": 0.507,
+                  "precision": 0.514
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                },
+                "Siaga": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.29,
+                  "recall": 0.598,
+                  "precision": 0.399
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.491,
+                  "recall": 0.853,
+                  "precision": 0.336
+                },
+                "Siaga": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.537,
+                  "recall": 0.667,
+                  "precision": 0.492
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.616,
+                  "recall": 0.667,
+                  "precision": 0.429
+                },
+                "Siaga": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              }
+            }
+          },
+          "below_current_share": 0.177,
+          "below_current_with_post_siaga2": 0.024
+        },
+        "xgb_monotone \u00b7 volume-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": 0.074,
+              "Siaga": 0.3185,
+              "Bahaya": 0.4234
+            },
+            "2020": {
+              "Waspada": 0.1054,
+              "Siaga": 0.4337,
+              "Bahaya": 0.5655
+            },
+            "2021": {
+              "Waspada": 0.1917,
+              "Siaga": 0.5546,
+              "Bahaya": 0.7272
+            },
+            "2025": {
+              "Waspada": 0.2164,
+              "Siaga": 0.6133,
+              "Bahaya": 0.7562
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.694,
+                0.663,
+                0.723
+              ],
+              "learned score": [
+                0.775,
+                0.735,
+                0.811
+              ],
+              "learned minus current": [
+                0.05,
+                0.115
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.269,
+                "recall": 0.558,
+                "precision": 0.458
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.443,
+                "recall": 0.758,
+                "precision": 0.378
+              },
+              "Siaga": {
+                "alarm_share": 0.052,
+                "recall": 0.174,
+                "precision": 0.739
+              },
+              "Bahaya": {
+                "alarm_share": 0.024,
+                "recall": 0.082,
+                "precision": 0.767
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  0.14,
+                  0.26
+                ],
+                "precision": [
+                  -0.116,
+                  -0.042
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  0.007,
+                  0.08
+                ],
+                "precision": [
+                  -0.093,
+                  0.122
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.017,
+                  0.046
+                ],
+                "precision": [
+                  -0.078,
+                  0.089
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.272,
+                  "recall": 0.555,
+                  "precision": 0.45
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.11,
+                  "precision": 0.62
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.057,
+                  "precision": 0.848
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.072,
+                    0.06
+                  ],
+                  "precision": [
+                    -0.052,
+                    0.037
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.056,
+                    0.02
+                  ],
+                  "precision": [
+                    -0.242,
+                    0.02
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.015,
+                    0.028
+                  ],
+                  "precision": [
+                    -0.079,
+                    0.26
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.752,
+                0.7,
+                0.802
+              ],
+              "learned score": [
+                0.781,
+                0.725,
+                0.834
+              ],
+              "learned minus current": [
+                -0.015,
+                0.073
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.269,
+                "recall": 0.706,
+                "precision": 0.2
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.443,
+                "recall": 0.838,
+                "precision": 0.144
+              },
+              "Siaga": {
+                "alarm_share": 0.052,
+                "recall": 0.247,
+                "precision": 0.36
+              },
+              "Bahaya": {
+                "alarm_share": 0.024,
+                "recall": 0.111,
+                "precision": 0.356
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  0.043,
+                  0.219
+                ],
+                "precision": [
+                  -0.082,
+                  -0.033
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.03,
+                  0.107
+                ],
+                "precision": [
+                  -0.133,
+                  0.058
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.005,
+                  0.052
+                ],
+                "precision": [
+                  -0.182,
+                  0.016
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.272,
+                  "recall": 0.685,
+                  "precision": 0.191
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.115,
+                  "precision": 0.223
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.068,
+                  "precision": 0.348
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.126,
+                    0.086
+                  ],
+                  "precision": [
+                    -0.037,
+                    0.019
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.167,
+                    -0.016
+                  ],
+                  "precision": [
+                    -0.294,
+                    -0.054
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.056,
+                    0.018
+                  ],
+                  "precision": [
+                    -0.265,
+                    0.077
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.139,
+                  "recall": 0.548,
+                  "precision": 0.347
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.378,
+                  "recall": 0.882,
+                  "precision": 0.206
+                },
+                "Siaga": {
+                  "alarm_share": 0.017,
+                  "recall": 0.097,
+                  "precision": 0.5
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.298,
+                  "recall": 0.507,
+                  "precision": 0.514
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.434,
+                  "recall": 0.737,
+                  "precision": 0.514
+                },
+                "Siaga": {
+                  "alarm_share": 0.036,
+                  "recall": 0.099,
+                  "precision": 0.833
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.034,
+                  "precision": 0.667
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.29,
+                  "recall": 0.598,
+                  "precision": 0.399
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.491,
+                  "recall": 0.853,
+                  "precision": 0.336
+                },
+                "Siaga": {
+                  "alarm_share": 0.049,
+                  "recall": 0.216,
+                  "precision": 0.846
+                },
+                "Bahaya": {
+                  "alarm_share": 0.008,
+                  "recall": 0.039,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.537,
+                  "recall": 0.667,
+                  "precision": 0.492
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.601,
+                  "recall": 0.659,
+                  "precision": 0.434
+                },
+                "Siaga": {
+                  "alarm_share": 0.22,
+                  "recall": 0.393,
+                  "precision": 0.707
+                },
+                "Bahaya": {
+                  "alarm_share": 0.135,
+                  "recall": 0.274,
+                  "precision": 0.804
+                }
+              }
+            }
+          },
+          "below_current_share": 0.05,
+          "below_current_with_post_siaga2": 0.014
+        }
+      }
+    },
+    "lag 2": {
+      "snapshots": 4302,
+      "test_snapshots": 3090,
+      "test_days": 1062,
+      "flood_share": 0.221,
+      "large_share": 0.076,
+      "scorers": {
+        "tree \u00b7 precision-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2020": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2021": {
+              "Waspada": 0.2205,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2025": {
+              "Waspada": 0.3208,
+              "Siaga": 0.5217,
+              "Bahaya": null
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.683,
+                0.653,
+                0.713
+              ],
+              "learned score": [
+                0.733,
+                0.695,
+                0.77
+              ],
+              "learned minus current": [
+                0.014,
+                0.09
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.248,
+                "recall": 0.521,
+                "precision": 0.464
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.132,
+                "recall": 0.242,
+                "precision": 0.405
+              },
+              "Siaga": {
+                "alarm_share": 0.018,
+                "recall": 0.059,
+                "precision": 0.702
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.345,
+                  -0.215
+                ],
+                "precision": [
+                  -0.127,
+                  0.025
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.096,
+                  -0.048
+                ],
+                "precision": [
+                  -0.139,
+                  0.084
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.0
+                ],
+                "precision": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.322,
+                  "recall": 0.635,
+                  "precision": 0.436
+                },
+                "Siaga": {
+                  "alarm_share": 0.048,
+                  "recall": 0.113,
+                  "precision": 0.524
+                },
+                "Bahaya": {
+                  "alarm_share": 0.019,
+                  "recall": 0.048,
+                  "precision": 0.55
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    0.05,
+                    0.186
+                  ],
+                  "precision": [
+                    -0.078,
+                    0.019
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.052,
+                    0.019
+                  ],
+                  "precision": [
+                    -0.319,
+                    -0.079
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.029,
+                    0.027
+                  ],
+                  "precision": [
+                    -0.44,
+                    0.028
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.732,
+                0.68,
+                0.784
+              ],
+              "learned score": [
+                0.712,
+                0.663,
+                0.763
+              ],
+              "learned minus current": [
+                -0.067,
+                0.032
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.248,
+                "recall": 0.651,
+                "precision": 0.199
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.132,
+                "recall": 0.166,
+                "precision": 0.096
+              },
+              "Siaga": {
+                "alarm_share": 0.018,
+                "recall": 0.089,
+                "precision": 0.368
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.592,
+                  -0.38
+                ],
+                "precision": [
+                  -0.155,
+                  -0.057
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.174,
+                  -0.065
+                ],
+                "precision": [
+                  -0.139,
+                  0.088
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.0
+                ],
+                "precision": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.322,
+                  "recall": 0.74,
+                  "precision": 0.175
+                },
+                "Siaga": {
+                  "alarm_share": 0.048,
+                  "recall": 0.094,
+                  "precision": 0.15
+                },
+                "Bahaya": {
+                  "alarm_share": 0.019,
+                  "recall": 0.055,
+                  "precision": 0.217
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.02,
+                    0.208
+                  ],
+                  "precision": [
+                    -0.052,
+                    0.006
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.179,
+                    -0.046
+                  ],
+                  "precision": [
+                    -0.348,
+                    -0.146
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.082,
+                    0.028
+                  ],
+                  "precision": [
+                    -0.41,
+                    -0.001
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.136,
+                  "recall": 0.516,
+                  "precision": 0.333
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Siaga": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.286,
+                  "recall": 0.462,
+                  "precision": 0.488
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                },
+                "Siaga": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.205,
+                  "recall": 0.559,
+                  "precision": 0.528
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.515,
+                  "recall": 0.873,
+                  "precision": 0.327
+                },
+                "Siaga": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.531,
+                  "recall": 0.652,
+                  "precision": 0.486
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.34,
+                  "recall": 0.467,
+                  "precision": 0.543
+                },
+                "Siaga": {
+                  "alarm_share": 0.109,
+                  "recall": 0.193,
+                  "precision": 0.703
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              }
+            }
+          },
+          "below_current_share": 0.181,
+          "below_current_with_post_siaga2": 0.024
+        },
+        "logistic \u00b7 precision-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2020": {
+              "Waspada": 0.5292,
+              "Siaga": 0.7626,
+              "Bahaya": null
+            },
+            "2021": {
+              "Waspada": 0.2056,
+              "Siaga": 0.7937,
+              "Bahaya": 0.8898
+            },
+            "2025": {
+              "Waspada": 0.1768,
+              "Siaga": 0.7953,
+              "Bahaya": 0.8418
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.683,
+                0.653,
+                0.713
+              ],
+              "learned score": [
+                0.746,
+                0.704,
+                0.784
+              ],
+              "learned minus current": [
+                0.027,
+                0.098
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.248,
+                "recall": 0.521,
+                "precision": 0.464
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.118,
+                "recall": 0.275,
+                "precision": 0.514
+              },
+              "Siaga": {
+                "alarm_share": 0.022,
+                "recall": 0.082,
+                "precision": 0.824
+              },
+              "Bahaya": {
+                "alarm_share": 0.017,
+                "recall": 0.061,
+                "precision": 0.792
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.3,
+                  -0.189
+                ],
+                "precision": [
+                  -0.012,
+                  0.117
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.076,
+                  -0.023
+                ],
+                "precision": [
+                  0.004,
+                  0.188
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.003,
+                  0.019
+                ],
+                "precision": [
+                  0.007,
+                  0.073
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.249,
+                  "recall": 0.512,
+                  "precision": 0.455
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.139,
+                  "precision": 0.785
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.06,
+                  "precision": 0.891
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.071,
+                    0.05
+                  ],
+                  "precision": [
+                    -0.059,
+                    0.036
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.027,
+                    0.05
+                  ],
+                  "precision": [
+                    -0.075,
+                    0.171
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.015,
+                    0.034
+                  ],
+                  "precision": [
+                    -0.11,
+                    0.333
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.732,
+                0.68,
+                0.784
+              ],
+              "learned score": [
+                0.764,
+                0.693,
+                0.828
+              ],
+              "learned minus current": [
+                -0.015,
+                0.076
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.248,
+                "recall": 0.651,
+                "precision": 0.199
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.118,
+                "recall": 0.272,
+                "precision": 0.175
+              },
+              "Siaga": {
+                "alarm_share": 0.022,
+                "recall": 0.14,
+                "precision": 0.485
+              },
+              "Bahaya": {
+                "alarm_share": 0.017,
+                "recall": 0.089,
+                "precision": 0.396
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.476,
+                  -0.278
+                ],
+                "precision": [
+                  -0.071,
+                  0.021
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.127,
+                  -0.01
+                ],
+                "precision": [
+                  -0.032,
+                  0.205
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.016
+                ],
+                "precision": [
+                  -0.103,
+                  0.017
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.249,
+                  "recall": 0.655,
+                  "precision": 0.2
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.226,
+                  "precision": 0.438
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.128,
+                  "precision": 0.652
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.1,
+                    0.095
+                  ],
+                  "precision": [
+                    -0.031,
+                    0.03
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.046,
+                    0.093
+                  ],
+                  "precision": [
+                    -0.087,
+                    0.165
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.008,
+                    0.101
+                  ],
+                  "precision": [
+                    -0.021,
+                    0.432
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.136,
+                  "recall": 0.516,
+                  "precision": 0.333
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Siaga": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.286,
+                  "recall": 0.462,
+                  "precision": 0.488
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.039,
+                  "recall": 0.102,
+                  "precision": 0.8
+                },
+                "Siaga": {
+                  "alarm_share": 0.023,
+                  "recall": 0.065,
+                  "precision": 0.852
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.205,
+                  "recall": 0.559,
+                  "precision": 0.528
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.267,
+                  "recall": 0.647,
+                  "precision": 0.468
+                },
+                "Siaga": {
+                  "alarm_share": 0.008,
+                  "recall": 0.039,
+                  "precision": 1.0
+                },
+                "Bahaya": {
+                  "alarm_share": 0.008,
+                  "recall": 0.039,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.531,
+                  "recall": 0.652,
+                  "precision": 0.486
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.513,
+                  "recall": 0.615,
+                  "precision": 0.474
+                },
+                "Siaga": {
+                  "alarm_share": 0.094,
+                  "recall": 0.193,
+                  "precision": 0.812
+                },
+                "Bahaya": {
+                  "alarm_share": 0.088,
+                  "recall": 0.185,
+                  "precision": 0.833
+                }
+              }
+            }
+          },
+          "below_current_share": 0.167,
+          "below_current_with_post_siaga2": 0.022
+        },
+        "logistic \u00b7 volume-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": 0.0527,
+              "Siaga": 0.2081,
+              "Bahaya": 0.3709
+            },
+            "2020": {
+              "Waspada": 0.104,
+              "Siaga": 0.4867,
+              "Bahaya": 0.63
+            },
+            "2021": {
+              "Waspada": 0.1766,
+              "Siaga": 0.6395,
+              "Bahaya": 0.7938
+            },
+            "2025": {
+              "Waspada": 0.1924,
+              "Siaga": 0.6757,
+              "Bahaya": 0.8263
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.683,
+                0.653,
+                0.713
+              ],
+              "learned score": [
+                0.746,
+                0.704,
+                0.784
+              ],
+              "learned minus current": [
+                0.027,
+                0.098
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.248,
+                "recall": 0.521,
+                "precision": 0.464
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.415,
+                "recall": 0.668,
+                "precision": 0.356
+              },
+              "Siaga": {
+                "alarm_share": 0.048,
+                "recall": 0.145,
+                "precision": 0.664
+              },
+              "Bahaya": {
+                "alarm_share": 0.03,
+                "recall": 0.104,
+                "precision": 0.755
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  0.089,
+                  0.201
+                ],
+                "precision": [
+                  -0.147,
+                  -0.072
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.018,
+                  0.049
+                ],
+                "precision": [
+                  -0.186,
+                  0.068
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.033,
+                  0.076
+                ],
+                "precision": [
+                  -0.149,
+                  0.123
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.249,
+                  "recall": 0.512,
+                  "precision": 0.455
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.139,
+                  "precision": 0.785
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.06,
+                  "precision": 0.891
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.071,
+                    0.05
+                  ],
+                  "precision": [
+                    -0.059,
+                    0.036
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.027,
+                    0.05
+                  ],
+                  "precision": [
+                    -0.075,
+                    0.171
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.015,
+                    0.034
+                  ],
+                  "precision": [
+                    -0.11,
+                    0.333
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.732,
+                0.68,
+                0.784
+              ],
+              "learned score": [
+                0.764,
+                0.693,
+                0.828
+              ],
+              "learned minus current": [
+                -0.015,
+                0.076
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.248,
+                "recall": 0.651,
+                "precision": 0.199
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.415,
+                "recall": 0.753,
+                "precision": 0.138
+              },
+              "Siaga": {
+                "alarm_share": 0.048,
+                "recall": 0.26,
+                "precision": 0.409
+              },
+              "Bahaya": {
+                "alarm_share": 0.03,
+                "recall": 0.2,
+                "precision": 0.5
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  0.023,
+                  0.18
+                ],
+                "precision": [
+                  -0.087,
+                  -0.037
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.009,
+                  0.117
+                ],
+                "precision": [
+                  -0.096,
+                  0.122
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.066,
+                  0.171
+                ],
+                "precision": [
+                  -0.077,
+                  0.201
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.249,
+                  "recall": 0.655,
+                  "precision": 0.2
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.226,
+                  "precision": 0.438
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.128,
+                  "precision": 0.652
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.1,
+                    0.095
+                  ],
+                  "precision": [
+                    -0.031,
+                    0.03
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.046,
+                    0.093
+                  ],
+                  "precision": [
+                    -0.087,
+                    0.165
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.008,
+                    0.101
+                  ],
+                  "precision": [
+                    -0.021,
+                    0.432
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.136,
+                  "recall": 0.516,
+                  "precision": 0.333
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.496,
+                  "recall": 0.882,
+                  "precision": 0.157
+                },
+                "Siaga": {
+                  "alarm_share": 0.049,
+                  "recall": 0.183,
+                  "precision": 0.327
+                },
+                "Bahaya": {
+                  "alarm_share": 0.021,
+                  "recall": 0.129,
+                  "precision": 0.545
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.286,
+                  "recall": 0.462,
+                  "precision": 0.488
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.361,
+                  "recall": 0.623,
+                  "precision": 0.523
+                },
+                "Siaga": {
+                  "alarm_share": 0.044,
+                  "recall": 0.119,
+                  "precision": 0.824
+                },
+                "Bahaya": {
+                  "alarm_share": 0.033,
+                  "recall": 0.085,
+                  "precision": 0.789
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.205,
+                  "recall": 0.559,
+                  "precision": 0.528
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.347,
+                  "recall": 0.735,
+                  "precision": 0.41
+                },
+                "Siaga": {
+                  "alarm_share": 0.015,
+                  "recall": 0.078,
+                  "precision": 1.0
+                },
+                "Bahaya": {
+                  "alarm_share": 0.008,
+                  "recall": 0.039,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.531,
+                  "recall": 0.652,
+                  "precision": 0.486
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.452,
+                  "recall": 0.585,
+                  "precision": 0.513
+                },
+                "Siaga": {
+                  "alarm_share": 0.111,
+                  "recall": 0.237,
+                  "precision": 0.842
+                },
+                "Bahaya": {
+                  "alarm_share": 0.088,
+                  "recall": 0.185,
+                  "precision": 0.833
+                }
+              }
+            }
+          },
+          "below_current_share": 0.054,
+          "below_current_with_post_siaga2": 0.017
+        },
+        "xgb_monotone \u00b7 precision-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2020": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2021": {
+              "Waspada": 0.1526,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2025": {
+              "Waspada": 0.151,
+              "Siaga": null,
+              "Bahaya": null
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.683,
+                0.653,
+                0.713
+              ],
+              "learned score": [
+                0.769,
+                0.73,
+                0.805
+              ],
+              "learned minus current": [
+                0.053,
+                0.12
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.248,
+                "recall": 0.521,
+                "precision": 0.464
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.164,
+                "recall": 0.286,
+                "precision": 0.385
+              },
+              "Siaga": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.299,
+                  -0.17
+                ],
+                "precision": [
+                  -0.138,
+                  -0.012
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.103,
+                  -0.056
+                ],
+                "precision": [
+                  -0.084,
+                  0.154
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.0
+                ],
+                "precision": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.252,
+                  "recall": 0.529,
+                  "precision": 0.463
+                },
+                "Siaga": {
+                  "alarm_share": 0.04,
+                  "recall": 0.116,
+                  "precision": 0.642
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.057,
+                  "precision": 0.848
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.06,
+                    0.071
+                  ],
+                  "precision": [
+                    -0.051,
+                    0.048
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.049,
+                    0.026
+                  ],
+                  "precision": [
+                    -0.217,
+                    0.043
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.016,
+                    0.029
+                  ],
+                  "precision": [
+                    -0.077,
+                    0.26
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.732,
+                0.68,
+                0.784
+              ],
+              "learned score": [
+                0.774,
+                0.713,
+                0.827
+              ],
+              "learned minus current": [
+                -0.002,
+                0.087
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.248,
+                "recall": 0.651,
+                "precision": 0.199
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.164,
+                "recall": 0.179,
+                "precision": 0.083
+              },
+              "Siaga": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.576,
+                  -0.367
+                ],
+                "precision": [
+                  -0.163,
+                  -0.074
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.176,
+                  -0.071
+                ],
+                "precision": [
+                  -0.086,
+                  0.178
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.0
+                ],
+                "precision": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.252,
+                  "recall": 0.655,
+                  "precision": 0.198
+                },
+                "Siaga": {
+                  "alarm_share": 0.04,
+                  "recall": 0.106,
+                  "precision": 0.203
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.068,
+                  "precision": 0.348
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.097,
+                    0.11
+                  ],
+                  "precision": [
+                    -0.03,
+                    0.029
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.171,
+                    -0.027
+                  ],
+                  "precision": [
+                    -0.312,
+                    -0.073
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.057,
+                    0.019
+                  ],
+                  "precision": [
+                    -0.273,
+                    0.07
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.136,
+                  "recall": 0.516,
+                  "precision": 0.333
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Siaga": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.286,
+                  "recall": 0.462,
+                  "precision": 0.488
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                },
+                "Siaga": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.205,
+                  "recall": 0.559,
+                  "precision": 0.528
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.521,
+                  "recall": 0.882,
+                  "precision": 0.327
+                },
+                "Siaga": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.531,
+                  "recall": 0.652,
+                  "precision": 0.486
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.625,
+                  "recall": 0.681,
+                  "precision": 0.432
+                },
+                "Siaga": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              }
+            }
+          },
+          "below_current_share": 0.161,
+          "below_current_with_post_siaga2": 0.024
+        },
+        "xgb_monotone \u00b7 volume-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": 0.074,
+              "Siaga": 0.3635,
+              "Bahaya": 0.3924
+            },
+            "2020": {
+              "Waspada": 0.0948,
+              "Siaga": 0.4616,
+              "Bahaya": 0.5659
+            },
+            "2021": {
+              "Waspada": 0.2065,
+              "Siaga": 0.567,
+              "Bahaya": 0.73
+            },
+            "2025": {
+              "Waspada": 0.2285,
+              "Siaga": 0.6194,
+              "Bahaya": 0.7628
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.683,
+                0.653,
+                0.713
+              ],
+              "learned score": [
+                0.769,
+                0.73,
+                0.805
+              ],
+              "learned minus current": [
+                0.053,
+                0.12
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.248,
+                "recall": 0.521,
+                "precision": 0.464
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.407,
+                "recall": 0.739,
+                "precision": 0.401
+              },
+              "Siaga": {
+                "alarm_share": 0.043,
+                "recall": 0.148,
+                "precision": 0.765
+              },
+              "Bahaya": {
+                "alarm_share": 0.022,
+                "recall": 0.075,
+                "precision": 0.75
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  0.156,
+                  0.278
+                ],
+                "precision": [
+                  -0.103,
+                  -0.023
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.015,
+                  0.049
+                ],
+                "precision": [
+                  -0.058,
+                  0.127
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.012,
+                  0.036
+                ],
+                "precision": [
+                  -0.095,
+                  0.07
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.252,
+                  "recall": 0.529,
+                  "precision": 0.463
+                },
+                "Siaga": {
+                  "alarm_share": 0.04,
+                  "recall": 0.116,
+                  "precision": 0.642
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.057,
+                  "precision": 0.848
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.06,
+                    0.071
+                  ],
+                  "precision": [
+                    -0.051,
+                    0.048
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.049,
+                    0.026
+                  ],
+                  "precision": [
+                    -0.217,
+                    0.043
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.016,
+                    0.029
+                  ],
+                  "precision": [
+                    -0.077,
+                    0.26
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.732,
+                0.68,
+                0.784
+              ],
+              "learned score": [
+                0.774,
+                0.713,
+                0.827
+              ],
+              "learned minus current": [
+                -0.002,
+                0.087
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.248,
+                "recall": 0.651,
+                "precision": 0.199
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.407,
+                "recall": 0.83,
+                "precision": 0.155
+              },
+              "Siaga": {
+                "alarm_share": 0.043,
+                "recall": 0.217,
+                "precision": 0.386
+              },
+              "Bahaya": {
+                "alarm_share": 0.022,
+                "recall": 0.102,
+                "precision": 0.353
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  0.093,
+                  0.269
+                ],
+                "precision": [
+                  -0.069,
+                  -0.019
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.065,
+                  0.086
+                ],
+                "precision": [
+                  -0.116,
+                  0.088
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.004,
+                  0.038
+                ],
+                "precision": [
+                  -0.178,
+                  -0.003
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.252,
+                  "recall": 0.655,
+                  "precision": 0.198
+                },
+                "Siaga": {
+                  "alarm_share": 0.04,
+                  "recall": 0.106,
+                  "precision": 0.203
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.068,
+                  "precision": 0.348
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.097,
+                    0.11
+                  ],
+                  "precision": [
+                    -0.03,
+                    0.029
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.171,
+                    -0.027
+                  ],
+                  "precision": [
+                    -0.312,
+                    -0.073
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.057,
+                    0.019
+                  ],
+                  "precision": [
+                    -0.273,
+                    0.07
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.136,
+                  "recall": 0.516,
+                  "precision": 0.333
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.276,
+                  "recall": 0.849,
+                  "precision": 0.271
+                },
+                "Siaga": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.286,
+                  "recall": 0.462,
+                  "precision": 0.488
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.463,
+                  "recall": 0.728,
+                  "precision": 0.476
+                },
+                "Siaga": {
+                  "alarm_share": 0.034,
+                  "recall": 0.093,
+                  "precision": 0.825
+                },
+                "Bahaya": {
+                  "alarm_share": 0.014,
+                  "recall": 0.028,
+                  "precision": 0.625
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.205,
+                  "recall": 0.559,
+                  "precision": 0.528
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.466,
+                  "recall": 0.794,
+                  "precision": 0.329
+                },
+                "Siaga": {
+                  "alarm_share": 0.021,
+                  "recall": 0.108,
+                  "precision": 1.0
+                },
+                "Bahaya": {
+                  "alarm_share": 0.008,
+                  "recall": 0.039,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.531,
+                  "recall": 0.652,
+                  "precision": 0.486
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.531,
+                  "recall": 0.652,
+                  "precision": 0.486
+                },
+                "Siaga": {
+                  "alarm_share": 0.223,
+                  "recall": 0.4,
+                  "precision": 0.711
+                },
+                "Bahaya": {
+                  "alarm_share": 0.126,
+                  "recall": 0.252,
+                  "precision": 0.791
+                }
+              }
+            }
+          },
+          "below_current_share": 0.052,
+          "below_current_with_post_siaga2": 0.016
+        }
+      }
+    },
+    "lag 3": {
+      "snapshots": 4302,
+      "test_snapshots": 3090,
+      "test_days": 1062,
+      "flood_share": 0.221,
+      "large_share": 0.076,
+      "scorers": {
+        "tree \u00b7 precision-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2020": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2021": {
+              "Waspada": 0.2363,
+              "Siaga": 0.8478,
+              "Bahaya": 0.8478
+            },
+            "2025": {
+              "Waspada": 0.3913,
+              "Siaga": 0.5217,
+              "Bahaya": null
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.685,
+                0.655,
+                0.714
+              ],
+              "learned score": [
+                0.743,
+                0.704,
+                0.779
+              ],
+              "learned minus current": [
+                0.023,
+                0.093
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.255,
+                "recall": 0.53,
+                "precision": 0.46
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.125,
+                "recall": 0.24,
+                "precision": 0.425
+              },
+              "Siaga": {
+                "alarm_share": 0.02,
+                "recall": 0.064,
+                "precision": 0.721
+              },
+              "Bahaya": {
+                "alarm_share": 0.016,
+                "recall": 0.057,
+                "precision": 0.78
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.354,
+                  -0.224
+                ],
+                "precision": [
+                  -0.109,
+                  0.047
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.091,
+                  -0.041
+                ],
+                "precision": [
+                  -0.117,
+                  0.102
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.014
+                ],
+                "precision": [
+                  0.0,
+                  0.05
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.292,
+                  "recall": 0.605,
+                  "precision": 0.458
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.101,
+                  "precision": 0.57
+                },
+                "Bahaya": {
+                  "alarm_share": 0.039,
+                  "recall": 0.101,
+                  "precision": 0.57
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    0.009,
+                    0.143
+                  ],
+                  "precision": [
+                    -0.05,
+                    0.043
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.064,
+                    0.007
+                  ],
+                  "precision": [
+                    -0.277,
+                    -0.041
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    0.023,
+                    0.083
+                  ],
+                  "precision": [
+                    -0.351,
+                    -0.029
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.731,
+                0.68,
+                0.784
+              ],
+              "learned score": [
+                0.729,
+                0.674,
+                0.78
+              ],
+              "learned minus current": [
+                -0.051,
+                0.05
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.255,
+                "recall": 0.655,
+                "precision": 0.196
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.125,
+                "recall": 0.166,
+                "precision": 0.101
+              },
+              "Siaga": {
+                "alarm_share": 0.02,
+                "recall": 0.089,
+                "precision": 0.344
+              },
+              "Bahaya": {
+                "alarm_share": 0.016,
+                "recall": 0.085,
+                "precision": 0.4
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.597,
+                  -0.379
+                ],
+                "precision": [
+                  -0.143,
+                  -0.046
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.174,
+                  -0.065
+                ],
+                "precision": [
+                  -0.162,
+                  0.06
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.0
+                ],
+                "precision": [
+                  -0.09,
+                  0.0
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.292,
+                  "recall": 0.74,
+                  "precision": 0.193
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.085,
+                  "precision": 0.165
+                },
+                "Bahaya": {
+                  "alarm_share": 0.039,
+                  "recall": 0.085,
+                  "precision": 0.165
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.028,
+                    0.203
+                  ],
+                  "precision": [
+                    -0.033,
+                    0.029
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.194,
+                    -0.045
+                  ],
+                  "precision": [
+                    -0.352,
+                    -0.118
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.044,
+                    0.044
+                  ],
+                  "precision": [
+                    -0.43,
+                    -0.125
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.134,
+                  "recall": 0.516,
+                  "precision": 0.34
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Siaga": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.291,
+                  "recall": 0.473,
+                  "precision": 0.493
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                },
+                "Siaga": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.225,
+                  "recall": 0.559,
+                  "precision": 0.479
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.475,
+                  "recall": 0.863,
+                  "precision": 0.351
+                },
+                "Siaga": {
+                  "alarm_share": 0.009,
+                  "recall": 0.049,
+                  "precision": 1.0
+                },
+                "Bahaya": {
+                  "alarm_share": 0.009,
+                  "recall": 0.049,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.551,
+                  "recall": 0.667,
+                  "precision": 0.479
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.34,
+                  "recall": 0.467,
+                  "precision": 0.543
+                },
+                "Siaga": {
+                  "alarm_share": 0.109,
+                  "recall": 0.193,
+                  "precision": 0.703
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              }
+            }
+          },
+          "below_current_share": 0.185,
+          "below_current_with_post_siaga2": 0.024
+        },
+        "logistic \u00b7 precision-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2020": {
+              "Waspada": 0.6515,
+              "Siaga": 0.7964,
+              "Bahaya": null
+            },
+            "2021": {
+              "Waspada": 0.2024,
+              "Siaga": 0.8007,
+              "Bahaya": 0.8897
+            },
+            "2025": {
+              "Waspada": 0.1714,
+              "Siaga": 0.8074,
+              "Bahaya": 0.9008
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.685,
+                0.655,
+                0.714
+              ],
+              "learned score": [
+                0.745,
+                0.703,
+                0.784
+              ],
+              "learned minus current": [
+                0.026,
+                0.095
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.255,
+                "recall": 0.53,
+                "precision": 0.46
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.117,
+                "recall": 0.264,
+                "precision": 0.497
+              },
+              "Siaga": {
+                "alarm_share": 0.019,
+                "recall": 0.072,
+                "precision": 0.817
+              },
+              "Bahaya": {
+                "alarm_share": 0.017,
+                "recall": 0.061,
+                "precision": 0.792
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.321,
+                  -0.206
+                ],
+                "precision": [
+                  -0.024,
+                  0.108
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.084,
+                  -0.035
+                ],
+                "precision": [
+                  -0.005,
+                  0.184
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.003,
+                  0.019
+                ],
+                "precision": [
+                  0.007,
+                  0.073
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.256,
+                  "recall": 0.518,
+                  "precision": 0.447
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.139,
+                  "precision": 0.785
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.06,
+                  "precision": 0.891
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.073,
+                    0.045
+                  ],
+                  "precision": [
+                    -0.061,
+                    0.032
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.028,
+                    0.049
+                  ],
+                  "precision": [
+                    -0.073,
+                    0.171
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.017,
+                    0.034
+                  ],
+                  "precision": [
+                    -0.11,
+                    0.336
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.731,
+                0.68,
+                0.784
+              ],
+              "learned score": [
+                0.757,
+                0.686,
+                0.824
+              ],
+              "learned minus current": [
+                -0.026,
+                0.075
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.255,
+                "recall": 0.655,
+                "precision": 0.196
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.117,
+                "recall": 0.234,
+                "precision": 0.152
+              },
+              "Siaga": {
+                "alarm_share": 0.019,
+                "recall": 0.111,
+                "precision": 0.433
+              },
+              "Bahaya": {
+                "alarm_share": 0.017,
+                "recall": 0.089,
+                "precision": 0.396
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.524,
+                  -0.317
+                ],
+                "precision": [
+                  -0.091,
+                  0.004
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.15,
+                  -0.049
+                ],
+                "precision": [
+                  -0.078,
+                  0.149
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.016
+                ],
+                "precision": [
+                  -0.103,
+                  0.017
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.256,
+                  "recall": 0.66,
+                  "precision": 0.196
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.213,
+                  "precision": 0.413
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.119,
+                  "precision": 0.609
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.091,
+                    0.1
+                  ],
+                  "precision": [
+                    -0.029,
+                    0.028
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.056,
+                    0.068
+                  ],
+                  "precision": [
+                    -0.101,
+                    0.141
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.014,
+                    0.082
+                  ],
+                  "precision": [
+                    -0.057,
+                    0.414
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.134,
+                  "recall": 0.516,
+                  "precision": 0.34
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Siaga": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.291,
+                  "recall": 0.473,
+                  "precision": 0.493
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.027,
+                  "recall": 0.076,
+                  "precision": 0.871
+                },
+                "Siaga": {
+                  "alarm_share": 0.017,
+                  "recall": 0.045,
+                  "precision": 0.8
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.225,
+                  "recall": 0.559,
+                  "precision": 0.479
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.286,
+                  "recall": 0.667,
+                  "precision": 0.45
+                },
+                "Siaga": {
+                  "alarm_share": 0.009,
+                  "recall": 0.049,
+                  "precision": 1.0
+                },
+                "Bahaya": {
+                  "alarm_share": 0.008,
+                  "recall": 0.039,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.551,
+                  "recall": 0.667,
+                  "precision": 0.479
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.513,
+                  "recall": 0.607,
+                  "precision": 0.469
+                },
+                "Siaga": {
+                  "alarm_share": 0.088,
+                  "recall": 0.185,
+                  "precision": 0.833
+                },
+                "Bahaya": {
+                  "alarm_share": 0.088,
+                  "recall": 0.185,
+                  "precision": 0.833
+                }
+              }
+            }
+          },
+          "below_current_share": 0.174,
+          "below_current_with_post_siaga2": 0.022
+        },
+        "logistic \u00b7 volume-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": 0.0581,
+              "Siaga": 0.2236,
+              "Bahaya": 0.4037
+            },
+            "2020": {
+              "Waspada": 0.1043,
+              "Siaga": 0.4943,
+              "Bahaya": 0.6516
+            },
+            "2021": {
+              "Waspada": 0.1737,
+              "Siaga": 0.6455,
+              "Bahaya": 0.7962
+            },
+            "2025": {
+              "Waspada": 0.1877,
+              "Siaga": 0.6622,
+              "Bahaya": 0.8202
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.685,
+                0.655,
+                0.714
+              ],
+              "learned score": [
+                0.745,
+                0.703,
+                0.784
+              ],
+              "learned minus current": [
+                0.026,
+                0.095
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.255,
+                "recall": 0.53,
+                "precision": 0.46
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.378,
+                "recall": 0.659,
+                "precision": 0.386
+              },
+              "Siaga": {
+                "alarm_share": 0.046,
+                "recall": 0.136,
+                "precision": 0.66
+              },
+              "Bahaya": {
+                "alarm_share": 0.027,
+                "recall": 0.098,
+                "precision": 0.807
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  0.072,
+                  0.177
+                ],
+                "precision": [
+                  -0.112,
+                  -0.039
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.022,
+                  0.039
+                ],
+                "precision": [
+                  -0.196,
+                  0.067
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.028,
+                  0.068
+                ],
+                "precision": [
+                  -0.08,
+                  0.149
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.256,
+                  "recall": 0.518,
+                  "precision": 0.447
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.139,
+                  "precision": 0.785
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.06,
+                  "precision": 0.891
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.073,
+                    0.045
+                  ],
+                  "precision": [
+                    -0.061,
+                    0.032
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.028,
+                    0.049
+                  ],
+                  "precision": [
+                    -0.073,
+                    0.171
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.017,
+                    0.034
+                  ],
+                  "precision": [
+                    -0.11,
+                    0.336
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.731,
+                0.68,
+                0.784
+              ],
+              "learned score": [
+                0.757,
+                0.686,
+                0.824
+              ],
+              "learned minus current": [
+                -0.026,
+                0.075
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.255,
+                "recall": 0.655,
+                "precision": 0.196
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.378,
+                "recall": 0.762,
+                "precision": 0.153
+              },
+              "Siaga": {
+                "alarm_share": 0.046,
+                "recall": 0.238,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.027,
+                "recall": 0.179,
+                "precision": 0.506
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  0.026,
+                  0.185
+                ],
+                "precision": [
+                  -0.066,
+                  -0.02
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.021,
+                  0.086
+                ],
+                "precision": [
+                  -0.107,
+                  0.108
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.05,
+                  0.145
+                ],
+                "precision": [
+                  -0.055,
+                  0.189
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.256,
+                  "recall": 0.66,
+                  "precision": 0.196
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.213,
+                  "precision": 0.413
+                },
+                "Bahaya": {
+                  "alarm_share": 0.015,
+                  "recall": 0.119,
+                  "precision": 0.609
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.091,
+                    0.1
+                  ],
+                  "precision": [
+                    -0.029,
+                    0.028
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.056,
+                    0.068
+                  ],
+                  "precision": [
+                    -0.101,
+                    0.141
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.014,
+                    0.082
+                  ],
+                  "precision": [
+                    -0.057,
+                    0.414
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.134,
+                  "recall": 0.516,
+                  "precision": 0.34
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.389,
+                  "recall": 0.839,
+                  "precision": 0.19
+                },
+                "Siaga": {
+                  "alarm_share": 0.046,
+                  "recall": 0.161,
+                  "precision": 0.306
+                },
+                "Bahaya": {
+                  "alarm_share": 0.016,
+                  "recall": 0.108,
+                  "precision": 0.588
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.291,
+                  "recall": 0.473,
+                  "precision": 0.493
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.358,
+                  "recall": 0.629,
+                  "precision": 0.532
+                },
+                "Siaga": {
+                  "alarm_share": 0.039,
+                  "recall": 0.108,
+                  "precision": 0.826
+                },
+                "Bahaya": {
+                  "alarm_share": 0.027,
+                  "recall": 0.076,
+                  "precision": 0.871
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.225,
+                  "recall": 0.559,
+                  "precision": 0.479
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.335,
+                  "recall": 0.696,
+                  "precision": 0.401
+                },
+                "Siaga": {
+                  "alarm_share": 0.015,
+                  "recall": 0.078,
+                  "precision": 1.0
+                },
+                "Bahaya": {
+                  "alarm_share": 0.009,
+                  "recall": 0.049,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.551,
+                  "recall": 0.667,
+                  "precision": 0.479
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.478,
+                  "recall": 0.585,
+                  "precision": 0.485
+                },
+                "Siaga": {
+                  "alarm_share": 0.111,
+                  "recall": 0.237,
+                  "precision": 0.842
+                },
+                "Bahaya": {
+                  "alarm_share": 0.088,
+                  "recall": 0.185,
+                  "precision": 0.833
+                }
+              }
+            }
+          },
+          "below_current_share": 0.059,
+          "below_current_with_post_siaga2": 0.018
+        },
+        "xgb_monotone \u00b7 precision-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": null,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2020": {
+              "Waspada": 0.1042,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2021": {
+              "Waspada": 0.1628,
+              "Siaga": null,
+              "Bahaya": null
+            },
+            "2025": {
+              "Waspada": 0.1683,
+              "Siaga": null,
+              "Bahaya": null
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.685,
+                0.655,
+                0.714
+              ],
+              "learned score": [
+                0.773,
+                0.733,
+                0.808
+              ],
+              "learned minus current": [
+                0.056,
+                0.12
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.255,
+                "recall": 0.53,
+                "precision": 0.46
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.332,
+                "recall": 0.649,
+                "precision": 0.431
+              },
+              "Siaga": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  0.055,
+                  0.189
+                ],
+                "precision": [
+                  -0.075,
+                  0.017
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.103,
+                  -0.056
+                ],
+                "precision": [
+                  -0.084,
+                  0.154
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.0
+                ],
+                "precision": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.261,
+                  "recall": 0.537,
+                  "precision": 0.455
+                },
+                "Siaga": {
+                  "alarm_share": 0.04,
+                  "recall": 0.116,
+                  "precision": 0.642
+                },
+                "Bahaya": {
+                  "alarm_share": 0.016,
+                  "recall": 0.059,
+                  "precision": 0.833
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.057,
+                    0.068
+                  ],
+                  "precision": [
+                    -0.052,
+                    0.041
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.05,
+                    0.025
+                  ],
+                  "precision": [
+                    -0.216,
+                    0.045
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.014,
+                    0.03
+                  ],
+                  "precision": [
+                    -0.083,
+                    0.249
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.731,
+                0.68,
+                0.784
+              ],
+              "learned score": [
+                0.777,
+                0.711,
+                0.831
+              ],
+              "learned minus current": [
+                -0.004,
+                0.091
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.255,
+                "recall": 0.655,
+                "precision": 0.196
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.332,
+                "recall": 0.762,
+                "precision": 0.174
+              },
+              "Siaga": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  -0.014,
+                  0.223
+                ],
+                "precision": [
+                  -0.05,
+                  0.009
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.176,
+                  -0.071
+                ],
+                "precision": [
+                  -0.086,
+                  0.178
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.0,
+                  0.0
+                ],
+                "precision": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.261,
+                  "recall": 0.677,
+                  "precision": 0.197
+                },
+                "Siaga": {
+                  "alarm_share": 0.04,
+                  "recall": 0.111,
+                  "precision": 0.211
+                },
+                "Bahaya": {
+                  "alarm_share": 0.016,
+                  "recall": 0.072,
+                  "precision": 0.354
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.083,
+                    0.12
+                  ],
+                  "precision": [
+                    -0.027,
+                    0.028
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.169,
+                    -0.02
+                  ],
+                  "precision": [
+                    -0.302,
+                    -0.069
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.054,
+                    0.025
+                  ],
+                  "precision": [
+                    -0.263,
+                    0.083
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.134,
+                  "recall": 0.516,
+                  "precision": 0.34
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Siaga": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.291,
+                  "recall": 0.473,
+                  "precision": 0.493
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.462,
+                  "recall": 0.737,
+                  "precision": 0.482
+                },
+                "Siaga": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.225,
+                  "recall": 0.559,
+                  "precision": 0.479
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.511,
+                  "recall": 0.863,
+                  "precision": 0.326
+                },
+                "Siaga": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.551,
+                  "recall": 0.667,
+                  "precision": 0.479
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.625,
+                  "recall": 0.681,
+                  "precision": 0.432
+                },
+                "Siaga": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              }
+            }
+          },
+          "below_current_share": 0.094,
+          "below_current_with_post_siaga2": 0.024
+        },
+        "xgb_monotone \u00b7 volume-matched": {
+          "thresholds_by_test_year": {
+            "2019": {
+              "Waspada": 0.074,
+              "Siaga": 0.3587,
+              "Bahaya": 0.4147
+            },
+            "2020": {
+              "Waspada": 0.1053,
+              "Siaga": 0.4813,
+              "Bahaya": 0.5847
+            },
+            "2021": {
+              "Waspada": 0.2003,
+              "Siaga": 0.5792,
+              "Bahaya": 0.7267
+            },
+            "2025": {
+              "Waspada": 0.2336,
+              "Siaga": 0.6508,
+              "Bahaya": 0.7811
+            }
+          },
+          "flood": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.685,
+                0.655,
+                0.714
+              ],
+              "learned score": [
+                0.773,
+                0.733,
+                0.808
+              ],
+              "learned minus current": [
+                0.056,
+                0.12
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.255,
+                "recall": 0.53,
+                "precision": 0.46
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.129,
+                "precision": 0.727
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.051,
+                "precision": 0.761
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.448,
+                "recall": 0.751,
+                "precision": 0.371
+              },
+              "Siaga": {
+                "alarm_share": 0.044,
+                "recall": 0.146,
+                "precision": 0.741
+              },
+              "Bahaya": {
+                "alarm_share": 0.022,
+                "recall": 0.076,
+                "precision": 0.776
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  0.16,
+                  0.279
+                ],
+                "precision": [
+                  -0.127,
+                  -0.053
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.013,
+                  0.047
+                ],
+                "precision": [
+                  -0.089,
+                  0.116
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.013,
+                  0.038
+                ],
+                "precision": [
+                  -0.053,
+                  0.089
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.261,
+                  "recall": 0.537,
+                  "precision": 0.455
+                },
+                "Siaga": {
+                  "alarm_share": 0.04,
+                  "recall": 0.116,
+                  "precision": 0.642
+                },
+                "Bahaya": {
+                  "alarm_share": 0.016,
+                  "recall": 0.059,
+                  "precision": 0.833
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.057,
+                    0.068
+                  ],
+                  "precision": [
+                    -0.052,
+                    0.041
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.05,
+                    0.025
+                  ],
+                  "precision": [
+                    -0.216,
+                    0.045
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.014,
+                    0.03
+                  ],
+                  "precision": [
+                    -0.083,
+                    0.249
+                  ]
+                }
+              }
+            }
+          },
+          "large": {
+            "roc_auc": {
+              "current (ordinal levels)": [
+                0.731,
+                0.68,
+                0.784
+              ],
+              "learned score": [
+                0.777,
+                0.711,
+                0.831
+              ],
+              "learned minus current": [
+                -0.004,
+                0.091
+              ]
+            },
+            "current": {
+              "Waspada": {
+                "alarm_share": 0.255,
+                "recall": 0.655,
+                "precision": 0.196
+              },
+              "Siaga": {
+                "alarm_share": 0.039,
+                "recall": 0.204,
+                "precision": 0.397
+              },
+              "Bahaya": {
+                "alarm_share": 0.015,
+                "recall": 0.085,
+                "precision": 0.435
+              }
+            },
+            "learned": {
+              "Waspada": {
+                "alarm_share": 0.448,
+                "recall": 0.843,
+                "precision": 0.143
+              },
+              "Siaga": {
+                "alarm_share": 0.044,
+                "recall": 0.221,
+                "precision": 0.385
+              },
+              "Bahaya": {
+                "alarm_share": 0.022,
+                "recall": 0.102,
+                "precision": 0.358
+              }
+            },
+            "learned_minus_current": {
+              "Waspada": {
+                "recall": [
+                  0.1,
+                  0.278
+                ],
+                "precision": [
+                  -0.079,
+                  -0.028
+                ]
+              },
+              "Siaga": {
+                "recall": [
+                  -0.051,
+                  0.079
+                ],
+                "precision": [
+                  -0.11,
+                  0.087
+                ]
+              },
+              "Bahaya": {
+                "recall": [
+                  0.004,
+                  0.038
+                ],
+                "precision": [
+                  -0.167,
+                  -0.003
+                ]
+              }
+            },
+            "equal_volume": {
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.261,
+                  "recall": 0.677,
+                  "precision": 0.197
+                },
+                "Siaga": {
+                  "alarm_share": 0.04,
+                  "recall": 0.111,
+                  "precision": 0.211
+                },
+                "Bahaya": {
+                  "alarm_share": 0.016,
+                  "recall": 0.072,
+                  "precision": 0.354
+                }
+              },
+              "learned_minus_current": {
+                "Waspada": {
+                  "recall": [
+                    -0.083,
+                    0.12
+                  ],
+                  "precision": [
+                    -0.027,
+                    0.028
+                  ]
+                },
+                "Siaga": {
+                  "recall": [
+                    -0.169,
+                    -0.02
+                  ],
+                  "precision": [
+                    -0.302,
+                    -0.069
+                  ]
+                },
+                "Bahaya": {
+                  "recall": [
+                    -0.054,
+                    0.025
+                  ],
+                  "precision": [
+                    -0.263,
+                    0.083
+                  ]
+                }
+              }
+            }
+          },
+          "per_year": {
+            "2019": {
+              "snapshots": 1055,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.134,
+                  "recall": 0.516,
+                  "precision": 0.34
+                },
+                "Siaga": {
+                  "alarm_share": 0.014,
+                  "recall": 0.118,
+                  "precision": 0.733
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.382,
+                  "recall": 0.882,
+                  "precision": 0.203
+                },
+                "Siaga": {
+                  "alarm_share": 0.017,
+                  "recall": 0.097,
+                  "precision": 0.5
+                },
+                "Bahaya": {
+                  "alarm_share": 0.005,
+                  "recall": 0.032,
+                  "precision": 0.6
+                }
+              }
+            },
+            "2020": {
+              "snapshots": 1166,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.291,
+                  "recall": 0.473,
+                  "precision": 0.493
+                },
+                "Siaga": {
+                  "alarm_share": 0.038,
+                  "recall": 0.082,
+                  "precision": 0.659
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.462,
+                  "recall": 0.737,
+                  "precision": 0.482
+                },
+                "Siaga": {
+                  "alarm_share": 0.03,
+                  "recall": 0.082,
+                  "precision": 0.829
+                },
+                "Bahaya": {
+                  "alarm_share": 0.012,
+                  "recall": 0.028,
+                  "precision": 0.714
+                }
+              }
+            },
+            "2021": {
+              "snapshots": 528,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.225,
+                  "recall": 0.559,
+                  "precision": 0.479
+                },
+                "Siaga": {
+                  "alarm_share": 0.006,
+                  "recall": 0.02,
+                  "precision": 0.667
+                },
+                "Bahaya": {
+                  "alarm_share": 0.002,
+                  "recall": 0.01,
+                  "precision": 1.0
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.464,
+                  "recall": 0.824,
+                  "precision": 0.343
+                },
+                "Siaga": {
+                  "alarm_share": 0.025,
+                  "recall": 0.118,
+                  "precision": 0.923
+                },
+                "Bahaya": {
+                  "alarm_share": 0.008,
+                  "recall": 0.039,
+                  "precision": 1.0
+                }
+              }
+            },
+            "2025": {
+              "snapshots": 341,
+              "current": {
+                "Waspada": {
+                  "alarm_share": 0.551,
+                  "recall": 0.667,
+                  "precision": 0.479
+                },
+                "Siaga": {
+                  "alarm_share": 0.173,
+                  "recall": 0.341,
+                  "precision": 0.78
+                },
+                "Bahaya": {
+                  "alarm_share": 0.076,
+                  "recall": 0.156,
+                  "precision": 0.808
+                }
+              },
+              "learned": {
+                "Waspada": {
+                  "alarm_share": 0.578,
+                  "recall": 0.644,
+                  "precision": 0.442
+                },
+                "Siaga": {
+                  "alarm_share": 0.202,
+                  "recall": 0.37,
+                  "precision": 0.725
+                },
+                "Bahaya": {
+                  "alarm_share": 0.129,
+                  "recall": 0.259,
+                  "precision": 0.795
+                }
+              }
+            }
+          },
+          "below_current_share": 0.053,
+          "below_current_with_post_siaga2": 0.015
+        }
+      }
+    }
+  },
+  "served": {
+    "kind": "xgb_monotone",
+    "mode": "volume",
+    "thresholds": {
+      "lag 1": {
+        "PRE_ALERT": 0.21118,
+        "WARNING": 0.6117,
+        "DANGER": 0.76178
+      },
+      "lag 2": {
+        "PRE_ALERT": 0.22189,
+        "WARNING": 0.61886,
+        "DANGER": 0.76152
+      },
+      "lag 3": {
+        "PRE_ALERT": 0.21843,
+        "WARNING": 0.63821,
+        "DANGER": 0.77641
+      }
+    }
+  }
+}

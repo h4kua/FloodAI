@@ -65,6 +65,7 @@ _AUTHORITY_TO_SOURCE = {
     DecisionAuthority.L2_INTEGRITY: "system_guardrail",
     DecisionAuthority.L3_ML:       "ml_adaptive",
     DecisionAuthority.L3_1_PRECISION_GATE: "precision_gate",
+    DecisionAuthority.L3_LEARNED:  "learned_decision_layer",
     DecisionAuthority.L4_TREND:    "trend_informed",
 }
 
@@ -236,6 +237,7 @@ def run_decision_engine(
     data_freshness_minutes: float = 0.0,
     elevation_data: dict | None = None,
     model_variant: str = "realtime_native",
+    learned_decision: dict | None = None,
 ) -> DecisionResult:
     """
     Adapter around app.domain.decide() — the canonical decision authority.
@@ -255,6 +257,8 @@ def run_decision_engine(
       L3.1 PRECISION_GATE — suppress marginal PRE_ALERT when baseline disagrees
       L3.7 NEW      — multi-signal early WARNING (E3)
       L4  TREND     — sustained -> DANGER OR rising-trend SAFE -> PRE_ALERT (E4)
+    With ``learned_decision`` (realtime_native/decision_layer.py) the learned layer's level is final
+    after L0, L1 and L1.7 (authority L3_LEARNED).
     """
     try:
         kwargs_snapshot = dict(
@@ -277,6 +281,7 @@ def run_decision_engine(
             data_freshness_minutes=data_freshness_minutes,
             elevation_data=elevation_data or {},
             model_variant=model_variant,
+            learned_decision=learned_decision,
         )
 
         canonical_inputs = _build_canonical_inputs(kwargs_snapshot)
@@ -338,6 +343,15 @@ def run_decision_engine(
 
 
 # ─── Adapter helpers ──────────────────────────────────────────────────────────
+
+
+def _learned_inputs(learned: dict | None) -> dict:
+    """ReasoningInputs fields of the learned decision layer (realtime_native/decision_layer.py)."""
+    if not learned or learned.get("risk_level") not in {r.value for r in RiskLevel}:
+        return {}
+    return {"learned_level": RiskLevel(learned["risk_level"]),
+            "learned_score": float(learned.get("score") or 0.0),
+            "learned_path": tuple({"feature": k, "push": v} for k, v in (learned.get("push") or {}).items())}
 
 
 def _build_canonical_inputs(kw: dict) -> dict:
@@ -463,6 +477,7 @@ def _build_canonical_inputs(kw: dict) -> dict:
         model_variant=str(kw.get("model_variant") or "realtime_native"),
         ood_score=ood_score_value,
         baseline_probability=baseline_prob,
+        **_learned_inputs(kw.get("learned_decision")),
     )
 
     failures: list[CanonicalFailureMode] = []

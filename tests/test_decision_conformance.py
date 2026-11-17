@@ -569,6 +569,7 @@ def test_decision_source_values_are_stable():
         "system_guardrail",
         "ml_adaptive",
         "precision_gate",
+        "learned_decision_layer",
         "trend_informed",
     }
 

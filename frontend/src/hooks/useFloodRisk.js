@@ -86,6 +86,8 @@ export function useFloodRisk() {
         districtRiskBreakdown: json.district_risk_breakdown ?? {},
         // Daily kecamatan model: today's flood chance per kecamatan, or null when it is off.
         dailyModel: json.daily_model ?? null,
+        // Learned decision layer: flood chance, thresholds, what raised it; decided=false when a safety rule set the level.
+        decisionLayer: json.decision_layer ?? null,
         // OpenWeather current conditions — pusat Jakarta
         openweather: json.openweather_current ?? null,
         // OpenWeather per kota administrasi Jakarta (5 wilayah)

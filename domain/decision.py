@@ -19,6 +19,11 @@ Decision hierarchy (top wins, evaluated top-to-bottom):
   L1.9 OOD_FLOOR      - post-ML: ood<-0.05->PRE_ALERT/70% cap, <-0.10->WARNING/55% cap
   L4   TREND          - sustained upward -> WARNING->DANGER (one-way, asymmetric)
 
+Learned path (reasoning.learned_level set): after the safety rules L0, L1 (Siaga 1, rapid rise at
+Siaga 3 or higher) and L1.7 (BMKG severe), the learned decision layer's level is final
+(authority L3_LEARNED; realtime_native/decision_layer.py). It replaces L1.5, L2, L3, L3.1, L3.3,
+L3.7, L1.8, L1.9 and L4, which then run only on the fallback path.
+
 This module has zero dependencies on FastAPI, psycopg2, sklearn, or any
 external service. Everything is a pure function over typed dataclasses.
 """
@@ -64,6 +69,11 @@ class ReasoningInputs:
     model_variant: str
     ood_score: float = 0.0         # IsolationForest decision_function; <0 = OOD
     baseline_probability: float = 0.0  # rule-based baseline for precision gate
+    # Learned decision layer (realtime_native/decision_layer.py): its level, score and the
+    # questions the tree asked. None -> the rule hierarchy decides.
+    learned_level: Optional[RiskLevel] = None
+    learned_score: float = 0.0
+    learned_path: Tuple[dict, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -588,8 +598,12 @@ def decide(
             decision_trace=tuple(decision_trace),
         )
 
+    # The learned layer also replaces L2: its only escalations come from heuristic signal conflicts
+    # (model vs baseline, water rising without rain), not from data failures, which never escalate.
+    use_learned = reasoning.learned_level is not None
+
     # ------------------------------------------------------------------ L1.5
-    extreme_count = sum([
+    extreme_count = 0 if use_learned else sum([
         perception.rainfall_1h_mm >= 60,
         perception.max_water_level_ratio >= 0.85,
         perception.bmkg_max_severity >= 0.80,
@@ -686,6 +700,29 @@ def decide(
             driver=Driver.BMKG_CONFIRMED_ALERT,
             ml_execution_mode="FULL",
             is_safe_for_automation=False,
+            decision_trace=tuple(decision_trace),
+        )
+
+    # ------------------------------------------------------------------ L3 LEARNED
+    if use_learned:
+        level = reasoning.learned_level
+        decision_trace.append(_trace(
+            DecisionAuthority.L3_LEARNED,
+            inputs={"probability": reasoning.probability, "score": reasoning.learned_score,
+                    "path": list(reasoning.learned_path)},
+            outputs={"risk": level.value},
+        ))
+        system_status = _resolve_system_status(failures, perception)
+        return Decision(
+            risk_level=level,
+            system_status=system_status,
+            reason=DecisionReason.RISK,
+            authority=DecisionAuthority.L3_LEARNED,
+            confidence=_penalize_confidence(reasoning.confidence, failures, perception),
+            driver=_select_driver(perception, reasoning),
+            ml_execution_mode="FULL",
+            is_safe_for_automation=(system_status == SystemStatus.OK
+                                    and level not in (RiskLevel.DANGER, RiskLevel.WARNING)),
             decision_trace=tuple(decision_trace),
         )
 

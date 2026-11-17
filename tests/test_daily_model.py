@@ -230,3 +230,19 @@ def test_recent_files_failure_keeps_giovanni(monkeypatch):
     out = daily_model._with_recent_files(rates, CELLS, pd.Timestamp("2026-11-15 17:00", tz="UTC"),
                                          pd.Timestamp("2026-11-17 05:00", tz="UTC"))
     assert out is rates
+
+
+def test_fetch_recent_skips_a_file_not_served_yet(monkeypatch):
+    listing = ('<a href="3B-HHR-E.MS.MRG.3IMERG.20261116-S233000-E235959.1410.V07C.HDF5">'
+               '<a href="3B-HHR-E.MS.MRG.3IMERG.20261116-S230000-E232959.1380.V07C.HDF5">')
+
+    def fake_get(url, token, timeout):
+        if "/data/" in url:
+            return listing if "/320/" in url else ""
+        return "Error: not ready" if "S233000" in url else _subset_text([[1.5, 0, 0, 0, 0, 2.5]])
+
+    monkeypatch.setattr(imerg_client, "_get", fake_get)
+    cache = {}
+    got = imerg_client.fetch_recent(CELLS, pd.Timestamp("2026-11-16 23:00", tz="UTC"),
+                                    pd.Timestamp("2026-11-17 01:00", tz="UTC"), token="t", cache=cache)
+    assert list(got["-6.65_106.85"]) == [1.5] and len(cache) == 1  # the other half-hour is retried later

@@ -8,7 +8,7 @@ import numpy as np
 from agents.perception_agent import PerceptionAgent
 from agents.reasoning_agent import _base_confidence, _outlier_capped_confidence
 from domain.decision import DAILY_MODEL_VARIANT
-from realtime_native import daily_model
+from realtime_native import daily_model, decision_layer
 from realtime_native.bundle import load_runtime_bundle
 from realtime_native.feature_builder import (
     REALTIME_NATIVE_FEATURES,
@@ -67,7 +67,8 @@ def _snapshot_freshness_minutes(snapshot: dict, now=None) -> float:
     return (ref - fetched).total_seconds() / 60.0
 
 
-def _live_decision(snapshot, engineered, probability, ood_detection, thresholds, model_card, *, now=None):
+def _live_decision(snapshot, engineered, probability, ood_detection, thresholds, model_card, *, now=None,
+                   learned=None):
     """
     Final citywide risk from the canonical L0–L4 decision engine, the same
     authority /predict/agentic uses. The model probability is one input; the
@@ -129,6 +130,7 @@ def _live_decision(snapshot, engineered, probability, ood_detection, thresholds,
         perception_completeness=present / len(_EXPECTED_SNAPSHOT_SECTIONS),
         data_freshness_minutes=_snapshot_freshness_minutes(snapshot, now),
         model_variant=str(thresholds.get("model_variant") or "realtime_native"),
+        learned_decision=learned,
     )
     return decision, failures
 
@@ -170,8 +172,9 @@ def _daily_model_note(daily, en):
             f"(model harian, hujan satelit sampai {daily.get('rain_through')}).")
 
 
-def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None, lang="id", daily=None):
-    """Plain-language reading of the level, in Indonesian (default) or English."""
+def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None, lang="id", daily=None, learned=None):
+    """Plain-language reading of the level, in Indonesian (default) or English. ``learned`` is the
+    learned decision layer's result when it set the level: the text then says what it looked at."""
     en = lang == "en"
 
     def tr(id_text, en_text):
@@ -207,6 +210,20 @@ def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None, lang="id
         label = _station_location_label(top_station)
         siaga = _clean_siaga(top_station["status_siaga"])
         height = f"{top_station.get('tinggi_air', 0):.0f} cm"
+
+    if learned is not None and risk_level in ("DANGER", "WARNING", "PRE_ALERT"):
+        why = decision_layer.describe(learned, en)
+        posts = tr(f" {label} mencatat {siaga} (TMA {height}).", f" {label} reads {siaga} ({height}).") if top_station else ""
+        if risk_level == "DANGER":
+            return tr(f"Bahaya.{why}{posts} Banjir mungkin terjadi hari ini: ikuti arahan BPBD dan siapkan evakuasi "
+                      "bila air naik di sekitar Anda.",
+                      f"Danger.{why}{posts} Flooding is likely today: follow BPBD's instructions and be ready to "
+                      "leave if the water rises near you.")
+        if risk_level == "WARNING":
+            return tr(f"Siaga.{why}{posts} Peluang banjir hari ini tinggi: amankan barang penting dan pantau terus.",
+                      f"Alert.{why}{posts} A flood today is quite likely: move valuables up and keep checking.")
+        return tr(f"Waspada.{why}{posts} Belum tentu banjir, tetapi siapkan diri dan pantau lebih sering.",
+                  f"Watch.{why}{posts} Not necessarily a flood, but be ready and check more often.")
 
     if risk_level == "DANGER":
         loc_context = ""
@@ -576,10 +593,17 @@ def predict_realtime_native(
         engine_thresholds = {**daily["thresholds"], "source": "daily_model", "model_variant": DAILY_MODEL_VARIANT,
                              "lag_days": daily["lag_days"], "model_version": daily["model_version"]}
         model_risk_level = daily["city_level"]
+    # The learned decision layer (a small tree on the daily model and the river posts) replaces the
+    # hand-written middle layers when it can decide; the safety rules still run in front of it.
+    learned = decision_layer.decide(daily, snapshot_raw.get("poskobanjir")) if daily is not None else None
     decision, failure_modes = _live_decision(
         snapshot_raw, engineered, engine_probability, ood_detection, engine_thresholds, model_card, now=as_of,
+        learned=learned,
     )
     risk_level = decision.risk_level
+    if learned is not None:
+        learned = {**learned, "decided": decision.override_trace.get("authority") == "L3_LEARNED"}
+    learned_text = learned if learned and learned["decided"] else None
 
     result = {
         "model_variant": DAILY_MODEL_VARIANT if daily is not None else "realtime_native",
@@ -601,9 +625,10 @@ def predict_realtime_native(
             "failure_modes": [f.get("type") for f in failure_modes],
             "trace": decision.decision_trace,
         },
-        "risk_interpretation": _risk_interpretation(risk_level, engineered.diagnostics, wilayah_summary, daily=daily),
+        "risk_interpretation": _risk_interpretation(risk_level, engineered.diagnostics, wilayah_summary, daily=daily,
+                                                    learned=learned_text),
         "risk_interpretation_en": _risk_interpretation(risk_level, engineered.diagnostics, wilayah_summary, lang="en",
-                                                       daily=daily),
+                                                       daily=daily, learned=learned_text),
         "recommended_action": _recommended_action(risk_level, wilayah_summary),
         "risk_thresholds": engine_thresholds,
         # ISO-8601 UTC timestamp when the sensor snapshot was built.
@@ -627,6 +652,9 @@ def predict_realtime_native(
         # Daily kecamatan model state (per-kecamatan probabilities, rain lag, thresholds);
         # None when it is off or not computed for today.
         "daily_model": daily,
+        # Learned decision layer: its level, score, the questions the tree asked and whether it set
+        # the final level (False when a safety rule decided first); None when it could not decide.
+        "decision_layer": learned,
     }
 
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)

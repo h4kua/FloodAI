@@ -141,11 +141,17 @@ def fetch_recent(cells: list[str], start: pd.Timestamp, end: pd.Timestamp, *, to
         ts, name = item
         url = (f"{GESDISC}/opendap/" + EARLY_DIR.format(year=ts.year, doy=ts.dayofyear) + name
                + f".ascii?precipitation[0:0][{lon0}:{lon1}][{lat0}:{lat1}]")
-        return ts, parse_subset(_get(url, token, timeout), cells, lon0, lat0)
+        try:
+            return ts, parse_subset(_get(url, token, timeout), cells, lon0, lat0)
+        except ImergUnavailable as exc:
+            if "refused the token" in str(exc):
+                raise
+            return ts, None  # this file not served yet (listed before OPeNDAP has it): retried next time
 
     with ThreadPoolExecutor(max_workers=workers) as pool:
         for ts, values in pool.map(one, sorted(wanted.items())):
-            cache[ts] = values
+            if values is not None:
+                cache[ts] = values
     stamps = sorted(ts for ts in cache if start <= ts < end)
     return {c: pd.Series([cache[ts].get(c, np.nan) for ts in stamps], index=pd.DatetimeIndex(stamps), dtype=float)
             for c in cells}

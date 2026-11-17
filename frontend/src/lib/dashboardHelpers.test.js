@@ -67,3 +67,16 @@ test("a Waspada raised by the daily model says why", () => {
   const quiet = buildStatusDesc({ level: "waspada", dailyModel: { ...dailyModel, city_level: "SAFE" } }, true);
   assert.doesNotMatch(quiet, /Hujan beberapa hari/);
 });
+
+test("a level set by the learned decision layer leads with today's flood chance", () => {
+  const decisionLayer = { decided: true, score: 0.64, push: { p: -0.2, w_max_now: 0.9 } };
+  const siaga = buildStatusDesc({ level: "siaga", waterLevelRatio: 0.3, decisionLayer }, true);
+  assert.match(siaga, /^Peluang banjir hari ini 64%\./);
+  assert.doesNotMatch(siaga, /Air sudah 30%/);
+  const dailyModel = { city_level: "PRE_ALERT", kecamatan: { a: { name: "Tebet", probability: 0.2, risk_level: "PRE_ALERT" } } };
+  const waspada = buildStatusDesc({ level: "waspada", dailyModel, decisionLayer: { ...decisionLayer, score: 0.3 } }, true);
+  assert.match(waspada, /Peluang banjir hari ini 30% menurut model keputusan/);
+  assert.doesNotMatch(waspada, /Hujan beberapa hari/);  // the daily chance did not raise it
+  const ruled = buildStatusDesc({ level: "siaga", waterLevelRatio: 0.8, decisionLayer: { ...decisionLayer, decided: false } }, true);
+  assert.match(ruled, /^Air sudah 80% dari batas siaga/);
+});

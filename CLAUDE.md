@@ -25,6 +25,10 @@ uvicorn api.main:app --host 0.0.0.0 --port 8080 --reload
 ## Architecture
 5-stage agentic pipeline (`pipeline/flood_pipeline.py`):
 Perception → Reasoning (XGBoost + OOD) → Evaluation (decision engine L0–L4) → Action → Routing.
+On the live path (`/predict/realtime-native`) a learned decision layer (`realtime_native/decision_layer.py`,
+authority `L3_LEARNED`) replaces the hand-written middle layers (L1.5, L1.8, L1.9, L2, L3, L3.1, L3.3, L3.7, L4)
+behind the safety rules L0, L1 (Siaga 1, rapid rise) and L1.7 (BMKG severe); without its inputs the full
+rule hierarchy decides, as before (`LEARNED_DECISION_ENABLED=false` forces that).
 The LLM is NOT in the critical path — decisions are deterministic; the LLM only generates the
 Bahasa Indonesia explanation and falls back to a static template on failure.
 
@@ -33,8 +37,8 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (656, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (32: flood roads, shelter ranking,
-  post levels, weather per wilayah, daily model card)
+- Tests: `tests/` (667, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (33: flood roads, shelter ranking,
+  post levels, weather per wilayah, daily model card, learned-layer status sentence)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
 
@@ -167,6 +171,22 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   model stays capped at Waspada.
 
 ## Resolved
+- 2026-11-17: learned decision layer (supervisor: the 10 hand-written layers were too simple). `scripts/train_decision_layer.py`
+  builds city snapshots at 06/12/18/23 WIB from the raw DSDA readings 2016-2021 (latest reading of the 3 h before) and the
+  2025 daily file: the daily model's out-of-sample city chance + the 14 river posts now and yesterday; label = BPBD flood
+  in any of the 42 kecamatan that day. Compared tree (depth 3), logistic regression and XGBoost (depth 2, all inputs
+  monotone increasing), test years 2019-2021 + 2025 each trained on earlier years. Served: monotone XGBoost per lag
+  (`models/daily_bundle/decision_layer*.json`), thresholds = flood chance at which it raises each level as often as the
+  rules did on the training snapshots (lag 1: Waspada 21 %, Siaga 61 %, Bahaya 76 %). Lag 1 vs the rules (river posts +
+  daily Waspada): ROC-AUC 0.775 vs 0.694 (CI of the difference [0.05, 0.115]); Siaga recall 0.129 -> 0.174 (CI
+  [0.007, 0.08]) and Bahaya 0.051 -> 0.082 ([0.017, 0.046]) at unchanged precision (0.74, 0.77); Waspada catches more
+  (0.56 -> 0.76) but fires more (27 % -> 44 % of test snapshots) at lower precision (0.46 -> 0.38); at equal alarm volume
+  on the test rows no level differs significantly. The depth-3 tree was too coarse (8 scores; Siaga precision 0.72 ->
+  0.46). Snapshots without yesterday's posts are dropped and a missing reading counts as normal (XGBoost had learned
+  "missing -> higher risk"). Live replay 6-17 Nov 2026: Waspada 42 % of snapshots (rules 45 %), but on other days: calm
+  posts lower a 21 % daily chance to Aman, a post at Siaga 3 yesterday raises a 6 % one to Waspada. The interpretation
+  and the Beranda sentence give today's chance, the level thresholds and what raised it most (XGBoost contributions).
+  Also: one GES DISC file listed before OPeNDAP serves it no longer drops the whole file fill.
 - 2026-11-17: the daily model reads the newest rain straight from the GES DISC IMERG Early files (OPeNDAP subset of the
   9 model cells, ~2 s a file, ~4.5 h after the rain; `imerg_client.fetch_recent`) for the hours after Giovanni's last
   value. Same values as Giovanni (all 9 cells, every half-hour of 15 Nov). Giovanni's delay varies (~28 h on 13 Nov,

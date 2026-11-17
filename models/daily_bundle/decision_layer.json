@@ -1,0 +1,81 @@
+{
+  "version": "20261117",
+  "kind": "xgb_monotone",
+  "threshold_mode": "volume",
+  "features": [
+    "p",
+    "w_max_now",
+    "w_frac1_now",
+    "w_frac2_now",
+    "w_upstream_now",
+    "w_manggarai_now",
+    "w_max_d1",
+    "w_frac1_d1",
+    "w_frac2_d1",
+    "w_upstream_d1",
+    "w_manggarai_d1"
+  ],
+  "label": "BPBD flood in any of the 42 model kecamatan that day",
+  "levels": {
+    "1": "PRE_ALERT",
+    "2": "WARNING",
+    "3": "DANGER"
+  },
+  "safety_rule": "a river post at Siaga 1 -> DANGER (engine L1)",
+  "lags": {
+    "1": {
+      "thresholds": {
+        "PRE_ALERT": 0.21118,
+        "WARNING": 0.6117,
+        "DANGER": 0.76178
+      },
+      "train_snapshots": 4302,
+      "train_years": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2025
+      ],
+      "model_file": "decision_layer_lag1.json"
+    },
+    "2": {
+      "thresholds": {
+        "PRE_ALERT": 0.22189,
+        "WARNING": 0.61886,
+        "DANGER": 0.76152
+      },
+      "train_snapshots": 4302,
+      "train_years": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2025
+      ],
+      "model_file": "decision_layer_lag2.json"
+    },
+    "3": {
+      "thresholds": {
+        "PRE_ALERT": 0.21843,
+        "WARNING": 0.63821,
+        "DANGER": 0.77641
+      },
+      "train_snapshots": 4302,
+      "train_years": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2025
+      ],
+      "model_file": "decision_layer_lag3.json"
+    }
+  }
+}
