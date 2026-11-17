@@ -1,5 +1,6 @@
 import { useMemo, useEffect, useState } from "react";
-import { MapContainer, CircleMarker, Popup, useMap } from "react-leaflet";
+import { MapContainer, CircleMarker, Marker, Pane, Popup, useMap } from "react-leaflet";
+import L from "leaflet";
 import { useApp, useT } from "../lib/appContext";
 import InvalidateMapSize from "./InvalidateMapSize";
 import BaseTiles from "./BaseTiles";
@@ -9,6 +10,7 @@ import { activeFloodPoints } from "../lib/floodRoads";
 import { ActiveFloodAreas, AREA_COLOR, StationMarkers } from "./mapLayers";
 import WeatherLayer, { WeatherPatterns, weatherKey } from "./WeatherLayer";
 import { byWilayahKey } from "../lib/wilayahWeather";
+import { formatChance, proneAreaChances } from "../lib/dashboardHelpers";
 
 
 // Single muted slate-blue for ALL historical BNPB flood-prone points so the
@@ -17,6 +19,19 @@ import { byWilayahKey } from "../lib/wilayahWeather";
 // popup — colour just isn't doing duplicate work anymore. This was the fix
 // to the 10-hue overload that made the map feel cluttered.
 const PRONE_COLOR = "#6b8aa3";
+// A kecamatan the daily model puts at Waspada today: its flood-prone points and label turn amber.
+const PRONE_WATCH_COLOR = "#e0a400";
+
+// The % label of a kecamatan's flood-prone areas (a small chip, cached per text + level).
+const chipIcons = {};
+function chanceChip(text, watch) {
+  const key = `${text}|${watch}`;
+  return (chipIcons[key] ??= L.divIcon({
+    className: `chance-chip${watch ? " is-watch" : ""}`,
+    html: `<span>${text}</span>`,
+    iconSize: null,
+  }));
+}
 
 function proneAccentColor(rivers) {
   // Accent only used inside the popup (river name line) — not on the dot.
@@ -56,11 +71,14 @@ function FitJakarta() {
 // station coords are available — NOT used when real stations are shown.
 // weatherWilayah: the backend's OpenWeather reading per kota (riskData.openweatherWilayah),
 // the same data as the "Weather now by area" cards; onWeatherPick(kota) opens those cards.
-export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0, weatherWilayah = {}, onWeatherPick, pickedWilayah = null }) {
+// dailyModel: riskData.dailyModel; its per-kecamatan chance labels the flood-prone areas.
+export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0, weatherWilayah = {}, onWeatherPick, pickedWilayah = null,
+                                   dailyModel = null }) {
   const t = useT();
   const { theme, lang } = useApp();
   const isId = lang === "id";
-  const [showProne, setShowProne] = useState(false); // off by default — it buries the post markers
+  // Flood-prone areas with today's chance: on by default (small dots and chips under the posts).
+  const [showProne, setShowProne] = useState(true);
   // Weather per wilayah: on by default, the choice is remembered.
   const [showWeather, setShowWeather] = useState(() => {
     try { return localStorage.getItem(WEATHER_KEY) !== "0"; } catch { return true; }
@@ -81,6 +99,13 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0, 
   );
   const hasRealStations = mappedStations.length > 0;
   const pronePoints = floodProneZones.points ?? [];
+  // Per kecamatan: today's chance from the daily model, its points and their centre (null without the model).
+  const proneAreas = useMemo(() => proneAreaChances(pronePoints, dailyModel), [pronePoints, dailyModel]);
+  const areaByPoint = useMemo(() => {
+    const out = {};
+    for (const a of proneAreas ?? []) for (const p of a.points) out[`${p.lat},${p.lon}`] = a;
+    return out;
+  }, [proneAreas]);
   // Same rule as the evacuation map: points along the river stretch of a post at Siaga, or all in heavy rain.
   const floodPoints = useMemo(
     () => activeFloodPoints(pronePoints, stations, rainfall, postRivers),
@@ -141,14 +166,17 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0, 
             river association) so the layer doubles as a soft "river spine"
             overlay even though no polylines are drawn. Rendered BEFORE
             sensor markers so the live readings sit on top. */}
-        {showProne && pronePoints.map((p, i) => (
+        {showProne && pronePoints.map((p, i) => {
+          const area = areaByPoint[`${p.lat},${p.lon}`];
+          const watch = area?.level && area.level !== "SAFE";
+          return (
           <CircleMarker
             key={`p-${i}`}
             center={[p.lat, p.lon]}
-            radius={2}
+            radius={area ? 3.5 : 2}
             pathOptions={{
-              fillColor: PRONE_COLOR,
-              fillOpacity: 0.42,
+              fillColor: watch ? PRONE_WATCH_COLOR : PRONE_COLOR,
+              fillOpacity: area ? 0.7 : 0.42,
               weight: 0,        // no border — sensor markers have a white stroke, BNPB dots don't
               opacity: 0,
             }}
@@ -170,13 +198,55 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0, 
                     {isId ? "Tidak terkait sungai utama" : "Not tied to a major river"}
                   </p>
                 )}
+                {area && (
+                  <p style={{ fontSize: 12, fontWeight: 700, color: watch ? "#9a6b00" : "var(--text)", margin: "4px 0" }}>
+                    {isId
+                      ? `Peluang banjir hari ini di Kec. ${area.name}: ${formatChance(area.probability)}`
+                      : `Flood chance today in ${area.name}: ${formatChance(area.probability)}`}
+                  </p>
+                )}
                 <p style={{ fontSize: 10, color: "var(--muted-2)", margin: 0, marginTop: 4 }}>
                   ● {isId ? "Titik rawan historis (BNPB)" : "Historical flood-prone point (BNPB)"}
                 </p>
               </div>
             </Popup>
           </CircleMarker>
-        ))}
+          );
+        })}
+
+        {/* Today's chance per kecamatan, one chip at the centre of its flood-prone points. Its own pane
+            sits under the posts (460), so a chip never covers a post. */}
+        {showProne && proneAreas && (
+          <Pane name="prone-chance" style={{ zIndex: 455 }}>
+            {proneAreas.map((a) => {
+              const watch = a.level && a.level !== "SAFE";
+              return (
+                <Marker key={a.slug} position={[a.lat, a.lon]} icon={chanceChip(formatChance(a.probability), watch)}
+                        pane="prone-chance" keyboard={false}
+                        title={isId ? `Kec. ${a.name}: peluang banjir hari ini ${formatChance(a.probability)}`
+                                    : `${a.name}: flood chance today ${formatChance(a.probability)}`}>
+                  <Popup autoPan autoPanPaddingTopLeft={[8, 64]} autoPanPaddingBottomRight={[8, 8]}>
+                    <div style={{ minWidth: 200 }}>
+                      <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>
+                        {isId ? `Kec. ${a.name}` : a.name} · {formatChance(a.probability)}
+                      </p>
+                      <p style={{ fontSize: 11, color: "var(--muted)", marginBottom: 4 }}>
+                        {isId
+                          ? `Peluang BPBD mencatat banjir di kecamatan ini hari ini, dari model harian (hujan satelit sampai ${dailyModel?.rain_through ?? "-"}).`
+                          : `Chance that BPBD records a flood in this kecamatan today, from the daily model (satellite rain up to ${dailyModel?.rain_through ?? "-"}).`}
+                      </p>
+                      <p style={{ fontSize: 11, color: "var(--muted)", margin: 0 }}>
+                        {isId
+                          ? `${a.points.length} titik rawan banjir di kecamatan ini.`
+                          : `${a.points.length} flood-prone point${a.points.length > 1 ? "s" : ""} in this kecamatan.`}
+                      </p>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+          </Pane>
+        )}
 
         {/* Active flood-prone areas, then the posts on top (shared with the evacuation map) */}
         <ActiveFloodAreas points={floodPoints} />
@@ -222,8 +292,8 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0, 
               color: "var(--muted)", fontSize: "0.78rem",
             }}
             title={isId
-              ? "Tampilkan/sembunyikan daerah yang pernah banjir (data BNPB)"
-              : "Show/hide areas that have flooded before (BNPB data)"}
+              ? "Tampilkan/sembunyikan titik rawan banjir (BPBD/BNPB) dengan peluang banjir hari ini di kecamatannya (model harian)"
+              : "Show/hide flood-prone points (BPBD/BNPB) with today's flood chance in their kecamatan (daily model)"}
           >
             <span style={{
               width: 9, height: 9, borderRadius: 2,
@@ -232,7 +302,9 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0, 
               flexShrink: 0,
             }} />
             <span style={{ flex: 1, textAlign: "left" }}>
-              {isId ? "Daerah pernah banjir" : "Previously flooded areas"}
+              {proneAreas
+                ? (isId ? "Area rawan banjir · peluang hari ini" : "Flood-prone areas · today's chance")
+                : (isId ? "Daerah pernah banjir" : "Previously flooded areas")}
             </span>
           </button>
           <button
