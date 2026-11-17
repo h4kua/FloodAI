@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { buildStatusDesc, byPostSeverity, dailyTopKecamatan, formatChance, groupStationsByWilayah, postClass, postRiskLevel, proneAreaChances } from "./dashboardHelpers.js";
+import { buildStatusDesc, byPostSeverity, dailyTopKecamatan, formatChance, groupStationsByWilayah, postClass, postRiskLevel } from "./dashboardHelpers.js";
 
 test("a post's level follows the band DSDA reports, not its ratio", () => {
   // 76% of Siaga 1 used to read "Siaga 2"; DSDA puts this post in Siaga 3.
@@ -79,21 +79,4 @@ test("a level set by the learned decision layer leads with today's flood chance"
   assert.doesNotMatch(waspada, /Hujan beberapa hari/);  // the daily chance did not raise it
   const ruled = buildStatusDesc({ level: "siaga", waterLevelRatio: 0.8, decisionLayer: { ...decisionLayer, decided: false } }, true);
   assert.match(ruled, /^Air sudah 80% dari batas siaga/);
-});
-
-test("flood-prone points carry their kecamatan's chance today, one label per kecamatan", () => {
-  const points = [
-    { kecamatan: "JATINEGARA", kelurahan: "BIDARA CINA", lat: -6.23, lon: 106.87 },
-    { kecamatan: "JATINEGARA", kelurahan: "KAMPUNG MELAYU", lat: -6.21, lon: 106.87 },
-    { kecamatan: "KEBON JERUK", kelurahan: "KEDOYA", lat: -6.18, lon: 106.76 },
-    { kecamatan: "SOMEWHERE ELSE", kelurahan: "X", lat: -6.1, lon: 106.8 },
-  ];
-  const dailyModel = { kecamatan: {
-    jatinegara: { name: "Jatinegara", probability: 0.12, risk_level: "PRE_ALERT" },
-    kebonjeruk: { name: "Kebon Jeruk", probability: 0.03, risk_level: "SAFE" },
-  } };
-  const areas = proneAreaChances(points, dailyModel);
-  assert.deepEqual(areas.map((a) => [a.name, a.points.length]), [["Jatinegara", 2], ["Kebon Jeruk", 1]]);
-  assert.ok(Math.abs(areas[0].lat - -6.22) < 1e-9 && areas[0].level === "PRE_ALERT");
-  assert.equal(proneAreaChances(points, null), null);
 });

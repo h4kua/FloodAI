@@ -118,8 +118,7 @@ export default function Home({ setRiskContext, riskLevel }) {
           <p className="panel-title" style={{ marginBottom: 0 }}>{t("map.title")}</p>
         </div>
         <FloodMap riskScore={score} stations={stations} rainfall={riskData?.rainfall ?? 0}
-          weatherWilayah={riskData?.openweatherWilayah} onWeatherPick={pickWeather} pickedWilayah={pickedWilayah}
-          dailyModel={riskData?.dailyModel} />
+          weatherWilayah={riskData?.openweatherWilayah} onWeatherPick={pickWeather} pickedWilayah={pickedWilayah} />
       </div>
 
       {/* Progressive disclosure — one collapsed section, one tab visible at a time */}

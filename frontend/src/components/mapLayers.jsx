@@ -9,6 +9,7 @@ import { useApp } from "../lib/appContext";
 import { RISK_RADIUS_M, areasByPost, riverForPost } from "../lib/floodRoads";
 import { postClass } from "../lib/dashboardHelpers";
 import postRivers from "../data/postRivers.json";
+import areaChance from "../data/activeAreaChance.json";
 
 export const AREA_COLOR = "#c8102e";
 // The river of an open post.
@@ -22,6 +23,20 @@ export const stationColor = (station) => POST_COLOR[postClass(station)];
 
 const titleCase = (s) => (s || "").toLowerCase().split(" ").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 const siagaWord = (status) => (status || "").replace(/^Status\s*:\s*/i, "");
+
+/* How often such an area flooded on days its post reached that band (DSDA 2016-2021 vs BPBD records,
+   scripts/active_area_chance.py), from the highest band among the posts that activated it. */
+function areaChanceNote(p, isId) {
+  const bands = (p.causes || []).map((s) => /siaga\s*[1-3]/i.exec(s.status_siaga || "")?.[0]).filter(Boolean)
+    .map((b) => b.replace(/\s+/, " ").replace(/^s/, "S"));
+  const band = bands.sort()[0];  // "Siaga 1" < "Siaga 2" < "Siaga 3"
+  const rate = band && areaChance.by_status?.[band];
+  if (rate == null) return null;
+  const pct = (v) => `${Math.round(v * 100)}%`;
+  return isId
+    ? `Pada hari pos di ${band} (2016–2021), area di sepanjang sungainya tercatat banjir pada sekitar ${pct(rate)} hari (hari biasa ${pct(areaChance.normal)}).`
+    : `On days a post was at ${band} (2016–2021), areas along its river had a recorded flood on about ${pct(rate)} of days (normal days ${pct(areaChance.normal)}).`;
+}
 const popupPad = { autoPan: true, autoPanPaddingTopLeft: [8, 64], autoPanPaddingBottomRight: [8, 8] };
 
 /**
@@ -158,6 +173,9 @@ export function ActiveFloodAreas({ points = [] }) {
                 ? (isId ? "Aktif karena hujan deras" : "Active because of heavy rain")
                 : (isId ? `Aktif karena pos ${posts}` : `Active because of post ${posts}`)}
             </p>
+            {areaChanceNote(p, isId) && (
+              <p style={{ fontSize: 11, color: "var(--muted)", margin: "4px 0 0" }}>{areaChanceNote(p, isId)}</p>
+            )}
           </div>
         </Popup>
       </Circle>

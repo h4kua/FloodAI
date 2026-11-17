@@ -33,6 +33,11 @@ export function riversForPost(name) {
 }
 
 const isSiaga = (station) => /siaga/i.test(station?.status_siaga || "");
+/** DSDA band as a rank: Siaga 1 -> 3, Siaga 2 -> 2, Siaga 3 -> 1, anything else -> 0. */
+export function siagaRank(status) {
+  const band = /siaga\s*([1-3])/i.exec(status || "");
+  return band ? 4 - Number(band[1]) : 0;
+}
 
 /** Posts at Siaga now, grouped by the BPBD river they feed. */
 export function postsOnAlert(stations = []) {
@@ -68,7 +73,9 @@ export function nearLines(lat, lng, lines = [], radiusM = NEAR_RIVER_M) {
  * their water reaches all of the river downstream) or one with no stretch keeps
  * the whole river.
  */
-export function activeFloodPoints(points = [], stations = [], rainfallMmH = 0, riverTable = null) {
+export function activeFloodPoints(points = [], stations = [], rainfallMmH = 0, riverTable = null, { minRank = 1 } = {}) {
+  // minRank 2: only posts at Siaga 2 or Siaga 1 activate areas (the home map; see activeAreaChance.json).
+  stations = stations.filter((s) => siagaRank(s?.status_siaga) >= minRank || (minRank <= 1 && isSiaga(s)));
   const byRiver = postsOnAlert(stations);
   const reaches = (post, p) => {
     const entry = riverTable ? riverForPost(post, riverTable) : null;

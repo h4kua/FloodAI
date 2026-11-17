@@ -1501,17 +1501,3 @@ button, input, select, textarea { font-family: inherit; }
 .daily-bar > span { display: block; height: 100%; border-radius: inherit; }
 .daily-pct { font-size: 0.85rem; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
 .daily-note { font-size: 0.8rem; color: var(--muted); line-height: 1.6; margin: 0; max-width: 70ch; }
-
-/* ── Map: today's chance on the flood-prone areas (one chip per kecamatan) ─ */
-.chance-chip { background: none; border: none; }
-.chance-chip span {
-  display: inline-block; transform: translate(-50%, -50%);
-  padding: 1px 5px; border-radius: 999px;
-  font: 700 10px/1.4 var(--font-body, system-ui), sans-serif; white-space: nowrap;
-  color: #334155; background: rgba(255, 255, 255, 0.92);
-  border: 1px solid #6b8aa3; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
-  cursor: pointer;
-}
-.chance-chip.is-watch span { color: #6b4a00; background: #fff4cc; border-color: #e0a400; }
-[data-theme="dark"] .chance-chip span { color: #e2e8f0; background: rgba(15, 23, 42, 0.88); }
-[data-theme="dark"] .chance-chip.is-watch span { color: #fde68a; background: rgba(66, 46, 0, 0.92); }

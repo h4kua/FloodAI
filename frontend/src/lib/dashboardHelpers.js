@@ -442,29 +442,3 @@ export function formatChance(p) {
   const pct = p * 100;
   return pct > 0 && pct < 1 ? "<1%" : `${Math.round(pct)}%`;
 }
-
-/* ── Flood-prone areas with today's chance ──────────────────────────────────
-   The BPBD/BNPB flood-prone points (src/data/floodProneZones.json) grouped by kecamatan, each with
-   the daily model's flood chance for that kecamatan today (riskData.dailyModel.kecamatan). One entry
-   per kecamatan, placed at the centre of its points, highest chance first. null without the model.
-*/
-const kecSlug = (name) => (name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-
-export function proneAreaChances(points = [], dailyModel) {
-  const kec = dailyModel?.kecamatan;
-  if (!kec) return null;
-  const groups = {};
-  for (const p of points) {
-    const slug = kecSlug(p.kecamatan);
-    const k = kec[slug];
-    if (!k) continue;
-    (groups[slug] ??= { slug, name: k.name, probability: k.probability, level: k.risk_level, points: [] }).points.push(p);
-  }
-  return Object.values(groups)
-    .map((g) => ({
-      ...g,
-      lat: g.points.reduce((sum, p) => sum + p.lat, 0) / g.points.length,
-      lon: g.points.reduce((sum, p) => sum + p.lon, 0) / g.points.length,
-    }))
-    .sort((a, b) => b.probability - a.probability);
-}

@@ -38,7 +38,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
 - Tests: `tests/` (670, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (34: flood roads, shelter ranking,
-  post levels, weather per wilayah, daily model card, learned-layer status sentence, flood-prone chances)
+  post levels, weather per wilayah, daily model card, learned-layer status sentence, Siaga 2/1 map areas)
 - Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
 
@@ -196,11 +196,15 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   Waspada 0.36 vs 0.18, Siaga 0.67 vs 0.38, Bahaya 0.67 vs 0.48, but recall lower (Siaga 0.14 vs 0.29) and Waspada on 12 % vs
   36 % of kota-snapshots. Live replay 6-17 Nov: Selatan Waspada 22 %, Timur 11 %, others <= 3 %. The API still returns
   `wilayah_status`, but the Beranda does not show it: the user wanted the flood chance on the map's flood-prone areas instead,
-  so `WilayahStatus` is back to the worst post per kota. The home map's flood-prone points (154 BPBD/BNPB points, 36
-  kecamatan; layer on by default) now carry the daily model's chance for their kecamatan today: one % chip per kecamatan at
-  the centre of its points (`proneAreaChances` in dashboardHelpers.js, pane under the posts), amber when that kecamatan is at
-  the model's Waspada. About page rewritten for the daily model, the learned layer, the safety rules, the map chances and
-  the year-by-year test figures.
+  so `WilayahStatus` is back to the worst post per kota. About page rewritten for the daily model, the learned layer, the
+  safety rules, the map circles and the year-by-year test figures.
+- 2026-11-18: home-map red circles meant "a post on this river is at any Siaga", so a chronic Siaga 3 (Cengkareng Drain)
+  lit areas whose kecamatan chance was 4 %; a % chip per kecamatan (tried 2026-11-17) cluttered the map and was removed.
+  `scripts/active_area_chance.py` applies the map's activation rule to the DSDA archive 2016-2021 (gate posts left out):
+  areas along a river had a BPBD flood on 1.7 % of normal days, 12 % at Siaga 3, 25 % at Siaga 2, 20 % at Siaga 1 (CI
+  [0.04, 0.43], 26 days) -> `frontend/src/data/activeAreaChance.json`. The home map now draws red circles only for posts at
+  Siaga 2 or 1 (`activeFloodPoints(..., { minRank: 2 })`) and each popup gives that rate; the evacuation page keeps Siaga 3
+  (routes stay cautious). No signal makes a flood certain: the strongest is about 1 day in 4.
 - 2026-11-17: the learned decision layer also reads today's rain so far: IMERG Early half-hours that started by now - 5 h
   (mean and max over the model's kecamatan cells, Bogor), plus the WIB hour (the only input not monotone). `daily_model.refresh()`
   keeps today's half-hours per cell in the state (`today_halfhours`); without them the rules decide. Lag 1, test 2019-2021 +

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   activeFloodPoints,
+  siagaRank,
   areasByPost,
   postKey,
   riverForPost,
@@ -199,4 +200,13 @@ test("a Siaga post only activates the flood-prone points near its drawn river st
   // An upstream post (outside Jakarta) has a line but still feeds the whole river.
   const up = { cengkarengdrain: { ...table.cengkarengdrain, upstream: true } };
   assert.equal(activeFloodPoints([near, far], [drain], 0, up).length, 2);
+});
+
+test("the home map's areas need a post at Siaga 2 or Siaga 1", () => {
+  assert.deepEqual(["Status : Siaga 1", "Siaga 2", "SIAGA 3", "Normal", ""].map(siagaRank), [3, 2, 1, 0, 0]);
+  const drain3 = post("P.A. Cengkareng Drain", "Siaga 3");
+  assert.equal(activeFloodPoints(POINTS, [drain3], 0, null, { minRank: 2 }).length, 0);
+  assert.deepEqual(activeFloodPoints(POINTS, [post("P.A. Cengkareng Drain", "Siaga 2")], 0, null, { minRank: 2 })
+    .map((p) => p.kelurahan), ["KAPUK"]);
+  assert.equal(activeFloodPoints(POINTS, [drain3], 0).length, 1);  // the evacuation map keeps Siaga 3
 });
