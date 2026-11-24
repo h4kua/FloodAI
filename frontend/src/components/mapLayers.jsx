@@ -10,6 +10,7 @@ import { RISK_RADIUS_M, areasByPost, riverForPost } from "../lib/floodRoads";
 import { postClass } from "../lib/dashboardHelpers";
 import postRivers from "../data/postRivers.json";
 import areaChance from "../data/activeAreaChance.json";
+import PostTrend from "./PostTrend";
 
 export const AREA_COLOR = "#c8102e";
 // The river of an open post.
@@ -37,7 +38,30 @@ function areaChanceNote(p, isId) {
     ? `Pada hari pos di ${band} (2016–2021), area di sepanjang sungainya tercatat banjir pada sekitar ${pct(rate)} hari (hari biasa ${pct(areaChance.normal)}).`
     : `On days a post was at ${band} (2016–2021), areas along its river had a recorded flood on about ${pct(rate)} of days (normal days ${pct(areaChance.normal)}).`;
 }
-const popupPad = { autoPan: true, autoPanPaddingTopLeft: [8, 64], autoPanPaddingBottomRight: [8, 8] };
+// pane: a popup inside the "posts" <Pane> would otherwise open in that pane, under the other posts and the weather cards.
+const popupPad = { pane: "popupPane", autoPan: true, autoPanPaddingTopLeft: [8, 64], autoPanPaddingBottomRight: [8, 8] };
+
+/* Content added after a popup opens (the river name, the water chart) makes it taller than Leaflet
+   measured, and Leaflet skips the auto-pan that follows its own (its `_autopanning` flag), so a post
+   near the map's top edge had its popup cut off. Re-lay it out, then pan by what still sticks out. */
+export function keepPopupInView(popup, pad = 12) {
+  const map = popup?._map;
+  if (!map || !popup.isOpen()) return;
+  popup.update();
+  requestAnimationFrame(() => {
+    const el = popup.getElement();
+    if (!el || !popup._map) return;
+    const m = map.getContainer().getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    let dx = 0;
+    let dy = 0;
+    if (r.top < m.top + pad) dy = r.top - m.top - pad;
+    else if (r.bottom > m.bottom - pad) dy = Math.min(r.bottom - m.bottom + pad, r.top - m.top - pad);
+    if (r.left < m.left + pad) dx = r.left - m.left - pad;
+    else if (r.right > m.right - pad) dx = r.right - m.right + pad;
+    if (dx || dy) map.panBy([dx, dy], { animate: true });
+  });
+}
 
 /**
  * Monitoring posts with validated coordinates, coloured by their DSDA band.
@@ -45,15 +69,14 @@ const popupPad = { autoPan: true, autoPanPaddingTopLeft: [8, 64], autoPanPadding
  * (src/data/postRivers.json), and the popup counts the active flood-prone areas
  * (`floodPoints`) the post makes active.
  */
-export function StationMarkers({ stations = [], floodPoints = [], small = false }) {
+export function StationMarkers({ stations = [], floodPoints = [], small = false, withTrend = false }) {
   const { theme, lang } = useApp();
   const isId = lang === "id";
   const [openPost, setOpenPost] = useState(null);
   const openPopup = useRef(null);
-  // The river line is added to the popup after it opens, so Leaflet's auto-pan
-  // measured a shorter popup and left the top cut off: lay it out and pan again.
+  // The river line is added to the popup after it opens: lay it out and pan again.
   useEffect(() => {
-    if (openPost && openPopup.current?.isOpen()) openPopup.current.update();
+    if (openPost) keepPopupInView(openPopup.current);
   }, [openPost]);
   const byPost = useMemo(() => areasByPost(floodPoints), [floodPoints]);
   const placed = stations.filter((s) => s.lat != null && s.lon != null);
@@ -127,6 +150,9 @@ export function StationMarkers({ stations = [], floodPoints = [], small = false 
                   ? `Membuat ${activated} area rawan di sungainya aktif`
                   : `Makes ${activated} flood-prone area${activated > 1 ? "s" : ""} on its river active`}
               </p>
+            )}
+            {withTrend && s.nama === openPost && (
+              <PostTrend name={s.nama} isId={isId} onResize={() => keepPopupInView(openPopup.current)} />
             )}
           </div>
         </Popup>

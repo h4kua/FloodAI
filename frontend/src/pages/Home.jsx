@@ -14,6 +14,8 @@ import { WilayahForecastGrid, ForecastPanel } from "../components/dashboard/Fore
 import { WeatherCurrentCard } from "../components/dashboard/WeatherSection";
 import { CrewAnalysisPanel } from "../components/dashboard/CrewAnalysisPanel";
 import DailyModelCard from "../components/dashboard/DailyModelCard";
+import DecisionPathCard from "../components/dashboard/DecisionPathCard";
+import AreaCheck from "../components/dashboard/AreaCheck";
 
 // The chatbot (and its ~60 KB offline knowledge base) loads after the page,
 // so the status card is not held up by it.
@@ -109,6 +111,9 @@ export default function Home({ setRiskContext, riskLevel }) {
       {/* 1 — Is my area at risk right now? */}
       <DecisionHero riskData={riskData} siaga1Count={realSiaga1} siaga2Count={realSiaga2} />
 
+      {/* 1a — My own kelurahan: today's chance, its flood history, nearest posts and safe places */}
+      <AreaCheck riskData={riskData} />
+
       {/* 1b — …and in MY part of Jakarta? */}
       <WilayahStatus riskData={riskData} />
 
@@ -155,6 +160,7 @@ export default function Home({ setRiskContext, riskLevel }) {
               <ModelOutputCard riskData={riskData}>
                 <CrewAnalysisPanel />
               </ModelOutputCard>
+              <DecisionPathCard riskData={riskData} />
               <DailyModelCard dailyModel={riskData?.dailyModel} />
             </>
           )}

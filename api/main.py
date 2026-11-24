@@ -34,6 +34,7 @@ from api.routes.chat import router as chat_router
 from api.routes.community_reports import router as community_reports_router
 from api.routes.crew_analysis import router as crew_analysis_router
 from api.routes.family import router as family_router
+from api.routes.history import router as history_router
 from api.routes.safe_arrival import router as safe_arrival_router
 from api.routes.sos import router as sos_router
 from api.observability import (
@@ -501,6 +502,11 @@ async def _scheduled_refresh() -> None:
             return
         # History is best-effort: a failed write is logged and never fails the refresh.
         await save_history(snapshot)
+        # The decision the site shows for this snapshot goes to the decision log (Riwayat page),
+        # and a level change may go to the Telegram channel. Never raises.
+        from services.history_service import log_decision
+
+        await asyncio.to_thread(log_decision, snapshot["fetched_at_utc"])
         _log.info(f"scheduled_refresh_finish (duration_ms={duration_ms})")
     except Exception as exc:  # noqa: BLE001 — scheduled job must never raise.
         duration_ms = int((time.perf_counter() - started) * 1000)
@@ -617,6 +623,7 @@ _register_middleware(app, RawCORSMiddleware)
 
 app.include_router(agentic_llm_router)
 app.include_router(chat_router)
+app.include_router(history_router)
 app.include_router(crew_analysis_router)
 app.include_router(safe_arrival_router)
 

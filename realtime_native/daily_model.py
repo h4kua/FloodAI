@@ -313,3 +313,33 @@ def _reset_for_tests() -> None:
     _water_cache.clear()
     _file_cache.clear()
     _post_cache.clear()
+
+
+def rain_summary(days: int = 14) -> dict | None:
+    """Satellite rain of the last ``days`` complete WIB days (Jakarta mean and wettest model cell,
+    Bogor upstream) and today's rain so far, from the cached IMERG Early fetch; None before the
+    first refresh."""
+    cached = _rain_cache
+    if not cached:
+        return None
+    bundle = load_bundle()
+    kec_cells = sorted({k["cell"] for k in bundle["kecamatan"].values()})
+    bogor = bundle["upstream_cells"]["bogor"]
+    daily = cached["daily"]
+    frame = pd.DataFrame({c: daily[c] for c in kec_cells if c in daily}).sort_index()
+    frame = frame.dropna(how="all").tail(days)
+
+    def mm(value):
+        return None if value is None or pd.isna(value) else round(float(value), 1)
+
+    out = [{"date": d.date().isoformat(), "jakarta_mean": mm(row.mean()), "jakarta_max": mm(row.max()),
+            "bogor": mm(daily[bogor].get(d)) if bogor in daily else None}
+           for d, row in frame.iterrows()]
+    today = cached.get("today") or {}
+    sums = {c: sum((today.get(c) or {}).values()) for c in kec_cells}
+    starts = sorted({s for c in kec_cells for s in (today.get(c) or {})})
+    return {"days": out,
+            "today": {"jakarta_mean": mm(sum(sums.values()) / len(sums)) if sums else None,
+                      "jakarta_max": mm(max(sums.values())) if sums else None,
+                      "bogor": mm(sum((today.get(bogor) or {}).values())),
+                      "through": starts[-1] if starts else None}}

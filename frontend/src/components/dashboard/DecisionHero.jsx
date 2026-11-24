@@ -40,6 +40,26 @@ function PostGauge({ stations, isId }) {
   );
 }
 
+/* What a resident should do at each level, in plain words (BPBD DKI preparedness advice). */
+const TODO = {
+  aman: {
+    id: ["Beraktivitas seperti biasa.", "Buka lagi situs ini saat hujan deras turun.", "Kenali tempat aman terdekat di halaman Evakuasi."],
+    en: ["Go about your day as usual.", "Check again when heavy rain starts.", "Know your nearest safe place on the Evacuation page."],
+  },
+  waspada: {
+    id: ["Cek situs ini atau info BPBD tiap beberapa jam.", "Simpan dokumen penting di tempat tinggi, dalam plastik kedap air.", "Jangan parkir kendaraan di dekat sungai atau saluran air."],
+    en: ["Check this site or BPBD news every few hours.", "Keep important papers up high, in a waterproof bag.", "Don't park near rivers or drains."],
+  },
+  siaga: {
+    id: ["Siapkan tas siaga: dokumen, obat, senter, power bank, air minum.", "Pindahkan barang berharga dan kendaraan ke tempat yang lebih tinggi.", "Cek rute ke tempat aman terdekat di halaman Evakuasi."],
+    en: ["Pack a go-bag: papers, medicine, torch, power bank, water.", "Move valuables and vehicles to higher ground.", "Check the route to your nearest safe place on the Evacuation page."],
+  },
+  bahaya: {
+    id: ["Segera mengungsi bila air mulai masuk atau petugas meminta.", "Matikan listrik dari meteran sebelum air masuk rumah.", "Jangan menyeberangi arus banjir, juga dengan kendaraan. Darurat: 112."],
+    en: ["Leave right away if water comes in or officials ask you to.", "Switch off the power at the meter before water gets in.", "Never cross flowing floodwater, on foot or by vehicle. Emergency: 112."],
+  },
+};
+
 /* ── DecisionHero — the first thing a citizen sees ─────────────────────────
    Answers "is my area at risk right now?" in one glance: a giant level word,
    a plain-language one-liner, the trend, and — ONLY when stations are in
@@ -113,9 +133,17 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
 
         {/* Trend + rain from old data say nothing about now — hide them when stale */}
         {!isStale && (trendCfg || rainText) && (
-          <div className="decision-hero-meta">
-            {trendCfg && <span className="decision-hero-trend">{trendCfg.text}</span>}
-            {rainText && <span className="decision-hero-trend">{rainText}</span>}
+          <p className="decision-hero-meta">
+            {[trendCfg && (isId ? `Tren: ${trendCfg.text.replace(/^[^A-Za-z]+/, "").toLowerCase()}` : `Trend: ${trendCfg.text.replace(/^[^A-Za-z]+/, "").toLowerCase()}`),
+              rainText && (isId ? `${rainText} di pusat kota`.replace(/ · (.*) di pusat kota$/, " di pusat kota ($1)") : `${rainText} in central Jakarta`.replace(/ · (.*) in central Jakarta$/, " in central Jakarta ($1)"))]
+              .filter(Boolean).join(" · ")}
+          </p>
+        )}
+
+        {!isStale && TODO[level] && (
+          <div className="decision-hero-todo">
+            <p className="decision-hero-todo-title">{isId ? "Yang perlu Anda lakukan" : "What to do"}</p>
+            <ul>{TODO[level][isId ? "id" : "en"].map((x) => <li key={x}>{x}</li>)}</ul>
           </div>
         )}
 

@@ -10,6 +10,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 // Beranda is the landing page and ships in the main bundle; the other pages
 // load on first visit.
 const Alert = lazy(() => import("./pages/Alert"));
+const History = lazy(() => import("./pages/History"));
 const Reports = lazy(() => import("./pages/Reports"));
 const About = lazy(() => import("./pages/About"));
 
@@ -30,6 +31,7 @@ function AppShell() {
           {page === "home"  && <Home setRiskContext={setRiskContext} riskLevel={riskContext.level} />}
           <Suspense fallback={<LoadingSpinner />}>
             {page === "alert" && <Alert riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
+            {page === "history" && <History />}
             {page === "reports" && <Reports riskLevel={riskContext.level} rainfall={riskContext.rainfall} focusReportId={focusReportId} />}
             {page === "about" && <About riskContext={riskContext} />}
           </Suspense>

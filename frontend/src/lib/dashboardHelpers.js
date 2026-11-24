@@ -117,8 +117,8 @@ export function stationKecamatan(nama) {
 
 /* ── Risk helpers ──────────────────────────────────────── */
 export function riskClass(rl) {
-  if (rl === "SIAGA_1") return "s1";
-  if (rl === "SIAGA_2") return "s2";
+  if (rl === "SIAGA_1" || rl === "BAHAYA") return "s1";
+  if (rl === "SIAGA_2" || rl === "SIAGA") return "s2";
   if (rl === "WASPADA") return "wsp";
   return "ok";
 }
@@ -441,4 +441,61 @@ export function formatChance(p) {
   if (p == null || Number.isNaN(p)) return "—";
   const pct = p * 100;
   return pct > 0 && pct < 1 ? "<1%" : `${Math.round(pct)}%`;
+}
+
+/* ── Decision layers' levels (backend SAFE / PRE_ALERT / WARNING / DANGER) ── */
+const MODEL_LEVEL = { SAFE: "AMAN", PRE_ALERT: "WASPADA", WARNING: "SIAGA", DANGER: "BAHAYA", UNKNOWN: "UNKNOWN" };
+export function modelLevelKey(level) {
+  return MODEL_LEVEL[level] ?? "UNKNOWN";
+}
+export const LEVEL_COLOR = { SAFE: "var(--safe)", PRE_ALERT: "var(--wsp)", WARNING: "var(--s2)", DANGER: "var(--s1)", UNKNOWN: "var(--muted-2)" };
+
+/** A timestamp as WIB date and/or time ("24 Nov, 14.30"). */
+export function formatWibAt(ts, isId, { date = true, time = true } = {}) {
+  if (!ts) return "";
+  const d = typeof ts === "number" ? new Date(ts) : new Date(ts);
+  const opts = { timeZone: "Asia/Jakarta" };
+  if (date) Object.assign(opts, { day: "numeric", month: "short" });
+  if (time) Object.assign(opts, { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleString(isId ? "id-ID" : "en-GB", opts);
+}
+
+/* ── What raised the learned layer's chance, in words (same as backend decision_layer.describe) ── */
+const STATUS_NAME = ["Normal", "Siaga 3", "Siaga 2", "Siaga 1"];
+export function layerReasonText(name, value, isId) {
+  const when = name.endsWith("_d1") ? (isId ? "kemarin" : "yesterday") : (isId ? "sekarang" : "now");
+  const base = name.replace(/_(now|d1)$/, "");
+  const status = value == null ? (isId ? "tidak ada data" : "no data") : (STATUS_NAME[Math.round(value)] ?? "?");
+  const pct = (v) => (v == null ? "?" : `${Math.round(v * 100)}%`);
+  const mm = (v) => `${Math.round(v ?? 0)} mm`;
+  switch (base) {
+    case "p": return isId ? `peluang model harian ${pct(value)}` : `daily model chance ${pct(value)}`;
+    case "w_max": return isId ? `pos sungai tertinggi ${when} ${status}` : `highest river post ${when} ${status}`;
+    case "w_frac1": return isId ? `${pct(value)} pos sungai di Siaga 3 ke atas ${when}` : `${pct(value)} of river posts at Siaga 3 or higher ${when}`;
+    case "w_frac2": return isId ? `${pct(value)} pos sungai di Siaga 2 ke atas ${when}` : `${pct(value)} of river posts at Siaga 2 or higher ${when}`;
+    case "w_upstream": return isId ? `pos hulu (Katulampa, Depok) ${when} ${status}` : `upstream posts (Katulampa, Depok) ${when} ${status}`;
+    case "w_manggarai": return `Manggarai ${when} ${status}`;
+    case "today_mean": return isId ? `hujan hari ini rata-rata ${mm(value)}` : `rain so far today ${mm(value)} on average`;
+    case "today_max": return isId ? `hujan hari ini hingga ${mm(value)}` : `rain so far today up to ${mm(value)}`;
+    case "today_bogor": return isId ? `hujan di Bogor hari ini ${mm(value)}` : `rain in Bogor today ${mm(value)}`;
+    default: return name;
+  }
+}
+
+/** The learned layer's inputs that raised the chance most (push > 0.05 log-odds), as text. */
+export function layerTopReasons(layer, isId, n = 3) {
+  const push = layer?.push ?? {};
+  return Object.entries(push)
+    .filter(([name, v]) => v > 0.05 && name !== "hour")
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n)
+    .map(([name]) => layerReasonText(name, layer?.features?.[name], isId));
+}
+
+/** Distance in km between two [lat, lon] points (haversine). */
+export function distanceKm(lat1, lon1, lat2, lon2) {
+  const r = Math.PI / 180;
+  const a = Math.sin(((lat2 - lat1) * r) / 2) ** 2
+    + Math.cos(lat1 * r) * Math.cos(lat2 * r) * Math.sin(((lon2 - lon1) * r) / 2) ** 2;
+  return 12742 * Math.asin(Math.sqrt(a));
 }

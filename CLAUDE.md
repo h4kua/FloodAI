@@ -37,10 +37,11 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (670, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (34: flood roads, shelter ranking,
-  post levels, weather per wilayah, daily model card, learned-layer status sentence, Siaga 2/1 map areas)
-- Frontend: pages Beranda / Evakuasi / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
-  onboarding guide `components/OnboardingTour.jsx` (11 steps, reopened from the top-bar "?")
+- Tests: `tests/` (678, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (36: flood roads, shelter ranking,
+  post levels, weather per wilayah, daily model card, learned-layer status sentence, Siaga 2/1 map areas, layer reasons)
+- Frontend: pages Beranda / Evakuasi / Riwayat / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
+  onboarding guide `components/OnboardingTour.jsx` (12 steps, reopened from the top-bar "?"); charts are plain SVG
+  (`components/charts.jsx`, no chart library)
 
 ## Data ingestion
 - Live water levels: Jakarta Satu ArcGIS FeatureServers via `services/pintu_air_fetcher.py`
@@ -187,6 +188,22 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   no flood reported; Waspada on 7 days (learned) and 7 (rules), not the same days. Re-run monthly through the season.
 
 ## Resolved
+- 2026-11-24: five resident features. (1) Riwayat page (`pages/History.jsx`, `GET /history/summary`): the status and the
+  learned layer's chance over 7/14/30 days, warning periods, IMERG rain per day (`daily_model.rain_summary`) and each river
+  post's highest Siaga band per day. The API scheduler logs every 15-minute decision as a `decision:<fetched_at>` row in
+  `realtime_snapshot_store` (`services/history_service.log_decision`); the days before were replayed with
+  `scripts/backfill_decision_log.py` (marked `source: replay`). (2) "Bagaimana keputusan dibuat" in the AI tab
+  (`DecisionPathCard`): data in, safety rules L0/L1/L1.7, the layer's chance against its thresholds and what raised it.
+  (3) A post's popup on the home map loads its last 2 days of water level (`PostTrend`, `GET /history/post`); popups open in
+  Leaflet's popup pane and re-pan once they grow (`keepPopupInView`; they were cut off at the map's top edge and drawn under
+  the other posts). (4) "Cek daerahku" under the status (`AreaCheck`, `frontend/src/data/areaProfiles.json` from
+  `scripts/build_area_profiles.py`: BPBD flood days 2013-2025 per kecamatan and kelurahan; a kelurahan with under a fifth of
+  its days in another kecamatan is moved to its main one, e.g. Kampung Melayu Duren Sawit 4 -> Jatinegara), with today's
+  kecamatan chance, nearest posts and shelter candidates, "Pakai lokasi saya", remembered in localStorage only.
+  (5) Telegram alerts (`services/telegram_alerts.py`): a message when the status rises to Siaga/Bahaya
+  (`TELEGRAM_MIN_LEVEL`) and when it falls again; needs Fly secrets `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`, the Riwayat
+  page shows a join card when Vercel has `VITE_TELEGRAM_URL`. Also: the status card lists what to do at each level, trend and
+  rain are plain text (were pills), and the chat button sits above the bottom nav up to 768 px (it covered "Tentang").
 - 2026-11-17: status per wilayah (`scripts/train_wilayah_layer.py`, `artifacts/reports/wilayah_layer.md`, `models/daily_bundle/wilayah_layer*.json`,
   `decision_layer.decide_wilayah`, API field `wilayah_status`). Inputs: the city layer's + the kota's highest kecamatan chance
   + its own river posts now / yesterday (`posts_d1` in the daily state) + which kota; a kota or upstream post at Siaga 1 -> Bahaya

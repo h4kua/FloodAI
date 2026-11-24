@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { buildStatusDesc, byPostSeverity, dailyTopKecamatan, formatChance, groupStationsByWilayah, postClass, postRiskLevel } from "./dashboardHelpers.js";
+import { buildStatusDesc, byPostSeverity, dailyTopKecamatan, distanceKm, formatChance, formatWibAt, groupStationsByWilayah, layerReasonText, layerTopReasons, modelLevelKey, postClass, postRiskLevel } from "./dashboardHelpers.js";
 
 test("a post's level follows the band DSDA reports, not its ratio", () => {
   // 76% of Siaga 1 used to read "Siaga 2"; DSDA puts this post in Siaga 3.
@@ -79,4 +79,23 @@ test("a level set by the learned decision layer leads with today's flood chance"
   assert.doesNotMatch(waspada, /Hujan beberapa hari/);  // the daily chance did not raise it
   const ruled = buildStatusDesc({ level: "siaga", waterLevelRatio: 0.8, decisionLayer: { ...decisionLayer, decided: false } }, true);
   assert.match(ruled, /^Air sudah 80% dari batas siaga/);
+});
+
+test("learned-layer reasons read like the backend's and skip the hour", () => {
+  assert.equal(layerReasonText("w_max_d1", 1, true), "pos sungai tertinggi kemarin Siaga 3");
+  assert.equal(layerReasonText("p", 0.21, false), "daily model chance 21%");
+  assert.equal(layerReasonText("today_max", 12.4, true), "hujan hari ini hingga 12 mm");
+  const layer = { push: { hour: 0.9, p: 0.4, w_max_now: 0.02, today_max: 0.2 }, features: { p: 0.3, today_max: 8 } };
+  assert.deepEqual(layerTopReasons(layer, true), ["peluang model harian 30%", "hujan hari ini hingga 8 mm"]);
+  assert.deepEqual(layerTopReasons(null, true), []);
+});
+
+test("backend levels map to badge keys; distances and WIB times", () => {
+  assert.equal(modelLevelKey("WARNING"), "SIAGA");
+  assert.equal(modelLevelKey("nope"), "UNKNOWN");
+  // Manggarai to Monas is about 4 km.
+  const d = distanceKm(-6.2083, 106.8497, -6.1754, 106.8272);
+  assert.ok(d > 4 && d < 4.6, String(d));
+  assert.equal(formatWibAt("2026-11-24T07:30:00Z", false, { date: false }), "14:30");
+  assert.equal(formatWibAt(null, true), "");
 });

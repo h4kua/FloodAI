@@ -1,6 +1,6 @@
 const T = {
   id: {
-    'nav.home': 'Beranda', 'nav.evac': 'Evakuasi', 'nav.reports': 'Laporan', 'nav.about': 'Tentang',
+    'nav.home': 'Beranda', 'nav.evac': 'Evakuasi', 'nav.history': 'Riwayat', 'nav.reports': 'Laporan', 'nav.about': 'Tentang',
     'footer.disclaimer': 'Alat bantu informasi — selalu ikuti arahan resmi BPBD.',
     'home.title': 'Kondisi Banjir Jakarta',
     'home.refresh': 'Perbarui', 'home.syncing': 'Memuat data…',
@@ -90,7 +90,7 @@ const T = {
     'safeArrival.close': 'Tutup',
   },
   en: {
-    'nav.home': 'Home', 'nav.evac': 'Evacuation', 'nav.reports': 'Reports', 'nav.about': 'About',
+    'nav.home': 'Home', 'nav.evac': 'Evacuation', 'nav.history': 'History', 'nav.reports': 'Reports', 'nav.about': 'About',
     'footer.disclaimer': 'An information aid — always follow official BPBD instructions.',
     'home.title': 'Jakarta Flood Status',
     'home.refresh': 'Refresh', 'home.syncing': 'Loading data…',

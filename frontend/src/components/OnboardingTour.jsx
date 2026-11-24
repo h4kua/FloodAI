@@ -67,6 +67,13 @@ const STEPS = (id) => [
       : "A route home or to the nearest shelter. Green roads are clear, red roads pass flood-prone areas. Once the route looks right, open it in Google Maps to navigate.",
   },
   {
+    key: "nav-history", selector: "[data-tour='nav-history']", icon: Icons.list, accent: "var(--cyan)",
+    title: id ? "Riwayat" : "History",
+    desc: id
+      ? "Status Jakarta, hujan satelit dan status tiap pos dalam 7 sampai 30 hari terakhir, serta kapan status pernah naik."
+      : "Jakarta's status, satellite rain and every post's status over the last 7 to 30 days, and when the status went up.",
+  },
+  {
     key: "nav-reports", selector: "[data-tour='nav-reports']", icon: Icons.report, accent: "var(--s2)",
     title: id ? "Laporan warga" : "Community reports",
     desc: id
