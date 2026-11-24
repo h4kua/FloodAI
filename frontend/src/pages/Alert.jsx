@@ -418,6 +418,11 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
       <div className="page-header fade-in">
         <div>
           <h1 className="page-title">{t("evac.title")}</h1>
+          <p className="page-sub">
+            {lang === "en"
+              ? "A way around flood-prone areas: home, to the nearest safe place, or to any address."
+              : "Jalan yang menghindari area rawan banjir: pulang, ke tempat aman terdekat, atau ke alamat lain."}
+          </p>
         </div>
         <span
           className={`risk-badge badge-${{ aman: "ok", waspada: "wsp", siaga: "s2", bahaya: "s1", unknown: "unknown" }[riskLevel] ?? "wsp"}`}

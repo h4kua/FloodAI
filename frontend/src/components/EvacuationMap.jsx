@@ -213,7 +213,7 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
             <Popup>
               <div>
                 <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{origin.name}</p>
-                <p style={{ fontSize: 11, color: "var(--cyan)", margin: 0 }}>{t("evac.depart")}</p>
+                <p style={{ fontSize: 12, color: "var(--cyan)", margin: 0 }}>{t("evac.depart")}</p>
               </div>
             </Popup>
           </CircleMarker>
@@ -231,7 +231,7 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
               <Popup>
                 <div>
                   <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{t("evac.yourLocation")}</p>
-                  <p style={{ fontSize: 11, color: "var(--cyan)", margin: 0 }}>{t("evac.gpsAccurate")}</p>
+                  <p style={{ fontSize: 12, color: "var(--cyan)", margin: 0 }}>{t("evac.gpsAccurate")}</p>
                 </div>
               </Popup>
             </CircleMarker>
@@ -246,11 +246,11 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
             <Popup>
               <div>
                 <p style={{ fontWeight: 700, marginBottom: 4, fontSize: 13 }}>{dest.name}</p>
-                <p style={{ fontSize: 11, color: "var(--muted)", margin: 0 }}>
+                <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>
                   {dest.isHome ? (isId ? "Rumah" : "Home") : t("evac.dest")}
                 </p>
                 {chosen && (
-                  <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>
+                  <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>
                     {metersToKm(chosen.distance)} · {secToMin(chosen.duration)}
                   </p>
                 )}
@@ -284,7 +284,7 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
       {!origin && (
         <div style={{ position: "absolute", inset: 0, zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
           <div style={{ background: "var(--panel)", border: "1px solid var(--line-2)", borderRadius: 8, boxShadow: "var(--shadow)", padding: "1rem 1.5rem", textAlign: "center" }}>
-            <p style={{ fontSize: "0.72rem", color: "var(--cyan)", marginBottom: "0.3rem" }}>
+            <p style={{ fontSize: "0.75rem", color: "var(--cyan)", marginBottom: "0.3rem" }}>
               {t("evac.hint.title")}
             </p>
             <p style={{ fontSize: "0.8rem", color: "var(--muted)", margin: 0 }}>{t("evac.hint.desc")}</p>

@@ -8,7 +8,7 @@ const OFFLINE_KB = {
 1. Siapkan tas darurat: KTP/KK/SIM, BPJS, buku tabungan (foto/scan di Google Drive), obat rutin, pakaian 3 hari, air minum 1,5L, senter, power bank, uang tunai — semua dalam kantong plastik kedap air.
 2. Matikan listrik di MCB dan tutup katup gas sebelum keluar.
 3. Beritahu RT/RW setempat dan anggota keluarga titik kumpul.
-4. Buka halaman Evakuasi di menu atas → masukkan alamatmu → dapat rute ke shelter.
+4. Buka halaman Rute Aman di menu atas → masukkan alamatmu → dapat rute ke shelter.
 5. Kalau tidak bisa evakuasi mandiri: hubungi BPBD 117 atau minta bantuan RT/RW.
 Jangan menunggu air masuk rumah — kalau sudah Siaga 2 di wilayahmu, mulai persiapan sekarang.`,
 
@@ -55,7 +55,7 @@ Jakarta Timur: GOR Cakung, Kantor Walikota Jakarta Timur (Jl. D.I. Panjaitan, Ma
 Jakarta Selatan: Stadion Lebak Bulus (Kec. Cilandak), Balai Rakyat Kec. Pasar Minggu
 Jakarta Pusat: Gedung Walikota Jakarta Pusat (Kec. Menteng), GOR Kemayoran
 
-Cara cepat: buka halaman Evakuasi di menu atas → masukkan alamatmu → dapat rute otomatis ke shelter terdekat.
+Cara cepat: buka halaman Rute Aman di menu atas → masukkan alamatmu → dapat rute otomatis ke shelter terdekat.
 Nomor BPBD Jakarta: 117 (24 jam, tahu shelter aktif real time).`,
 
     kontak: `Nomor darurat Jakarta — simpan sekarang:
@@ -185,7 +185,7 @@ Relatif Aman:
 • Jl. TB Simatupang (JakSel selatan), Jl. Fatmawati, Jl. Ragunan
 • Kawasan Monas (Jl. Medan Merdeka) — dataran tinggi
 
-Untuk rute yang mempertimbangkan kondisi jalan: buka halaman Evakuasi → masukkan alamat.`,
+Untuk rute yang mempertimbangkan kondisi jalan: buka halaman Rute Aman → masukkan alamat.`,
 
     web: `deFlood.ai adalah platform pemantauan banjir realtime Jakarta. Ini fitur-fiturnya:
 
@@ -204,7 +204,7 @@ Tabel Sensor:
 • Semua pos pantau dengan tinggi air aktual vs ambang Siaga 1
 • Progress bar persentase untuk tiap stasiun
 
-Halaman Evakuasi:
+Halaman Rute Aman:
 • Masukkan alamatmu → dapat rute ke shelter pengungsian terdekat
 • 5 langkah evakuasi terstandar BPBD
 
@@ -268,7 +268,7 @@ Tempat Lain:
 Rawan genangan: Pasar Ikan Muara Baru, Pasar Jatinegara, Pasar Kalideres, Terminal Kalideres, Terminal Pulo Gadung (pantau saat kiriman)
 Aman / dataran tinggi: Monas, Senayan/GBK, TMII, Kemang Village, kawasan Sudirman-Thamrin`,
 
-    jarak: `Estimasi jarak dari titik rawan ke shelter terdekat (perkiraan — untuk rute akurat buka halaman Evakuasi):
+    jarak: `Estimasi jarak dari titik rawan ke shelter terdekat (perkiraan — untuk rute akurat buka halaman Rute Aman):
 
 Dari Pluit (Kel. Pluit, JakUt):
 → GOR Tanjung Priok (Jl. Enggano No.1): ~4 km, ~10 mnt kendaraan
@@ -299,7 +299,7 @@ Dari Cakung:
 Dari Kemayoran:
 → GOR Kemayoran: ~1 km, ~3 mnt
 
-Saat banjir: jalan normal sering terputus. Hubungi BPBD 117 untuk evakuasi pakai perahu atau kendaraan khusus. Untuk rute yang mempertimbangkan kondisi jalan realtime → buka halaman Evakuasi di menu atas.`,
+Saat banjir: jalan normal sering terputus. Hubungi BPBD 117 untuk evakuasi pakai perahu atau kendaraan khusus. Untuk rute yang mempertimbangkan kondisi jalan realtime → buka halaman Rute Aman di menu atas.`,
   },
 
   en: {
@@ -307,7 +307,7 @@ Saat banjir: jalan normal sering terputus. Hubungi BPBD 117 untuk evakuasi pakai
 1. Pack an emergency bag: ID, health insurance card, bank book (scan to Google Drive NOW), meds, 3 days of clothes, 1.5L water, flashlight, power bank, cash — all in waterproof zip-locks.
 2. Turn off electricity at the main breaker and close the gas valve.
 3. Inform your RT/RW leader and family about your evacuation plan.
-4. Open the Evacuation page in the top menu → type your address → get a route to the nearest shelter.
+4. Open the Safe Route page in the top menu → type your address → get a route to the nearest shelter.
 5. Can't evacuate alone? Call BPBD at 117 — they coordinate boat evacuations in flooded areas.
 Don't wait for water to enter your house — if your area is at Siaga 2, start preparing now.`,
 
@@ -354,7 +354,7 @@ East Jakarta: GOR Cakung, East Jakarta City Hall (Jl. D.I. Panjaitan, Matraman)
 South Jakarta: Lebak Bulus Stadium (Cilandak), Pasar Minggu community center
 Central Jakarta: Central Jakarta City Hall (Menteng), GOR Kemayoran
 
-Fastest way: open the Evacuation page from the top menu → enter your address → automatic route to nearest shelter.
+Fastest way: open the Safe Route page from the top menu → enter your address → automatic route to nearest shelter.
 BPBD Jakarta: 117 (24 hours, real-time shelter availability).`,
 
     kontak: `Emergency numbers for Jakarta — save these now:
@@ -483,7 +483,7 @@ Relatively Safe:
 • Jl. TB Simatupang (South Jakarta), Jl. Fatmawati, Jl. Ragunan
 • Monas area (Jl. Medan Merdeka) — elevated ground
 
-For live routing: open the Evacuation page → enter your address.`,
+For live routing: open the Safe Route page → enter your address.`,
 
     web: `deFlood.ai is Jakarta's realtime flood monitoring platform. Here's what it does:
 
@@ -502,7 +502,7 @@ Station Table:
 • All monitoring points with actual water height vs Siaga 1 threshold
 • Progress bar showing percentage of danger threshold
 
-Evacuation Page:
+Safe Route page:
 • Enter your address → get route to nearest emergency shelter
 • 5 standard BPBD evacuation steps
 
@@ -564,7 +564,7 @@ Other Landmarks:
 Flood-prone: Pasar Ikan Muara Baru, Pasar Jatinegara, Terminal Kalideres, Terminal Pulo Gadung
 Safe / elevated: Monas, Senayan/GBK, TMII, Kemang Village, Sudirman-Thamrin corridor`,
 
-    jarak: `Estimated distances from flood-prone areas to nearest shelters (use the Evacuation page for live routing):
+    jarak: `Estimated distances from flood-prone areas to nearest shelters (use the Safe Route page for live routing):
 
 From Pluit (Kel. Pluit, North Jakarta):
 → GOR Tanjung Priok (Jl. Enggano No.1): ~4 km, ~10 min by vehicle
@@ -593,7 +593,7 @@ From Cakung:
 From Kemayoran:
 → GOR Kemayoran: ~1 km, ~3 min
 
-During flooding: normal roads are often blocked. Call BPBD 117 for boat or special vehicle evacuation. For real-time routing → open the Evacuation page from the top menu.`,
+During flooding: normal roads are often blocked. Call BPBD 117 for boat or special vehicle evacuation. For real-time routing → open the Safe Route page from the top menu.`,
   },
 };
 

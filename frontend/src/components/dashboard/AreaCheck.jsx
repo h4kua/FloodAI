@@ -189,7 +189,7 @@ export default function AreaCheck({ riskData }) {
                   ))}
                 </ul>
               ) : <p>{isId ? "Tidak bisa dimuat saat ini." : "Could not be loaded right now."}</p>}
-            <p>{isId ? "Kandidat dari survei OSM/InAWARE, bukan daftar resmi. Rute ada di halaman Evakuasi." : "Candidates from the OSM/InAWARE survey, not an official list. Routes are on the Evacuation page."}</p>
+            <p>{isId ? "Kandidat dari survei OSM/InAWARE, bukan daftar resmi. Rute ada di halaman Rute Aman." : "Candidates from the OSM/InAWARE survey, not an official list. Routes are on the Safe Route page."}</p>
           </div>
         </div>
       )}

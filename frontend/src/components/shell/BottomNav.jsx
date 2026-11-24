@@ -17,10 +17,11 @@ export default function BottomNav({ page, onNavigate }) {
           data-tour={item.tour}
           className={`bottom-nav-btn${page === item.id ? " active" : ""}`}
           aria-current={page === item.id ? "page" : undefined}
+          aria-label={item.shortKey ? t(item.labelKey) : undefined}
           onClick={() => onNavigate(item.id)}
         >
           {item.icon}
-          <span className="bottom-nav-label">{t(item.labelKey)}</span>
+          <span className="bottom-nav-label">{t(item.shortKey ?? item.labelKey)}</span>
         </button>
       ))}
     </nav>

@@ -179,7 +179,7 @@ Tempat / Landmark Lain:
   Aman / dataran tinggi: Monas, Senayan/GBK, TMII, Ancol (bagian boulevard), Kemang Village
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ESTIMASI JARAK SHELTER (perkiraan jarak tempuh — untuk rute akurat buka halaman Evakuasi):
+ESTIMASI JARAK SHELTER (perkiraan jarak tempuh — untuk rute akurat buka halaman Rute Aman):
 
 Dari Pluit (Kel. Pluit, JakUt): → GOR Tanjung Priok ~4 km (~10 mnt kendaraan)
 Dari Pademangan Barat: → GOR Tanjung Priok ~3 km (~8 mnt)
@@ -193,7 +193,7 @@ Dari Cakung: → GOR Cakung ~2 km (~6 mnt)
 Dari Kemayoran: → GOR Kemayoran ~1 km (~3 mnt)
 
 Catatan jarak: Saat banjir, jalur normal bisa terputus. BPBD 117 koordinasi perahu atau kendaraan khusus.
-Untuk rute realtime yang mempertimbangkan kondisi jalan: buka halaman Evakuasi di menu atas → masukkan alamat.
+Untuk rute realtime yang mempertimbangkan kondisi jalan: buka halaman Rute Aman di menu atas → masukkan alamat.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 NAMA JALAN & LOKASI SPESIFIK (gunakan ketika user tanya jalan/rute/kawasan):
@@ -275,7 +275,7 @@ INFRASTRUKTUR ANTI-BANJIR:
 FITUR WEBSITE deFlood.ai (untuk pertanyaan "ini apa", "cara pakai", "penjelasan"):
 • Beranda: status Jakarta (Aman, Waspada, Siaga, Bahaya, atau Tidak diketahui bila data rusak) dengan jam data, kotak jumlah pos pantau per status, status 5 wilayah, peta pos pantau dan area rawan banjir yang aktif, dan bagian "Lihat detail" (analisis AI, ketinggian air tiap pos, prakiraan cuaca). Diperbarui tiap 15 menit.
 • Status ditetapkan mesin keputusan berlapis, bukan oleh chatbot: tidak pernah lebih rendah dari pita siaga DSDA pos pantau terparah; peluang dari model XGBoost hanya salah satu masukan.
-• Evakuasi: isi alamat, pakai lokasi (GPS) atau ketuk peta. Tujuan bawaan adalah rumah (setelah disimpan), atau pilih pengungsian terdekat atau alamat lain. Jalan hijau aman, jalan merah melewati area rawan banjir aktif. Tombol "Buka di Google Maps" untuk navigasi belokan demi belokan.
+• Rute Aman: isi alamat, pakai lokasi (GPS) atau ketuk peta. Tujuan bawaan adalah rumah (setelah disimpan), atau pilih pengungsian terdekat atau alamat lain. Jalan hijau aman, jalan merah melewati area rawan banjir aktif. Tombol "Buka di Google Maps" untuk navigasi belokan demi belokan.
 • Laporan: warga berbagi kondisi air di sekitarnya, boleh dengan foto. Laporan belum diverifikasi, tampil 6 jam, dan tidak mengubah status resmi.
 • Tentang: cara kerja, sumber data (DSDA, BMKG, OpenWeather, BPBD) dan batasannya.
 • Tombol "?" di bagian atas membuka panduan 11 langkah; di sebelahnya ganti bahasa ID/EN dan mode terang/gelap.

@@ -28,7 +28,7 @@ const STEPS = (id) => [
     key: "welcome", selector: null, icon: Icons.wave, accent: "var(--cyan)",
     title: id ? "Selamat datang di deFlood.ai" : "Welcome to deFlood.ai",
     desc: id
-      ? "Panduan singkat ini menunjukkan cara membaca status banjir, mencari rute evakuasi, dan mengirim laporan. Sekitar satu menit."
+      ? "Panduan singkat ini menunjukkan cara membaca status banjir, mencari jalan yang menghindari banjir, dan mengirim laporan. Sekitar satu menit."
       : "This short guide shows how to read the flood status, find an evacuation route and send a report. About a minute.",
   },
   {
@@ -61,10 +61,10 @@ const STEPS = (id) => [
   },
   {
     key: "nav-evac", selector: "[data-tour='nav-evac']", icon: Icons.shield, accent: "var(--s1)",
-    title: id ? "Evakuasi" : "Evacuation",
+    title: id ? "Rute Aman" : "Safe Route",
     desc: id
-      ? "Rute ke rumah Anda atau ke tempat pengungsian terdekat. Jalan hijau aman, jalan merah melewati area rawan banjir. Setelah rutenya cocok, buka di Google Maps untuk navigasi."
-      : "A route home or to the nearest shelter. Green roads are clear, red roads pass flood-prone areas. Once the route looks right, open it in Google Maps to navigate.",
+      ? "Cari jalan yang menghindari area rawan banjir, pulang ke rumah, ke tempat aman terdekat, atau ke alamat lain. Jalan hijau aman, jalan merah melewati area rawan banjir. Setelah rutenya cocok, buka di Google Maps untuk navigasi."
+      : "Find a way around flood-prone areas: home, to the nearest safe place, or to any address. Green roads are clear, red roads pass flood-prone areas. Once the route looks right, open it in Google Maps to navigate.",
   },
   {
     key: "nav-history", selector: "[data-tour='nav-history']", icon: Icons.list, accent: "var(--cyan)",

@@ -43,16 +43,16 @@ function PostGauge({ stations, isId }) {
 /* What a resident should do at each level, in plain words (BPBD DKI preparedness advice). */
 const TODO = {
   aman: {
-    id: ["Beraktivitas seperti biasa.", "Buka lagi situs ini saat hujan deras turun.", "Kenali tempat aman terdekat di halaman Evakuasi."],
-    en: ["Go about your day as usual.", "Check again when heavy rain starts.", "Know your nearest safe place on the Evacuation page."],
+    id: ["Beraktivitas seperti biasa.", "Buka lagi situs ini saat hujan deras turun.", "Kenali tempat aman terdekat di halaman Rute Aman."],
+    en: ["Go about your day as usual.", "Check again when heavy rain starts.", "Know your nearest safe place on the Safe Route page."],
   },
   waspada: {
     id: ["Cek situs ini atau info BPBD tiap beberapa jam.", "Simpan dokumen penting di tempat tinggi, dalam plastik kedap air.", "Jangan parkir kendaraan di dekat sungai atau saluran air."],
     en: ["Check this site or BPBD news every few hours.", "Keep important papers up high, in a waterproof bag.", "Don't park near rivers or drains."],
   },
   siaga: {
-    id: ["Siapkan tas siaga: dokumen, obat, senter, power bank, air minum.", "Pindahkan barang berharga dan kendaraan ke tempat yang lebih tinggi.", "Cek rute ke tempat aman terdekat di halaman Evakuasi."],
-    en: ["Pack a go-bag: papers, medicine, torch, power bank, water.", "Move valuables and vehicles to higher ground.", "Check the route to your nearest safe place on the Evacuation page."],
+    id: ["Siapkan tas siaga: dokumen, obat, senter, power bank, air minum.", "Pindahkan barang berharga dan kendaraan ke tempat yang lebih tinggi.", "Cek jalan yang menghindari banjir di halaman Rute Aman."],
+    en: ["Pack a go-bag: papers, medicine, torch, power bank, water.", "Move valuables and vehicles to higher ground.", "Check a route around flood areas on the Safe Route page."],
   },
   bahaya: {
     id: ["Segera mengungsi bila air mulai masuk atau petugas meminta.", "Matikan listrik dari meteran sebelum air masuk rumah.", "Jangan menyeberangi arus banjir, juga dengan kendaraan. Darurat: 112."],

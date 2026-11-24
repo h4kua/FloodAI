@@ -39,7 +39,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
 - Tests: `tests/` (679, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (36: flood roads, shelter ranking,
   post levels, weather per wilayah, daily model card, learned-layer status sentence, Siaga 2/1 map areas, layer reasons)
-- Frontend: pages Beranda / Evakuasi / Riwayat / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
+- Frontend: pages Beranda / Rute Aman (was Evakuasi; file `pages/Alert.jsx`) / Riwayat / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (12 steps, reopened from the top-bar "?"); charts are plain SVG
   (`components/charts.jsx`, no chart library)
 
@@ -213,7 +213,10 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   labels are sentence case, only the status card animates in, the chat button lost its permanent fake "1" badge.
   The evacuation map still lit flood-prone areas for posts at Siaga 3 (the home map only for Siaga 2/1), so the two maps
   disagreed: both now use `ACTIVE_AREA_MIN_RANK = 2` (`lib/floodRoads.js`). Riwayat says when a period was raised by a
-  safety rule rather than the layer's chance.
+  safety rule rather than the layer's chance. The evacuation page is now "Rute Aman" (its job is a way around flood-prone
+  areas; bottom nav says "Rute"), also in the tour, the status card, the offline chat and `api/chat_knowledge.txt`.
+  Responsive pass at 320/375/768/1280 px: no page overflow, tap targets >= 44 px, text >= 12 px, page headers wrap, and
+  the map panels use `isolation: isolate` (Leaflet's panes had drawn over the bottom nav).
 - 2026-11-17: status per wilayah (`scripts/train_wilayah_layer.py`, `artifacts/reports/wilayah_layer.md`, `models/daily_bundle/wilayah_layer*.json`,
   `decision_layer.decide_wilayah`, API field `wilayah_status`). Inputs: the city layer's + the kota's highest kecamatan chance
   + its own river posts now / yesterday (`posts_d1` in the daily state) + which kota; a kota or upstream post at Siaga 1 -> Bahaya

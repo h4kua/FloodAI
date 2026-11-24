@@ -23,6 +23,7 @@ export const NAV_ITEMS = [
   {
     id: "alert",
     labelKey: "nav.evac",
+    shortKey: "nav.evacShort", // "Rute Aman" does not fit a fifth of a 320 px bottom nav
     tour: "nav-evac",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" {...stroke} aria-hidden="true">

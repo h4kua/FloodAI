@@ -221,7 +221,7 @@ button, input, select, textarea { font-family: inherit; }
   padding-left: 1rem;
 }
 .topbar-toggle {
-  min-width: 38px; height: 38px;
+  min-width: 44px; height: 44px;
   font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em;
   background: transparent; border: 1px solid var(--line);
   border-radius: var(--r-pill); color: var(--chrome-text); padding: 0 0.7rem; cursor: pointer;
@@ -259,7 +259,7 @@ button, input, select, textarea { font-family: inherit; }
   transition: background 0.2s var(--ease-out);
 }
 .bottom-nav-label {
-  font-size: 0.7rem; font-weight: 600; line-height: 1;
+  font-size: 0.75rem; font-weight: 600; line-height: 1;
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .bottom-nav-btn.active { color: var(--cyan); }
@@ -279,9 +279,11 @@ button, input, select, textarea { font-family: inherit; }
 
 /* ── Page header ─────────────────────────────────────────────── */
 .page-header {
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  padding: 0.25rem 0 0.25rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem 1rem;
+  padding: 0.25rem 0 0.25rem; flex-wrap: wrap;
 }
+/* The title block takes the row; a badge or buttons beside it drop below on a narrow phone. */
+.page-header > div:first-child { flex: 1 1 240px; min-width: 0; }
 .page-title {
   font-family: var(--font-display);
   font-size: clamp(1.6rem, 2.6vw, 2.15rem);
@@ -505,6 +507,8 @@ button, input, select, textarea { font-family: inherit; }
 
 /* ── Map panel ───────────────────────────────────────────────── */
 .map-panel { overflow: hidden; display: flex; flex-direction: column; }
+/* Leaflet's panes (z-index 400-1000) and the map overlays stay inside the map, under the top bar and bottom nav. */
+.map-panel, .evac-map-panel, .flood-map-wrap { isolation: isolate; }
 .map-panel .leaflet-container { background: var(--panel-2); flex: 1; }
 .map-legend {
   position: absolute; bottom: 12px; left: 12px; z-index: 500;
@@ -521,7 +525,7 @@ button, input, select, textarea { font-family: inherit; }
 @media (min-width: 641px) { *:has(> .leaflet-container .leaflet-popup) > .map-legend { opacity: 0; visibility: hidden; } }
 .map-legend-toggle {
   display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
-  width: 100%; min-height: 28px; margin-bottom: 2px; padding: 0;
+  width: 100%; min-height: 44px; margin-bottom: 2px; padding: 0;
   background: none; border: 0; cursor: pointer;
   font: inherit; font-size: 0.8rem; font-weight: 700; color: var(--text);
 }
@@ -787,7 +791,7 @@ button, input, select, textarea { font-family: inherit; }
 .route-field .route-input { padding-right: 2.75rem; }
 .route-field-btn {
   position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
-  width: 36px; height: 36px; border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   background: transparent; border: 0; color: var(--cyan);
   font-size: 1.1rem; font-weight: 700; cursor: pointer; display: grid; place-items: center;
 }
@@ -1006,7 +1010,7 @@ button, input, select, textarea { font-family: inherit; }
 .about-row { display: flex; align-items: flex-start; gap: 0.875rem; margin-bottom: 0.875rem; }
 .about-row:last-child { margin-bottom: 0; }
 .about-tag {
-  font-size: 0.72rem; font-weight: 700;
+  font-size: 0.75rem; font-weight: 700;
   color: var(--muted); border: 1px solid var(--line-2);
   border-radius: var(--r-sm); padding: 0.2rem 0.5rem; flex-shrink: 0; margin-top: 0.15rem; white-space: nowrap;
 }
@@ -1029,7 +1033,7 @@ button, input, select, textarea { font-family: inherit; }
 }
 .team-card:hover { border-color: var(--line-2); }
 .team-role {
-  font-size: 0.72rem; font-weight: 700;
+  font-size: 0.75rem; font-weight: 700;
   border-radius: var(--r-pill); padding: 0.2rem 0.6rem;
   display: inline-flex; align-items: center; width: fit-content;
 }
@@ -1170,7 +1174,7 @@ button, input, select, textarea { font-family: inherit; }
 .ow-wilayah-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.35; margin-bottom: 0.5rem; }
 .ow-wilayah-desc.rain { color: var(--cyan); font-weight: 600; }
 .ow-wilayah-card.picked { border-color: var(--cyan); box-shadow: 0 0 0 2px var(--cyan-border); }
-.ow-wilayah-details { margin: 0.35rem 0 0; display: grid; gap: 2px; font-size: 0.72rem; }
+.ow-wilayah-details { margin: 0.35rem 0 0; display: grid; gap: 2px; font-size: 0.75rem; }
 .ow-wilayah-details div { display: flex; justify-content: space-between; gap: 0.5rem; }
 .ow-wilayah-details dt { color: var(--muted); }
 .ow-wilayah-details dd { margin: 0; font-weight: 600; color: var(--text); text-align: right; }
@@ -1327,7 +1331,7 @@ button, input, select, textarea { font-family: inherit; }
   .forecast-table-row { grid-template-columns: 90px repeat(var(--fct-cols, 4), 1fr); }
   .fct-label-cell { padding-right: 0.375rem; margin-right: 0.125rem; }
   .fct-icon { font-size: 1.1rem; }
-  .fct-desc { font-size: 0.72rem; }
+  .fct-desc { font-size: 0.75rem; }
   .ow-wilayah-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
@@ -1357,7 +1361,7 @@ button, input, select, textarea { font-family: inherit; }
   }
 
   .topbar { padding: 0 1rem; height: 56px; }
-  .topbar-toggle { min-width: 36px; height: 36px; }
+  .topbar-toggle { min-width: 44px; height: 44px; }
 
   /* Map legend: compact so it covers less of a phone-sized map */
   /* Phones: the legend sits under the map as a wrapped row, always visible */
@@ -1395,7 +1399,7 @@ button, input, select, textarea { font-family: inherit; }
   .evac-map-panel { min-height: 300px; }
 
   .page-header    { align-items: center; gap: 0.75rem; }
-  .header-actions .btn { min-width: 40px; min-height: 40px; justify-content: center; padding: 0.5rem; }
+  .header-actions .btn { min-width: 44px; min-height: 44px; justify-content: center; padding: 0.5rem; }
   .header-actions .btn-label { display: none; }
   .header-info-col { align-items: flex-start !important; }
   .header-sensor-time { display: none; }
@@ -1433,7 +1437,7 @@ button, input, select, textarea { font-family: inherit; }
 }
 
 /* Weather per wilayah on the home map (components/WeatherLayer.jsx) */
-.wx-key { display: flex; flex-wrap: wrap; gap: 2px 10px; padding: 0 0 4px 15px; max-width: 190px; font-size: 0.72rem; color: var(--muted); }
+.wx-key { display: flex; flex-wrap: wrap; gap: 2px 10px; padding: 0 0 4px 15px; max-width: 190px; font-size: 0.75rem; color: var(--muted); }
 .wx-key span { display: inline-flex; align-items: center; gap: 4px; }
 .wx-key i { width: 10px; height: 10px; border-radius: 3px; opacity: 0.85; }
 
@@ -1509,12 +1513,12 @@ button, input, select, textarea { font-family: inherit; }
 .chart-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
 .chart-th {
   position: absolute; right: 2px; transform: translateY(-115%);
-  font-size: 0.7rem; font-weight: 700; line-height: 1; padding: 1px 4px;
+  font-size: 0.75rem; font-weight: 700; line-height: 1; padding: 1px 4px;
   background: color-mix(in srgb, var(--panel) 85%, transparent); border-radius: 4px; pointer-events: none;
 }
 .chart-th.is-below { transform: translateY(15%); }
 .chart-strip { display: block; width: 100%; height: 8px; margin-top: 3px; border-radius: 2px; }
-.chart-x { display: flex; justify-content: space-between; gap: 0.25rem; font-size: 0.7rem; color: var(--muted); margin-top: 0.3rem; }
+.chart-x { display: flex; justify-content: space-between; gap: 0.25rem; font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
 .chart-x span { white-space: nowrap; }
 .bars { display: flex; align-items: flex-end; gap: 3px; width: 100%; border-bottom: 1px solid var(--line); }
 .bars-day { flex: 1 1 0; min-width: 0; height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 1px; }
@@ -1544,9 +1548,9 @@ button, input, select, textarea { font-family: inherit; }
 .history-periods { list-style: none; padding: 0; margin: 0.5rem 0 0; display: grid; gap: 0.5rem; }
 .history-periods li { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.75rem; font-size: 0.85rem; padding: 0.5rem 0; border-bottom: 1px solid var(--line); }
 .history-periods li:last-child { border-bottom: none; }
-.history-periods small { color: var(--muted); }
+.history-periods small { color: var(--muted); font-size: 0.8rem; }
 .post-grid-wrap { overflow-x: auto; margin: 0.25rem 0 0; }
-.post-grid { border-collapse: separate; border-spacing: 2px; font-size: 0.72rem; }
+.post-grid { border-collapse: separate; border-spacing: 2px; font-size: 0.75rem; }
 .post-grid th { font-weight: 600; color: var(--muted); text-align: center; padding: 0 2px; white-space: nowrap; }
 .post-grid th[scope="row"] { text-align: left; padding-right: 0.5rem; color: var(--text); position: sticky; left: 0; background: var(--panel); }
 .post-grid td { width: 18px; min-width: 18px; height: 18px; border-radius: 3px; border: 1px solid var(--line); }
@@ -1574,13 +1578,13 @@ button, input, select, textarea { font-family: inherit; }
   background: linear-gradient(90deg, var(--safe-soft) 0 20%, var(--wsp-soft) 20% 65%, color-mix(in srgb, var(--s2) 18%, var(--panel)) 65% 80%, color-mix(in srgb, var(--s1) 18%, var(--panel)) 80% 100%);
   border: 1px solid var(--line); }
 .chance-bar-fill { position: absolute; top: -4px; width: 4px; height: 18px; margin-left: -2px; border-radius: 2px; background: var(--text); }
-.chance-bar-tick { position: absolute; top: 14px; transform: translateX(-50%); font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
+.chance-bar-tick { position: absolute; top: 14px; transform: translateX(-50%); font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
 
 /* ── Post trend in the map popup ─────────────────────────────── */
 .post-trend { margin-top: 0.5rem; min-width: 220px; }
 .post-trend-btn { font: inherit; font-size: 0.78rem; font-weight: 700; color: var(--cyan); background: none; border: none; padding: 0.25rem 0; cursor: pointer; text-decoration: underline; }
-.post-trend .chart-x { font-size: 0.65rem; }
-.post-trend-note { font-size: 0.72rem; color: var(--muted); margin: 0.25rem 0 0; }
+.post-trend .chart-x { font-size: 0.75rem; }
+.post-trend-note { font-size: 0.75rem; color: var(--muted); margin: 0.25rem 0 0; }
 
 /* ── Cek daerahku ────────────────────────────────────────────── */
 .area-check-form { display: flex; gap: 0.5rem; margin: 0.5rem 0 0.75rem; }
@@ -1588,7 +1592,7 @@ button, input, select, textarea { font-family: inherit; }
   flex: 1 1 auto; min-width: 0; font: inherit; font-size: 0.9rem; padding: 0.55rem 0.8rem; min-height: 40px;
   border: 1px solid var(--line-2); border-radius: var(--r-sm); background: var(--panel); color: var(--text);
 }
-.area-check-locate { font: inherit; font-size: 0.82rem; font-weight: 700; color: var(--cyan); background: none; border: none; padding: 0.25rem 0; margin: -0.25rem 0 0.75rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.area-check-locate { font: inherit; font-size: 0.85rem; font-weight: 700; color: var(--cyan); background: none; border: none; padding: 0; min-height: 44px; margin: -0.5rem 0 0.5rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .area-check-locate:disabled { color: var(--muted); cursor: wait; }
 .area-check-grid { display: grid; grid-template-columns: 1fr; gap: 1rem 1.5rem; }
 @media (min-width: 560px) { .area-check-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
