@@ -36,3 +36,11 @@ scripts/
 # Logs
 *.log
 logs/
+
+# Not part of the app (local tool folders, frontend sources, experiments); kept out of the Fly build
+# context: _skills_tmp alone made it ~230 MB and the upload timed out (24 Nov 2026).
+_skills_tmp/
+frontend/
+video-mockup/
+models/candidates/
+artifacts/reports/

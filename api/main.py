@@ -15,7 +15,7 @@ import logging
 import time
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from typing import Optional
 
@@ -483,6 +483,12 @@ def _refresh_interval_minutes() -> int:
     return value
 
 
+# The decision log (a full prediction + the Riwayat post table) and the daily model refresh both
+# peak in memory; run together on the 512 MB machine (every 30 min, 24 Nov 2026 13:28 UTC) they froze
+# the app until a restart. They now take turns.
+_HEAVY_JOB_LOCK = asyncio.Lock()
+
+
 async def _scheduled_refresh() -> None:
     """
     Rebuild the realtime snapshot and persist it to Supabase. Never raises — every
@@ -506,7 +512,8 @@ async def _scheduled_refresh() -> None:
         # and a level change may go to the Telegram channel. Never raises.
         from services.history_service import log_decision
 
-        await asyncio.to_thread(log_decision, snapshot["fetched_at_utc"])
+        async with _HEAVY_JOB_LOCK:
+            await asyncio.to_thread(log_decision, snapshot["fetched_at_utc"])
         _log.info(f"scheduled_refresh_finish (duration_ms={duration_ms})")
     except Exception as exc:  # noqa: BLE001 — scheduled job must never raise.
         duration_ms = int((time.perf_counter() - started) * 1000)
@@ -524,7 +531,8 @@ async def _scheduled_daily_model() -> None:
     event loop. daily_model.refresh never raises; on failure the site keeps the monthly model."""
     from realtime_native import daily_model
 
-    await asyncio.to_thread(daily_model.refresh)
+    async with _HEAVY_JOB_LOCK:
+        await asyncio.to_thread(daily_model.refresh)
 
 
 @asynccontextmanager
@@ -578,6 +586,8 @@ async def lifespan(app: FastAPI):
             _scheduled_daily_model,
             "interval",
             minutes=_DAILY_MODEL_INTERVAL_MIN,
+            # Offset from the 15-minute refresh so the two do not start at the same second.
+            next_run_time=datetime.now(timezone.utc) + timedelta(minutes=_DAILY_MODEL_INTERVAL_MIN - 7),
             id="daily_model_refresh",
             replace_existing=True,
             max_instances=1,
