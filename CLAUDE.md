@@ -37,7 +37,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (678, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (36: flood roads, shelter ranking,
+- Tests: `tests/` (679, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (36: flood roads, shelter ranking,
   post levels, weather per wilayah, daily model card, learned-layer status sentence, Siaga 2/1 map areas, layer reasons)
 - Frontend: pages Beranda / Evakuasi / Riwayat / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (12 steps, reopened from the top-bar "?"); charts are plain SVG
@@ -204,6 +204,13 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   (`TELEGRAM_MIN_LEVEL`) and when it falls again; needs Fly secrets `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`, the Riwayat
   page shows a join card when Vercel has `VITE_TELEGRAM_URL`. Also: the status card lists what to do at each level, trend and
   rain are plain text (were pills), and the chat button sits above the bottom nav up to 768 px (it covered "Tentang").
+  Follow-ups the same day: `/history/summary?days=7` ran the 512 MB machine out of memory (a week of full post lists
+  loaded at once): post history is now streamed 100 rows a page, each finished WIB day's bands are kept in memory
+  (`_day_bands`, cold 14 days ~14 s / 64 MB, then 0.5 s) and the scheduler warms them. Map popups near the edge (Marina
+  Ancol on the coast) were still cut off because `maxBounds` with viscosity 1 blocked the pan: `PopupKeeper` (both maps)
+  lifts the bounds while a popup is open and restores them when the last one closes, and re-pans when a popup grows.
+  Weather cards stay inside the map (`KeepCardsInside`), show only kota + temperature on phones and lost the glass blur;
+  labels are sentence case, only the status card animates in, the chat button lost its permanent fake "1" badge.
 - 2026-11-17: status per wilayah (`scripts/train_wilayah_layer.py`, `artifacts/reports/wilayah_layer.md`, `models/daily_bundle/wilayah_layer*.json`,
   `decision_layer.decide_wilayah`, API field `wilayah_status`). Inputs: the city layer's + the kota's highest kecamatan chance
   + its own river posts now / yesterday (`posts_d1` in the daily state) + which kota; a kota or upstream post at Siaga 1 -> Bahaya

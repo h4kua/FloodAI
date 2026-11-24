@@ -3,8 +3,8 @@
    these components, so the same post has the same colour on both, and every
    red area names the post that made it active.
 */
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Circle, CircleMarker, Pane, Polyline, Popup } from "react-leaflet";
+import { useMemo, useRef, useState } from "react";
+import { Circle, CircleMarker, Pane, Polyline, Popup, useMapEvents } from "react-leaflet";
 import { useApp } from "../lib/appContext";
 import { RISK_RADIUS_M, areasByPost, riverForPost } from "../lib/floodRoads";
 import { postClass } from "../lib/dashboardHelpers";
@@ -63,6 +63,47 @@ export function keepPopupInView(popup, pad = 12) {
   });
 }
 
+/** Every popup on the map stays fully inside it, also when its content grows after opening.
+    The maps keep the view inside Jakarta (maxBounds, viscosity 1), which also blocked the pan a popup
+    near the edge needs (Marina Ancol on the coast was cut off): the limit is lifted while a popup is
+    open and put back when it closes, which brings the view back inside Jakarta. */
+export function PopupKeeper() {
+  const saved = useRef(null);
+  const open = useRef(0);
+  const map = useMapEvents({
+    popupopen: (e) => {
+      const popup = e.popup;
+      open.current += 1;
+      if (map.options.maxBounds) {
+        saved.current = map.options.maxBounds;
+        map.setMaxBounds(null);
+      }
+      keepPopupInView(popup);
+      const el = popup.getElement()?.querySelector(".leaflet-popup-content");
+      if (!el || typeof ResizeObserver === "undefined") return;
+      let last = el.offsetHeight;
+      const ro = new ResizeObserver(() => {
+        if (Math.abs(el.offsetHeight - last) < 2) return;
+        last = el.offsetHeight;
+        keepPopupInView(popup);
+      });
+      ro.observe(el);
+      popup.once("remove", () => ro.disconnect());
+    },
+    popupclose: () => {
+      open.current = Math.max(0, open.current - 1);
+      // One marker to the next closes A before B opens: restore only if nothing opened meanwhile.
+      setTimeout(() => {
+        if (open.current === 0 && saved.current) {
+          map.setMaxBounds(saved.current);
+          saved.current = null;
+        }
+      }, 0);
+    },
+  });
+  return null;
+}
+
 /**
  * Monitoring posts with validated coordinates, coloured by their DSDA band.
  * While a post's popup is open, the river it measures is drawn in blue around it
@@ -73,11 +114,7 @@ export function StationMarkers({ stations = [], floodPoints = [], small = false,
   const { theme, lang } = useApp();
   const isId = lang === "id";
   const [openPost, setOpenPost] = useState(null);
-  const openPopup = useRef(null);
-  // The river line is added to the popup after it opens: lay it out and pan again.
-  useEffect(() => {
-    if (openPost) keepPopupInView(openPopup.current);
-  }, [openPost]);
+  // The river line is added to the popup after it opens: PopupKeeper re-pans once it grows.
   const byPost = useMemo(() => areasByPost(floodPoints), [floodPoints]);
   const placed = stations.filter((s) => s.lat != null && s.lon != null);
   const open = placed.find((s) => s.nama === openPost);
@@ -108,7 +145,7 @@ export function StationMarkers({ stations = [], floodPoints = [], small = false,
         center={[s.lat, s.lon]}
         radius={radius}
         eventHandlers={{
-          popupopen: (e) => { openPopup.current = e.popup; setOpenPost(s.nama); },
+          popupopen: () => setOpenPost(s.nama),
           popupclose: () => setOpenPost((cur) => (cur === s.nama ? null : cur)),
         }}
         pathOptions={{
@@ -152,7 +189,7 @@ export function StationMarkers({ stations = [], floodPoints = [], small = false,
               </p>
             )}
             {withTrend && s.nama === openPost && (
-              <PostTrend name={s.nama} isId={isId} onResize={() => keepPopupInView(openPopup.current)} />
+              <PostTrend name={s.nama} isId={isId} />
             )}
           </div>
         </Popup>

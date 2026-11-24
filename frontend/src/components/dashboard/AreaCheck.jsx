@@ -100,7 +100,10 @@ export default function AreaCheck({ riskData }) {
   }, [riskData?.stations, lat, lon]);
 
   const today = chosen ? riskData?.dailyModel?.kecamatan?.[chosen.kec.slug] : null;
-  const km = (v) => (v < 0.1 ? "< 0.1 km" : `${v < 10 ? v.toFixed(1) : Math.round(v)} km`);
+  const km = (v) => {
+    const txt = v < 0.1 ? "< 0.1" : v < 10 ? v.toFixed(1) : String(Math.round(v));
+    return `${isId ? txt.replace(".", ",") : txt} km`;
+  };
 
   return (
     <section className="panel panel-body fade-in" aria-labelledby="area-check-title">
@@ -165,7 +168,10 @@ export default function AreaCheck({ riskData }) {
             {posts.length ? (
               <ul>
                 {posts.map((p) => (
-                  <li key={p.nama}><b>{p.nama}</b> · {km(p.km)} · {(p.status_siaga || "").replace(/^Status\s*:\s*/i, "")}</li>
+                  <li key={p.nama}>
+                    <b>{p.nama}</b>
+                    <span>{isId ? `${km(p.km)} dari sini, ${(p.status_siaga || "").replace(/^Status\s*:\s*/i, "")}` : `${km(p.km)} away, ${(p.status_siaga || "").replace(/^Status\s*:\s*/i, "")}`}</span>
+                  </li>
                 ))}
               </ul>
             ) : <p>{isId ? "Data pos belum tersedia." : "No post data yet."}</p>}
@@ -176,7 +182,10 @@ export default function AreaCheck({ riskData }) {
               : shelters.length ? (
                 <ul>
                   {shelters.map((s) => (
-                    <li key={s.id ?? s.name}><b>{s.name}</b> · {km(s.distance_km ?? distanceKm(lat, lon, s.lat, s.lon))}</li>
+                    <li key={s.id ?? s.name}>
+                      <b>{s.name}</b>
+                      <span>{isId ? `${km(s.distance_km ?? distanceKm(lat, lon, s.lat, s.lon))} dari sini` : `${km(s.distance_km ?? distanceKm(lat, lon, s.lat, s.lon))} away`}</span>
+                    </li>
                   ))}
                 </ul>
               ) : <p>{isId ? "Tidak bisa dimuat saat ini." : "Could not be loaded right now."}</p>}

@@ -122,7 +122,7 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
             : (isId ? "Status Jakarta saat ini" : "Jakarta right now")}
           {snapTimeStr && (
             <span className="decision-hero-time">
-              · {isId ? "data" : "data from"} {snapTimeStr}
+              {isId ? `, data pukul ${snapTimeStr}` : `, data from ${snapTimeStr}`}
             </span>
           )}
         </div>
@@ -134,9 +134,9 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
         {/* Trend + rain from old data say nothing about now — hide them when stale */}
         {!isStale && (trendCfg || rainText) && (
           <p className="decision-hero-meta">
-            {[trendCfg && (isId ? `Tren: ${trendCfg.text.replace(/^[^A-Za-z]+/, "").toLowerCase()}` : `Trend: ${trendCfg.text.replace(/^[^A-Za-z]+/, "").toLowerCase()}`),
-              rainText && (isId ? `${rainText} di pusat kota`.replace(/ · (.*) di pusat kota$/, " di pusat kota ($1)") : `${rainText} in central Jakarta`.replace(/ · (.*) in central Jakarta$/, " in central Jakarta ($1)"))]
-              .filter(Boolean).join(" · ")}
+            {[trendCfg && (isId ? `Tren ${trendCfg.text.replace(/^[^A-Za-z]+/, "").toLowerCase()}.` : `Trend: ${trendCfg.text.replace(/^[^A-Za-z]+/, "").toLowerCase()}.`),
+              rainText && (isId ? `${rainText.replace(/ · (.*)$/, " ($1)")} di pusat kota.` : `${rainText.replace(/ · (.*)$/, " ($1)")} in central Jakarta.`)]
+              .filter(Boolean).join(" ")}
           </p>
         )}
 

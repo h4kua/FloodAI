@@ -8,6 +8,13 @@ const W = 1000;
 const H = 100;
 const GAP_MS = 2 * 60 * 60 * 1000; // a hole of more than 2 h breaks the line
 
+// Two limit lines close together (Siaga 2 200 cm, Siaga 3 170 cm) put their labels on top of each
+// other: the lower line's label goes under its line instead.
+function placeLabels(items) {
+  const sorted = [...items].sort((a, b) => a.top - b.top);
+  return sorted.map((th, i) => ({ ...th, below: i > 0 && th.top - sorted[i - 1].top < 14 }));
+}
+
 /**
  * points: [{ t: ms, y: number | null, level?: "SAFE" | ... }], oldest first.
  * thresholds: [{ y, label, color }] drawn as dashed lines with their label.
@@ -46,8 +53,8 @@ export function TimeLine({ points = [], yMin = 0, yMax = 1, thresholds = [], hei
                           strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
           ))}
         </svg>
-        {thresholds.map((th) => (
-          <span key={th.label} className="chart-th" style={{ top: `${(y(th.y) / H) * 100}%`, color: th.color }}>
+        {placeLabels(thresholds.map((th) => ({ ...th, top: (y(th.y) / H) * 100 }))).map((th) => (
+          <span key={th.label} className={`chart-th${th.below ? " is-below" : ""}`} style={{ top: `${th.top}%`, color: th.color }}>
             {th.label}
           </span>
         ))}

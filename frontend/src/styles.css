@@ -330,8 +330,8 @@ button, input, select, textarea { font-family: inherit; }
   text-wrap: pretty;
 }
 .decision-hero-eyebrow {
-  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-  margin-bottom: 0.5rem;
+  font-size: 0.9rem; font-weight: 700;
+  margin-bottom: 0.35rem;
   display: flex; flex-wrap: wrap; gap: 0.25rem 0.5rem; align-items: baseline;
 }
 .decision-hero-time { font-weight: 500; letter-spacing: 0.02em; text-transform: none; opacity: 0.8; }
@@ -367,7 +367,7 @@ button, input, select, textarea { font-family: inherit; }
 .is-stale .hero-gauge { border-color: var(--line); filter: grayscale(1); }
 .hero-gauge-head {
   display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
-  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+  font-size: 0.88rem; font-weight: 700;
   color: var(--muted); margin-bottom: 0.625rem;
 }
 .hero-gauge-head strong {
@@ -1098,7 +1098,7 @@ button, input, select, textarea { font-family: inherit; }
   display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
   padding-bottom: 0.625rem; border-bottom: 1px solid var(--line);
 }
-.ai-card-label { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.ai-card-label { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; color: var(--text); }
 .ai-card-time  { font-size: 0.78rem; color: var(--muted-2); }
 .ai-card-lead {
   font-size: 1.15rem; font-weight: 600;
@@ -1142,8 +1142,7 @@ button, input, select, textarea { font-family: inherit; }
 }
 .crew-section { display: flex; flex-direction: column; gap: 0.25rem; max-width: 70ch; }
 .crew-section h4 {
-  margin: 0; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em;
-  text-transform: uppercase; color: var(--muted-2);
+  margin: 0; font-size: 0.9rem; font-weight: 700; color: var(--text);
 }
 .crew-section p { margin: 0; font-size: 0.875rem; line-height: 1.6; color: var(--muted); }
 .crew-section-officer p { font-style: italic; }
@@ -1288,7 +1287,7 @@ button, input, select, textarea { font-family: inherit; }
 @keyframes slide-down { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
 @keyframes fade-in    { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
 
-.fade-in { animation: fade-in 0.28s var(--ease-out) both; }
+.status-hero.fade-in { animation: fade-in 0.28s var(--ease-out) both; }
 
 /* Pressable feedback */
 .btn:active:not(:disabled),
@@ -1457,14 +1456,13 @@ button, input, select, textarea { font-family: inherit; }
   display: flex; align-items: center; gap: 6px;
   padding: 3px 10px 3px 5px; white-space: nowrap; cursor: pointer;
   color: var(--text);
-  background: color-mix(in srgb, var(--panel) 74%, transparent);
-  -webkit-backdrop-filter: blur(8px) saturate(1.3); backdrop-filter: blur(8px) saturate(1.3);
-  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.16);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.14);
 }
-.wx-card:hover { transform: translate(-50%, calc(-50% - 2px)); box-shadow: 0 8px 20px rgba(15, 23, 42, 0.22); }
+.wx-card:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.wx-temp { font-weight: 600; color: var(--muted); }
 .wx-ico { display: flex; }
 .wx-ico svg { filter: drop-shadow(0 1px 1.5px rgba(15, 23, 42, 0.25)); overflow: visible; }
 .wx-txt { display: flex; flex-direction: column; line-height: 1.15; }
@@ -1488,7 +1486,8 @@ button, input, select, textarea { font-family: inherit; }
   .wx-card { gap: 4px; padding: 2px 8px 2px 4px; border-radius: 12px; }
   .wx-ico svg { width: 26px; height: 22px; }
   .wx-txt b { font-size: 11px; }
-  .wx-txt small { font-size: 10px; }
+  /* On a phone the card is the kota and its temperature; the weather words are in the details */
+  .wx-txt small { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .wx-card, .wx-card * { animation: none !important; transition: none !important; }
@@ -1513,6 +1512,7 @@ button, input, select, textarea { font-family: inherit; }
   font-size: 0.7rem; font-weight: 700; line-height: 1; padding: 1px 4px;
   background: color-mix(in srgb, var(--panel) 85%, transparent); border-radius: 4px; pointer-events: none;
 }
+.chart-th.is-below { transform: translateY(15%); }
 .chart-strip { display: block; width: 100%; height: 8px; margin-top: 3px; border-radius: 2px; }
 .chart-x { display: flex; justify-content: space-between; gap: 0.25rem; font-size: 0.7rem; color: var(--muted); margin-top: 0.3rem; }
 .chart-x span { white-space: nowrap; }
@@ -1588,13 +1588,14 @@ button, input, select, textarea { font-family: inherit; }
 }
 .area-check-locate { font: inherit; font-size: 0.82rem; font-weight: 700; color: var(--cyan); background: none; border: none; padding: 0.25rem 0; margin: -0.25rem 0 0.75rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .area-check-locate:disabled { color: var(--muted); cursor: wait; }
-.area-check-grid { display: grid; grid-template-columns: 1fr; gap: 0.75rem; }
+.area-check-grid { display: grid; grid-template-columns: 1fr; gap: 1rem 1.5rem; }
 @media (min-width: 560px) { .area-check-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1100px) { .area-check-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.area-check-cell { border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0.75rem; background: var(--panel-2); }
+.area-check-cell { border-top: 2px solid var(--line); padding: 0.75rem 0 0; }
 .area-check-cell h4 { font-size: 0.82rem; font-weight: 700; color: var(--muted); margin: 0 0 0.35rem; }
 .area-check-cell .area-check-big { font-family: var(--font-display); font-size: 1.75rem; font-weight: 800; line-height: 1.1; margin: 0 0 0.3rem; color: var(--text); }
 .area-check-foot { font-size: 0.75rem; color: var(--muted); margin: 0.6rem 0 0; }
 .area-check-cell p, .area-check-cell li { font-size: 0.82rem; color: var(--muted); line-height: 1.45; margin: 0.2rem 0 0; }
-.area-check-cell ul { list-style: none; padding: 0; margin: 0; }
+.area-check-cell ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.35rem; }
+.area-check-cell li span { display: block; }
 .area-check-cell li b { color: var(--text); font-weight: 600; }

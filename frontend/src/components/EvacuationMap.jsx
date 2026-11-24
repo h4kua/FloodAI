@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { MapContainer, CircleMarker, Polyline, Popup, useMap, useMapEvents } from "react-leaflet";
 import { useApp, useT } from "../lib/appContext";
 import { ROUTERS, googleMapsUrl, riskyOnlyAtEnds, safestRouteIndex, splitRouteByRisk, travelMode } from "../lib/floodRoads";
-import { ActiveFloodAreas, StationMarkers } from "./mapLayers";
+import { ActiveFloodAreas, PopupKeeper, StationMarkers } from "./mapLayers";
 import InvalidateMapSize from "./InvalidateMapSize";
 import BaseTiles from "./BaseTiles";
 
@@ -258,6 +258,7 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
             </Popup>
           </CircleMarker>
         )}
+        <PopupKeeper />
       </MapContainer>
 
       {/* Nav instruction panel — shows when route + steps exist */}

@@ -56,6 +56,7 @@ def _cached(key, loader):
 def _reset_cache_for_tests() -> None:
     with _lock:
         _cache.clear()
+    _day_bands.clear()
 
 
 # ---------------------------------------------------------------- decision log
@@ -91,16 +92,23 @@ def save_decisions_sync(rows: list[dict]) -> bool:
         return False
 
 
-def _select_since(prefix: str, columns: str, since: datetime) -> list[dict]:
-    rows, offset = [], 0
+def _pages_since(prefix: str, columns: str, since: datetime, page: int = 1000, until: datetime | None = None):
+    """Rows of one id prefix since a time (and before `until`), oldest first, one page at a time."""
+    offset = 0
     while True:
-        res = (_client().table(TABLE).select(columns).like("id", f"{prefix}%")
-               .gte("fetched_at", since.isoformat()).order("fetched_at").range(offset, offset + 999).execute())
+        query = _client().table(TABLE).select(columns).like("id", f"{prefix}%").gte("fetched_at", since.isoformat())
+        if until is not None:
+            query = query.lt("fetched_at", until.isoformat())
+        res = query.order("fetched_at").range(offset, offset + page - 1).execute()
         batch = res.data or []
-        rows += batch
-        if len(batch) < 1000:
-            return rows
-        offset += 1000
+        yield batch
+        if len(batch) < page:
+            return
+        offset += page
+
+
+def _select_since(prefix: str, columns: str, since: datetime) -> list[dict]:
+    return [row for batch in _pages_since(prefix, columns, since) for row in batch]
 
 
 def load_decisions(days: int) -> list[dict]:
@@ -147,17 +155,25 @@ def warning_periods(decisions: list[dict], min_level: str = "PRE_ALERT", gap_min
 
 # ---------------------------------------------------------------- river posts
 
-def _post_rows(days: int) -> list[dict]:
-    since = datetime.now(timezone.utc) - timedelta(days=days)
+def _post_rows(days: int, since: datetime | None = None, until: datetime | None = None):
+    """The stored 15-minute DSDA readings, streamed: a week of full post lists held at once ran the
+    512 MB machine out of memory, so callers fold each page into a small summary and drop it."""
+    since = since or datetime.now(timezone.utc) - timedelta(days=days)
+    try:
+        for batch in _pages_since(HISTORY_PREFIX, "fetched_at,poskobanjir:snapshot->poskobanjir", since, page=100,
+                                  until=until):
+            yield from batch
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("post_history_load_failed error_type=%s", type(exc).__name__)
+        raise _LoadFailed from exc
 
-    def load():
-        try:
-            return _select_since(HISTORY_PREFIX, "fetched_at,poskobanjir:snapshot->poskobanjir", since)
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("post_history_load_failed error_type=%s", type(exc).__name__)
-            return []
 
-    return _cached(("posts", days), load)
+class _LoadFailed(Exception):
+    pass
+
+
+# Bands of WIB days that are over never change: kept for the life of the process.
+_day_bands: dict[str, dict] = {}
 
 
 def _num(value):
@@ -170,8 +186,24 @@ def _num(value):
 
 def post_series(name: str, days: int) -> dict:
     """Water level (cm) and Siaga band over time for one post, with its Siaga limits."""
-    points, limits = [], {}
+    return _cached(("post", name.strip(), days), lambda: _post_series(name, days))
+
+
+def _rows_for(name: str, days: int):
+    """Only the one post of each stored row, so a 2-day series stays small."""
     for row in _post_rows(days):
+        posts = [p for p in row.get("poskobanjir") or []
+                 if isinstance(p, dict) and (p.get("nama_pintu_air") or "").strip() == name.strip()]
+        yield {"fetched_at": row["fetched_at"], "poskobanjir": posts}
+
+
+def _post_series(name: str, days: int) -> dict:
+    points, limits = [], {}
+    try:
+        rows = list(_rows_for(name, days))
+    except _LoadFailed:
+        rows = []
+    for row in rows:
         for p in row.get("poskobanjir") or []:
             if isinstance(p, dict) and (p.get("nama_pintu_air") or "").strip() == name.strip():
                 level = dfe.status_level(p.get("status_siaga"))
@@ -184,8 +216,12 @@ def post_series(name: str, days: int) -> dict:
 
 def posts_daily(days: int) -> dict:
     """Highest Siaga band (0 normal .. 3 Siaga 1) per post and WIB day."""
+    return _cached(("posts_daily", days), lambda: _posts_daily(days))
+
+
+def _bands_of(rows) -> dict:
     out: dict = {}
-    for row in _post_rows(days):
+    for row in rows:
         day = pd.Timestamp(row["fetched_at"]).tz_convert("Asia/Jakarta").date().isoformat()
         for p in row.get("poskobanjir") or []:
             if not isinstance(p, dict) or _num(p.get("siaga1")) is None:
@@ -196,6 +232,28 @@ def posts_daily(days: int) -> dict:
             name = (p.get("nama_pintu_air") or "").strip()
             per_day = out.setdefault(name, {})
             per_day[day] = max(per_day.get(day, 0), int(level))
+    return out
+
+
+def _posts_daily(days: int) -> dict:
+    wib = "Asia/Jakarta"
+    today = pd.Timestamp.now(tz=wib).normalize()
+    out: dict = {}
+    for i in range(days, -1, -1):
+        start = today - pd.Timedelta(days=i)
+        key = start.date().isoformat()
+        bands = _day_bands.get(key)
+        if bands is None:
+            try:
+                rows = _post_rows(1, since=start.tz_convert("UTC").to_pydatetime(),
+                                  until=(start + pd.Timedelta(days=1)).tz_convert("UTC").to_pydatetime())
+                bands = {name: per[key] for name, per in _bands_of(rows).items() if key in per}
+            except _LoadFailed:
+                continue
+            if i > 0:
+                _day_bands[key] = bands
+        for name, band in bands.items():
+            out.setdefault(name, {})[key] = band
     return out
 
 
@@ -234,4 +292,8 @@ def log_decision(fetched_at: str) -> dict | None:
         telegram_alerts.maybe_notify(result)
     except Exception as exc:  # noqa: BLE001
         logger.warning("telegram_alert_failed error_type=%s", type(exc).__name__)
+    try:  # warm the Riwayat page's post table: finished days are read once, then only today's rows
+        posts_daily(14)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("posts_daily_warm_failed error_type=%s", type(exc).__name__)
     return result

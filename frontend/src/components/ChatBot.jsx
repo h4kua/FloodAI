@@ -48,7 +48,6 @@ export default function ChatBot({ riskContext = {} }) {
   const { lang } = useApp();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [hasUnread, setHasUnread] = useState(true);
   const { messages, loading, sendMessage, aiOnline } = useChat(riskContext, lang);
   const quickReplies = [
     t("chat.q1"), t("chat.q2"), t("chat.q3"), t("chat.q4"),
@@ -57,7 +56,6 @@ export default function ChatBot({ riskContext = {} }) {
 
   useEffect(() => {
     if (open) {
-      setHasUnread(false);
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 60);
     }
   }, [open, messages]);
@@ -165,7 +163,6 @@ export default function ChatBot({ riskContext = {} }) {
         aria-label={open ? "Tutup chat" : "Buka chat AI"}
       >
         {open ? "✕" : (lang === "en" ? "Ask AI" : "Tanya AI")}
-        {!open && hasUnread && <span className="chatbot-unread">1</span>}
       </button>
     </div>
   );

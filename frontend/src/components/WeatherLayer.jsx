@@ -12,7 +12,7 @@
 */
 import { useEffect, useMemo, useRef } from "react";
 import L from "leaflet";
-import { Marker, Pane, Polygon } from "react-leaflet";
+import { Marker, Pane, Polygon, useMap } from "react-leaflet";
 import wilayahShapes from "../data/wilayahShapes.json";
 import { KINDS, WILAYAH, cloudDrift, describeWeather } from "../lib/wilayahWeather";
 
@@ -226,6 +226,35 @@ function WeatherCard({ position, icon, title, onPick }) {
  * The tints and textures sit in a pane between the basemap (200) and the flood
  * areas and posts (400); the cards in one above (450), so they can be tapped.
  */
+/** Nudges kota cards that stick out of the map back inside it (a phone-width map cut "Pusat" and "Barat" off). */
+function KeepCardsInside() {
+  const map = useMap();
+  useEffect(() => {
+    const fit = () => {
+      const box = map.getContainer().getBoundingClientRect();
+      map.getContainer().querySelectorAll(".wx-card").forEach((card) => {
+        card.style.marginLeft = "0px";
+        card.style.marginTop = "0px";
+        const r = card.getBoundingClientRect();
+        const pad = 6;
+        let dx = 0;
+        let dy = 0;
+        if (r.left < box.left + pad) dx = box.left + pad - r.left;
+        else if (r.right > box.right - pad) dx = box.right - pad - r.right;
+        if (r.top < box.top + pad) dy = box.top + pad - r.top;
+        else if (r.bottom > box.bottom - pad) dy = box.bottom - pad - r.bottom;
+        card.style.marginLeft = `${dx}px`;
+        card.style.marginTop = `${dy}px`;
+      });
+    };
+    const later = () => requestAnimationFrame(fit);
+    later();
+    map.on("moveend zoomend resize layeradd", later);
+    return () => map.off("moveend zoomend resize layeradd", later);
+  }, [map]);
+  return null;
+}
+
 export default function WeatherLayer({ weather = {}, lang = "id", theme = "light", onPick, picked = null }) {
   const dark = theme === "dark";
   const en = lang === "en";
@@ -260,7 +289,8 @@ export default function WeatherLayer({ weather = {}, lang = "id", theme = "light
       className: "wx-marker",
       html: `<div class="wx-card wx-k-${info.kind}${picked === wilayah ? " is-picked" : ""}">`
         + `<span class="wx-ico">${weatherPicture(info.kind, info.isDay)}</span>`
-        + `<span class="wx-txt"><b>${escapeHtml(name)}</b><small>${info.temp ? `${escapeHtml(info.temp)} · ` : ""}${escapeHtml(info.text)}</small></span></div>`,
+        + `<span class="wx-txt"><b>${escapeHtml(name)}${info.temp ? ` <span class="wx-temp">${escapeHtml(info.temp)}</span>` : ""}</b>`
+        + `<small>${escapeHtml(info.text)}</small></span></div>`,
       iconSize: [0, 0],
     });
     const fullName = en ? `${enName} Jakarta` : `Jakarta ${id}`;
@@ -274,6 +304,7 @@ export default function WeatherLayer({ weather = {}, lang = "id", theme = "light
     <>
       <Pane name="weather" style={{ zIndex: 350, pointerEvents: "none" }}>{areas}</Pane>
       <Pane name="weather-cards" style={{ zIndex: 450 }}>{cards}</Pane>
+      <KeepCardsInside />
     </>
   );
 }

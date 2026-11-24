@@ -59,13 +59,28 @@ ROWS = [
 
 
 def test_post_series_and_daily_bands(monkeypatch):
-    monkeypatch.setattr(history_service, "_post_rows", lambda days: ROWS)
+    monkeypatch.setattr(history_service, "_post_rows", lambda days, **kw: iter(ROWS))
     series = history_service.post_series("P.A. Manggarai 1", 2)
     assert [p["cm"] for p in series["points"]] == [780.0, 700.0]
     assert [p["status"] for p in series["points"]] == [1, 0]
     assert series["limits"] == {"siaga3": 750.0, "siaga2": 850.0, "siaga1": 950.0}
-    daily = history_service.posts_daily(2)
-    assert daily == {"P.A. Manggarai 1": {"2026-11-17": 1}}  # both readings are 17 Nov in WIB; the pump has no limits
+    bands = history_service._bands_of(ROWS)
+    assert bands == {"P.A. Manggarai 1": {"2026-11-17": 1}}  # both readings are 17 Nov in WIB; the pump has no limits
+
+
+def test_posts_daily_reads_each_finished_day_once(monkeypatch):
+    calls = []
+
+    def rows(days, since=None, until=None):
+        calls.append(since)
+        return iter([{"fetched_at": since.isoformat(), "poskobanjir": ROWS[0]["poskobanjir"]}])
+
+    monkeypatch.setattr(history_service, "_post_rows", rows)
+    first = history_service._posts_daily(3)
+    assert len(calls) == 4 and all(v == {k: 1 for k in v} for v in first.values())  # 3 past days + today
+    assert len(first["P.A. Manggarai 1"]) == 4
+    history_service._posts_daily(3)
+    assert len(calls) == 5  # the past days came from memory, only today was read again
 
 
 def test_rain_summary_from_the_daily_model_cache():

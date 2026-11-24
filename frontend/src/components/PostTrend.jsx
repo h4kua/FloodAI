@@ -3,7 +3,7 @@
    15-minute reading of that post, in cm, with its own DSDA Siaga limits.
    Loaded only when the reader asks for it, so the map stays light.
 */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { API_BASE } from "../lib/api";
 import { formatWibAt } from "../lib/dashboardHelpers";
 import { TimeLine } from "./charts";
@@ -14,11 +14,9 @@ const LIMITS = [
   { key: "siaga3", label: "Siaga 3", color: "var(--wsp)" },
 ];
 
-export default function PostTrend({ name, isId, onResize }) {
+export default function PostTrend({ name, isId }) {
   const [state, setState] = useState("idle"); // idle | loading | done | error
   const [series, setSeries] = useState(null);
-
-  useEffect(() => { onResize?.(); }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const load = () => {
     setState("loading");
