@@ -1527,6 +1527,8 @@ button, input, select, textarea { font-family: inherit; }
 
 /* ── Riwayat page ────────────────────────────────────────────── */
 .page-sub { font-size: 0.9rem; color: var(--muted); margin: 0.35rem 0 0; max-width: 60ch; }
+.page-header:has(.history-range) { flex-wrap: wrap; align-items: flex-end; }
+.page-header:has(.history-range) > div:first-child { flex: 1 1 280px; }
 .history-range { display: inline-flex; gap: 0.25rem; padding: 3px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--panel); }
 .history-range-btn {
   border: none; background: transparent; color: var(--muted); font: inherit; font-size: 0.8rem; font-weight: 700;

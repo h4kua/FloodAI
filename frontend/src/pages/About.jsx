@@ -191,8 +191,8 @@ export default function About({ riskContext = {} }) {
               </li>
               <li>
                 {id
-                  ? "Lingkaran merah di peta: pada hari pos sungainya di Siaga 2 atau Siaga 1 (2016–2021), area di sepanjang sungai itu tercatat banjir pada sekitar 1 dari 4 hari, dibanding 1 dari 60 hari biasa. Di Siaga 3 hanya sekitar 1 dari 8, jadi Siaga 3 tidak diberi lingkaran merah. Peta evakuasi tetap menghindari area di Siaga 3 agar rute lebih aman."
-                  : "Red circles on the map: on days their river post was at Alert 2 or Alert 1 (2016–2021), areas along that river had a recorded flood on about 1 in 4 days, against 1 in 60 on normal days. At Alert 3 it was about 1 in 8, so Alert 3 gets no red circle. The evacuation map still avoids Alert 3 areas to keep routes safe."}
+                  ? "Lingkaran merah di peta: pada hari pos sungainya di Siaga 2 atau Siaga 1 (2016–2021), area di sepanjang sungai itu tercatat banjir pada sekitar 1 dari 4 hari, dibanding 1 dari 60 hari biasa. Di Siaga 3 hanya sekitar 1 dari 8, jadi Siaga 3 tidak diberi lingkaran merah. Peta Beranda dan peta evakuasi memakai aturan yang sama."
+                  : "Red circles on the map: on days their river post was at Alert 2 or Alert 1 (2016–2021), areas along that river had a recorded flood on about 1 in 4 days, against 1 in 60 on normal days. At Alert 3 it was about 1 in 8, so Alert 3 gets no red circle. The home map and the evacuation map use the same rule."}
               </li>
               <li>
                 {id

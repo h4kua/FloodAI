@@ -4,7 +4,7 @@ import EvacuationMap, { DESTINATIONS, EVAC_COLORS, haversineKm } from "../compon
 import { API_BASE } from "../lib/api";
 import floodProneZones from "../data/floodProneZones.json";
 import postRivers from "../data/postRivers.json";
-import { activeFloodPoints, nearestShelters } from "../lib/floodRoads";
+import { ACTIVE_AREA_MIN_RANK, activeFloodPoints, nearestShelters } from "../lib/floodRoads";
 import { useFloodRisk } from "../hooks/useFloodRisk";
 import ChatBot from "../components/ChatBot";
 import { useT, useApp } from "../lib/appContext";
@@ -207,10 +207,11 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
   const config       = humanizeRiskLevel(riskLevel, lang);
 
   // Flood-prone areas that count right now: BPBD points on a river whose post
-  // is at Siaga, or all of them in heavy rain.
+  // is at Siaga 2 or 1 (the same rule as the home map), or all of them in heavy rain.
   const { riskData } = useFloodRisk();
   const floodPoints = useMemo(
-    () => activeFloodPoints(floodProneZones.points, riskData?.stations ?? [], riskData?.rainfall ?? 0, postRivers),
+    () => activeFloodPoints(floodProneZones.points, riskData?.stations ?? [], riskData?.rainfall ?? 0, postRivers,
+      { minRank: ACTIVE_AREA_MIN_RANK }),
     [riskData],
   );
 

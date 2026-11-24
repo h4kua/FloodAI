@@ -211,6 +211,9 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   lifts the bounds while a popup is open and restores them when the last one closes, and re-pans when a popup grows.
   Weather cards stay inside the map (`KeepCardsInside`), show only kota + temperature on phones and lost the glass blur;
   labels are sentence case, only the status card animates in, the chat button lost its permanent fake "1" badge.
+  The evacuation map still lit flood-prone areas for posts at Siaga 3 (the home map only for Siaga 2/1), so the two maps
+  disagreed: both now use `ACTIVE_AREA_MIN_RANK = 2` (`lib/floodRoads.js`). Riwayat says when a period was raised by a
+  safety rule rather than the layer's chance.
 - 2026-11-17: status per wilayah (`scripts/train_wilayah_layer.py`, `artifacts/reports/wilayah_layer.md`, `models/daily_bundle/wilayah_layer*.json`,
   `decision_layer.decide_wilayah`, API field `wilayah_status`). Inputs: the city layer's + the kota's highest kecamatan chance
   + its own river posts now / yesterday (`posts_d1` in the daily state) + which kota; a kota or upstream post at Siaga 1 -> Bahaya
@@ -227,8 +230,8 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   `scripts/active_area_chance.py` applies the map's activation rule to the DSDA archive 2016-2021 (gate posts left out):
   areas along a river had a BPBD flood on 1.7 % of normal days, 12 % at Siaga 3, 25 % at Siaga 2, 20 % at Siaga 1 (CI
   [0.04, 0.43], 26 days) -> `frontend/src/data/activeAreaChance.json`. The home map now draws red circles only for posts at
-  Siaga 2 or 1 (`activeFloodPoints(..., { minRank: 2 })`) and each popup gives that rate; the evacuation page keeps Siaga 3
-  (routes stay cautious). No signal makes a flood certain: the strongest is about 1 day in 4.
+  Siaga 2 or 1 (`activeFloodPoints(..., { minRank: 2 })`) and each popup gives that rate; since 2026-11-24 the evacuation
+  map uses the same rule. No signal makes a flood certain: the strongest is about 1 day in 4.
 - 2026-11-17: the learned decision layer also reads today's rain so far: IMERG Early half-hours that started by now - 5 h
   (mean and max over the model's kecamatan cells, Bogor), plus the WIB hour (the only input not monotone). `daily_model.refresh()`
   keeps today's half-hours per cell in the state (`today_halfhours`); without them the rules decide. Lag 1, test 2019-2021 +

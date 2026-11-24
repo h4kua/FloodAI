@@ -73,6 +73,12 @@ export function nearLines(lat, lng, lines = [], radiusM = NEAR_RIVER_M) {
  * their water reaches all of the river downstream) or one with no stretch keeps
  * the whole river.
  */
+/* Both maps light an area only for a post at Siaga 2 or Siaga 1: along a river, a BPBD flood followed on
+   1.7 % of normal days, 12 % at Siaga 3 and 20-25 % at Siaga 2/1 (scripts/active_area_chance.py), and some
+   posts sit at Siaga 3 most days. The evacuation map used Siaga 3 too, so it showed red areas the home
+   map did not. */
+export const ACTIVE_AREA_MIN_RANK = 2;
+
 export function activeFloodPoints(points = [], stations = [], rainfallMmH = 0, riverTable = null, { minRank = 1 } = {}) {
   // minRank 2: only posts at Siaga 2 or Siaga 1 activate areas (the home map; see activeAreaChance.json).
   stations = stations.filter((s) => siagaRank(s?.status_siaga) >= minRank || (minRank <= 1 && isSiaga(s)));

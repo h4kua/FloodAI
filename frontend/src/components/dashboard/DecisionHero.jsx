@@ -99,7 +99,7 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
   const rainText = rain == null ? null
     : rain >= 20 ? (isId ? `Hujan deras · ${Math.round(rain)} mm/jam` : `Heavy rain · ${Math.round(rain)} mm/h`)
     : rain >= 5  ? (isId ? `Hujan sedang · ${Math.round(rain)} mm/jam` : `Moderate rain · ${Math.round(rain)} mm/h`)
-    : rain > 0   ? (isId ? `Hujan ringan · ${rain.toFixed(1)} mm/jam` : `Light rain · ${rain.toFixed(1)} mm/h`)
+    : rain > 0   ? (isId ? `Hujan ringan · ${rain.toFixed(1).replace(".", ",")} mm/jam` : `Light rain · ${rain.toFixed(1)} mm/h`)
     : (isId ? "Tidak hujan" : "No rain");
 
   // AlertRibbon folded in: one red line with real station counts, Siaga only.
@@ -122,7 +122,7 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
             : (isId ? "Status Jakarta saat ini" : "Jakarta right now")}
           {snapTimeStr && (
             <span className="decision-hero-time">
-              {isId ? `, data pukul ${snapTimeStr}` : `, data from ${snapTimeStr}`}
+              {isId ? `data pukul ${snapTimeStr}` : `data from ${snapTimeStr}`}
             </span>
           )}
         </div>

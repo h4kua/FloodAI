@@ -22,6 +22,19 @@ const LEVEL_NAME = {
 const BAND_COLOR = ["var(--safe)", "var(--wsp)", "var(--s2)", "var(--s1)"];
 const BAND_NAME = ["Normal", "Siaga 3", "Siaga 2", "Siaga 1"];
 
+// The learned layer's chance at which it raises each level; a level above what the chance reached was
+// set by a safety rule (a post at Siaga 1 or water rising fast, or a BMKG warning).
+const LEVEL_FROM = { PRE_ALERT: 0.2, WARNING: 0.65, DANGER: 0.8 };
+function periodNote(p, isId) {
+  const ruled = p.peak_chance == null || p.peak_chance < (LEVEL_FROM[p.peak_level] ?? 0);
+  if (ruled) {
+    return isId
+      ? "dinaikkan aturan keselamatan (pos Siaga 1, air naik cepat, atau peringatan BMKG)"
+      : "raised by a safety rule (a post at Siaga 1, water rising fast, or a BMKG warning)";
+  }
+  return isId ? `peluang tertinggi ${formatChance(p.peak_chance)}` : `peak chance ${formatChance(p.peak_chance)}`;
+}
+
 function dayLabel(iso, isId) {
   return new Date(`${iso}T00:00:00+07:00`).toLocaleDateString(isId ? "id-ID" : "en-GB",
     { day: "numeric", month: "short", timeZone: "Asia/Jakarta" });
@@ -150,7 +163,7 @@ export default function History() {
                     <span>
                       {formatWibAt(p.start, isId)} – {formatWibAt(p.end, isId, { date: formatWibAt(p.start, isId, { time: false }) !== formatWibAt(p.end, isId, { time: false }) })}
                     </span>
-                    <small>{p.peak_chance != null ? (isId ? `peluang tertinggi ${formatChance(p.peak_chance)}` : `peak chance ${formatChance(p.peak_chance)}`) : ""}</small>
+                    <small>{periodNote(p, isId)}</small>
                   </li>
                 ))}
               </ul>

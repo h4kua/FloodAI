@@ -5,7 +5,7 @@ import InvalidateMapSize from "./InvalidateMapSize";
 import BaseTiles from "./BaseTiles";
 import floodProneZones from "../data/floodProneZones.json";
 import postRivers from "../data/postRivers.json";
-import { activeFloodPoints } from "../lib/floodRoads";
+import { ACTIVE_AREA_MIN_RANK, activeFloodPoints } from "../lib/floodRoads";
 import { ActiveFloodAreas, AREA_COLOR, PopupKeeper, StationMarkers } from "./mapLayers";
 import WeatherLayer, { WeatherPatterns, weatherKey } from "./WeatherLayer";
 import { byWilayahKey } from "../lib/wilayahWeather";
@@ -84,9 +84,9 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0, 
   // Red circles only where a flood is likely: points along the river stretch of a post at Siaga 2 or
   // Siaga 1 (about 1 in 4 such days had a recorded flood in 2016-2021, vs 1 in 8 at Siaga 3 and 1 in 60
   // on normal days; scripts/active_area_chance.py), or all points in heavy rain. The evacuation map
-  // keeps Siaga 3 too, so routes stay cautious.
+  // uses the same rule (ACTIVE_AREA_MIN_RANK).
   const floodPoints = useMemo(
-    () => activeFloodPoints(pronePoints, stations, rainfall, postRivers, { minRank: 2 }),
+    () => activeFloodPoints(pronePoints, stations, rainfall, postRivers, { minRank: ACTIVE_AREA_MIN_RANK }),
     [pronePoints, stations, rainfall],
   );
 
