@@ -154,6 +154,13 @@ export default function History() {
       calm: all.filter((p) => p.top === 0).length,
     };
   }, [data]);
+  const dupShort = useMemo(() => {
+    const seen = new Set();
+    const dup = new Set();
+    postRows.moved.forEach((p) => { const k = shortPost(p.name); (seen.has(k) ? dup : seen).add(k); });
+    return dup;
+  }, [postRows]);
+  const postLabel = (name) => (dupShort.has(shortPost(name)) ? name : shortPost(name));
   const postDays = useMemo(() => [...new Set(Object.values(data?.posts_daily ?? {}).flatMap((d) => Object.keys(d)))].sort(), [data]);
 
   const longPoints = useMemo(() => decisions.map((d) => ({ t: Date.parse(d.t), y: d.chance, level: d.level })), [decisions]);
@@ -295,7 +302,7 @@ export default function History() {
                     <tbody>
                       {postRows.moved.map((p) => (
                         <tr key={p.name}>
-                          <th scope="row">{shortPost(p.name)}</th>
+                          <th scope="row">{postLabel(p.name)}</th>
                           {postDays.map((d) => {
                             const band = p.d[d];
                             return <td key={d} title={`${shortPost(p.name)} · ${fmt(d, isId, { day: "numeric", month: "short" })} · ${band == null ? "-" : BAND_NAME[band]}`}

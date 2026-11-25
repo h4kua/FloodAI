@@ -154,7 +154,7 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
           </p>
         )}
 
-        {!isStale && TODO[level] && (
+        {!isStale && (level === "siaga" || level === "bahaya") && TODO[level] && (
           <div className="decision-hero-todo">
             <p className="decision-hero-todo-title">{isId ? "Yang bisa Anda lakukan" : "What you can do"}</p>
             <ul>{TODO[level][isId ? "id" : "en"].map((x) => <li key={x}>{x}</li>)}</ul>
