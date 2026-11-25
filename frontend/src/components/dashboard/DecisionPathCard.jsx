@@ -46,8 +46,8 @@ export default function DecisionPathCard({ riskData }) {
           <h4>{isId ? "Data masuk" : "Data in"}</h4>
           <p>
             {isId
-              ? `${posts} pos pantau air DSDA (tiap 15 menit)${daily?.city_probability != null ? `, model harian per kecamatan (peluang tertinggi ${formatChance(daily.city_probability)})` : ""}, hujan satelit NASA hari ini dan peringatan BMKG.`
-              : `${posts} DSDA water-level posts (every 15 minutes)${daily?.city_probability != null ? `, the daily kecamatan model (highest chance ${formatChance(daily.city_probability)})` : ""}, today's NASA satellite rain and BMKG warnings.`}
+              ? `${posts} pos air (tiap 15 menit)${daily?.city_probability != null ? `, model harian (peluang tertinggi ${formatChance(daily.city_probability)})` : ""}, hujan satelit, dan peringatan BMKG.`
+              : `${posts} water posts (every 15 minutes)${daily?.city_probability != null ? `, the daily model (highest chance ${formatChance(daily.city_probability)})` : ""}, satellite rain and BMKG warnings.`}
           </p>
         </li>
         <li className="decision-step">
@@ -58,7 +58,7 @@ export default function DecisionPathCard({ riskData }) {
               return (
                 <li key={s.key} className={hit ? "rule-hit" : undefined}>
                   <span className="rule-mark" aria-hidden="true">{hit ? "!" : "✓"}</span>
-                  <span>{isId ? s.id : s.en}: {hit ? (isId ? "terpicu, status langsung ditetapkan" : "triggered, it sets the status") : (isId ? "tidak terpicu" : "not triggered")}</span>
+                  <span>{isId ? s.id : s.en}: {hit ? (isId ? "terpicu, menentukan status" : "triggered, sets the status") : (isId ? "tidak terpicu" : "not triggered")}</span>
                 </li>
               );
             })}
@@ -71,18 +71,21 @@ export default function DecisionPathCard({ riskData }) {
                 <h4>{isId ? `Lapisan keputusan terlatih: peluang ${formatChance(layer.score)}` : `Learned decision layer: ${formatChance(layer.score)} chance`}</h4>
                 <p>
                   {isId
-                    ? "Model XGBoost yang dilatih pada data DSDA dan banjir BPBD 2016–2025 menggabungkan semua data di atas menjadi satu peluang banjir hari ini."
-                    : "An XGBoost model trained on DSDA and BPBD flood data 2016–2025 combines all of the above into one flood chance for today."}
+                    ? "Model terlatih menggabungkan semua data di atas menjadi satu peluang."
+                    : "A trained model combines all of the above into one chance."}
                 </p>
                 <div className="chance-bar" role="img"
                      aria-label={isId ? `Peluang ${formatChance(layer.score)}` : `Chance ${formatChance(layer.score)}`}>
                   <span className="chance-bar-fill" style={{ left: `${Math.min(100, layer.score * 100)}%` }} />
                   {["PRE_ALERT", "WARNING", "DANGER"].filter((k) => thr[k] != null).map((k) => (
-                    <span key={k} className="chance-bar-tick" style={{ left: `${thr[k] * 100}%` }}>
-                      {names[k]} {Math.round(thr[k] * 100)}%
-                    </span>
+                    <span key={k} className="chance-bar-tick" style={{ left: `${thr[k] * 100}%` }} />
                   ))}
                 </div>
+                <ul className="chance-legend">
+                  {["PRE_ALERT", "WARNING", "DANGER"].filter((k) => thr[k] != null).map((k) => (
+                    <li key={k}>{names[k]} <b>{isId ? "mulai" : "from"} {Math.round(thr[k] * 100)}%</b></li>
+                  ))}
+                </ul>
                 {reasons.length > 0 && (
                   <>
                     <p>{isId ? "Yang paling menaikkan peluang:" : "What raised the chance most:"}</p>
@@ -95,8 +98,8 @@ export default function DecisionPathCard({ riskData }) {
                 <h4>{isId ? "Aturan pos sungai" : "River-post rules"}</h4>
                 <p>
                   {isId
-                    ? "Lapisan terlatih belum punya semua masukannya (misalnya hujan satelit hari ini), jadi status mengikuti aturan berdasarkan status Siaga tiap pos dan model harian."
-                    : "The learned layer does not have all its inputs yet (today's satellite rain, for example), so the status follows rules on each post's Siaga status and the daily model."}
+                    ? "Data model belum lengkap, jadi status mengikuti aturan status pos dan model harian."
+                    : "The model's data is incomplete, so the status follows the post rules and the daily model."}
                 </p>
               </>
             )}

@@ -62,7 +62,7 @@ test("a Waspada raised by the daily model stays short and calm", () => {
     tebet: { name: "Tebet", probability: 0.05, risk_level: "SAFE" },
   } };
   const text = buildStatusDesc({ level: "waspada", dailyModel }, true);
-  assert.match(text, /^Tidak perlu panik/);
+  assert.match(text, /^Belum perlu bersiap/);
   assert.doesNotMatch(text, /Hujan beberapa hari/);
 });
 

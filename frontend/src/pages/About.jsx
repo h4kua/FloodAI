@@ -90,7 +90,7 @@ export default function About({ riskContext = {}, onNavigate }) {
 
   const levels = [
     { key: "AMAN", d: id ? "Tidak ada tanda banjir. Beraktivitas seperti biasa." : "No sign of flooding. Go about your day." },
-    { key: "WASPADA", d: id ? "Mungkin ada genangan kalau hujan. Tidak perlu panik; pantau saja." : "Some waterlogging is possible if it rains. No need to worry; just keep an eye on it." },
+    { key: "WASPADA", d: id ? "Mungkin ada genangan kalau hujan. Belum perlu bersiap; cukup dipantau." : "Some waterlogging is possible if it rains. No need to get ready yet; just keep watch." },
     { key: "SIAGA", d: id ? "Air sungai tinggi atau genangan cukup mungkin. Mulai bersiap." : "Rivers are high or waterlogging is likely. Start getting ready." },
     { key: "BAHAYA", d: id ? "Risiko tinggi. Ikuti arahan BPBD. Darurat: 112." : "High risk. Follow BPBD. Emergency: 112." },
   ];

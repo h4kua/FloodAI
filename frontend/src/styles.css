@@ -1594,11 +1594,14 @@ button, input, select, textarea { font-family: inherit; }
 .rule-list li { display: flex; gap: 0.5rem; align-items: baseline; }
 .rule-list .rule-mark { font-weight: 800; width: 1rem; flex: none; }
 .rule-list .rule-hit { color: var(--s1); font-weight: 700; }
-.chance-bar { position: relative; height: 12px; border-radius: 6px; margin: 0.6rem 0 1.4rem;
+.chance-bar { position: relative; height: 12px; border-radius: 6px; margin: 0.7rem 0 0.9rem;
   background: linear-gradient(90deg, var(--safe-soft) 0 20%, var(--wsp-soft) 20% 65%, color-mix(in srgb, var(--s2) 18%, var(--panel)) 65% 80%, color-mix(in srgb, var(--s1) 18%, var(--panel)) 80% 100%);
   border: 1px solid var(--line); }
 .chance-bar-fill { position: absolute; top: -4px; width: 4px; height: 18px; margin-left: -2px; border-radius: 2px; background: var(--text); }
-.chance-bar-tick { position: absolute; top: 14px; transform: translateX(-50%); font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+.chance-bar-tick { position: absolute; top: -2px; width: 2px; height: 16px; margin-left: -1px; background: var(--muted-2, var(--muted)); border-radius: 1px; }
+.chance-legend { list-style: none; margin: 0 0 0.6rem !important; padding: 0 !important; display: flex; flex-wrap: wrap; gap: 0.2rem 1rem; }
+.chance-legend li { font-size: 0.8rem; color: var(--muted); }
+.chance-legend b { color: var(--text); }
 
 /* ── Post trend in the map popup ─────────────────────────────── */
 .post-trend { margin-top: 0.5rem; min-width: 220px; }
@@ -1733,3 +1736,10 @@ button, input, select, textarea { font-family: inherit; }
   .history-range-btn { min-width: 44px; }
   .li-btn { justify-content: center; }
 }
+
+/* Where today's status sits on the four-step scale (Aman < Waspada < Siaga < Bahaya). */
+.level-scale { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; list-style: none; padding: 0; margin: 0.1rem 0 1rem; max-width: 26rem; }
+.level-scale li { font-size: 0.8rem; opacity: 0.7; }
+.level-scale li::before { content: ""; display: block; height: 6px; border-radius: 3px; background: currentColor; opacity: 0.22; margin-bottom: 0.3rem; }
+.level-scale li.on::before { opacity: 1; }
+.level-scale li.cur { opacity: 1; font-weight: 800; }

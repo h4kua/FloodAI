@@ -40,6 +40,8 @@ function PostGauge({ stations, isId }) {
   );
 }
 
+const LEVEL_IDX = { aman: 0, waspada: 1, siaga: 2, bahaya: 3 };
+
 /* What a resident should do at each level, in plain words (BPBD DKI preparedness advice). */
 const TODO = {
   aman: {
@@ -133,6 +135,14 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
         <div className="status-hero-level decision-hero-level">
           {cfg.label}
         </div>
+        {!isStale && LEVEL_IDX[level] != null && (
+          <ol className="level-scale" aria-label={isId ? `Tingkat ${LEVEL_IDX[level] + 1} dari 4` : `Level ${LEVEL_IDX[level] + 1} of 4`}>
+            {(isId ? ["Aman", "Waspada", "Siaga", "Bahaya"] : ["Safe", "Watch", "Alert", "Danger"]).map((n, i) => (
+              <li key={n} className={`${i <= LEVEL_IDX[level] ? "on" : ""}${i === LEVEL_IDX[level] ? " cur" : ""}`}
+                  aria-current={i === LEVEL_IDX[level] ? "true" : undefined}>{n}</li>
+            ))}
+          </ol>
+        )}
         <p className="status-hero-desc decision-hero-desc">{dynamicDesc}</p>
 
         {/* Trend + rain from old data say nothing about now — hide them when stale */}

@@ -269,8 +269,8 @@ export function buildStatusDesc(riskData, isId) {
     const dNote = "";
     // Posts at Siaga 2 or 1 are named in the strip under the status, so this sentence does not repeat them.
     return isId
-      ? `Tidak perlu panik, tapi tetap dipantau.${lNote}${dNote}${tNote}${rfNote}`
-      : `No need to worry, but keep an eye on it.${lNote}${dNote}${tNote}${rfNote}`;
+      ? `Belum perlu bersiap, cukup dipantau.${lNote}${dNote}${tNote}${rfNote}`
+      : `No need to get ready yet, just keep watch.${lNote}${dNote}${tNote}${rfNote}`;
   }
 
   // aman — only claim "all normal" when every post really is below Waspada,
