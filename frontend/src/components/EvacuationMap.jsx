@@ -280,18 +280,6 @@ export default function EvacuationMap({ origin = null, dest = null, floodPoints 
         </div>
       )}
 
-      {/* Placeholder overlay */}
-      {!origin && (
-        <div style={{ position: "absolute", inset: 0, zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-          <div style={{ background: "var(--panel)", border: "1px solid var(--line-2)", borderRadius: 8, boxShadow: "var(--shadow)", padding: "1rem 1.5rem", textAlign: "center" }}>
-            <p style={{ fontSize: "0.75rem", color: "var(--cyan)", marginBottom: "0.3rem" }}>
-              {t("evac.hint.title")}
-            </p>
-            <p style={{ fontSize: "0.8rem", color: "var(--muted)", margin: 0 }}>{t("evac.hint.desc")}</p>
-          </div>
-        </div>
-      )}
-
       {/* Route summary — distance, time, and how much of it runs through risky areas */}
       {(loading || error || chosen) && (
         <div className="route-summary">

@@ -1,6 +1,6 @@
 # How often an activated flood-prone area floods
 
-Generated 2026-11-17T18:23:41+00:00 by `scripts/active_area_chance.py`. DSDA archive 2016-08-15 to 2021-12-31, posts ANGKEHULU, CIBALOKGADOG, CIPINANGHULU, DEPOK, KARET, KATULAMPA, MANGGARAI, PESANGGRAHAN, PULOGADUNG. A pair = one day and one kecamatan holding a flood-prone point the post activates (same rule as the map). Rate = share of pairs with a BPBD flood record in that kecamatan that day; 95 % intervals resample days.
+Generated 2026-11-25T02:35:53+00:00 by `scripts/active_area_chance.py`. DSDA archive 2016-08-15 to 2021-12-31, posts ANGKEHULU, CIBALOKGADOG, CIPINANGHULU, DEPOK, KARET, KATULAMPA, MANGGARAI, PESANGGRAHAN, PULOGADUNG. A pair = one day and one kecamatan holding a flood-prone point the post activates (same rule as the map). Rate = share of pairs with a BPBD flood record in that kecamatan that day; 95 % intervals resample days.
 
 | Post's highest status that day | Flood share | 95 % | Pairs | Days |
 |---|---|---|---|---|

@@ -126,6 +126,8 @@ def main() -> int:
         report["by_post"][post] = {LEVEL_NAMES[lv]: {"rate": round(float(s["flood"].mean()), 3), "pairs": int(len(s))}
                                    for lv, s in g.groupby("level")}
     served = {"source": "DSDA archive 2016-2021 vs BPBD flood records (scripts/active_area_chance.py)",
+              # The posts the rates were measured on: the map shows a rate only for a cause post in this list.
+              "posts": [p.lower() for p in report["posts"]],
               "by_status": {LEVEL_NAMES[lv]: report["by_level"][str(lv)]["rate"] for lv in (1, 2, 3)},
               "normal": report["by_level"]["0"]["rate"]}
     OUT.write_text(json.dumps(served, indent=2), encoding="utf-8")

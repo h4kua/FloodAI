@@ -78,7 +78,9 @@ export default function Home({ setRiskContext, riskLevel }) {
   // ── Real station counts from DSDADKI sensors (NOT derived from ML zones) ──
   const stations    = riskData?.stations ?? [];
   const realSiaga1  = useMemo(() => stations.filter(s => postRiskLevel(s) === "SIAGA_1").length, [stations]);
-  const realSiaga2  = useMemo(() => stations.filter(s => postRiskLevel(s) === "SIAGA_2").length, [stations]);
+  // A chronically high post at Siaga 2 (Cengkareng Drain, two sea posts) keeps its official status but does not alarm.
+  const realSiaga2  = useMemo(() => stations.filter(s => postRiskLevel(s) === "SIAGA_2" && !s.chronic).length, [stations]);
+  const usualSiaga2 = useMemo(() => stations.filter(s => postRiskLevel(s) === "SIAGA_2" && s.chronic).length, [stations]);
 
   if (loading) return <LoadingSpinner message="Mengambil data realtime..." />;
 
@@ -109,7 +111,7 @@ export default function Home({ setRiskContext, riskLevel }) {
       <StaleDataBanner snapshotFetchedAt={riskData?.snapshotFetchedAt} />
 
       {/* 1 — Is my area at risk right now? */}
-      <DecisionHero riskData={riskData} siaga1Count={realSiaga1} siaga2Count={realSiaga2} />
+      <DecisionHero riskData={riskData} siaga1Count={realSiaga1} siaga2Count={realSiaga2} usualSiaga2Count={usualSiaga2} />
 
       {/* 1a — My own kelurahan: today's chance, its flood history, nearest posts and safe places */}
       <AreaCheck riskData={riskData} />

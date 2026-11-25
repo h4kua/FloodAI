@@ -432,7 +432,22 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
         </span>
       </div>
 
-      <div className="evac-col-left fade-in">
+      <div className="evac-layout fade-in">
+      <div className="evac-top">
+        {/* What this page does, and what it says right now */}
+        <div className={`evac-now${floodPoints.length ? " is-active" : ""}`} role="status">
+          <p className="evac-now-title">
+            {floodPoints.length
+              ? (lang === "en" ? `${floodPoints.length} flood-prone areas are active now` : `${floodPoints.length} area rawan banjir sedang aktif`)
+              : (lang === "en" ? "No flood-prone area is active now" : "Tidak ada area rawan banjir yang aktif")}
+          </p>
+          <p>
+            {floodPoints.length
+              ? (lang === "en" ? "The route avoids the red areas when another road exists." : "Rute menghindari area merah bila ada jalan lain.")
+              : (lang === "en" ? "Most roads should be fine, but check the road yourself before you go." : "Jalan mana pun relatif aman, tapi tetap cek kondisi jalan sebelum berangkat.")}
+          </p>
+        </div>
+
         {/* Primary CTA — one tap: GPS → nearest shelter → route (decision-first).
             Hidden once a location is set; the search panel takes over. */}
         {!userLocation && (
@@ -537,7 +552,17 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           <div className="geo-error-banner">{geoError || locateError}</div>
         )}
 
-        {/* Map — klik atau GPS untuk set lokasi */}
+        {!userLocation && (
+          <ol className="evac-steps">
+            <li>{lang === "en" ? "Choose where you start: the green button, an address, or a tap on the map." : "Pilih titik berangkat: tombol hijau, ketik alamat, atau ketuk peta."}</li>
+            <li>{lang === "en" ? "Choose where to go: home, the nearest safe place, or any address." : "Pilih tujuan: rumah, tempat aman terdekat, atau alamat lain."}</li>
+            <li>{lang === "en" ? "Follow the green line. Red crosses a flood-prone area." : "Ikuti garis hijau. Garis merah lewat area rawan banjir."}</li>
+          </ol>
+        )}
+      </div>
+
+      {/* Map — tap the map or use GPS to set the start */}
+      <div className="evac-mapcol">
         <div className="panel evac-map-panel" style={{ cursor: "crosshair" }}>
           <EvacuationMap
             origin={userLocation}
@@ -548,7 +573,9 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
             onLocateMe={handleLocateMe}
           />
         </div>
+      </div>
 
+      <div className="evac-after">
         {/* The chosen shelter, in one line */}
         {shelterChosen && (
           <div className="shelter-line">
@@ -594,9 +621,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
             <li><i className="dot" style={{ background: "#e0a400", boxShadow: "0 0 0 1.5px var(--text)" }} />
               {lang === "en" ? "Water-level post (colour = its status, as on the home map)" : "Pos pantau (warna = statusnya, sama seperti peta beranda)"}</li>
             <li><i className="area" style={{ borderColor: EVAC_COLORS.risky }} />
-              {floodPoints.length > 0
-                ? (lang === "en" ? `${floodPoints.length} flood-prone areas active now` : `${floodPoints.length} area rawan banjir aktif sekarang`)
-                : (lang === "en" ? "No flood-prone area is active now" : "Tidak ada area rawan banjir yang aktif sekarang")}</li>
+              {lang === "en" ? "Active flood-prone area (red circle)" : "Area rawan banjir yang aktif (lingkaran merah)"}</li>
           </ul>
           <p>
             {lang === "en"
@@ -604,6 +629,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
               : "Perkiraan dari titik rawan banjir BPBD di sungai yang pos pantaunya berstatus Siaga (semua titik saat hujan deras) — bukan kondisi jalan langsung. Tetap cek kondisi jalan sebelum berangkat."}
           </p>
         </div>
+      </div>
       </div>
 
       <ChatBot riskContext={{ level: riskLevel, rainfall }} />

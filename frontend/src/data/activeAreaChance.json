@@ -1,5 +1,16 @@
 {
   "source": "DSDA archive 2016-2021 vs BPBD flood records (scripts/active_area_chance.py)",
+  "posts": [
+    "angkehulu",
+    "cibalokgadog",
+    "cipinanghulu",
+    "depok",
+    "karet",
+    "katulampa",
+    "manggarai",
+    "pesanggrahan",
+    "pulogadung"
+  ],
   "by_status": {
     "Siaga 3": 0.124,
     "Siaga 2": 0.245,

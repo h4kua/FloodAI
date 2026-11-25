@@ -775,6 +775,22 @@ button, input, select, textarea { font-family: inherit; }
 
 /* ── Evakuasi page ───────────────────────────────────────────── */
 .evac-col-left { display: flex; flex-direction: column; gap: 0.75rem; }
+/* Rute Aman: controls and explanation on the left, the map beside them; one column on a phone (controls, map, then details). */
+.evac-layout { display: grid; gap: 0.75rem 1.25rem; grid-template-columns: 1fr; grid-template-areas: "top" "map" "after"; align-items: start; }
+.evac-top { grid-area: top; display: flex; flex-direction: column; gap: 0.75rem; min-width: 0; }
+.evac-mapcol { grid-area: map; min-width: 0; }
+.evac-after { grid-area: after; display: flex; flex-direction: column; gap: 0.75rem; min-width: 0; }
+@media (min-width: 960px) {
+  .evac-layout { grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); grid-template-areas: "top map" "after map"; grid-template-rows: auto 1fr; }
+  .evac-mapcol { position: sticky; top: 72px; align-self: start; }
+  .evac-mapcol .evac-map-panel { height: clamp(520px, calc(100vh - 110px), 780px); }
+}
+.evac-now { border-left: 3px solid var(--safe); padding: 0.15rem 0 0.15rem 0.85rem; }
+.evac-now.is-active { border-left-color: var(--s1); }
+.evac-now p { margin: 0; font-size: 0.88rem; color: var(--muted); line-height: 1.45; }
+.evac-now .evac-now-title { font-size: 0.98rem; font-weight: 700; color: var(--text); margin-bottom: 0.1rem; }
+.evac-steps { margin: 0; padding: 0 0 0 1.25rem; display: grid; gap: 0.5rem; font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
+.evac-steps li::marker { font-weight: 800; color: var(--text); }
 .evac-map-panel { display: flex; flex-direction: column; flex: 1; min-height: 420px; overflow: hidden; }
 .evac-map-panel .leaflet-container { flex: 1; background: var(--panel-2); }
 /* The street basemap has no dark variant: invert it so dark mode stays dark. */
@@ -1610,3 +1626,80 @@ button, input, select, textarea { font-family: inherit; }
 .area-check-cell ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.35rem; }
 .area-check-cell li span { display: block; }
 .area-check-cell li b { color: var(--text); font-weight: 600; }
+
+
+/* ── Riwayat (calendar) ──────────────────────────────────────── */
+.hist { display: flex; flex-direction: column; gap: 1.25rem; }
+.hist h2 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; margin: 0 0 0.35rem; letter-spacing: -0.01em; }
+.hist-summary { padding-top: 0.25rem; }
+.hist-lead { font-size: clamp(1.05rem, 2.2vw, 1.3rem); font-weight: 600; line-height: 1.45; margin: 0 0 0.9rem; max-width: 52ch; text-wrap: pretty; }
+.hist-share { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--line); gap: 2px; }
+.hist-share i { display: block; min-width: 3px; }
+.hist-share-legend { list-style: none; margin: 0.6rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.3rem 1.1rem; font-size: 0.85rem; color: var(--muted); }
+.hist-share-legend li { display: inline-flex; align-items: center; gap: 0.4rem; }
+.hist-share-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.hist-share-legend b { color: var(--text); }
+.hist-share-note { margin-left: auto; }
+.hist-cal { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 0.5rem; }
+.hist-day {
+  --c: var(--line-2);
+  font: inherit; color: var(--text); text-align: left; cursor: pointer; min-height: 88px;
+  display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto auto; align-items: baseline; gap: 0.1rem 0.4rem;
+  padding: 0.5rem 0.6rem 0.55rem; border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--c) 11%, var(--panel));
+}
+.hist-day.is-empty { background: var(--panel); border-top-color: var(--line); color: var(--muted-2); }
+.hist-day.is-selected { outline: 2px solid var(--text); outline-offset: 1px; }
+.hist-day:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.hist-day-wd { font-size: 0.75rem; color: var(--muted); }
+.hist-day-n { font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; justify-self: end; line-height: 1; }
+.hist-day-level { grid-column: 1 / -1; font-size: 0.85rem; font-weight: 700; }
+.hist-day-rain { grid-column: 1 / -1; font-size: 0.75rem; color: var(--muted); }
+.hist-legend-note { font-size: 0.8rem; color: var(--muted); margin: 0.6rem 0 0; }
+.hist-detail { border-top: 1px solid var(--line); padding-top: 1rem; max-width: 70ch; }
+.hist-detail p { margin: 0 0 0.45rem; line-height: 1.55; }
+.hist-muted { color: var(--muted); font-size: 0.9rem; }
+.hist-note { font-size: 0.8rem; color: var(--muted); margin: 0; line-height: 1.5; max-width: 70ch; }
+.hist-details { border-top: 1px solid var(--line); padding: 0.25rem 0; }
+.hist-details summary { cursor: pointer; font-weight: 700; font-size: 0.95rem; padding: 0.75rem 0; min-height: 44px; display: flex; align-items: center; list-style-position: inside; }
+.hist-details-body { padding: 0 0 1rem; }
+.hist-rain { display: grid; gap: 0.35rem; }
+.hist-rain-row { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr) 4rem; gap: 0.1rem 0.6rem; align-items: center; font-size: 0.85rem; }
+.hist-rain-row i { height: 8px; border-radius: 4px; background: var(--cyan); min-width: 2px; }
+.hist-rain-row b { text-align: right; }
+.hist-rain-row small { grid-column: 2 / -1; color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem; }
+.hist-telegram { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 1rem; }
+.hist-telegram p { margin: 0; color: var(--muted); font-size: 0.9rem; max-width: 56ch; line-height: 1.5; }
+@media (max-width: 480px) { .hist-cal { grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); } .hist-share-note { margin-left: 0; } }
+.hist-issue { border-left: 3px solid var(--wsp); padding: 0.35rem 0 0.35rem 0.75rem; background: color-mix(in srgb, var(--wsp) 8%, transparent); font-size: 0.9rem; color: var(--text); }
+
+/* ── Document layout (Tentang): title on the left, text on the right ───────── */
+.doc { display: flex; flex-direction: column; }
+.doc-sec { display: grid; grid-template-columns: minmax(150px, 220px) minmax(0, 1fr); gap: 0.5rem 2.5rem; padding: 1.5rem 0; border-top: 1px solid var(--line); }
+.doc-sec:first-child { border-top: none; padding-top: 0.5rem; }
+.doc-sec-head h2 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 0.25rem; }
+.doc-sec-head p { margin: 0; font-size: 0.85rem; color: var(--muted); line-height: 1.45; }
+.doc-sec-body { min-width: 0; max-width: 72ch; }
+.doc-sec-body .team-grid { max-width: none; }
+.doc-list { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.55rem; font-size: 0.93rem; color: var(--text); line-height: 1.6; }
+.doc-aside { font-size: 0.88rem; color: var(--muted); line-height: 1.55; margin: 1rem 0 0; }
+.start-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+@media (max-width: 520px) { .start-links { grid-template-columns: 1fr; } }
+.start-link { font: inherit; text-align: left; cursor: pointer; display: grid; gap: 0.2rem; padding: 0.8rem 0.9rem; min-height: 44px; border: 1px solid var(--line-2); border-radius: var(--r-sm); background: var(--panel); color: var(--text); }
+.start-link b { font-size: 0.95rem; }
+.start-link span { font-size: 0.82rem; color: var(--muted); line-height: 1.4; }
+@media (hover: hover) and (pointer: fine) { .start-link:hover { border-color: var(--text); } }
+.start-link:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.status-key { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.85rem; }
+.status-key li { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: 0.75rem; align-items: start; }
+.status-key p { margin: 0; font-size: 0.93rem; line-height: 1.55; }
+.how-steps { margin: 0; padding-left: 1.3rem; display: grid; gap: 0.8rem; font-size: 0.93rem; line-height: 1.6; }
+.how-steps li::marker { font-weight: 800; }
+.hist-details summary::after { content: "›"; margin-left: auto; font-size: 1.3rem; line-height: 1; transition: transform 0.15s; }
+.hist-details[open] summary::after { transform: rotate(90deg); }
+.hist-details summary { list-style: none; }
+.hist-details summary::-webkit-details-marker { display: none; }
+@media (max-width: 760px) {
+  .doc-sec { grid-template-columns: 1fr; gap: 0.6rem; padding: 1.25rem 0; }
+  .status-key li { grid-template-columns: 1fr; gap: 0.3rem; }
+}

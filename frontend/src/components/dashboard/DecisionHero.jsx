@@ -69,7 +69,7 @@ const TODO = {
    The card itself is a solid signage block coloured by .status-hero.level-*;
    text inherits the block's ink colour.
 */
-export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 0 }) {
+export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 0, usualSiaga2Count = 0 }) {
   const { lang } = useApp();
   const isId = lang === "id";
 
@@ -111,6 +111,10 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
     ? (isId
         ? `${siaga2Count} pos pantau air sedang di Siaga 2: air agak tinggi, belum di batas tertinggi.`
         : `${siaga2Count === 1 ? "1 water-level post is" : `${siaga2Count} water-level posts are`} at Alert 2: water is fairly high, not yet at the highest level.`)
+    : usualSiaga2Count > 0
+    ? (isId
+        ? `${usualSiaga2Count} pos pantau air di Siaga 2, tapi pos ini memang sering tinggi (pasang laut dan pintu air), jadi tidak menaikkan status.`
+        : `${usualSiaga2Count === 1 ? "1 water-level post is" : `${usualSiaga2Count} water-level posts are`} at Alert 2, but ${usualSiaga2Count === 1 ? "it is" : "they are"} often high (tide and gates), so it does not raise the status.`)
     : null;
 
   return (

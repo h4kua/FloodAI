@@ -37,7 +37,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (683, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (36: flood roads, shelter ranking,
+- Tests: `tests/` (683, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (37: flood roads, shelter ranking,
   post levels, weather per wilayah, daily model card, learned-layer status sentence, Siaga 2/1 map areas, layer reasons)
 - Frontend: pages Beranda / Rute Aman (was Evakuasi; file `pages/Alert.jsx`) / Riwayat / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (13 steps, reopened from the top-bar "?"); charts are plain SVG
@@ -203,6 +203,26 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   no flood reported; Waspada on 7 days (learned) and 7 (rules), not the same days. Re-run monthly through the season.
 
 ## Resolved
+- 2026-11-25 (evening): red areas on a low chance. Cengkareng Drain (flagged `chronic`: sits at Siaga 2-3 for days) lit five red
+  areas in Jakarta Barat while the kecamatan chance was 5-10 %. Two faults: the map used the raw DSDA band (the city status already
+  counts chronic posts one lower), and the popup's "25 % of days" came from `scripts/active_area_chance.py`, whose archive has 9 posts
+  (angkehulu, cibalokgadog, cipinanghulu, depok, karet, katulampa, manggarai, pesanggrahan, pulogadung) and NO Cengkareng Drain
+  day. `effectiveSiagaRank` (`lib/floodRoads.js`) counts a chronic post one band lower for both maps; the popup shows a rate only
+  when a cause post is in `activeAreaChance.json` `posts` and otherwise says the post has no 2016-2021 record. The hero strip
+  says chronic Siaga 2 posts "memang sering tinggi" and does not alarm.
+- 2026-11-25 (evening): why the two biggest 2026 floods were missed (`scripts/news_2026_miss_causes.py`,
+  `artifacts/reports/news_2026_miss_causes.md`): upstream rain was ordinary (Bogor 3-day total at the 35th and 45th percentile of
+  Jan-Mar 2013-2025, Depok 29th and 62nd), the flood day's own rain at the Jakarta cell only the 82nd and 78th percentile (IMERG is
+  a 10 km cell and averages out short local downpours), and the moon phase does not fit (3.9 and 4.6 days from full moon; flood
+  days overall 32 % near a new/full moon vs 35 % of all days). None explains them. Also possible: the news date is the day of
+  the report, which can trail the rain ("RT masih tergenang").
+- 2026-11-25 (evening): design pass. Rute Aman: two columns on desktop (what the page does and the state now, steps, controls on the
+  left, a tall sticky map on the right), controls then map then details on a phone. Riwayat: one plain sentence, the share of time
+  per level, a tappable day calendar (colour = highest status that day, rain under it), the picked day in words with its chart, and
+  the long chart, the posts table and rain under "Lebih rinci"; days 24-25 Nov carry an open note about the false Bahaya.
+  Tentang: document layout (title left, text right), "Mulai dari sini" shortcuts, what each status means, how far to trust it
+  (the 2026 test, honestly), updated technical details. Audited at 320/768/1280 px: no sideways scroll, taps >= 44 px, text >= 12 px,
+  no blank band over 120 px (except Laporan with no reports).
 - 2026-11-25: a false "Bahaya!" on the home page at 31 % chance and no rain (24-25 Nov, 13 live snapshots). Safety rule L1.6 says
   "a post that is high AND rising fast -> Danger", but `analyze_hydrology` took ONE overall delta (the maximum over all posts)
   and paired it with the overall severity: Bendung Katulampa 10.6 -> 33.6 cm (0.115 of its Siaga 1, a near-empty weir) +

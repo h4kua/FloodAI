@@ -33,7 +33,7 @@ function AppShell() {
             {page === "alert" && <Alert riskLevel={riskContext.level} rainfall={riskContext.rainfall} />}
             {page === "history" && <History />}
             {page === "reports" && <Reports riskLevel={riskContext.level} rainfall={riskContext.rainfall} focusReportId={focusReportId} />}
-            {page === "about" && <About riskContext={riskContext} />}
+            {page === "about" && <About riskContext={riskContext} onNavigate={setPage} />}
           </Suspense>
         </ErrorBoundary>
       </main>

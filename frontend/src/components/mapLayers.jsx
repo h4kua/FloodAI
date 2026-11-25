@@ -6,7 +6,7 @@
 import { useMemo, useRef, useState } from "react";
 import { Circle, CircleMarker, Pane, Polyline, Popup, useMapEvents } from "react-leaflet";
 import { useApp } from "../lib/appContext";
-import { RISK_RADIUS_M, areasByPost, riverForPost } from "../lib/floodRoads";
+import { RISK_RADIUS_M, areasByPost, postKey, riverForPost } from "../lib/floodRoads";
 import { postClass } from "../lib/dashboardHelpers";
 import postRivers from "../data/postRivers.json";
 import areaChance from "../data/activeAreaChance.json";
@@ -28,17 +28,24 @@ const siagaWord = (status) => (status || "").replace(/^Status\s*:\s*/i, "");
 /* How often such an area flooded on days its post reached that band (DSDA 2016-2021 vs BPBD records,
    scripts/active_area_chance.py), from the highest band among the posts that activated it. */
 function areaChanceNote(p, isId) {
-  const bands = (p.causes || []).map((s) => /siaga\s*[1-3]/i.exec(s.status_siaga || "")?.[0]).filter(Boolean)
+  const causes = p.causes || [];
+  const measured = new Set(areaChance.posts || []);
+  // Only posts the archive measured: the rate says nothing about a post with no 2016-2021 record.
+  const known = causes.filter((s) => measured.has(postKey(s.nama)));
+  const bands = known.map((s) => /siaga\s*[1-3]/i.exec(s.status_siaga || "")?.[0]).filter(Boolean)
     .map((b) => b.replace(/\s+/, " ").replace(/^s/, "S"));
   const band = bands.sort()[0];  // "Siaga 1" < "Siaga 2" < "Siaga 3"
   const rate = band && areaChance.by_status?.[band];
-  if (rate == null) return null;
+  if (rate == null) {
+    return causes.length ? (isId
+      ? "Pos ini belum punya catatan 2016–2021, jadi belum ada angka seberapa sering area ini banjir saat posnya setinggi ini."
+      : "This post has no 2016–2021 record, so there is no figure for how often this area floods when it is this high.") : null;
+  }
   const pct = (v) => `${Math.round(v * 100)}%`;
   return isId
     ? `Pada hari pos di ${band} (2016–2021), area di sepanjang sungainya tercatat banjir pada sekitar ${pct(rate)} hari (hari biasa ${pct(areaChance.normal)}).`
     : `On days a post was at ${band} (2016–2021), areas along its river had a recorded flood on about ${pct(rate)} of days (normal days ${pct(areaChance.normal)}).`;
 }
-// pane: a popup inside the "posts" <Pane> would otherwise open in that pane, under the other posts and the weather cards.
 const popupPad = { pane: "popupPane", autoPan: true, autoPanPaddingTopLeft: [8, 64], autoPanPaddingBottomRight: [8, 8] };
 
 /* Content added after a popup opens (the river name, the water chart) makes it taller than Leaflet

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   activeFloodPoints,
+  effectiveSiagaRank,
   siagaRank,
   areasByPost,
   postKey,
@@ -209,4 +210,14 @@ test("the home map's areas need a post at Siaga 2 or Siaga 1", () => {
   assert.deepEqual(activeFloodPoints(POINTS, [post("P.A. Cengkareng Drain", "Siaga 2")], 0, null, { minRank: 2 })
     .map((p) => p.kelurahan), ["KAPUK"]);
   assert.equal(activeFloodPoints(POINTS, [drain3], 0).length, 1);  // the evacuation map keeps Siaga 3
+});
+
+test("a chronically high post counts one band lower: Cengkareng Drain at Siaga 2 lights no area on the map", () => {
+  const drain = { ...post("P.A. Cengkareng Drain", "Siaga 2"), chronic: true };
+  assert.equal(effectiveSiagaRank(drain), 1);
+  assert.equal(activeFloodPoints(POINTS, [drain], 0, null, { minRank: 2 }).length, 0);
+  // The same post unflagged (or any other post) at Siaga 2 still lights its river.
+  assert.ok(activeFloodPoints(POINTS, [post("P.A. Cengkareng Drain", "Siaga 2")], 0, null, { minRank: 2 }).length > 0);
+  // A chronic post at Siaga 1 still counts (as Siaga 2).
+  assert.ok(activeFloodPoints(POINTS, [{ ...post("P.A. Cengkareng Drain", "Siaga 1"), chronic: true }], 0, null, { minRank: 2 }).length > 0);
 });

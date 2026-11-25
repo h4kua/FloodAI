@@ -79,9 +79,16 @@ export function nearLines(lat, lng, lines = [], radiusM = NEAR_RIVER_M) {
    map did not. */
 export const ACTIVE_AREA_MIN_RANK = 2;
 
+/** The band a post counts for here: one lower for a chronically high post (`chronic` from the backend: Cengkareng Drain
+    and two sea posts), as in the city status. Cengkareng Drain sat at Siaga 2 for days at a time while its kecamatan
+    chance was 5-10 %, and lit five red areas; the 25 % rate on those circles was measured on other posts. */
+export function effectiveSiagaRank(station) {
+  return Math.max(0, siagaRank(station?.status_siaga) - (station?.chronic ? 1 : 0));
+}
+
 export function activeFloodPoints(points = [], stations = [], rainfallMmH = 0, riverTable = null, { minRank = 1 } = {}) {
   // minRank 2: only posts at Siaga 2 or Siaga 1 activate areas (the home map; see activeAreaChance.json).
-  stations = stations.filter((s) => siagaRank(s?.status_siaga) >= minRank || (minRank <= 1 && isSiaga(s)));
+  stations = stations.filter((s) => effectiveSiagaRank(s) >= minRank || (minRank <= 1 && isSiaga(s) && !s?.chronic));
   const byRiver = postsOnAlert(stations);
   const reaches = (post, p) => {
     const entry = riverTable ? riverForPost(post, riverTable) : null;
