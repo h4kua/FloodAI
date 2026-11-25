@@ -6,6 +6,11 @@
 app = 'floodai-8eclra'
 primary_region = 'sin'
 
+# 512 MB of RAM is almost used up by the models (305 MB), the daily model's rain data (+130 MB) and the
+# Riwayat tables (+17 MB); the 15-minute refresh then spikes past it and the process was OOM-killed or hung
+# (24 Nov 13:28 UTC, 25 Nov 01:19 UTC). Swap turns that spike into a short slowdown instead.
+swap_size_mb = 512
+
 [build]
 
 [env]
@@ -30,11 +35,6 @@ primary_region = 'sin'
     grace_period = '30s'
     method = 'GET'
     path = '/healthz'
-
-# 512 MB of RAM is almost used up by the models (305 MB), the daily model's rain data (+130 MB) and the
-# Riwayat tables (+17 MB); the 15-minute refresh then spikes past it and the process was OOM-killed or hung
-# (24 Nov 13:28 UTC, 25 Nov 01:19 UTC). Swap turns that spike into a short slowdown instead.
-swap_size_mb = 512
 
 [[vm]]
   memory = '512mb'
