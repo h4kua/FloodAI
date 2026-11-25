@@ -277,6 +277,8 @@ class PerceptionAgent:
         hydrology = analyze_hydrology(
             flood_posts,
             water_level_delta=water_level_delta,
+            station_deltas={str(r.get("nama_pintu_air") or r.get("name") or ""): self._station_water_level_delta(r)
+                            for r in flood_posts},
         )
 
         # BNPB InaRISK vulnerability context — silently None on any failure.

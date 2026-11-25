@@ -110,8 +110,11 @@ def _live_decision(snapshot, engineered, probability, ood_detection, thresholds,
     # The rise rate comes from each post's own previous reading, as in
     # PerceptionAgent, not from the feature history (months old after downtime).
     posts = scored_station_records(snapshot.get("poskobanjir"))
+    perception = PerceptionAgent()
     hydrology = analyze_hydrology(
-        posts, water_level_delta=PerceptionAgent()._extract_water_level_delta(snapshot, posts),
+        posts, water_level_delta=perception._extract_water_level_delta(snapshot, posts),
+        station_deltas={str(r.get("nama_pintu_air") or r.get("name") or ""): perception._station_water_level_delta(r)
+                        for r in posts},
     )
     decision = run_decision_engine(
         evaluation_risk_level=_classify(probability, thresholds),
@@ -239,9 +242,9 @@ def _risk_interpretation(risk_level, diagnostics, wilayah_summary=None, lang="id
                 "The flood risk matches what the posts measure, not only a statistical forecast.",
             )
         return tr(
-            f"Risiko tinggi dari kombinasi hujan intens, akumulasi temporal, dan sinyal hidrologi.{loc_context} "
+            f"Risiko tinggi menurut aturan keselamatan dan sinyal muka air.{loc_context} "
             "Potensi genangan atau banjir meningkat dalam waktu dekat.",
-            f"High risk from heavy rain, rain building up over time and the water levels together.{loc_context} "
+            f"High risk according to the safety rules and the water levels.{loc_context} "
             "Waterlogging or flooding is getting more likely soon.",
         )
 

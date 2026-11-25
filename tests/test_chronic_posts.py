@@ -35,3 +35,33 @@ def test_the_list_can_be_overridden_or_switched_off(monkeypatch):
     assert analyze_hydrology([_post("P.A. Cengkareng Drain", 195)]).dominant_siaga_level == "siaga3"
     monkeypatch.setenv("FLOOD_CHRONIC_POSTS", "karet")
     assert status_siaga_level("siaga3", "P.A. Karet 1") == "normal"
+
+
+# --- Rapid rise must come from a post that is itself high (25 Nov 2026 false Bahaya) ---------------------
+
+def test_a_small_rise_at_a_near_empty_weir_is_not_a_rapid_escalation():
+    # Katulampa 10.6 -> 33.6 cm is 0.115 of its Siaga 1 (200 cm), but the post is Normal; Cengkareng Drain is
+    # chronically at Siaga 2 (counted as Siaga 3) and not rising. The old rule paired the two and said Bahaya.
+    posts = [_post("Bendung Katulampa", 33.6, 80, 150, 200), _post("P.A. Cengkareng Drain", 288)]
+    deltas = {"Bendung Katulampa": 0.115, "P.A. Cengkareng Drain": 0.0097}
+    result = analyze_hydrology(posts, water_level_delta=0.115, station_deltas=deltas)
+    assert result.rapid_escalation is False
+    assert analyze_hydrology(posts, water_level_delta=0.115).rapid_escalation is True  # the old global behaviour
+
+
+def test_a_high_post_rising_fast_is_still_a_rapid_escalation():
+    posts = [_post("P.A. Manggarai 2", 780, 750, 850, 950), _post("Bendung Katulampa", 33.6, 80, 150, 200)]
+    result = analyze_hydrology(posts, station_deltas={"P.A. Manggarai 2": 0.12, "Bendung Katulampa": 0.0})
+    assert result.rapid_escalation is True
+    assert "P.A. Manggarai 2" in result.overall_explanation
+
+
+def test_a_fast_rise_at_a_normal_post_stays_calm_even_if_others_are_high():
+    posts = [_post("P.A. Manggarai 2", 780, 750, 850, 950), _post("P.A. Karet 1", 100, 200, 300, 400)]
+    result = analyze_hydrology(posts, station_deltas={"P.A. Manggarai 2": 0.01, "P.A. Karet 1": 0.2})
+    assert result.rapid_escalation is False
+
+
+def test_without_per_post_deltas_the_overall_delta_still_decides():
+    posts = [_post("P.A. Manggarai 2", 760, 750, 850, 950)]
+    assert analyze_hydrology(posts, water_level_delta=0.25, station_deltas={"P.A. Manggarai 2": None}).rapid_escalation is True

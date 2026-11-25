@@ -37,7 +37,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Agentic pipeline: `pipeline/flood_pipeline.py`
 - Decision engine: `services/decision_engine.py` (the former `app/` package was flattened)
 - Output contract / canonical enums: `core/output_contract.py`, `contracts/vocabulary.py`
-- Tests: `tests/` (679, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (36: flood roads, shelter ranking,
+- Tests: `tests/` (683, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (36: flood roads, shelter ranking,
   post levels, weather per wilayah, daily model card, learned-layer status sentence, Siaga 2/1 map areas, layer reasons)
 - Frontend: pages Beranda / Rute Aman (was Evakuasi; file `pages/Alert.jsx`) / Riwayat / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
   onboarding guide `components/OnboardingTour.jsx` (13 steps, reopened from the top-bar "?"); charts are plain SVG
@@ -188,6 +188,12 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   no flood reported; Waspada on 7 days (learned) and 7 (rules), not the same days. Re-run monthly through the season.
 
 ## Resolved
+- 2026-11-25: a false "Bahaya!" on the home page at 31 % chance and no rain (24-25 Nov, 13 live snapshots). Safety rule L1.6 says
+  "a post that is high AND rising fast -> Danger", but `analyze_hydrology` took ONE overall delta (the maximum over all posts)
+  and paired it with the overall severity: Bendung Katulampa 10.6 -> 33.6 cm (0.115 of its Siaga 1, a near-empty weir) +
+  Cengkareng Drain (chronically Siaga 2, counted Siaga 3) = Bahaya. Now `analyze_hydrology(..., station_deltas=...)` needs one
+  post that rises > 0.10 of its Siaga 1 AND is itself at Siaga 3+ (chronic-adjusted); with no per-post deltas the old overall
+  rule still applies. The DANGER fallback sentence no longer claims heavy rain. Past Riwayat rows keep what the site showed.
 - 2026-11-24: five resident features. (1) Riwayat page (`pages/History.jsx`, `GET /history/summary`): the status and the
   learned layer's chance over 7/14/30 days, warning periods, IMERG rain per day (`daily_model.rain_summary`) and each river
   post's highest Siaga band per day. The API scheduler logs every 15-minute decision as a `decision:<fetched_at>` row in

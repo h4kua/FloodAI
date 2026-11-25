@@ -76,6 +76,11 @@ def status_siaga_level(siaga_level: str, station_name: str) -> str:
 _NEAR_THRESHOLD_MARGIN = 0.10   # within 10% of next siaga level value
 _MIN_REAL_THRESHOLD_CM = 1.0    # smaller thresholds are DSDA placeholders
 _RAPID_DELTA_THRESHOLD = 0.10   # normalised ratio delta for rapid escalation
+# A rapid rise only counts on a post that is itself at Siaga 3 or higher (same bar as domain.decision's
+# _HYDRO_RAPID_SEVERITY): 25 Nov 2026 Bendung Katulampa went 10.6 -> 33.6 cm (0.115 of its Siaga 1), a trivial
+# change at a near-empty weir, and the rule paired it with a different, chronically high post (Cengkareng
+# Drain) to declare Bahaya at 31 % chance with no rain.
+_RAPID_MIN_POST_SEVERITY = 0.50
 
 
 def _safe_float(v, default: float = 0.0) -> float:
@@ -241,6 +246,7 @@ class HydrologyAssessment:
 def analyze_hydrology(
     poskobanjir_records: list[dict],
     water_level_delta: float | None = None,
+    station_deltas: dict[str, float | None] | None = None,
 ) -> HydrologyAssessment:
     """
     Full hydrology reasoning across all Posko Banjir station records.
@@ -248,6 +254,10 @@ def analyze_hydrology(
     Args:
         poskobanjir_records: Raw list from snapshot["poskobanjir"].
         water_level_delta:   Normalised delta from feature_builder (ratio units).
+        station_deltas:      Each post's own normalised rise since its previous reading, by post name.
+                             When at least one is known, a rapid escalation needs ONE post that rises fast
+                             and is itself at Siaga 3 or higher; otherwise the single ``water_level_delta``
+                             (the maximum over all posts) decides, as before.
     """
     if not poskobanjir_records:
         return HydrologyAssessment(
@@ -320,7 +330,19 @@ def analyze_hydrology(
     dominant_level = dominant.status_siaga_level or dominant.siaga_level
     crit_count = sum(1 for s in assessments if (s.status_siaga_level or s.siaga_level) in ("siaga1", "siaga2"))
     near_count = sum(1 for s in assessments if s.near_threshold)
-    rapid      = delta_value is not None and delta_value > _RAPID_DELTA_THRESHOLD
+    # Per-post rises are used whenever the records carry them; a snapshot that only has one overall delta
+    # (nothing per post) keeps the old overall rule.
+    if station_deltas and any(v is not None for v in station_deltas.values()):
+        rapid_posts = [
+            a.station_name for a in assessments
+            if (station_deltas.get(a.station_name) or 0.0) > _RAPID_DELTA_THRESHOLD
+            and a.status_severity >= _RAPID_MIN_POST_SEVERITY
+        ]
+        rapid = bool(rapid_posts)
+        rapid_name = ", ".join(rapid_posts[:2])
+    else:
+        rapid = delta_value is not None and delta_value > _RAPID_DELTA_THRESHOLD
+        rapid_name = ""
 
     parts: list[str] = []
     if dominant_level == "siaga1":
@@ -345,7 +367,10 @@ def analyze_hydrology(
     if near_count:
         parts.append(f"{near_count} station(s) approaching next alert level.")
     if rapid:
-        parts.append("Rapid water level escalation detected — possible upstream surge or tidal backflow.")
+        parts.append(
+            (f"Rapid water level escalation at {rapid_name}" if rapid_name else "Rapid water level escalation detected")
+            + " — possible upstream surge or tidal backflow."
+        )
     elif delta_value is None:
         _log.debug("Hydrology rapid escalation check skipped because water_level_delta is unavailable.")
         parts.append("Rapid escalation check unavailable — water level delta is missing.")
