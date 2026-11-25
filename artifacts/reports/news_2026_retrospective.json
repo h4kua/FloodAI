@@ -1,0 +1,279 @@
+{
+  "days_scored": 328,
+  "flood_days": 34,
+  "large_flood_days": 11,
+  "lag_counts": {
+    "1": 328
+  },
+  "auc_model": 0.844,
+  "auc_model_ci": [
+    0.792,
+    0.889
+  ],
+  "auc_rain7": 0.821,
+  "auc_diff_model_minus_rain7_ci": [
+    -0.017,
+    0.064
+  ],
+  "auc_large_model": 0.892,
+  "auc_large_rain7": 0.888,
+  "alarm_days": 77,
+  "alarm_share": 0.235,
+  "recall_flood_at_alarm": 0.618,
+  "recall_large_at_alarm": 0.818,
+  "rain7_recall_flood_same_alarm_days": 0.618,
+  "rain7_recall_large_same_alarm_days": 0.818,
+  "by_month": {
+    "2026-01": {
+      "days": 31,
+      "alarm_days": 26,
+      "flood_days": 15,
+      "flood_days_with_alarm": 11
+    },
+    "2026-02": {
+      "days": 28,
+      "alarm_days": 26,
+      "flood_days": 5,
+      "flood_days_with_alarm": 5
+    },
+    "2026-03": {
+      "days": 31,
+      "alarm_days": 3,
+      "flood_days": 5,
+      "flood_days_with_alarm": 1
+    },
+    "2026-04": {
+      "days": 30,
+      "alarm_days": 3,
+      "flood_days": 3,
+      "flood_days_with_alarm": 0
+    },
+    "2026-05": {
+      "days": 31,
+      "alarm_days": 7,
+      "flood_days": 6,
+      "flood_days_with_alarm": 4
+    },
+    "2026-06": {
+      "days": 30,
+      "alarm_days": 2,
+      "flood_days": 0,
+      "flood_days_with_alarm": 0
+    },
+    "2026-07": {
+      "days": 31,
+      "alarm_days": 1,
+      "flood_days": 0,
+      "flood_days_with_alarm": 0
+    },
+    "2026-08": {
+      "days": 31,
+      "alarm_days": 0,
+      "flood_days": 0,
+      "flood_days_with_alarm": 0
+    },
+    "2026-09": {
+      "days": 30,
+      "alarm_days": 1,
+      "flood_days": 0,
+      "flood_days_with_alarm": 0
+    },
+    "2026-10": {
+      "days": 31,
+      "alarm_days": 7,
+      "flood_days": 0,
+      "flood_days_with_alarm": 0
+    },
+    "2026-11": {
+      "days": 24,
+      "alarm_days": 1,
+      "flood_days": 0,
+      "flood_days_with_alarm": 0
+    }
+  },
+  "kecamatan_auc_all_days": 0.874,
+  "reported_kecamatan_mean_percentile_on_flood_days": 0.704,
+  "missed_flood_days": [
+    {
+      "date": "2026-03-08",
+      "kecamatan_named": 22,
+      "reports": 11,
+      "p": 0.089,
+      "rain7": 90.6
+    },
+    {
+      "date": "2026-01-29",
+      "kecamatan_named": 21,
+      "reports": 13,
+      "p": 0.089,
+      "rain7": 72.5
+    },
+    {
+      "date": "2026-03-09",
+      "kecamatan_named": 9,
+      "reports": 3,
+      "p": 0.089,
+      "rain7": 102.4
+    },
+    {
+      "date": "2026-05-01",
+      "kecamatan_named": 9,
+      "reports": 4,
+      "p": 0.089,
+      "rain7": 47.1
+    },
+    {
+      "date": "2026-03-22",
+      "kecamatan_named": 7,
+      "reports": 4,
+      "p": 0.061,
+      "rain7": 69.3
+    },
+    {
+      "date": "2026-01-25",
+      "kecamatan_named": 6,
+      "reports": 4,
+      "p": 0.089,
+      "rain7": 132.6
+    },
+    {
+      "date": "2026-04-17",
+      "kecamatan_named": 6,
+      "reports": 2,
+      "p": 0.089,
+      "rain7": 62.1
+    },
+    {
+      "date": "2026-04-04",
+      "kecamatan_named": 5,
+      "reports": 2,
+      "p": 0.089,
+      "rain7": 77.0
+    },
+    {
+      "date": "2026-04-20",
+      "kecamatan_named": 5,
+      "reports": 3,
+      "p": 0.084,
+      "rain7": 46.8
+    },
+    {
+      "date": "2026-05-19",
+      "kecamatan_named": 4,
+      "reports": 2,
+      "p": 0.084,
+      "rain7": 34.2
+    },
+    {
+      "date": "2026-01-26",
+      "kecamatan_named": 2,
+      "reports": 1,
+      "p": 0.089,
+      "rain7": 80.1
+    },
+    {
+      "date": "2026-01-27",
+      "kecamatan_named": 1,
+      "reports": 1,
+      "p": 0.089,
+      "rain7": 83.6
+    },
+    {
+      "date": "2026-03-11",
+      "kecamatan_named": 1,
+      "reports": 1,
+      "p": 0.089,
+      "rain7": 83.0
+    }
+  ],
+  "large_days": [
+    {
+      "date": "2026-01-12",
+      "kecamatan_named": 26,
+      "p": 0.202,
+      "level": "PRE_ALERT",
+      "rain7": 92.1,
+      "top": "Jatinegara"
+    },
+    {
+      "date": "2026-01-13",
+      "kecamatan_named": 11,
+      "p": 0.202,
+      "level": "PRE_ALERT",
+      "rain7": 121.7,
+      "top": "Penjaringan"
+    },
+    {
+      "date": "2026-01-18",
+      "kecamatan_named": 26,
+      "p": 0.206,
+      "level": "PRE_ALERT",
+      "rain7": 144.8,
+      "top": "Penjaringan"
+    },
+    {
+      "date": "2026-01-22",
+      "kecamatan_named": 28,
+      "p": 0.135,
+      "level": "PRE_ALERT",
+      "rain7": 140.3,
+      "top": "Cengkareng"
+    },
+    {
+      "date": "2026-01-23",
+      "kecamatan_named": 25,
+      "p": 0.206,
+      "level": "PRE_ALERT",
+      "rain7": 157.1,
+      "top": "Jatinegara"
+    },
+    {
+      "date": "2026-01-24",
+      "kecamatan_named": 15,
+      "p": 0.135,
+      "level": "PRE_ALERT",
+      "rain7": 162.6,
+      "top": "Jatinegara"
+    },
+    {
+      "date": "2026-01-29",
+      "kecamatan_named": 21,
+      "p": 0.089,
+      "level": "SAFE",
+      "rain7": 72.5,
+      "top": "Jatinegara"
+    },
+    {
+      "date": "2026-01-30",
+      "kecamatan_named": 14,
+      "p": 0.14,
+      "level": "PRE_ALERT",
+      "rain7": 71.1,
+      "top": "Jatinegara"
+    },
+    {
+      "date": "2026-02-20",
+      "kecamatan_named": 17,
+      "p": 0.24,
+      "level": "PRE_ALERT",
+      "rain7": 161.5,
+      "top": "Jatinegara"
+    },
+    {
+      "date": "2026-03-08",
+      "kecamatan_named": 22,
+      "p": 0.089,
+      "level": "SAFE",
+      "rain7": 90.6,
+      "top": "Jatinegara"
+    },
+    {
+      "date": "2026-05-05",
+      "kecamatan_named": 14,
+      "p": 0.206,
+      "level": "PRE_ALERT",
+      "rain7": 133.7,
+      "top": "Jatinegara"
+    }
+  ]
+}

@@ -168,8 +168,16 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   `news_flood_reports_2026_clean.csv` keeps titles naming Jakarta or a Jakarta place (conservative: some real reports such as
   Kelapa Gading and Daan Mogot titles were dropped). 34 flood days, Jan 15 / Feb 5 / Mar 5 / Apr 3 / May 6, none Jun-Nov (nothing
   reported 1-25 Nov either). Largest: 22 Jan (132 RT), 8 Mar (148 RT), 5 May (80 RT). Not used for training (the 2023-2025 test
-  of the same idea changed nothing). Possible next step: replay the daily model on these dates (needs IMERG for 2026 and has no
-  DSDA water history before Apr 2026) as a true out-of-time test; positives only, so recall/ranking but not precision.
+  of the same idea changed nothing).
+  Out-of-time test (`scripts/news_2026_retrospective.py`, `artifacts/reports/news_2026_retrospective.md`: every 2026 day replayed
+  through the served daily model, lag 1, no water inputs; positives only, so ranking not precision): city ROC-AUC 0.844 [0.792,
+  0.889] (same as the by-year 0.84), but the plain 7-day city rain total scores 0.821 and the difference [-0.017, 0.064]
+  includes 0; at the same 77 alarm days (24 % of days) both catch exactly the same 62 % of flood days and 82 % of the 11 large
+  ones. The model raises Waspada on 26 of 31 January and 26 of 28 February days. Misses include the two largest: 8 Mar (22
+  kecamatan, 148 RT, chance 9 %, 7-day rain 91 mm) and 29 Jan (21 kecamatan, 9 %): rain-driven flooding is caught, floods
+  without a rain signal (upstream "kiriman", tide) are not; the river-post layer might catch some, but there are no DSDA posts
+  before Apr 2026 to replay. Within a flood day the reported kecamatan sit at only the 0.70 mean percentile of 42 (0.5 =
+  random): the model finds the day better than the place.
 - Large flood days (2026-11-17, `scripts/large_flood_experiment.py`, `artifacts/reports/large_flood_experiment.md`): can the
   live daily model (lag 1/2) justify Siaga on days with BPBD floods in >= 5 kecamatan (6.8 % of days 2016-2022)? It ranks
   them better than "any flood" (lag 1 ROC-AUC 0.74 vs 0.70; 2023-2025 0.80) but is not precise enough: at 2 alarm days a
