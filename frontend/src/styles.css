@@ -523,6 +523,9 @@ button, input, select, textarea { font-family: inherit; }
 /* An open post or area popup goes over the legend (the legend sits above Leaflet's panes). */
 .map-legend { transition: opacity 0.15s var(--ease-out); }
 @media (min-width: 641px) { *:has(> .leaflet-container .leaflet-popup) > .map-legend { opacity: 0; visibility: hidden; } }
+/* The +/- buttons sit at the map's top left, where a popup opened near that corner would be covered by them
+   (they hid the "P." of a post's name); they come back when the popup closes. */
+.leaflet-container:has(.leaflet-popup) .leaflet-control-zoom { opacity: 0; pointer-events: none; transition: opacity 0.15s; }
 .map-legend-toggle {
   display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
   width: 100%; min-height: 44px; margin-bottom: 2px; padding: 0;
@@ -1548,6 +1551,7 @@ button, input, select, textarea { font-family: inherit; }
 .history-periods { list-style: none; padding: 0; margin: 0.5rem 0 0; display: grid; gap: 0.5rem; }
 .history-periods li { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.75rem; font-size: 0.85rem; padding: 0.5rem 0; border-bottom: 1px solid var(--line); }
 .history-periods li:last-child { border-bottom: none; }
+.history-peak { font-size: 0.8rem; color: var(--muted); }
 .history-periods small { color: var(--muted); font-size: 0.8rem; }
 .post-grid-wrap { overflow-x: auto; margin: 0.25rem 0 0; }
 .post-grid { border-collapse: separate; border-spacing: 2px; font-size: 0.75rem; }
@@ -1593,6 +1597,7 @@ button, input, select, textarea { font-family: inherit; }
   border: 1px solid var(--line-2); border-radius: var(--r-sm); background: var(--panel); color: var(--text);
 }
 .area-check-locate { font: inherit; font-size: 0.85rem; font-weight: 700; color: var(--cyan); background: none; border: none; padding: 0; min-height: 44px; margin: -0.5rem 0 0.5rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.area-check-geo { font-size: 0.85rem; color: var(--muted); margin: -0.25rem 0 0.75rem; line-height: 1.45; }
 .area-check-locate:disabled { color: var(--muted); cursor: wait; }
 .area-check-grid { display: grid; grid-template-columns: 1fr; gap: 1rem 1.5rem; }
 @media (min-width: 560px) { .area-check-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

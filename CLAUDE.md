@@ -40,7 +40,7 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
 - Tests: `tests/` (679, `python -m pytest tests -q`); frontend `npm test` in `frontend/` (36: flood roads, shelter ranking,
   post levels, weather per wilayah, daily model card, learned-layer status sentence, Siaga 2/1 map areas, layer reasons)
 - Frontend: pages Beranda / Rute Aman (was Evakuasi; file `pages/Alert.jsx`) / Riwayat / Laporan / Tentang; API base in `frontend/src/lib/api.js`;
-  onboarding guide `components/OnboardingTour.jsx` (12 steps, reopened from the top-bar "?"); charts are plain SVG
+  onboarding guide `components/OnboardingTour.jsx` (13 steps, reopened from the top-bar "?"); charts are plain SVG
   (`components/charts.jsx`, no chart library)
 
 ## Data ingestion
@@ -212,7 +212,15 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   Weather cards stay inside the map (`KeepCardsInside`), show only kota + temperature on phones and lost the glass blur;
   labels are sentence case, only the status card animates in, the chat button lost its permanent fake "1" badge.
   The evacuation map still lit flood-prone areas for posts at Siaga 3 (the home map only for Siaga 2/1), so the two maps
-  disagreed: both now use `ACTIVE_AREA_MIN_RANK = 2` (`lib/floodRoads.js`). Riwayat says when a period was raised by a
+  disagreed: both now use `ACTIVE_AREA_MIN_RANK = 2` (`lib/floodRoads.js`).
+  Found by clicking with a real mouse (scripted `.click()` hid it): the "Lihat grafik" link inside a map popup closed the
+  popup instead of loading the chart. React swaps the clicked button out at once, Leaflet then cannot tell the click came
+  from inside the popup (it walks up from the clicked element) and the map takes it; `PostTrend` now stops the click.
+  The zoom +/- buttons fade while a popup is open (they covered its first letters). "Pakai lokasi saya" never said why it
+  did nothing (denied, timeout, outside Jakarta): it now shows a message, picks the nearest KECAMATAN centre first and a
+  kelurahan only when its centre is within 1 km. Status wording is calmer (`buildStatusDesc`: "Tidak perlu panik, tapi
+  tetap dipantau", "peluang ada genangan di salah satu kecamatan"); the strip under it says what Siaga 2 means; Riwayat
+  labels a period by its peak and lists only posts that left Normal. Riwayat says when a period was raised by a
   safety rule rather than the layer's chance. The evacuation page is now "Rute Aman" (its job is a way around flood-prone
   areas; bottom nav says "Rute"), also in the tour, the status card, the offline chat and `api/chat_knowledge.txt`.
   Responsive pass at 320/375/768/1280 px: no page overflow, tap targets >= 44 px, text >= 12 px, page headers wrap, and

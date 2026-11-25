@@ -26,17 +26,29 @@ export default function PostTrend({ name, isId }) {
       .catch(() => setState("error"));
   };
 
+  // A click inside a Leaflet popup must not reach the map: Leaflet tells "clicked inside the popup" by walking
+  // up from the clicked element, and this button is swapped out as soon as the state changes, so the walk
+  // found nothing and the map took the click and closed the popup before the chart could load.
+  const press = (e) => { e.stopPropagation(); load(); };
+
   if (state === "idle") {
     return (
       <div className="post-trend">
-        <button type="button" className="post-trend-btn" onClick={load}>
+        <button type="button" className="post-trend-btn" onClick={press}>
           {isId ? "Lihat grafik 2 hari terakhir" : "Show the last 2 days"}
         </button>
       </div>
     );
   }
   if (state === "loading") return <p className="post-trend-note">{isId ? "Memuat grafik..." : "Loading chart..."}</p>;
-  if (state === "error") return <p className="post-trend-note">{isId ? "Grafik belum bisa dimuat." : "The chart could not be loaded."}</p>;
+  if (state === "error") {
+    return (
+      <div className="post-trend">
+        <p className="post-trend-note">{isId ? "Grafik belum bisa dimuat." : "The chart could not be loaded."}</p>
+        <button type="button" className="post-trend-btn" onClick={press}>{isId ? "Coba lagi" : "Try again"}</button>
+      </div>
+    );
+  }
 
   const points = (series?.points ?? []).filter((p) => p.cm != null).map((p) => ({ t: Date.parse(p.t), y: p.cm }));
   if (points.length < 2) return <p className="post-trend-note">{isId ? "Belum ada cukup data untuk pos ini." : "Not enough data for this post yet."}</p>;

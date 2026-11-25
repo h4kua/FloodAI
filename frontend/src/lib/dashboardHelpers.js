@@ -219,9 +219,11 @@ export function buildStatusDesc(riskData, isId) {
   const topW = dangerW[0];
   // When the learned decision layer set the level, lead with its flood chance for today.
   const learned = riskData?.decisionLayer?.decided ? riskData.decisionLayer : null;
+  // BPBD calls what the model predicts "genangan" (waterlogging); it is the chance that at least one of the
+  // 42 kecamatan has a recorded one today.
   const lNote = learned
-    ? (isId ? ` Peluang banjir hari ini ${formatChance(learned.score)} menurut model keputusan.`
-            : ` Today's flood chance is ${formatChance(learned.score)} according to the decision model.`)
+    ? (isId ? ` Peluang ada genangan di salah satu kecamatan hari ini sekitar ${formatChance(learned.score)}.`
+            : ` The chance of waterlogging in at least one kecamatan today is about ${formatChance(learned.score)}.`)
     : "";
 
   if (level === "unknown") {
@@ -232,38 +234,34 @@ export function buildStatusDesc(riskData, isId) {
 
   if (level === "bahaya") {
     const stNote = s1.length > 0
-      ? (isId ? ` ${s1.length} pos pantau sudah melewati batas siaga, terparah di ${cleanStationName(s1[0].nama)}.` : ` ${postsEn(s1.length)} past the alert limit, worst at ${cleanStationName(s1[0].nama)}.`)
+      ? (isId ? ` ${s1.length} pos pantau air sudah di batas tertinggi (Siaga 1), terparah di ${cleanStationName(s1[0].nama)}.` : ` ${postsEn(s1.length)} at the highest level (Siaga 1), worst at ${cleanStationName(s1[0].nama)}.`)
       : "";
     return isId
-      ? `Kondisi berbahaya.${lNote}${stNote} Ikuti arahan BPBD dan bersiap mengungsi. Telepon 117 jika butuh bantuan.`
-      : `Dangerous conditions.${lNote}${stNote} Follow BPBD instructions and get ready to evacuate. Call 117 if you need help.`;
+      ? `Risiko banjir tinggi hari ini.${lNote}${stNote} Ikuti arahan BPBD dan siap mengungsi bila diminta. Butuh bantuan: BPBD 117.`
+      : `Flood risk is high today.${lNote}${stNote} Follow BPBD instructions and be ready to leave if asked. Need help: BPBD 117.`;
   }
 
   if (level === "siaga") {
     const wlrPct = Math.round(wlr * 100);
     const sNote  = s1.length + s2.length > 0
-      ? (isId ? ` ${s1.length + s2.length} pos pantau mendekati atau melewati batas siaga.` : ` ${postsEn(s1.length + s2.length)} near or past the alert limit.`)
+      ? (isId ? ` ${s1.length + s2.length} pos pantau air sudah tinggi.` : ` ${postsEn(s1.length + s2.length)} now high.`)
       : "";
     const wNote  = topW
-      ? (isId ? ` Paling perlu diwaspadai: ${topW.wilayah}.` : ` Watch ${topW.wilayah} most closely.`)
+      ? (isId ? ` Daerah yang paling perlu dicek: ${topW.wilayah}.` : ` Check ${topW.wilayah} first.`)
       : "";
     const lead = learned
-      ? (isId ? `Peluang banjir hari ini ${formatChance(learned.score)}.` : `Today's flood chance is ${formatChance(learned.score)}.`)
+      ? lNote.trim()
       : (isId ? `Air sudah ${wlrPct}% dari batas siaga.` : `Water is at ${wlrPct}% of the alert limit.`);
     return isId
-      ? `${lead}${sNote}${wNote} Siapkan tas darurat dan pantau terus.`
-      : `${lead}${sNote}${wNote} Pack an emergency bag and keep watching.`;
+      ? `${lead}${sNote}${wNote} Sebaiknya mulai bersiap; langkahnya ada di bawah.`
+      : `${lead}${sNote}${wNote} Time to get ready; the steps are below.`;
   }
 
   if (level === "waspada") {
     const tNote = riskTrend === "increasing"
-      ? (isId ? " Risikonya sedang naik." : " The risk is rising.")
+      ? (isId ? " Air cenderung naik." : " Water tends to rise.")
       : riskTrend === "decreasing"
       ? (isId ? " Kondisinya mulai membaik." : " Things are improving.")
-      : "";
-    const alertCount = s1.length + s2.length;
-    const sNote = alertCount > 0
-      ? (isId ? ` ${alertCount} pos pantau berstatus siaga.` : ` ${postsEn(alertCount)} on alert.`)
       : "";
     const rfNote = rainfall > 5
       ? (isId ? ` Sedang hujan ${Math.round(rainfall)} mm/jam.` : ` It's raining ${Math.round(rainfall)} mm/h.`)
@@ -275,12 +273,13 @@ export function buildStatusDesc(riskData, isId) {
     const top = daily && daily.city_level !== "SAFE" && rainPushed ? dailyTopKecamatan(daily, 1)[0] : null;
     const dNote = top
       ? (isId
-          ? ` Hujan beberapa hari terakhir menaikkan peluang banjir hari ini, tertinggi ${formatChance(top.probability)} di Kec. ${top.name}.`
-          : ` Rain over the last few days raises today's flood chance, highest ${formatChance(top.probability)} in ${top.name}.`)
+          ? ` Hujan beberapa hari terakhir ikut menaikkannya; di satu kecamatan peluangnya ${formatChance(top.probability)} (Kec. ${top.name}).`
+          : ` Rain over the last few days adds to it; in a single kecamatan the chance is ${formatChance(top.probability)} (${top.name}).`)
       : "";
+    // Posts at Siaga 2 or 1 are named in the strip under the status, so this sentence does not repeat them.
     return isId
-      ? `Ada tanda awal yang perlu diperhatikan.${lNote}${dNote}${sNote}${tNote}${rfNote} Pantau terus kondisinya.`
-      : `There are early warning signs.${lNote}${dNote}${sNote}${tNote}${rfNote} Keep an eye on conditions.`;
+      ? `Tidak perlu panik, tapi tetap dipantau.${lNote}${dNote}${tNote}${rfNote}`
+      : `No need to worry, but keep an eye on it.${lNote}${dNote}${tNote}${rfNote}`;
   }
 
   // aman — only claim "all normal" when every post really is below Waspada,

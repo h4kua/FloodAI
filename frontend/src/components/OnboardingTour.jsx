@@ -39,6 +39,13 @@ const STEPS = (id) => [
       : "One word: Safe, Watch, Alert or Danger. Updated every 15 minutes from DSDA water posts, the weather and BMKG warnings. The small panel counts the posts at each status.",
   },
   {
+    key: "area", selector: ".area-check-form", icon: Icons.map, accent: "var(--cyan)",
+    title: id ? "Cek daerahku" : "Check my area",
+    desc: id
+      ? "Ketik kelurahan atau kecamatan Anda, atau tekan Pakai lokasi saya. Muncul peluang genangan hari ini, riwayat banjir di sana, pos air dan tempat aman terdekat."
+      : "Type your kelurahan or kecamatan, or tap Use my location. You get today's chance of waterlogging, its flood history, and the nearest water posts and safe places.",
+  },
+  {
     key: "wilayah", selector: ".wilayah-status-list", icon: Icons.grid, accent: "var(--wsp)",
     title: id ? "Status per wilayah" : "Status by area",
     desc: id
@@ -49,8 +56,8 @@ const STEPS = (id) => [
     key: "map", selector: "#map-anchor", icon: Icons.map, accent: "var(--safe)",
     title: id ? "Peta kondisi air" : "Water map",
     desc: id
-      ? "Tiap titik adalah pos pantau, warnanya sama dengan statusnya. Lingkaran merah adalah area rawan banjir yang sedang aktif. Ketuk titik untuk melihat ketinggian airnya."
-      : "Each dot is a water post, coloured by its status. Red circles are flood-prone areas that are active now. Tap a dot to see its water level.",
+      ? "Tiap titik adalah pos pantau, warnanya sama dengan statusnya. Lingkaran merah adalah area rawan banjir yang sedang aktif. Ketuk titik untuk melihat ketinggian airnya, lalu Lihat grafik untuk 2 hari terakhir."
+      : "Each dot is a water post, coloured by its status. Red circles are flood-prone areas that are active now. Tap a dot to see its water level, then Show the last 2 days for a chart.",
   },
   {
     key: "detail", selector: ".collapsible-section", icon: Icons.list, accent: "var(--cyan)",

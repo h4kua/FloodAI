@@ -35,6 +35,11 @@ function periodNote(p, isId) {
   return isId ? `peluang tertinggi ${formatChance(p.peak_chance)}` : `peak chance ${formatChance(p.peak_chance)}`;
 }
 
+function hoursText(p, isId) {
+  const h = Math.max(1, Math.round((Date.parse(p.end) - Date.parse(p.start)) / 3600000));
+  return isId ? `status di atas Aman selama ± ${h} jam` : `status above Safe for about ${h} h`;
+}
+
 function dayLabel(iso, isId) {
   return new Date(`${iso}T00:00:00+07:00`).toLocaleDateString(isId ? "id-ID" : "en-GB",
     { day: "numeric", month: "short", timeZone: "Asia/Jakarta" });
@@ -76,7 +81,12 @@ export default function History() {
     return [0, 0.25, 0.5, 0.75, 1].map((f) => formatWibAt(t0 + f * (t1 - t0), isId, { time: false }));
   }, [points, isId]);
   const rainDays = data?.rain?.days ?? [];
-  const postNames = Object.keys(data?.posts_daily ?? {}).sort();
+  // Only posts that left Normal at least once get a row; the calm rest is one sentence (44 mostly green rows were noise).
+  const { postNames, calmPosts } = useMemo(() => {
+    const all = Object.entries(data?.posts_daily ?? {}).map(([name, days]) => ({ name, top: Math.max(0, ...Object.values(days)) }));
+    const moved = all.filter((p) => p.top > 0).sort((a, b) => b.top - a.top || a.name.localeCompare(b.name));
+    return { postNames: moved.map((p) => p.name), calmPosts: all.length - moved.length };
+  }, [data]);
   const postDays = useMemo(() => {
     const set = new Set();
     Object.values(data?.posts_daily ?? {}).forEach((d) => Object.keys(d).forEach((k) => set.add(k)));
@@ -159,11 +169,12 @@ export default function History() {
               <ul className="history-periods">
                 {data.periods.slice(0, 12).map((p) => (
                   <li key={p.start}>
+                    <span className="history-peak">{isId ? "Puncak" : "Peak"}</span>
                     <RiskBadge level={modelLevelKey(p.peak_level)} />
                     <span>
                       {formatWibAt(p.start, isId)} – {formatWibAt(p.end, isId, { date: formatWibAt(p.start, isId, { time: false }) !== formatWibAt(p.end, isId, { time: false }) })}
                     </span>
-                    <small>{periodNote(p, isId)}</small>
+                    <small>{hoursText(p, isId)}; {periodNote(p, isId)}</small>
                   </li>
                 ))}
               </ul>
@@ -239,7 +250,14 @@ export default function History() {
                 </table>
               </div>
             ) : (
-              <p className="station-sub">{isId ? "Data pos belum tersedia." : "No post data yet."}</p>
+              <p className="station-sub">{calmPosts ? "" : (isId ? "Data pos belum tersedia." : "No post data yet.")}</p>
+            )}
+            {calmPosts > 0 && (
+              <p className="history-note">
+                {isId
+                  ? `${calmPosts} pos lain tetap Normal sepanjang periode ini, jadi tidak ditampilkan.`
+                  : `${calmPosts} other posts stayed Normal for the whole period, so they are not listed.`}
+              </p>
             )}
             <ul className="history-share">
               {BAND_NAME.map((b, i) => <li key={b}><i style={{ background: BAND_COLOR[i] }} /><span>{b}</span></li>)}

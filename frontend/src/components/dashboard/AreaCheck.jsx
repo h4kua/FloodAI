@@ -59,21 +59,51 @@ export default function AreaCheck({ riskData }) {
     else setChosen(null);
   };
 
-  // "Pakai lokasi saya": the nearest area with a known centre (kelurahan where we have one, else kecamatan).
+  // "Pakai lokasi saya": the kecamatan whose centre is nearest, then its kelurahan if we know one within 1 km.
+  // Kelurahan centres exist for only 94 of 253, so the kecamatan is chosen first (the nearest kelurahan
+  // with a centre could belong to the next kecamatan over).
   const [locating, setLocating] = useState(false);
-  const useMyLocation = () => {
-    if (!navigator.geolocation) return;
+  const [geoNote, setGeoNote] = useState("");
+  const locateMe = () => {
+    setGeoNote("");
+    if (!navigator.geolocation) {
+      setGeoNote(isId ? "Browser ini tidak bisa membaca lokasi. Ketik nama daerah Anda di atas." : "This browser cannot read your location. Type your area above.");
+      return;
+    }
     setLocating(true);
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const { latitude: la, longitude: lo } = pos.coords;
-      const near = options
-        .map((o) => ({ o, la: o.kel ? o.kel.lat : o.kec.lat, lo: o.kel ? o.kel.lon : o.kec.lon }))
-        .filter((x) => x.la != null)
-        .map((x) => ({ ...x, d: distanceKm(la, lo, x.la, x.lo) }))
-        .sort((a, b) => a.d - b.d)[0];
-      setLocating(false);
-      if (near && near.d < 15) { setChosen(near.o); setText(near.o.label); writeStored(near.o.label); }
-    }, () => setLocating(false), { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 });
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: la, longitude: lo } = pos.coords;
+        const kecs = options.filter((o) => !o.kel)
+          .map((o) => ({ o, d: distanceKm(la, lo, o.kec.lat, o.kec.lon) }))
+          .sort((a, b) => a.d - b.d);
+        setLocating(false);
+        if (!kecs.length || kecs[0].d > 15) {
+          setGeoNote(isId ? "Lokasi Anda sepertinya di luar Jakarta. Ketik nama daerah di Jakarta yang ingin dicek." : "You seem to be outside Jakarta. Type the Jakarta area you want to check.");
+          return;
+        }
+        const kecOption = kecs[0].o;
+        const kel = options
+          .filter((o) => o.kel && o.kec.slug === kecOption.kec.slug && o.kel.lat != null)
+          .map((o) => ({ o, d: distanceKm(la, lo, o.kel.lat, o.kel.lon) }))
+          .sort((a, b) => a.d - b.d)[0];
+        const hit = kel && kel.d <= 1 ? kel.o : kecOption;
+        setChosen(hit);
+        setText(hit.label);
+        writeStored(hit.label);
+        setGeoNote(isId ? `Lokasi Anda terbaca dekat ${hit.kel ? hit.kel.name : `Kecamatan ${hit.kec.name}`}. Salah? Ketik nama daerah yang benar di atas.`
+                        : `Your location is near ${hit.kel ? hit.kel.name : `${hit.kec.name} kecamatan`}. Wrong? Type the right area above.`);
+      },
+      (err) => {
+        setLocating(false);
+        setGeoNote(err.code === 1
+          ? (isId ? "Izin lokasi ditolak. Aktifkan lokasi untuk situs ini di pengaturan browser, atau ketik nama daerah Anda." : "Location permission was denied. Allow location for this site in your browser settings, or type your area.")
+          : err.code === 3
+            ? (isId ? "Lokasi terlalu lama dibaca. Coba lagi, atau ketik nama daerah Anda." : "Reading your location took too long. Try again, or type your area.")
+            : (isId ? "Lokasi Anda belum bisa dibaca. Coba lagi, atau ketik nama daerah Anda." : "Your location could not be read. Try again, or type your area."));
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
+    );
   };
 
   const lat = chosen?.kel?.lat ?? chosen?.kec.lat;
@@ -122,11 +152,10 @@ export default function AreaCheck({ riskData }) {
         </datalist>
         <button type="submit" className="btn btn-ghost">{isId ? "Cek" : "Check"}</button>
       </form>
-      {"geolocation" in navigator && (
-        <button type="button" className="area-check-locate" onClick={useMyLocation} disabled={locating}>
-          {locating ? (isId ? "Mencari lokasi..." : "Finding you...") : (isId ? "Pakai lokasi saya" : "Use my location")}
-        </button>
-      )}
+      <button type="button" className="area-check-locate" onClick={locateMe} disabled={locating}>
+        {locating ? (isId ? "Mencari lokasi..." : "Finding you...") : (isId ? "Pakai lokasi saya" : "Use my location")}
+      </button>
+      {geoNote && <p className="area-check-geo" role="status">{geoNote}</p>}
 
       {!chosen && text && (
         <p className="station-sub" style={{ margin: 0 }}>

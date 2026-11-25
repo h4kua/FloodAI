@@ -47,8 +47,8 @@ const TODO = {
     en: ["Go about your day as usual.", "Check again when heavy rain starts.", "Know your nearest safe place on the Safe Route page."],
   },
   waspada: {
-    id: ["Cek situs ini atau info BPBD tiap beberapa jam.", "Simpan dokumen penting di tempat tinggi, dalam plastik kedap air.", "Jangan parkir kendaraan di dekat sungai atau saluran air."],
-    en: ["Check this site or BPBD news every few hours.", "Keep important papers up high, in a waterproof bag.", "Don't park near rivers or drains."],
+    id: ["Cek situs ini atau info BPBD tiap beberapa jam.", "Kalau sempat, simpan dokumen penting di tempat yang tinggi.", "Hindari memarkir kendaraan dekat sungai atau saluran air."],
+    en: ["Check this site or BPBD news every few hours.", "If you have a moment, put important papers somewhere high.", "Avoid parking near rivers or drains."],
   },
   siaga: {
     id: ["Siapkan tas siaga: dokumen, obat, senter, power bank, air minum.", "Pindahkan barang berharga dan kendaraan ke tempat yang lebih tinggi.", "Cek jalan yang menghindari banjir di halaman Rute Aman."],
@@ -105,12 +105,12 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
   // AlertRibbon folded in: one red line with real station counts, Siaga only.
   const alertLine = siaga1Count > 0
     ? (isId
-        ? `Siaga 1 — ${siaga1Count} pos pantau di level tertinggi. Hubungi BPBD 117 bila butuh bantuan.`
-        : `Alert 1 — ${siaga1Count === 1 ? "1 post is" : `${siaga1Count} posts are`} at the highest level. Call BPBD 117 if you need help.`)
+        ? `${siaga1Count} pos pantau air sudah di Siaga 1, batas tertinggi. Ikuti info BPBD; butuh bantuan: BPBD 117.`
+        : `${siaga1Count === 1 ? "1 water-level post is" : `${siaga1Count} water-level posts are`} at Alert 1, the highest level. Follow BPBD updates; need help: BPBD 117.`)
     : siaga2Count > 0
     ? (isId
-        ? `Siaga 2 — ${siaga2Count} pos pantau di level Siaga 2. Pantau terus.`
-        : `Alert 2 — ${siaga2Count === 1 ? "1 post is" : `${siaga2Count} posts are`} at Alert 2. Keep watching.`)
+        ? `${siaga2Count} pos pantau air sedang di Siaga 2: air agak tinggi, belum di batas tertinggi.`
+        : `${siaga2Count === 1 ? "1 water-level post is" : `${siaga2Count} water-level posts are`} at Alert 2: water is fairly high, not yet at the highest level.`)
     : null;
 
   return (
@@ -142,7 +142,7 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
 
         {!isStale && TODO[level] && (
           <div className="decision-hero-todo">
-            <p className="decision-hero-todo-title">{isId ? "Yang perlu Anda lakukan" : "What to do"}</p>
+            <p className="decision-hero-todo-title">{isId ? "Yang bisa Anda lakukan" : "What you can do"}</p>
             <ul>{TODO[level][isId ? "id" : "en"].map((x) => <li key={x}>{x}</li>)}</ul>
           </div>
         )}
