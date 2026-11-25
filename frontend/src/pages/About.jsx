@@ -82,17 +82,17 @@ export default function About({ riskContext = {}, onNavigate }) {
   const go = (page) => () => onNavigate?.(page);
 
   const start = [
-    { page: "home", t: id ? "Cek status Jakarta" : "Check Jakarta's status", d: id ? "Aman, Waspada, Siaga atau Bahaya, dan apa yang bisa dilakukan." : "Safe, Watch, Alert or Danger, and what you can do." },
-    { page: "alert", t: id ? "Cari rute aman" : "Find a safe route", d: id ? "Jalan yang menghindari area rawan banjir yang sedang aktif." : "A road that avoids the flood-prone areas that are active now." },
-    { page: "history", t: id ? "Lihat riwayat" : "See the history", d: id ? "Status dan hujan beberapa hari terakhir, hari demi hari." : "Status and rain over the last days, day by day." },
-    { page: "reports", t: id ? "Kirim laporan" : "Send a report", d: id ? "Kabarkan air di sekitar Anda; warga lain ikut melihat." : "Tell others about the water near you." },
+    { page: "home", t: id ? "Cek status Jakarta" : "Check Jakarta's status", d: id ? "Aman sampai Bahaya, dan langkahnya." : "Safe to Danger, and what to do." },
+    { page: "alert", t: id ? "Cari rute aman" : "Find a safe route", d: id ? "Jalan yang menghindari area banjir." : "Roads that avoid flooded areas." },
+    { page: "history", t: id ? "Lihat riwayat" : "See the history", d: id ? "Status dan hujan hari-hari lalu." : "Status and rain on past days." },
+    { page: "reports", t: id ? "Kirim laporan" : "Send a report", d: id ? "Kabarkan air di sekitar Anda." : "Tell others about the water near you." },
   ];
 
   const levels = [
     { key: "AMAN", d: id ? "Tidak ada tanda banjir. Beraktivitas seperti biasa." : "No sign of flooding. Go about your day." },
-    { key: "WASPADA", d: id ? "Ada kemungkinan genangan di beberapa tempat, terutama kalau hujan turun. Tidak perlu panik; pantau info dan hindari parkir di tepi sungai." : "Waterlogging is possible in a few places, mostly if it rains. No need to worry; keep an eye on it and avoid parking by rivers." },
-    { key: "SIAGA", d: id ? "Air sungai sudah tinggi atau peluang genangan besar. Mulai bersiap: tas siaga, dokumen di tempat tinggi, cek Rute Aman." : "River levels are high or waterlogging is quite likely. Start getting ready: a go-bag, papers up high, check Safe Route." },
-    { key: "BAHAYA", d: id ? "Ada pos di batas tertinggi (Siaga 1) atau risikonya sangat tinggi. Ikuti arahan BPBD dan siap mengungsi bila diminta. Darurat: 112." : "A post is at its highest level (Siaga 1) or the risk is very high. Follow BPBD and be ready to leave if asked. Emergency: 112." },
+    { key: "WASPADA", d: id ? "Mungkin ada genangan kalau hujan. Tidak perlu panik; pantau saja." : "Some waterlogging is possible if it rains. No need to worry; just keep an eye on it." },
+    { key: "SIAGA", d: id ? "Air sungai tinggi atau genangan cukup mungkin. Mulai bersiap." : "Rivers are high or waterlogging is likely. Start getting ready." },
+    { key: "BAHAYA", d: id ? "Risiko tinggi. Ikuti arahan BPBD. Darurat: 112." : "High risk. Follow BPBD. Emergency: 112." },
   ];
 
   return (
@@ -102,15 +102,14 @@ export default function About({ riskContext = {}, onNavigate }) {
           <h1 className="page-title">{id ? "Tentang deFlood.ai" : "About deFlood.ai"}</h1>
           <p className="page-sub">
             {id
-              ? "Untuk dua hal saja: memperkirakan banjir di Jakarta, dan menunjukkan jalan yang tidak melewati genangan."
-              : "For two things only: estimating flooding in Jakarta, and showing roads that avoid waterlogging."}
+              ? "Memperkirakan banjir di Jakarta dan menunjukkan jalan yang menghindari genangan."
+              : "Estimating flooding in Jakarta and showing roads that avoid waterlogging."}
           </p>
         </div>
       </div>
 
       <div className="doc fade-in">
-        <Doc id="about-start" title={id ? "Mulai dari sini" : "Start here"}
-             note={id ? "Pilih yang Anda perlukan sekarang." : "Pick what you need now."}>
+        <Doc id="about-start" title={id ? "Mulai dari sini" : "Start here"}>
           <div className="start-links">
             {start.map((s) => (
               <button key={s.page} type="button" className="start-link" onClick={go(s.page)}>
@@ -121,8 +120,7 @@ export default function About({ riskContext = {}, onNavigate }) {
           </div>
         </Doc>
 
-        <Doc id="about-status" title={id ? "Arti status" : "What the status means"}
-             note={id ? "Satu kata untuk seluruh Jakarta, diperbarui tiap 15 menit." : "One word for all of Jakarta, updated every 15 minutes."}>
+        <Doc id="about-status" title={id ? "Arti status" : "What the status means"}>
           <ul className="status-key">
             {levels.map((l) => (
               <li key={l.key}>
@@ -133,81 +131,58 @@ export default function About({ riskContext = {}, onNavigate }) {
           </ul>
         </Doc>
 
-        <Doc id="about-how" title={id ? "Dari data sampai status" : "From data to status"}>
+        <Doc id="about-how" title={id ? "Cara kerjanya" : "How it works"}>
           <ol className="how-steps">
             <li>
-              <b>{id ? "Data masuk." : "Data comes in."}</b>{" "}
-              {id ? "Tiap 15 menit kami membaca ketinggian air di pos pantau sungai dan pintu air, cuaca, dan peringatan BMKG. Hujan satelit NASA ikut dibaca; datanya tiba sekitar 5 jam setelah hujan."
-                  : "Every 15 minutes we read water levels at river and gate posts, the weather and BMKG warnings. NASA satellite rain is read too; it arrives about 5 hours after the rain."}
+              {id ? "Tiap 15 menit kami membaca tinggi air di pos sungai, cuaca, dan peringatan BMKG."
+                  : "Every 15 minutes we read river-post water levels, weather and BMKG warnings."}
             </li>
             <li>
-              <b>{id ? "Peluang tiap kecamatan." : "A chance for each kecamatan."}</b>{" "}
-              {id ? "Model harian, dilatih dengan catatan genangan BPBD 2013–2025, memperkirakan peluang ada genangan di tiap kecamatan hari ini dari hujan beberapa hari terakhir."
-                  : "A daily model, trained on BPBD waterlogging records from 2013–2025, estimates today's chance of waterlogging in each kecamatan from the last few days of rain."}
+              {id ? "Model menghitung peluang genangan tiap kecamatan dari hujan satelit beberapa hari terakhir, dilatih dengan catatan BPBD 2013–2025."
+                  : "A model estimates each kecamatan's waterlogging chance from recent satellite rain, trained on BPBD records from 2013–2025."}
             </li>
             <li>
-              <b>{id ? "Peluang untuk Jakarta, lalu status." : "A chance for Jakarta, then the status."}</b>{" "}
-              {id ? "Model keputusan menggabungkannya dengan status pos sungai sekarang dan kemarin serta hujan hari ini. Di depannya ada aturan keselamatan: pos di Siaga 1 selalu berarti Bahaya, dan peringatan BMKG yang parah berarti minimal Siaga."
-                  : "A decision model combines it with the river posts now and yesterday and today's rain. Safety rules sit in front of it: a post at Siaga 1 always means Danger, and a severe BMKG warning means at least Alert."}
-            </li>
-            <li>
-              <b>{id ? "Pos yang memang selalu tinggi." : "Posts that are always high."}</b>{" "}
-              {id ? "P.A. Cengkareng Drain dan dua pos laut (Marina Ancol, Pompa Pasar Ikan) naik turun mengikuti pasang laut dan pintu air. Status resminya tetap tampil, tapi untuk status Jakarta dan lingkaran merah di peta mereka dihitung satu tingkat lebih rendah, supaya tidak membuat status naik terus."
-                  : "P.A. Cengkareng Drain and two sea posts (Marina Ancol, Pompa Pasar Ikan) rise and fall with the tide and the gates. Their official status is still shown, but for Jakarta's status and the red circles on the map they count one level lower, so they do not keep the status up."}
+              {id ? "Hasilnya digabung dengan status pos sungai menjadi satu status untuk Jakarta. Pos di Siaga 1 selalu berarti Bahaya."
+                  : "That is combined with the river posts into one status for Jakarta. A post at Siaga 1 always means Danger."}
             </li>
           </ol>
           <p className="doc-aside">
-            {id ? "Lingkaran merah di peta hanya muncul di area rawan banjir yang sungainya sedang di Siaga 2 atau Siaga 1. Itu bukan kepastian banjir: pada catatan 2016–2021, area seperti itu tercatat banjir sekitar 1 dari 4 hari, dibanding 1 dari 60 hari biasa."
-                : "Red circles on the map appear only on flood-prone areas whose river is at Alert 2 or Alert 1. That is not a certainty: in the 2016–2021 records such areas had a recorded flood on about 1 day in 4, against 1 in 60 on normal days."}
+            {id ? "Lingkaran merah di peta bukan kepastian banjir: area seperti itu tercatat banjir sekitar 1 dari 4 hari, dibanding 1 dari 60 hari biasa."
+                : "A red circle on the map is not a certain flood: such areas flooded about 1 day in 4, against 1 in 60 on normal days."}
           </p>
         </Doc>
 
-        <Doc id="about-trust" title={id ? "Seberapa bisa dipercaya" : "How far to trust it"}
-             note={id ? "Diuji pada hari yang tidak dipakai untuk melatih." : "Tested on days that were not used for training."}>
+        <Doc id="about-trust" title={id ? "Seberapa bisa dipercaya" : "How far to trust it"}>
           <ul className="doc-list">
-            <li>
-              {id ? "Pada tahun-tahun yang diuji (2019–2021, 2025), model memberi peluang lebih tinggi pada hari banjir daripada hari biasa sekitar 8 dari 10 kali."
-                  : "On the years tested (2019–2021, 2025), the model gave a higher chance to flood days than to ordinary days about 8 times in 10."}
-            </li>
-            <li>
-              {id ? "Uji lagi untuk Januari–Mei 2026 dengan 34 hari banjir dari berita: 6 dari 10 hari banjir, dan 8 dari 10 banjir besar, berstatus Waspada atau lebih. Hasilnya sebanding dengan aturan sederhana “hujan 7 hari terakhir”, bukan lebih baik."
-                  : "A further test on January–May 2026 with 34 flood days from the news: 6 in 10 flood days, and 8 in 10 large floods, showed Watch or higher. That is about as good as the simple rule “rain over the last 7 days”, not better."}
-            </li>
-            <li>
-              {id ? "Dua banjir terbesar 2026 (29 Jan dan 8 Mar) tidak tertangkap. Hujan di satelit pada hari-hari itu tidak ekstrem, jadi banjir yang tidak diawali hujan lebat di Jakarta, Bogor atau Depok bisa terlewat."
-                  : "The two largest floods of 2026 (29 Jan and 8 Mar) were missed. The satellite rain on those days was not extreme, so floods that do not follow heavy rain over Jakarta, Bogor or Depok can slip through."}
-            </li>
-            <li>
-              {id ? "Angka peluang biasanya kecil (10–40%): artinya peluang ada genangan di salah satu kecamatan hari itu, bukan peluang banjir besar. Genangan kecil sering tidak tercatat, dan catatan BPBD setelah 2022 belum lengkap."
-                  : "The chances are usually small (10–40%): they are the chance of waterlogging in at least one kecamatan that day, not of a big flood. Small waterlogging often goes unrecorded, and BPBD records after 2022 are incomplete."}
-            </li>
-            <li>
-              {id ? "Di musim hujan (Januari–Februari) status Waspada muncul hampir setiap hari. Itu peringatan ringan, bukan tanda bahaya."
-                  : "In the rainy season (January–February) the Watch status shows on almost every day. That is a light notice, not a sign of danger."}
-            </li>
+            {(id ? [
+              "Pada hari-hari uji, model memberi peluang lebih tinggi pada hari banjir sekitar 8 dari 10 kali.",
+              "Uji Januari–Mei 2026: 6 dari 10 hari banjir tertangkap, sama baiknya dengan aturan sederhana “hujan 7 hari terakhir”. Dua banjir terbesar (29 Jan, 8 Mar) terlewat.",
+              "Peluang biasanya kecil (10–40%). Itu peluang genangan di satu kecamatan, bukan banjir besar.",
+              "Di musim hujan, Waspada muncul hampir tiap hari. Itu peringatan ringan.",
+            ] : [
+              "On test days, the model gave flood days a higher chance about 8 times in 10.",
+              "Jan–May 2026 test: 6 in 10 flood days caught, as good as the simple rule “rain over the last 7 days”. The two largest floods (29 Jan, 8 Mar) were missed.",
+              "Chances are usually small (10–40%). That is the chance of waterlogging in one kecamatan, not a big flood.",
+              "In the rainy season, Watch shows almost daily. It is a light notice.",
+            ]).map((text) => <li key={text}>{text}</li>)}
           </ul>
         </Doc>
 
         <Doc id="about-know" title={id ? "Penting diketahui" : "Good to know"}>
           <ul className="doc-list">
             {(id ? [
-              "Situs ini alat bantu, bukan pengganti informasi resmi dari BPBD, BMKG, atau BNPB. Saat darurat, ikuti arahan petugas.",
-              "Rute Aman adalah perkiraan dari titik rawan banjir BPBD, bukan kondisi jalan langsung. Cek jalan sendiri sebelum berangkat.",
-              "Data bisa terlambat bila pos pantau belum mengirim pembaruan.",
-              "Laporan warga belum diverifikasi, tampil 6 jam, dan tidak mengubah status resmi.",
-              "Pilihan daerah di Cek daerahku hanya disimpan di perangkat Anda.",
+              "Alat bantu, bukan pengganti info resmi BPBD, BMKG, atau BNPB.",
+              "Rute Aman adalah perkiraan dari titik rawan BPBD, bukan kondisi jalan langsung. Cek sendiri sebelum berangkat.",
+              "Laporan warga belum diverifikasi dan tidak mengubah status resmi.",
             ] : [
-              "This site is an aid, not a replacement for official information from BPBD, BMKG or BNPB. In an emergency, follow the officers.",
-              "Safe Route is an estimate from BPBD flood-prone points, not live road conditions. Check the road yourself before you go.",
-              "Data can be late if a monitoring post has not sent an update.",
-              "Community reports are unverified, shown for 6 hours and never change the official status.",
-              "The area you choose in Check my area is kept on your device only.",
+              "An aid, not a replacement for official BPBD, BMKG or BNPB information.",
+              "Safe Route is an estimate from BPBD flood-prone points, not live road conditions. Check it yourself before you go.",
+              "Community reports are unverified and never change the official status.",
             ]).map((text) => <li key={text}>{text}</li>)}
           </ul>
         </Doc>
 
-        <Doc id="about-team" title={id ? "Tim pengembang" : "The team"}
-             note={id ? "Dibuat oleh mahasiswa sebagai kontribusi untuk peringatan dini banjir di Jakarta." : "Built by students as a contribution to early flood warning in Jakarta."}>
+        <Doc id="about-team" title={id ? "Tim pengembang" : "The team"}>
           <div className="team-grid">
             <TeamCard role={id ? "Ketua Project" : "Project Lead"} roleType="lead" name="Juan Javier SZ" linkedin="https://www.linkedin.com/in/juanjaviersz/" />
             <TeamCard role={id ? "Anggota Tim" : "Team Member"} roleType="member" name="Jessen Wijaya Agussalim" linkedin="https://www.linkedin.com/in/jessen-wijaya-agussalim" />
@@ -223,7 +198,7 @@ export default function About({ riskContext = {}, onNavigate }) {
         iconBg="var(--cyan-soft)"
         iconColor="var(--cyan)"
         title={id ? "Detail teknis" : "Technical details"}
-        subtitle={id ? "Performa model, sumber data, dan teknologi" : "Model performance, data sources, and stack"}
+        subtitle={id ? "Performa model, data, teknologi" : "Model performance, data, stack"}
       >
         <div className="doc">
           <Doc id="tech-perf" title={id ? "Performa model" : "Model performance"}

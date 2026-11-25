@@ -203,6 +203,12 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   no flood reported; Waspada on 7 days (learned) and 7 (rules), not the same days. Re-run monthly through the season.
 
 ## Resolved
+- 2026-11-25 (night): Riwayat had a gap (the day tiles auto-filled 13 columns, so the 14th sat alone on a second row, and on a wide
+  screen the detail used half the width). The calendar is now a real Monday-first week grid (7 columns, weekday header, leading
+  blanks) beside the picked day on desktop (>= 900 px), stacked on a phone; under 600 px a tile shows the level's first letter, under
+  370 px the tiles go back to a wrapped grid with the full word. Text cut across the site (words in `main`: Beranda 356 -> 300,
+  Tentang 615 -> 299, Rute Aman 144 -> 106): the Waspada sentence no longer names a kecamatan, the technical detail stays under
+  "Detail teknis", notes under charts are one line. Tap targets under 44 px on phones fixed (range buttons, LinkedIn, Cek, map switches).
 - 2026-11-25 (evening): red areas on a low chance. Cengkareng Drain (flagged `chronic`: sits at Siaga 2-3 for days) lit five red
   areas in Jakarta Barat while the kecamatan chance was 5-10 %. Two faults: the map used the raw DSDA band (the city status already
   counts chronic posts one lower), and the popup's "25 % of days" came from `scripts/active_area_chance.py`, whose archive has 9 posts

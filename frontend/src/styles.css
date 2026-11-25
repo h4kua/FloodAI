@@ -1640,23 +1640,30 @@ button, input, select, textarea { font-family: inherit; }
 .hist-share-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
 .hist-share-legend b { color: var(--text); }
 .hist-share-note { margin-left: auto; }
-.hist-cal { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 0.5rem; }
+.hist-body { display: grid; gap: 1.25rem; align-items: start; }
+@media (min-width: 900px) { .hist-body { grid-template-columns: minmax(320px, 34rem) minmax(0, 1fr); gap: 2.5rem; } }
+.hist-calwrap { min-width: 0; }
+.hist-cal-head, .hist-cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.3rem; }
+.hist-cal-head { margin-bottom: 0.3rem; font-size: 0.75rem; color: var(--muted); text-align: center; }
+.hist-more { display: flex; flex-direction: column; }
+.hist-detail-main { font-size: 1.05rem; }
 .hist-day {
   --c: var(--line-2);
-  font: inherit; color: var(--text); text-align: left; cursor: pointer; min-height: 88px;
-  display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto auto; align-items: baseline; gap: 0.1rem 0.4rem;
-  padding: 0.5rem 0.6rem 0.55rem; border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: var(--r-sm);
+  font: inherit; color: var(--text); text-align: left; cursor: pointer; min-height: 76px; min-width: 0;
+  display: grid; grid-template-columns: 1fr; align-content: start; gap: 0.1rem;
+  padding: 0.4rem 0.4rem 0.45rem; border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: var(--r-sm);
   background: color-mix(in srgb, var(--c) 11%, var(--panel));
 }
 .hist-day.is-empty { background: var(--panel); border-top-color: var(--line); color: var(--muted-2); }
 .hist-day.is-selected { outline: 2px solid var(--text); outline-offset: 1px; }
 .hist-day:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
-.hist-day-wd { font-size: 0.75rem; color: var(--muted); }
-.hist-day-n { font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; justify-self: end; line-height: 1; }
-.hist-day-level { grid-column: 1 / -1; font-size: 0.85rem; font-weight: 700; }
-.hist-day-rain { grid-column: 1 / -1; font-size: 0.75rem; color: var(--muted); }
+.hist-day-wd { display: none; font-size: 0.75rem; color: var(--muted); }
+.hist-day-n { font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; line-height: 1.1; }
+.hist-day-level { font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+.hist-day-rain { font-size: 0.75rem; color: var(--muted); }
 .hist-legend-note { font-size: 0.8rem; color: var(--muted); margin: 0.6rem 0 0; }
-.hist-detail { border-top: 1px solid var(--line); padding-top: 1rem; max-width: 70ch; }
+.hist-detail { min-width: 0; }
+@media (max-width: 899px) { .hist-detail { border-top: 1px solid var(--line); padding-top: 1rem; } }
 .hist-detail p { margin: 0 0 0.45rem; line-height: 1.55; }
 .hist-muted { color: var(--muted); font-size: 0.9rem; }
 .hist-note { font-size: 0.8rem; color: var(--muted); margin: 0; line-height: 1.5; max-width: 70ch; }
@@ -1670,7 +1677,23 @@ button, input, select, textarea { font-family: inherit; }
 .hist-rain-row small { grid-column: 2 / -1; color: var(--muted); font-size: 0.75rem; margin-bottom: 0.25rem; }
 .hist-telegram { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 1rem; }
 .hist-telegram p { margin: 0; color: var(--muted); font-size: 0.9rem; max-width: 56ch; line-height: 1.5; }
-@media (max-width: 480px) { .hist-cal { grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); } .hist-share-note { margin-left: 0; } }
+.hist-lv-init { display: none; }
+@media (max-width: 599px) {
+  .hist-cal-head, .hist-cal { gap: 0.2rem; }
+  .hist-day { padding: 0.35rem 0.2rem 0.4rem; text-align: center; }
+  .hist-lv-full { display: none; }
+  .hist-lv-init { display: inline; font-size: 0.9rem; }
+  .hist-day-rain { font-size: 0.75rem; }
+}
+@media (max-width: 369px) {
+  .hist-cal-head, .hist-pad { display: none; }
+  .hist-cal { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 0.4rem; }
+  .hist-day { text-align: left; padding: 0.4rem 0.5rem; }
+  .hist-day-wd { display: block; }
+  .hist-lv-full { display: inline; }
+  .hist-lv-init { display: none; }
+}
+
 .hist-issue { border-left: 3px solid var(--wsp); padding: 0.35rem 0 0.35rem 0.75rem; background: color-mix(in srgb, var(--wsp) 8%, transparent); font-size: 0.9rem; color: var(--text); }
 
 /* ── Document layout (Tentang): title on the left, text on the right ───────── */
@@ -1702,4 +1725,11 @@ button, input, select, textarea { font-family: inherit; }
 @media (max-width: 760px) {
   .doc-sec { grid-template-columns: 1fr; gap: 0.6rem; padding: 1.25rem 0; }
   .status-key li { grid-template-columns: 1fr; gap: 0.3rem; }
+}
+
+/* Tap targets: every button a resident presses is at least 44 px tall on a phone. */
+@media (max-width: 768px) {
+  .history-range-btn, .li-btn, .btn { min-height: 44px; }
+  .history-range-btn { min-width: 44px; }
+  .li-btn { justify-content: center; }
 }

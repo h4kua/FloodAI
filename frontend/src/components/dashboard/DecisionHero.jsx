@@ -43,20 +43,20 @@ function PostGauge({ stations, isId }) {
 /* What a resident should do at each level, in plain words (BPBD DKI preparedness advice). */
 const TODO = {
   aman: {
-    id: ["Beraktivitas seperti biasa.", "Buka lagi situs ini saat hujan deras turun.", "Kenali tempat aman terdekat di halaman Rute Aman."],
-    en: ["Go about your day as usual.", "Check again when heavy rain starts.", "Know your nearest safe place on the Safe Route page."],
+    id: ["Beraktivitas seperti biasa.", "Cek lagi saat hujan deras.", "Kenali tempat aman terdekat (halaman Rute Aman)."],
+    en: ["Go about your day as usual.", "Check again in heavy rain.", "Know your nearest safe place (Safe Route page)."],
   },
   waspada: {
-    id: ["Cek situs ini atau info BPBD tiap beberapa jam.", "Kalau sempat, simpan dokumen penting di tempat yang tinggi.", "Hindari memarkir kendaraan dekat sungai atau saluran air."],
-    en: ["Check this site or BPBD news every few hours.", "If you have a moment, put important papers somewhere high.", "Avoid parking near rivers or drains."],
+    id: ["Cek situs ini tiap beberapa jam.", "Simpan dokumen penting di tempat tinggi.", "Jangan parkir dekat sungai atau saluran."],
+    en: ["Check this site every few hours.", "Keep important papers somewhere high.", "Do not park near rivers or drains."],
   },
   siaga: {
-    id: ["Siapkan tas siaga: dokumen, obat, senter, power bank, air minum.", "Pindahkan barang berharga dan kendaraan ke tempat yang lebih tinggi.", "Cek jalan yang menghindari banjir di halaman Rute Aman."],
-    en: ["Pack a go-bag: papers, medicine, torch, power bank, water.", "Move valuables and vehicles to higher ground.", "Check a route around flood areas on the Safe Route page."],
+    id: ["Siapkan tas siaga: dokumen, obat, senter, air minum.", "Pindahkan barang berharga dan kendaraan ke tempat tinggi.", "Cek jalan yang aman di halaman Rute Aman."],
+    en: ["Pack a go-bag: papers, medicine, torch, water.", "Move valuables and vehicles to higher ground.", "Check a safe route on the Safe Route page."],
   },
   bahaya: {
-    id: ["Segera mengungsi bila air mulai masuk atau petugas meminta.", "Matikan listrik dari meteran sebelum air masuk rumah.", "Jangan menyeberangi arus banjir, juga dengan kendaraan. Darurat: 112."],
-    en: ["Leave right away if water comes in or officials ask you to.", "Switch off the power at the meter before water gets in.", "Never cross flowing floodwater, on foot or by vehicle. Emergency: 112."],
+    id: ["Mengungsi bila air masuk atau petugas meminta.", "Matikan listrik dari meteran sebelum air masuk.", "Jangan seberangi arus banjir. Darurat: 112."],
+    en: ["Leave if water comes in or officials ask.", "Switch off the power at the meter first.", "Never cross flowing floodwater. Emergency: 112."],
   },
 };
 
@@ -105,16 +105,16 @@ export default function DecisionHero({ riskData, siaga1Count = 0, siaga2Count = 
   // AlertRibbon folded in: one red line with real station counts, Siaga only.
   const alertLine = siaga1Count > 0
     ? (isId
-        ? `${siaga1Count} pos pantau air sudah di Siaga 1, batas tertinggi. Ikuti info BPBD; butuh bantuan: BPBD 117.`
-        : `${siaga1Count === 1 ? "1 water-level post is" : `${siaga1Count} water-level posts are`} at Alert 1, the highest level. Follow BPBD updates; need help: BPBD 117.`)
+        ? `${siaga1Count} pos air di Siaga 1 (tertinggi). Ikuti info BPBD. Bantuan: 117.`
+        : `${siaga1Count === 1 ? "1 water-level post is" : `${siaga1Count} water-level posts are`} at Alert 1, the highest level. Follow BPBD. Help: 117.`)
     : siaga2Count > 0
     ? (isId
-        ? `${siaga2Count} pos pantau air sedang di Siaga 2: air agak tinggi, belum di batas tertinggi.`
-        : `${siaga2Count === 1 ? "1 water-level post is" : `${siaga2Count} water-level posts are`} at Alert 2: water is fairly high, not yet at the highest level.`)
+        ? `${siaga2Count} pos air di Siaga 2: agak tinggi, belum tertinggi.`
+        : `${siaga2Count === 1 ? "1 water-level post is" : `${siaga2Count} water-level posts are`} at Alert 2: fairly high, not the highest.`)
     : usualSiaga2Count > 0
     ? (isId
-        ? `${usualSiaga2Count} pos pantau air di Siaga 2, tapi pos ini memang sering tinggi (pasang laut dan pintu air), jadi tidak menaikkan status.`
-        : `${usualSiaga2Count === 1 ? "1 water-level post is" : `${usualSiaga2Count} water-level posts are`} at Alert 2, but ${usualSiaga2Count === 1 ? "it is" : "they are"} often high (tide and gates), so it does not raise the status.`)
+        ? `${usualSiaga2Count} pos air di Siaga 2, memang sering tinggi (pasang laut, pintu air), tidak menaikkan status.`
+        : `${usualSiaga2Count === 1 ? "1 water-level post is" : `${usualSiaga2Count} water-level posts are`} at Alert 2, but ${usualSiaga2Count === 1 ? "it is" : "they are"} often high (tide, gates); it does not raise the status.`)
     : null;
 
   return (

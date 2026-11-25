@@ -140,8 +140,8 @@ export default function AreaCheck({ riskData }) {
       <p id="area-check-title" className="station-title">{isId ? "Cek daerahku" : "Check my area"}</p>
       <p className="station-sub" style={{ marginBottom: 0 }}>
         {isId
-          ? "Ketik nama kelurahan atau kecamatan di Jakarta. Pilihan disimpan di perangkat ini saja."
-          : "Type a kelurahan or kecamatan in Jakarta. Your choice is kept on this device only."}
+          ? "Ketik kelurahan atau kecamatan. Disimpan di perangkat ini saja."
+          : "Type a kelurahan or kecamatan. Kept on this device only."}
       </p>
       <form className="area-check-form" onSubmit={submit} role="search">
         <input list="area-check-options" value={text} onChange={(e) => pick(e.target.value)}
@@ -218,15 +218,15 @@ export default function AreaCheck({ riskData }) {
                   ))}
                 </ul>
               ) : <p>{isId ? "Tidak bisa dimuat saat ini." : "Could not be loaded right now."}</p>}
-            <p>{isId ? "Kandidat dari survei OSM/InAWARE, bukan daftar resmi. Rute ada di halaman Rute Aman." : "Candidates from the OSM/InAWARE survey, not an official list. Routes are on the Safe Route page."}</p>
+            <p>{isId ? "Kandidat dari survei OSM, bukan daftar resmi." : "Candidates from an OSM survey, not an official list."}</p>
           </div>
         </div>
       )}
       {chosen && (
         <p className="area-check-foot">
           {isId
-            ? "Riwayat: hari dengan banjir yang dicatat BPBD DKI; catatan 2023–2025 belum lengkap. Peluang hari ini berlaku untuk seluruh kecamatan."
-            : "History: days with a flood recorded by BPBD DKI; 2023–2025 records are incomplete. Today's chance is for the whole kecamatan."}
+            ? "Riwayat = hari banjir menurut BPBD (2023–2025 belum lengkap)."
+            : "History = flood days per BPBD (2023–2025 incomplete)."}
         </p>
       )}
     </section>

@@ -56,17 +56,14 @@ test("the daily model card lists the highest chances first", () => {
   assert.equal(formatChance(0), "0%");
 });
 
-test("a Waspada raised by the daily model says why", () => {
+test("a Waspada raised by the daily model stays short and calm", () => {
   const dailyModel = { city_level: "PRE_ALERT", kecamatan: {
     jatinegara: { name: "Jatinegara", probability: 0.17, risk_level: "PRE_ALERT" },
     tebet: { name: "Tebet", probability: 0.05, risk_level: "SAFE" },
   } };
   const text = buildStatusDesc({ level: "waspada", dailyModel }, true);
-  assert.match(text, /Hujan beberapa hari terakhir/);
-  assert.match(text, /peluangnya 17% \(Kec\. Jatinegara\)/);
   assert.match(text, /^Tidak perlu panik/);
-  const quiet = buildStatusDesc({ level: "waspada", dailyModel: { ...dailyModel, city_level: "SAFE" } }, true);
-  assert.doesNotMatch(quiet, /Hujan beberapa hari/);
+  assert.doesNotMatch(text, /Hujan beberapa hari/);
 });
 
 test("a level set by the learned decision layer leads with today's flood chance", () => {

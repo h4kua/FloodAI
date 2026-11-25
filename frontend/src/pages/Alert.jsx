@@ -420,8 +420,8 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           <h1 className="page-title">{t("evac.title")}</h1>
           <p className="page-sub">
             {lang === "en"
-              ? "A way around flood-prone areas: home, to the nearest safe place, or to any address."
-              : "Jalan yang menghindari area rawan banjir: pulang, ke tempat aman terdekat, atau ke alamat lain."}
+              ? "A road around flood-prone areas."
+              : "Jalan yang menghindari area rawan banjir."}
           </p>
         </div>
         <span
@@ -444,7 +444,7 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           <p>
             {floodPoints.length
               ? (lang === "en" ? "The route avoids the red areas when another road exists." : "Rute menghindari area merah bila ada jalan lain.")
-              : (lang === "en" ? "Most roads should be fine, but check the road yourself before you go." : "Jalan mana pun relatif aman, tapi tetap cek kondisi jalan sebelum berangkat.")}
+              : (lang === "en" ? "Roads should be fine. Still check before you go." : "Jalan relatif aman. Tetap cek sebelum berangkat.")}
           </p>
         </div>
 
@@ -554,8 +554,8 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
 
         {!userLocation && (
           <ol className="evac-steps">
-            <li>{lang === "en" ? "Choose where you start: the green button, an address, or a tap on the map." : "Pilih titik berangkat: tombol hijau, ketik alamat, atau ketuk peta."}</li>
-            <li>{lang === "en" ? "Choose where to go: home, the nearest safe place, or any address." : "Pilih tujuan: rumah, tempat aman terdekat, atau alamat lain."}</li>
+            <li>{lang === "en" ? "Pick a start: green button, address, or tap the map." : "Pilih titik berangkat: tombol hijau, alamat, atau ketuk peta."}</li>
+            <li>{lang === "en" ? "Pick a destination: home, a safe place, or an address." : "Pilih tujuan: rumah, tempat aman, atau alamat."}</li>
             <li>{lang === "en" ? "Follow the green line. Red crosses a flood-prone area." : "Ikuti garis hijau. Garis merah lewat area rawan banjir."}</li>
           </ol>
         )}
@@ -625,8 +625,8 @@ export default function Alert({ riskLevel = "waspada", rainfall = 0 }) {
           </ul>
           <p>
             {lang === "en"
-              ? "An estimate from BPBD flood-prone points near rivers whose water-level post is on alert (all points in heavy rain) — not live road conditions. Check the road yourself before you go."
-              : "Perkiraan dari titik rawan banjir BPBD di sungai yang pos pantaunya berstatus Siaga (semua titik saat hujan deras) — bukan kondisi jalan langsung. Tetap cek kondisi jalan sebelum berangkat."}
+              ? "An estimate from BPBD flood-prone points, not live road conditions. Check the road before you go."
+              : "Perkiraan dari titik rawan BPBD, bukan kondisi jalan langsung. Cek jalan sebelum berangkat."}
           </p>
         </div>
       </div>

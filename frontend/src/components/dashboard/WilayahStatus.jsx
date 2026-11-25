@@ -26,8 +26,8 @@ export default function WilayahStatus({ riskData }) {
       </p>
       <p className="station-sub" style={{ marginBottom: 0 }}>
         {isId
-          ? "Menurut pos pantau air dengan kondisi terparah di tiap wilayah."
-          : "Based on the worst water-level post in each area."}
+          ? "Pos terparah di tiap wilayah."
+          : "The worst post in each area."}
       </p>
       <ul className="wilayah-status-list">
         {groups.map((g) => (

@@ -28,12 +28,12 @@ const BAND_NAME = ["Normal", "Siaga 3", "Siaga 2", "Siaga 1"];
 // Days whose recorded status is known to be wrong, with the reason: shown under the day instead of rewriting the log.
 const KNOWN_ISSUES = {
   "2026-11-24": {
-    id: "Bahaya pada hari ini sebagian besar adalah kesalahan sistem: aturan keselamatan membaca kenaikan kecil di Bendung Katulampa sebagai banjir kiriman. Sudah diperbaiki pada 25 Nov.",
-    en: "Most of today's Danger was a system error: a safety rule read a small rise at Bendung Katulampa as an upstream flood surge. Fixed on 25 Nov.",
+    id: "Sebagian besar Bahaya hari ini adalah galat sistem (kenaikan kecil di Katulampa terbaca sebagai banjir kiriman). Sudah diperbaiki 25 Nov.",
+    en: "Most of this Danger was a system error (a small rise at Katulampa read as an upstream surge). Fixed 25 Nov.",
   },
   "2026-11-25": {
-    id: "Bahaya sampai sekitar pukul 09.35 WIB adalah kesalahan sistem yang sama dengan 24 Nov, sudah diperbaiki. Setelah itu statusnya Waspada.",
-    en: "Danger until about 09:35 WIB was the same system error as on 24 Nov, now fixed. After that the status was Watch.",
+    id: "Bahaya sampai 09.35 WIB adalah galat yang sama, sudah diperbaiki. Setelah itu Waspada.",
+    en: "Danger until 09:35 WIB was the same error, now fixed. Watch after that.",
   },
 };
 
@@ -42,6 +42,10 @@ const keyDate = (key) => new Date(`${key}T12:00:00+07:00`);
 const fmt = (key, isId, opts) => keyDate(key).toLocaleDateString(isId ? "id-ID" : "en-GB", { timeZone: "Asia/Jakarta", ...opts });
 const mm = (v) => (v == null ? "–" : `${Math.round(v)} mm`);
 const shortPost = (name) => (name || "").replace(/^(P\.A\.|P\.S\.|Pompa|Rumah Pompa|Bendung\.?)\s*/i, "").replace(/\s+\d+$/, "");
+
+const WEEKDAYS = { id: ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"], en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] };
+/** Monday-first column of a WIB day (0 = Monday). */
+const weekdayCol = (key) => (keyDate(key).getUTCDay() + 6) % 7;
 
 function lastDays(n) {
   const out = [];
@@ -139,8 +143,8 @@ export default function History() {
   const summary = !logged
     ? (isId ? "Belum ada data untuk rentang ini." : "No data for this range yet.")
     : isId
-      ? `Dalam ${days} hari terakhir, ${dayCounts.SAFE} dari ${logged} hari tercatat Aman sepanjang hari.${hot ? ` Status Siaga atau Bahaya muncul di ${hot} hari.` : " Status tidak pernah mencapai Siaga."}`
-      : `Over the last ${days} days, ${dayCounts.SAFE} of ${logged} days stayed Safe all day.${hot ? ` Alert or Danger showed on ${hot} days.` : " The status never reached Alert."}`;
+      ? `${dayCounts.SAFE} dari ${logged} hari Aman sepanjang hari.${hot ? ` Siaga atau Bahaya: ${hot} hari.` : ""}`
+      : `${dayCounts.SAFE} of ${logged} days stayed Safe all day.${hot ? ` Alert or Danger: ${hot} days.` : ""}`;
 
   const rainDays = data?.rain?.days ?? [];
   const postRows = useMemo(() => {
@@ -160,16 +164,15 @@ export default function History() {
     { y: 0.2, label: `${names.PRE_ALERT} 20%`, color: "var(--wsp)" },
   ];
 
+  const lead = weekdayCol(keys[0]);
+  const wdNames = WEEKDAYS[isId ? "id" : "en"];
+
   return (
     <>
       <div className="page-header fade-in">
         <div>
           <h1 className="page-title">{isId ? "Riwayat" : "History"}</h1>
-          <p className="page-sub">
-            {isId
-              ? "Status yang ditampilkan situs ini tiap hari, dan hujan yang turun. Ketuk satu hari untuk melihat rinciannya."
-              : "The status this site showed each day, and the rain that fell. Tap a day for its detail."}
-          </p>
+          <p className="page-sub">{isId ? "Status tiap hari. Ketuk satu hari untuk rinciannya." : "The status each day. Tap a day for detail."}</p>
         </div>
         <div className="history-range" role="group" aria-label={isId ? "Rentang waktu" : "Time range"}>
           {RANGES.map((r) => (
@@ -190,7 +193,6 @@ export default function History() {
 
       {data && (
         <div className="hist fade-in">
-          {/* 1 — one sentence and the share of time at each level */}
           <section className="hist-summary" aria-label={isId ? "Ringkasan" : "Summary"}>
             <p className="hist-lead">{summary}</p>
             <div className="hist-share" role="img"
@@ -201,166 +203,152 @@ export default function History() {
               {share.map((s) => (
                 <li key={s.level}><i style={{ background: LEVEL_COLOR[s.level] }} />{names[s.level]} <b>{Math.round(s.share * 100)}%</b></li>
               ))}
-              <li className="hist-share-note">{isId ? "dari seluruh waktu yang tercatat" : "of all recorded time"}</li>
             </ul>
           </section>
 
-          {/* 2 — the calendar */}
-          <section aria-label={isId ? "Kalender status" : "Status calendar"}>
-            <div className="hist-cal">
-              {keys.map((k) => {
-                const d = byDay[k];
-                const rain = rainBy[k];
-                const level = d?.top ?? null;
-                return (
-                  <button key={k} type="button" className={`hist-day${k === selected ? " is-selected" : ""}${d ? "" : " is-empty"}`}
-                          style={level ? { "--c": LEVEL_COLOR[level] } : undefined} aria-pressed={k === selected}
-                          aria-label={`${fmt(k, isId, { weekday: "long", day: "numeric", month: "long" })}: ${level ? names[level] : (isId ? "tidak ada data" : "no data")}${rain ? `, ${isId ? "hujan" : "rain"} ${mm(rain.jakarta_mean)}` : ""}`}
-                          onClick={() => setPicked(k)}>
-                    <span className="hist-day-wd">{fmt(k, isId, { weekday: "short" })}</span>
-                    <span className="hist-day-n">{fmt(k, isId, { day: "numeric" })}</span>
-                    <span className="hist-day-level">{level ? names[level] : "–"}</span>
-                    <span className="hist-day-rain">{rain ? mm(rain.jakarta_mean) : "–"}</span>
-                  </button>
-                );
-              })}
-            </div>
-            <p className="hist-legend-note">
-              {isId ? "Warna: status tertinggi hari itu. Angka bawah: rata-rata hujan satelit di Jakarta." : "Colour: the highest status that day. Bottom number: average satellite rain over Jakarta."}
-            </p>
-          </section>
-
-          {/* 3 — the picked day */}
-          <section className="hist-detail" aria-live="polite">
-            <h2>{fmt(selected, isId, { weekday: "long", day: "numeric", month: "long" })}</h2>
-            {sel ? (
-              <>
-                <p>
-                  {isId ? "Status tertinggi: " : "Highest status: "}<b style={{ color: LEVEL_COLOR[sel.top] }}>{names[sel.top]}</b>
-                  {sel.top === "SAFE"
-                    ? (isId ? ". Sepanjang hari tercatat Aman." : ". Safe all day.")
-                    : isId
-                      ? `. Di atas Aman selama sekitar ${hoursText(sel.aboveHours, true)} jam (${formatWibAt(sel.from, true, { date: false })}–${formatWibAt(sel.to, true, { date: false })} WIB).`
-                      : `. Above Safe for about ${hoursText(sel.aboveHours, false)} h (${formatWibAt(sel.from, false, { date: false })}–${formatWibAt(sel.to, false, { date: false })} WIB).`}
-                </p>
-                {sel.top !== "SAFE" && (
-                  <p className="hist-muted">
-                    {sel.ruled
-                      ? (isId ? "Statusnya dinaikkan aturan keselamatan (pos di Siaga 1, air di pos yang sudah tinggi naik cepat, atau peringatan BMKG), bukan oleh peluang model."
-                              : "The status was raised by a safety rule (a post at Siaga 1, a high post rising fast, or a BMKG warning), not by the model's chance.")
-                      : (isId ? `Peluang ada genangan di salah satu kecamatan paling tinggi ${formatChance(sel.peak)}.`
-                              : `The chance of waterlogging in at least one kecamatan peaked at ${formatChance(sel.peak)}.`)}
-                  </p>
-                )}
-                {KNOWN_ISSUES[selected] && (
-                  <p className="hist-issue" role="note">{KNOWN_ISSUES[selected][isId ? "id" : "en"]}</p>
-                )}
-                {selRain && (
-                  <p className="hist-muted">
-                    {isId
-                      ? `Hujan satelit${selRain.partial ? ` sampai ${selRain.partial} WIB` : ""}: Jakarta rata-rata ${mm(selRain.jakarta_mean)}, tertinggi ${mm(selRain.jakarta_max)}; Bogor ${mm(selRain.bogor)}.`
-                      : `Satellite rain${selRain.partial ? ` up to ${selRain.partial} WIB` : ""}: Jakarta ${mm(selRain.jakarta_mean)} on average, wettest ${mm(selRain.jakarta_max)}; Bogor ${mm(selRain.bogor)}.`}
-                  </p>
-                )}
-                {selPoints.length > 1 && sel.peak != null && (
-                  <TimeLine points={selPoints} yMax={1} levelStrip height={110} thresholds={thresholds}
-                            xLabels={[selPoints[0].t, (selPoints[0].t + selPoints[selPoints.length - 1].t) / 2, selPoints[selPoints.length - 1].t].map((t) => formatWibAt(t, isId, { date: false }))}
-                            ariaLabel={isId ? "Peluang banjir sepanjang hari" : "Flood chance through the day"} />
-                )}
-              </>
-            ) : (
-              <p className="hist-muted">{isId ? "Tidak ada data untuk hari ini." : "No data for this day."}</p>
-            )}
-          </section>
-
-          {data.replayed_until && (
-            <p className="hist-note">
-              {isId
-                ? `Sampai ${formatWibAt(data.replayed_until, true)} WIB, status dihitung ulang dari data tersimpan dengan model yang sekarang; setelah itu tercatat langsung saat itu juga.`
-                : `Up to ${formatWibAt(data.replayed_until, false)} WIB the status was recomputed from stored data with the current models; after that it was logged live.`}
-            </p>
-          )}
-
-          <Details title={isId ? "Lebih rinci: grafik seluruh periode" : "More detail: chart of the whole period"}>
-            {longPoints.length > 1 ? (
-              <TimeLine points={longPoints} yMax={1} levelStrip height={170} thresholds={thresholds}
-                        xLabels={[0, 0.25, 0.5, 0.75, 1].map((f) => formatWibAt(longPoints[0].t + f * (longPoints[longPoints.length - 1].t - longPoints[0].t), isId, { time: false }))}
-                        ariaLabel={isId ? "Peluang banjir Jakarta" : "Jakarta flood chance"} />
-            ) : <p className="hist-muted">{isId ? "Belum cukup data." : "Not enough data yet."}</p>}
-            <p className="hist-muted">
-              {isId ? "Garis: peluang ada genangan di salah satu kecamatan, dihitung model keputusan tiap 15 menit. Pita bawah: status yang tampil."
-                    : "Line: the chance of waterlogging in at least one kecamatan, from the decision model every 15 minutes. Band below: the status shown."}
-            </p>
-          </Details>
-
-          <Details title={isId ? "Lebih rinci: pos pantau air per hari" : "More detail: water-level posts by day"}>
-            {postRows.moved.length ? (
-              <div className="post-grid-wrap">
-                <table className="post-grid">
-                  <thead>
-                    <tr>
-                      <th scope="col">{isId ? "Pos" : "Post"}</th>
-                      {postDays.map((d) => <th key={d} scope="col">{fmt(d, isId, { day: "numeric" })}</th>)}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {postRows.moved.map((p) => (
-                      <tr key={p.name}>
-                        <th scope="row">{shortPost(p.name)}</th>
-                        {postDays.map((d) => {
-                          const band = p.d[d];
-                          return <td key={d} title={`${shortPost(p.name)} · ${fmt(d, isId, { day: "numeric", month: "short" })} · ${band == null ? "-" : BAND_NAME[band]}`}
-                                     style={{ background: band == null ? "transparent" : BAND_COLOR[band] }} />;
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          <div className="hist-body">
+            <section className="hist-calwrap" aria-label={isId ? "Kalender status" : "Status calendar"}>
+              <div className="hist-cal-head" aria-hidden="true">{wdNames.map((w) => <span key={w}>{w}</span>)}</div>
+              <div className="hist-cal">
+                {Array.from({ length: lead }, (_, i) => <span key={`pad${i}`} className="hist-pad" aria-hidden="true" />)}
+                {keys.map((k) => {
+                  const d = byDay[k];
+                  const rain = rainBy[k];
+                  const level = d?.top ?? null;
+                  return (
+                    <button key={k} type="button" className={`hist-day${k === selected ? " is-selected" : ""}${d ? "" : " is-empty"}`}
+                            style={level ? { "--c": LEVEL_COLOR[level] } : undefined} aria-pressed={k === selected}
+                            aria-label={`${fmt(k, isId, { weekday: "long", day: "numeric", month: "long" })}: ${level ? names[level] : (isId ? "tidak ada data" : "no data")}${rain ? `, ${isId ? "hujan" : "rain"} ${mm(rain.jakarta_mean)}` : ""}`}
+                            onClick={() => setPicked(k)}>
+                      <span className="hist-day-wd">{fmt(k, isId, { weekday: "short" })}</span>
+                      <span className="hist-day-n">{fmt(k, isId, { day: "numeric" })}</span>
+                      <span className="hist-day-level"><span className="hist-lv-full">{level ? names[level] : "–"}</span><span className="hist-lv-init" aria-hidden="true">{level ? names[level][0] : "–"}</span></span>
+                      <span className="hist-day-rain">{rain ? mm(rain.jakarta_mean) : "–"}</span>
+                    </button>
+                  );
+                })}
               </div>
-            ) : <p className="hist-muted">{isId ? "Semua pos tetap Normal." : "Every post stayed Normal."}</p>}
-            {postRows.calm > 0 && (
-              <p className="hist-muted">
-                {isId ? `${postRows.calm} pos lain tetap Normal sepanjang periode ini, jadi tidak ditampilkan.` : `${postRows.calm} other posts stayed Normal for the whole period, so they are not listed.`}
-              </p>
-            )}
-            <ul className="history-share">
-              {BAND_NAME.map((b, i) => <li key={b}><i style={{ background: BAND_COLOR[i] }} /><span>{b}</span></li>)}
-            </ul>
-            <p className="hist-muted">
-              {isId ? "Status resmi DSDA tiap pos. Ketuk pos di peta Beranda untuk grafik tinggi airnya." : "Each post's official DSDA status. Tap a post on the home map for its water-level chart."}
-            </p>
-          </Details>
+              <p className="hist-legend-note">{isId ? "Warna = status tertinggi. Angka = hujan Jakarta." : "Colour = highest status. Number = Jakarta rain."}</p>
+            </section>
 
-          {rainDays.length > 0 && (
-            <Details title={isId ? "Lebih rinci: hujan satelit per hari" : "More detail: satellite rain by day"}>
-              <div className="hist-rain">
-                {rainDays.slice(-days).map((d) => (
-                  <div key={d.date} className="hist-rain-row">
-                    <span>{fmt(d.date, isId, { day: "numeric", month: "short" })}</span>
-                    <i style={{ width: `${Math.min(100, ((d.jakarta_mean ?? 0) / 60) * 100)}%` }} />
-                    <b>{mm(d.jakarta_mean)}</b>
-                    <small>{isId ? `tertinggi ${mm(d.jakarta_max)}, Bogor ${mm(d.bogor)}` : `wettest ${mm(d.jakarta_max)}, Bogor ${mm(d.bogor)}`}</small>
-                  </div>
-                ))}
-              </div>
-              <p className="hist-muted">
-                {isId ? "NASA GPM IMERG Early, hari WIB yang sudah lengkap; datanya tiba sekitar 5 jam setelah hujan. Batang penuh = 60 mm."
-                      : "NASA GPM IMERG Early, complete WIB days; the data arrives about 5 hours after the rain. A full bar = 60 mm."}
-              </p>
+            <section className="hist-detail" aria-live="polite">
+              <h2>{fmt(selected, isId, { weekday: "long", day: "numeric", month: "long" })}</h2>
+              {sel ? (
+                <>
+                  <p className="hist-detail-main">
+                    <b style={{ color: LEVEL_COLOR[sel.top] }}>{names[sel.top]}</b>
+                    {sel.top === "SAFE"
+                      ? (isId ? " sepanjang hari." : " all day.")
+                      : isId
+                        ? ` · di atas Aman ${hoursText(sel.aboveHours, true)} jam (${formatWibAt(sel.from, true, { date: false })}–${formatWibAt(sel.to, true, { date: false })} WIB)`
+                        : ` · above Safe ${hoursText(sel.aboveHours, false)} h (${formatWibAt(sel.from, false, { date: false })}–${formatWibAt(sel.to, false, { date: false })} WIB)`}
+                  </p>
+                  {sel.top !== "SAFE" && (
+                    <p className="hist-muted">
+                      {sel.ruled
+                        ? (isId ? "Dinaikkan aturan keselamatan, bukan peluang model." : "Raised by a safety rule, not the model's chance.")
+                        : (isId ? `Peluang genangan tertinggi ${formatChance(sel.peak)}.` : `Peak waterlogging chance ${formatChance(sel.peak)}.`)}
+                    </p>
+                  )}
+                  {KNOWN_ISSUES[selected] && (
+                    <p className="hist-issue" role="note">{KNOWN_ISSUES[selected][isId ? "id" : "en"]}</p>
+                  )}
+                  {selPoints.length > 1 && sel.peak != null && (
+                    <TimeLine points={selPoints} yMax={1} levelStrip height={120} thresholds={thresholds}
+                              xLabels={[selPoints[0].t, (selPoints[0].t + selPoints[selPoints.length - 1].t) / 2, selPoints[selPoints.length - 1].t].map((t) => formatWibAt(t, isId, { date: false }))}
+                              ariaLabel={isId ? "Peluang banjir sepanjang hari" : "Flood chance through the day"} />
+                  )}
+                  {selRain && (
+                    <p className="hist-muted">
+                      {isId
+                        ? `Hujan${selRain.partial ? ` s/d ${selRain.partial}` : ""}: Jakarta ${mm(selRain.jakarta_mean)}, Bogor ${mm(selRain.bogor)}`
+                        : `Rain${selRain.partial ? ` to ${selRain.partial}` : ""}: Jakarta ${mm(selRain.jakarta_mean)}, Bogor ${mm(selRain.bogor)}`}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="hist-muted">{isId ? "Tidak ada data untuk hari ini." : "No data for this day."}</p>
+              )}
+            </section>
+          </div>
+
+          <div className="hist-more">
+            <Details title={isId ? "Grafik seluruh periode" : "Chart of the whole period"}>
+              {longPoints.length > 1 ? (
+                <TimeLine points={longPoints} yMax={1} levelStrip height={170} thresholds={thresholds}
+                          xLabels={[0, 0.25, 0.5, 0.75, 1].map((f) => formatWibAt(longPoints[0].t + f * (longPoints[longPoints.length - 1].t - longPoints[0].t), isId, { time: false }))}
+                          ariaLabel={isId ? "Peluang banjir Jakarta" : "Jakarta flood chance"} />
+              ) : <p className="hist-muted">{isId ? "Belum cukup data." : "Not enough data yet."}</p>}
+              <p className="hist-muted">{isId ? "Garis = peluang genangan di salah satu kecamatan. Pita bawah = status yang tampil." : "Line = chance of waterlogging in a kecamatan. Band = status shown."}</p>
             </Details>
-          )}
+
+            <Details title={isId ? "Pos pantau air" : "Water-level posts"}>
+              {postRows.moved.length ? (
+                <div className="post-grid-wrap">
+                  <table className="post-grid">
+                    <thead>
+                      <tr>
+                        <th scope="col">{isId ? "Pos" : "Post"}</th>
+                        {postDays.map((d) => <th key={d} scope="col">{fmt(d, isId, { day: "numeric" })}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {postRows.moved.map((p) => (
+                        <tr key={p.name}>
+                          <th scope="row">{shortPost(p.name)}</th>
+                          {postDays.map((d) => {
+                            const band = p.d[d];
+                            return <td key={d} title={`${shortPost(p.name)} · ${fmt(d, isId, { day: "numeric", month: "short" })} · ${band == null ? "-" : BAND_NAME[band]}`}
+                                       style={{ background: band == null ? "transparent" : BAND_COLOR[band] }} />;
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : <p className="hist-muted">{isId ? "Semua pos tetap Normal." : "Every post stayed Normal."}</p>}
+              <ul className="history-share">
+                {BAND_NAME.map((b, i) => <li key={b}><i style={{ background: BAND_COLOR[i] }} /><span>{b}</span></li>)}
+              </ul>
+              {postRows.calm > 0 && (
+                <p className="hist-muted">{isId ? `${postRows.calm} pos lain tetap Normal, tidak ditampilkan.` : `${postRows.calm} other posts stayed Normal, not shown.`}</p>
+              )}
+            </Details>
+
+            {rainDays.length > 0 && (
+              <Details title={isId ? "Hujan per hari" : "Rain by day"}>
+                <div className="hist-rain">
+                  {rainDays.slice(-days).map((d) => (
+                    <div key={d.date} className="hist-rain-row">
+                      <span>{fmt(d.date, isId, { day: "numeric", month: "short" })}</span>
+                      <i style={{ width: `${Math.min(100, ((d.jakarta_mean ?? 0) / 60) * 100)}%` }} />
+                      <b>{mm(d.jakarta_mean)}</b>
+                    </div>
+                  ))}
+                </div>
+                <p className="hist-muted">{isId ? "Rata-rata Jakarta, satelit NASA IMERG. Batang penuh = 60 mm." : "Jakarta average, NASA IMERG satellite. Full bar = 60 mm."}</p>
+              </Details>
+            )}
+
+            {data.replayed_until && (
+              <Details title={isId ? "Cara data dicatat" : "How this is recorded"}>
+                <p className="hist-muted">
+                  {isId
+                    ? `Sampai ${formatWibAt(data.replayed_until, true)} WIB, status dihitung ulang dari data tersimpan. Setelah itu dicatat langsung.`
+                    : `Up to ${formatWibAt(data.replayed_until, false)} WIB the status was recomputed from stored data. After that it was logged live.`}
+                </p>
+              </Details>
+            )}
+          </div>
 
           {TELEGRAM_URL && (
             <aside className="hist-telegram">
               <div>
-                <h2>{isId ? "Dapatkan peringatan di Telegram" : "Get alerts on Telegram"}</h2>
-                <p>
-                  {isId ? "Pesan dikirim saat status Jakarta naik ke Siaga atau Bahaya, dan saat turun lagi. Tanpa akun di situs ini dan tanpa nomor telepon."
-                        : "A message goes out when Jakarta's status rises to Alert or Danger, and when it falls again. No account here and no phone number needed."}
-                </p>
+                <h2>{isId ? "Peringatan di Telegram" : "Alerts on Telegram"}</h2>
+                <p>{isId ? "Pesan saat status naik ke Siaga atau Bahaya, dan saat turun lagi." : "A message when the status rises to Alert or Danger, and when it falls."}</p>
               </div>
               <a className="btn btn-ghost" href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer">
-                {isId ? "Buka kanal Telegram" : "Open the Telegram channel"}
+                {isId ? "Buka Telegram" : "Open Telegram"}
               </a>
             </aside>
           )}

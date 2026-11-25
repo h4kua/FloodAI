@@ -221,7 +221,7 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0, 
             type="button"
             onClick={() => setShowProne(v => !v)}
             style={{
-              display: "flex", alignItems: "center", gap: 6, width: "100%", minHeight: 32,
+              display: "flex", alignItems: "center", gap: 6, width: "100%", minHeight: 44,
               background: "transparent", border: "none", padding: "4px 0", cursor: "pointer",
               color: "var(--muted)", fontSize: "0.78rem",
             }}
@@ -244,7 +244,7 @@ export default function FloodMap({ riskScore = 45, stations = [], rainfall = 0, 
             onClick={toggleWeather}
             aria-pressed={showWeather}
             style={{
-              display: "flex", alignItems: "center", gap: 6, width: "100%", minHeight: 32,
+              display: "flex", alignItems: "center", gap: 6, width: "100%", minHeight: 44,
               background: "transparent", border: "none", padding: "4px 0", cursor: "pointer",
               color: "var(--muted)", fontSize: "0.78rem",
             }}

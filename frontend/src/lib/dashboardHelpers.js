@@ -266,16 +266,7 @@ export function buildStatusDesc(riskData, isId) {
     const rfNote = rainfall > 5
       ? (isId ? ` Sedang hujan ${Math.round(rainfall)} mm/jam.` : ` It's raining ${Math.round(rainfall)} mm/h.`)
       : "";
-    // The daily kecamatan model raises Waspada after wet days even when every post is normal: say so.
-    const daily = riskData?.dailyModel;
-    // With the learned layer deciding, mention recent rain only when the daily chance pushed the risk up.
-    const rainPushed = !learned || (learned.push?.p ?? 0) > 0;
-    const top = daily && daily.city_level !== "SAFE" && rainPushed ? dailyTopKecamatan(daily, 1)[0] : null;
-    const dNote = top
-      ? (isId
-          ? ` Hujan beberapa hari terakhir ikut menaikkannya; di satu kecamatan peluangnya ${formatChance(top.probability)} (Kec. ${top.name}).`
-          : ` Rain over the last few days adds to it; in a single kecamatan the chance is ${formatChance(top.probability)} (${top.name}).`)
-      : "";
+    const dNote = "";
     // Posts at Siaga 2 or 1 are named in the strip under the status, so this sentence does not repeat them.
     return isId
       ? `Tidak perlu panik, tapi tetap dipantau.${lNote}${dNote}${tNote}${rfNote}`
