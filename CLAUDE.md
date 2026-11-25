@@ -163,6 +163,13 @@ Bahasa Indonesia explanation and falls back to a static template on failure.
   kecamatan-month are kept). They add 320 flood kecamatan-days to 2023-Sep 2025 (990 -> 1310); training on them changes
   nothing (ROC-AUC 0.869 vs 0.865, CIs overlap). Nothing served; the raw cache (data/raw/news/) is not committed.
 
+- 2026 news (2026-11-25, `fetch_news_flood_days.py --start 2026-01 --end 2026-11 --out data/processed/news_flood_reports_2026.csv`):
+  276 candidate detik.com reports, 195 mapped to a model kecamatan; other cities slipped in (Kendari, Padang), so
+  `news_flood_reports_2026_clean.csv` keeps titles naming Jakarta or a Jakarta place (conservative: some real reports such as
+  Kelapa Gading and Daan Mogot titles were dropped). 34 flood days, Jan 15 / Feb 5 / Mar 5 / Apr 3 / May 6, none Jun-Nov (nothing
+  reported 1-25 Nov either). Largest: 22 Jan (132 RT), 8 Mar (148 RT), 5 May (80 RT). Not used for training (the 2023-2025 test
+  of the same idea changed nothing). Possible next step: replay the daily model on these dates (needs IMERG for 2026 and has no
+  DSDA water history before Apr 2026) as a true out-of-time test; positives only, so recall/ranking but not precision.
 - Large flood days (2026-11-17, `scripts/large_flood_experiment.py`, `artifacts/reports/large_flood_experiment.md`): can the
   live daily model (lag 1/2) justify Siaga on days with BPBD floods in >= 5 kecamatan (6.8 % of days 2016-2022)? It ranks
   them better than "any flood" (lag 1 ROC-AUC 0.74 vs 0.70; 2023-2025 0.80) but is not precise enough: at 2 alarm days a
